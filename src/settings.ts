@@ -26,11 +26,8 @@ export interface AutoClassifierSettings {
 
 export interface Frontmatter {
 	name: string;
-	type: "string" | "number" | "date" | "enum";
-	defaultValue: string;
-	isRequired: boolean;
+	refs?: string[];
 	allowMultiple: boolean;
-	inputRange: "title" | "content" | "selection";
 	count: number;
 }
 
@@ -56,11 +53,8 @@ export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 	frontmatter: [
 		{
 			name: "tags",
-			type: "string",
-			defaultValue: "",
-			isRequired: false,
+			refs: [],
 			allowMultiple: true,
-			inputRange: "content",
 			count: 1,
 		},
 	],
