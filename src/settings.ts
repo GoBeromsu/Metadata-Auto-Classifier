@@ -195,17 +195,8 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 	}
 
 	addTagSettings(containerEl: HTMLElement): void {
-		const tagSetting = this.plugin.settings.frontmatter.find(
-			(m) => m.name === "tag"
-		) || {
-			name: "tag",
-			type: "string",
-			defaultValue: "",
-			isRequired: true,
-			allowMultiple: true,
-			inputRange: "content",
-			count: 3,
-		};
+		const tagSetting = this.getOrCreateTagSetting();
+		console.log("Current tag setting:", tagSetting);
 
 		new Setting(containerEl)
 			.setName("Tags")
@@ -219,6 +210,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 						if (!isNaN(count) && count > 0) {
 							tagSetting.count = count;
 							await this.plugin.saveSettings();
+							console.log("Tag count updated:", count);
 						}
 					})
 			)
@@ -227,16 +219,27 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 					.setIcon("reset")
 					.setTooltip("Set default count")
 					.onClick(async () => {
-						tagSetting.count = 3;
+						tagSetting.count =
+							DEFAULT_SETTINGS.frontmatter[0].count;
 						await this.plugin.saveSettings();
 						this.display();
+						console.log(
+							"Tag count reset to default:",
+							tagSetting.count
+						);
 					})
 			);
+	}
 
-		// Check if tag setting is in the frontmatter array
-		if (!this.plugin.settings.frontmatter.some((m) => m.name === "tag")) {
+	getOrCreateTagSetting(): Frontmatter {
+		let tagSetting = this.plugin.settings.frontmatter.find(
+			(m) => m.name === "tags"
+		);
+		if (!tagSetting) {
+			tagSetting = { ...DEFAULT_SETTINGS.frontmatter[0] };
 			this.plugin.settings.frontmatter.unshift(tagSetting);
 		}
+		return tagSetting;
 	}
 
 	getSelectedProvider(): APIProvider {
