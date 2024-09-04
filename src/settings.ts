@@ -14,19 +14,21 @@ export interface Model {
 	temperature: number;
 }
 
-export interface Metadata {
+export interface AutoClassifierSettings {
+	apiProviders: APIProvider[];
+	selectedProvider: string;
+	selectedModel: string;
+	frontmatter: Frontmatter[];
+}
+
+export interface Frontmatter {
 	name: string;
 	type: "string" | "number" | "date" | "enum";
 	defaultValue: string;
 	isRequired: boolean;
 	allowMultiple: boolean;
-}
-
-export interface AutoClassifierSettings {
-	apiProviders: APIProvider[];
-	selectedProvider: string;
-	selectedModel: string;
-	metadata: Metadata[];
+	inputRange: "title" | "content" | "selection";
+	count: number;
 }
 
 export const DEFAULT_SETTINGS: AutoClassifierSettings = {
@@ -46,13 +48,15 @@ export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 	],
 	selectedProvider: "OpenAI",
 	selectedModel: "gpt-3.5-turbo",
-	metadata: [
+	frontmatter: [
 		{
 			name: "tags",
 			type: "string",
 			defaultValue: "",
 			isRequired: false,
 			allowMultiple: true,
+			inputRange: "content",
+			count: 1,
 		},
 	],
 };
@@ -70,7 +74,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		this.addAPISettings(containerEl);
-		this.addMetadataSettings(containerEl);
+		this.addFrontmatterSettings(containerEl);
 	}
 
 	addAPISettings(containerEl: HTMLElement): void {
