@@ -5,18 +5,20 @@ import {
 	AutoClassifierSettingTab,
 } from "./settings";
 import { AIFactory } from "api";
+import { MetaDataManager } from "./metaDataManager";
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
+	metaDataManager: MetaDataManager;
 
 	async onload() {
 		await this.loadSettings();
-
+		this.metaDataManager = new MetaDataManager(this.app);
 		this.addCommand({
 			id: "fetch-tags",
 			name: "Fetch tags using current provider",
 			callback: async () => {
-				await this.fetchAndDisplayTags();
+				await this.classifyTags();
 			},
 		});
 
@@ -35,29 +37,34 @@ export default class AutoClassifierPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	async fetchAndDisplayTags() {
+	async classifyTags(): Promise<void> {
+		const currentFile = this.app.workspace.getActiveFile();
+		if (!currentFile) {
+			new Notice("No active file.");
+			return;
+		}
+
+		const currentProvider = this.settings.selectedProvider;
+		const provider = AIFactory.getProvider(currentProvider);
+		const selectedProvider = this.settings.apiProviders.find(
+			(p) => p.name === currentProvider
+		);
+
+		if (!selectedProvider || !selectedProvider.apiKey) {
+			new Notice("API key for the selected provider is not set.");
+			return;
+		}
+
+		const tagSetting = this.settings.frontmatter.find(
+			(m) => m.name === "tags"
+		);
+		const tagCount = tagSetting ? tagSetting.count : 3;
+
 		try {
-			const currentProvider = this.settings.selectedProvider;
-			const provider = AIFactory.getProvider(currentProvider);
-			const selectedProvider = this.settings.apiProviders.find(
-				(p) => p.name === currentProvider
-			);
-
-			if (!selectedProvider || !selectedProvider.apiKey) {
-				new Notice(
-					"API key is not set for the selected provider. Please set it in the plugin settings."
-				);
-				return;
-			}
-
-			const tagSetting = this.settings.frontmatter.find(
-				(m) => m.name === "tag"
-			);
-			const tagCount = tagSetting ? tagSetting.count : 3;
-
+			const content = await this.app.vault.read(currentFile);
 			const tagsResponse = await provider.callAPI(
 				"You are a tag retrieval system. Return only a JSON array of tags.",
-				`Retrieve ${tagCount} most relevant tags for this system.`,
+				`Retrieve ${tagCount} most relevant tags for this content: ${content}`,
 				selectedProvider.apiKey
 			);
 
@@ -69,20 +76,29 @@ export default class AutoClassifierPlugin extends Plugin {
 				}
 				tags = tags.slice(0, tagCount);
 			} catch (error) {
-				console.error("Failed to parse tags response:", error);
-				new Notice("Failed to parse tags from the API response.");
+				console.error("Failed to parse tag response:", error);
+				new Notice("Failed to parse tags from API response.");
 				return;
 			}
 
-			console.log("Fetched tags:", tags);
+			const preprocessedTags = this.metaDataManager.preprocessTags(tags);
+			await this.metaDataManager.insertToFrontMatter(
+				currentFile,
+				"tags",
+				preprocessedTags,
+				false
+			);
 			new Notice(
-				`Successfully fetched ${tags.length} tags. Check console for details.`
+				`${preprocessedTags.length} tags added: ${preprocessedTags.join(
+					", "
+				)}`
 			);
 		} catch (error) {
-			console.error("Error fetching tags:", error);
-			new Notice(
-				"Failed to fetch tags. Check console for error details."
+			console.error(
+				"Error occurred while classifying and adding tags:",
+				error
 			);
+			new Notice("An error occurred while classifying and adding tags.");
 		}
 	}
 }
