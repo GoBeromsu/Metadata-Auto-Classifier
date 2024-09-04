@@ -1,8 +1,10 @@
 import AutoClassifierPlugin from "main";
-import { App, Notice, PluginSettingTab, Setting } from "obsidian";
+import { App, Notice, PluginSettingTab } from "obsidian";
 
 import { MetaDataManager } from "metaDataManager";
-import { APISettingTab } from "./apiSetting";
+
+import { TagSetting, DEFAULT_TAG_SETTING } from "./tagSetting";
+import { APISetting } from "./apiSetting";
 
 export interface APIProvider {
 	name: string;
@@ -52,26 +54,21 @@ export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 	] as APIProvider[],
 	selectedProvider: "OpenAI",
 	selectedModel: "gpt-3.5-turbo",
-	frontmatter: [
-		{
-			name: "tags",
-			refs: [] as string[],
-			allowMultiple: true,
-			count: 5,
-		} as Frontmatter,
-	],
+	frontmatter: [DEFAULT_TAG_SETTING],
 };
 
 export class AutoClassifierSettingTab extends PluginSettingTab {
 	plugin: AutoClassifierPlugin;
 	metaDataManager: MetaDataManager;
-	apiSettingTab: APISettingTab;
+	apiSetting: APISetting;
+	tagSetting: TagSetting;
 
 	constructor(app: App, plugin: AutoClassifierPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 		this.metaDataManager = new MetaDataManager(app);
-		this.apiSettingTab = new APISettingTab(app, plugin);
+		this.apiSetting = new APISetting(app, plugin);
+		this.tagSetting = new TagSetting(app, plugin);
 	}
 
 	async loadSettings(): Promise<void> {
@@ -87,90 +84,12 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
-		this.apiSettingTab.display();
+		this.apiSetting.display(containerEl);
 		this.addFrontmatterSettings(containerEl);
 	}
 
 	addFrontmatterSettings(containerEl: HTMLElement): void {
 		containerEl.createEl("h2", { text: "Frontmatter" });
-
-		// Tag settings (default and non-removable)
-		this.addTagSettings(containerEl);
-
-		// Add button to fetch all tags
-		new Setting(containerEl)
-			.setName("Fetch All Tags")
-			.setDesc("Fetch all tags from your vault and save them")
-			.addButton((button) =>
-				button
-					.setButtonText("Fetch Tags")
-					.setCta()
-					.onClick(async () => {
-						await this.fetchAndSaveTags();
-					})
-			);
-	}
-
-	async fetchAndSaveTags(): Promise<void> {
-		const allTags = await this.metaDataManager.getAllTags();
-		const tagSetting = this.getOrCreateTagSetting();
-		tagSetting.refs = allTags;
-		await this.plugin.saveSettings();
-		this.display();
-		new Notice(`${allTags.length}개의 태그를 가져왔습니다.`);
-		console.log("저장된 태그:", tagSetting.refs);
-	}
-
-	addTagSettings(containerEl: HTMLElement): void {
-		const tagSetting = this.getOrCreateTagSetting();
-		console.log("Current tag setting:", tagSetting);
-
-		new Setting(containerEl)
-			.setName("Tags")
-			.setDesc("Default settings for automatic tagging")
-			.addText((text) =>
-				text
-					.setPlaceholder("Tag count")
-					.setValue(tagSetting.count.toString())
-					.onChange(async (value) => {
-						const count = parseInt(value, 10);
-						if (!isNaN(count) && count > 0) {
-							tagSetting.count = count;
-							await this.plugin.saveSettings();
-							console.log("Tag count updated:", count);
-						}
-					})
-			)
-			.addExtraButton((button) =>
-				button
-					.setIcon("reset")
-					.setTooltip("Set default count")
-					.onClick(async () => {
-						tagSetting.count =
-							DEFAULT_SETTINGS.frontmatter[0].count;
-						await this.plugin.saveSettings();
-						this.display();
-						console.log(
-							"Tag count reset to default:",
-							tagSetting.count
-						);
-					})
-			);
-	}
-
-	getOrCreateTagSetting(): Frontmatter {
-		let tagSetting = this.plugin.settings.frontmatter.find(
-			(m) => m.name === "tags"
-		);
-		if (!tagSetting) {
-			tagSetting = {
-				name: "tags",
-				refs: [],
-				allowMultiple: true,
-				count: 5,
-			};
-			this.plugin.settings.frontmatter.push(tagSetting);
-		}
-		return tagSetting;
+		this.tagSetting.display(containerEl);
 	}
 }

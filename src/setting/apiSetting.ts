@@ -3,16 +3,14 @@ import AutoClassifierPlugin from "../main";
 import { APIProvider, DEFAULT_SETTINGS } from "./index";
 import { AIFactory } from "../api";
 
-export class APISettingTab extends PluginSettingTab {
+export class APISetting {
 	plugin: AutoClassifierPlugin;
 
 	constructor(app: App, plugin: AutoClassifierPlugin) {
-		super(app, plugin);
 		this.plugin = plugin;
 	}
 
-	display(): void {
-		const { containerEl } = this;
+	display(containerEl: HTMLElement): void {
 		containerEl.empty();
 
 		this.addAPIProviderSetting(containerEl);
@@ -20,7 +18,7 @@ export class APISettingTab extends PluginSettingTab {
 		this.addModelSetting(containerEl);
 	}
 
-	addAPIProviderSetting(containerEl: HTMLElement): void {
+	private addAPIProviderSetting(containerEl: HTMLElement): void {
 		new Setting(containerEl)
 			.setName("API Provider")
 			.setDesc("Select the API provider")
@@ -33,12 +31,12 @@ export class APISettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						this.plugin.settings.selectedProvider = value;
 						await this.plugin.saveSettings();
-						this.display();
+						this.display(containerEl);
 					});
 			});
 	}
 
-	addAPIKeySetting(containerEl: HTMLElement): void {
+	private addAPIKeySetting(containerEl: HTMLElement): void {
 		const selectedProvider = this.getSelectedProvider();
 
 		const apiKeySetting = new Setting(containerEl)
@@ -62,7 +60,7 @@ export class APISettingTab extends PluginSettingTab {
 		this.updateAPITestResult(apiKeySetting, selectedProvider);
 	}
 
-	addModelSetting(containerEl: HTMLElement): void {
+	private addModelSetting(containerEl: HTMLElement): void {
 		const selectedProvider = this.getSelectedProvider();
 
 		new Setting(containerEl)
@@ -81,7 +79,7 @@ export class APISettingTab extends PluginSettingTab {
 			});
 	}
 
-	getSelectedProvider(): APIProvider {
+	private getSelectedProvider(): APIProvider {
 		return (
 			this.plugin.settings.apiProviders.find(
 				(provider) =>
@@ -90,7 +88,7 @@ export class APISettingTab extends PluginSettingTab {
 		);
 	}
 
-	async testAPIKey(provider: APIProvider): Promise<void> {
+	private async testAPIKey(provider: APIProvider): Promise<void> {
 		try {
 			const aiProvider = AIFactory.getProvider(provider.name);
 			const result = await aiProvider.testAPI(provider.apiKey);
@@ -99,17 +97,18 @@ export class APISettingTab extends PluginSettingTab {
 			provider.lastTested = new Date();
 
 			await this.plugin.saveSettings();
-			this.display();
 		} catch (error) {
 			console.error("Error occurred during API test:", error);
 			provider.testResult = false;
 			provider.lastTested = new Date();
 			await this.plugin.saveSettings();
-			this.display();
 		}
 	}
 
-	updateAPITestResult(apiKeySetting: Setting, provider: APIProvider): void {
+	private updateAPITestResult(
+		apiKeySetting: Setting,
+		provider: APIProvider
+	): void {
 		if (provider.lastTested) {
 			const resultText = provider.testResult
 				? "Success! API is working."
