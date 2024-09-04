@@ -123,6 +123,65 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 					});
 			});
 
+	addFrontmatterSettings(containerEl: HTMLElement): void {
+		containerEl.createEl("h2", { text: "Frontmatter" });
+
+		// Tag settings (default and non-removable)
+		this.addTagSettings(containerEl);
+
+		// Additional frontmatter fields
+		this.plugin.settings.frontmatter.forEach((frontmatter, index) => {
+			if (frontmatter.name !== "tag") {
+				// Skip the default tag field
+				this.addFrontmatterField(containerEl, frontmatter, index);
+			}
+		});
+
+	addTagSettings(containerEl: HTMLElement): void {
+		const tagSetting = this.plugin.settings.frontmatter.find(
+			(m) => m.name === "tag"
+		) || {
+			name: "tag",
+			type: "string",
+			defaultValue: "",
+			isRequired: true,
+			allowMultiple: true,
+			inputRange: "content",
+			count: 3,
+		};
+
+		new Setting(containerEl)
+			.setName("Tag Settings")
+			.setDesc("Default settings for automatic tag classification")
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOption("title", "Title")
+					.addOption("content", "Content")
+					.addOption("selection", "Selection")
+					.setValue(tagSetting.inputRange)
+					.onChange(
+						async (value: "title" | "content" | "selection") => {
+							tagSetting.inputRange = value;
+							await this.plugin.saveSettings();
+						}
+					)
+			)
+			.addSlider((slider) =>
+				slider
+					.setLimits(1, 10, 1)
+					.setValue(tagSetting.count)
+					.setDynamicTooltip()
+					.onChange(async (value) => {
+						tagSetting.count = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		// Check if tag setting is in the frontmatter array
+		if (!this.plugin.settings.frontmatter.some((m) => m.name === "tag")) {
+			this.plugin.settings.frontmatter.unshift(tagSetting);
+		}
+	}
 	}
 
 	getSelectedProvider(): APIProvider {
