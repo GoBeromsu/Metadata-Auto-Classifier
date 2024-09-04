@@ -6,7 +6,7 @@ import {
 } from "./settings";
 import { AIFactory } from "api";
 import { MetaDataManager } from "./metaDataManager";
-import { DEFAULT_CHAT_ROLE, DEFAULT_PROMPT_TEMPLATE } from "templatess";
+import { DEFAULT_CHAT_ROLE, getPromptTemplate } from "templatess";
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
@@ -55,38 +55,36 @@ export default class AutoClassifierPlugin extends Plugin {
 			return;
 		}
 
+		// 3. Prepare input and prompt
 		const tagSetting = this.settings.frontmatter.find(
 			(m) => m.name === "tags"
 		);
 		const tagCount = tagSetting ? tagSetting.count : 3;
+		const content = await this.app.vault.read(currentFile);
+		const chatRole = DEFAULT_CHAT_ROLE;
+		const promptTemplate = getPromptTemplate(false, tagCount, content);
 
+		// 4. Call API and process response
+		const provider = AIFactory.getProvider(this.settings.selectedProvider);
 		try {
-			const content = await this.app.vault.read(currentFile);
-			const chatRole = DEFAULT_CHAT_ROLE;
-			const promptTemplate = DEFAULT_PROMPT_TEMPLATE.replace(
-				"{{input}}",
-				content
-			);
-
-			const tagsResponse = await provider.callAPI(
+			const responseRaw = await provider.callAPI(
 				chatRole,
 				promptTemplate,
 				selectedProvider.apiKey
 			);
 
-			let tags: string[];
-			try {
-				const parsedResponse = JSON.parse(tagsResponse);
-				if (
-					!parsedResponse.output ||
-					!Array.isArray(parsedResponse.output)
-				) {
-					throw new Error("Response is not in the correct format");
-				}
-				tags = parsedResponse.output.slice(0, tagCount);
-			} catch (error) {
-				console.error("Failed to parse tag response:", error);
-				new Notice("Failed to parse tags from API response.");
+			// 5. Process the response
+			const { resOutput, resReliability } =
+				this.processAPIResponse(responseRaw);
+			if (!resOutput || resReliability === undefined) {
+				return;
+			}
+
+			// 6. Check reliability
+			if (resReliability <= 0.2) {
+				new Notice(
+					`⛔ ${this.manifest.name}: Response has low reliability (${resReliability})`
+				);
 				return;
 			}
 
@@ -103,9 +101,9 @@ export default class AutoClassifierPlugin extends Plugin {
 				false
 			);
 			new Notice(
-				`${preprocessedTags.length} tags added: ${preprocessedTags.join(
-					", "
-				)}`
+				`✅ ${
+					preprocessedTags.length
+				} tags added: ${preprocessedTags.join(", ")}`
 			);
 		} catch (error) {
 			console.error(
@@ -113,6 +111,32 @@ export default class AutoClassifierPlugin extends Plugin {
 				error
 			);
 			new Notice("An error occurred while classifying and adding tags.");
+		}
+	}
+
+	private processAPIResponse(responseRaw: string): {
+		resOutput: string | null;
+		resReliability: number | undefined;
+	} {
+		try {
+			const response = JSON.parse(responseRaw);
+			if (
+				typeof response.reliability === "number" &&
+				Array.isArray(response.output)
+			) {
+				return {
+					resOutput: response.output.join(", "),
+					resReliability: response.reliability,
+				};
+			} else {
+				throw new Error("Invalid response format");
+			}
+		} catch (error) {
+			console.error("Error parsing API response:", error);
+			new Notice(
+				`⛔ ${this.manifest.name}: Output format error (output: ${responseRaw})`
+			);
+			return { resOutput: null, resReliability: undefined };
 		}
 	}
 }
