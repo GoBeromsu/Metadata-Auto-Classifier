@@ -45,4 +45,17 @@ export class MetaDataManager {
 		}
 		return null;
 	}
+
+	async getAllTags(): Promise<string[]> {
+		const tags = new Set<string>();
+		this.app.vault.getMarkdownFiles().forEach((file) => {
+			const cachedMetadata = this.app.metadataCache.getFileCache(file);
+			if (cachedMetadata && cachedMetadata.tags) {
+				cachedMetadata.tags.forEach((tag) => {
+					tags.add(tag.tag.replace(/^#/, ""));
+				});
+			}
+		});
+		return Array.from(tags);
+	}
 }

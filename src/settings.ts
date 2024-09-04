@@ -1,6 +1,7 @@
 import AutoClassifierPlugin from "main";
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, Notice, PluginSettingTab, Setting } from "obsidian";
 import { AIFactory } from "./api";
+import { MetaDataManager } from "metaDataManager";
 
 export interface APIProvider {
 	name: string;
@@ -55,17 +56,19 @@ export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 			name: "tags",
 			refs: [],
 			allowMultiple: true,
-			count: 1,
+			count: 5,
 		},
 	],
 };
 
 export class AutoClassifierSettingTab extends PluginSettingTab {
 	plugin: AutoClassifierPlugin;
+	metaDataManager: MetaDataManager;
 
 	constructor(app: App, plugin: AutoClassifierPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
+		this.metaDataManager = new MetaDataManager(app);
 	}
 
 	async loadSettings(): Promise<void> {
@@ -192,6 +195,29 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 
 		// Tag settings (default and non-removable)
 		this.addTagSettings(containerEl);
+
+		// Add button to fetch all tags
+		new Setting(containerEl)
+			.setName("Fetch All Tags")
+			.setDesc("Fetch all tags from your vault and save them")
+			.addButton((button) =>
+				button
+					.setButtonText("Fetch Tags")
+					.setCta()
+					.onClick(async () => {
+						await this.fetchAndSaveTags();
+					})
+			);
+	}
+
+	async fetchAndSaveTags(): Promise<void> {
+		const allTags = await this.metaDataManager.getAllTags();
+		const tagSetting = this.getOrCreateTagSetting();
+		tagSetting.refs = allTags;
+		await this.plugin.saveSettings();
+		this.display();
+		new Notice(`${allTags.length}개의 태그를 가져왔습니다.`);
+		console.log("저장된 태그:", tagSetting.refs);
 	}
 
 	addTagSettings(containerEl: HTMLElement): void {
@@ -236,8 +262,13 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 			(m) => m.name === "tags"
 		);
 		if (!tagSetting) {
-			tagSetting = { ...DEFAULT_SETTINGS.frontmatter[0] };
-			this.plugin.settings.frontmatter.unshift(tagSetting);
+			tagSetting = {
+				name: "tags",
+				refs: [],
+				allowMultiple: true,
+				count: 5,
+			};
+			this.plugin.settings.frontmatter.push(tagSetting);
 		}
 		return tagSetting;
 	}
