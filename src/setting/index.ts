@@ -1,7 +1,8 @@
 import AutoClassifierPlugin from "main";
 import { App, Notice, PluginSettingTab, Setting } from "obsidian";
-import { AIFactory } from "./api";
+
 import { MetaDataManager } from "metaDataManager";
+import { APISettingTab } from "./apiSetting";
 
 export interface APIProvider {
 	name: string;
@@ -64,11 +65,13 @@ export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 export class AutoClassifierSettingTab extends PluginSettingTab {
 	plugin: AutoClassifierPlugin;
 	metaDataManager: MetaDataManager;
+	apiSettingTab: APISettingTab;
 
 	constructor(app: App, plugin: AutoClassifierPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 		this.metaDataManager = new MetaDataManager(app);
+		this.apiSettingTab = new APISettingTab(app, plugin);
 	}
 
 	async loadSettings(): Promise<void> {
@@ -84,114 +87,8 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
-
-		this.addAPISettings(containerEl);
+		this.apiSettingTab.display();
 		this.addFrontmatterSettings(containerEl);
-	}
-
-	addAPISettings(containerEl: HTMLElement): void {
-		containerEl.createEl("h2", { text: "API Settings" });
-
-		new Setting(containerEl)
-			.setName("API Provider")
-			.setDesc("Select the API provider")
-			.addDropdown((dropdown) => {
-				this.plugin.settings.apiProviders.forEach((provider) => {
-					dropdown.addOption(provider.name, provider.name);
-				});
-				dropdown
-					.setValue(this.plugin.settings.selectedProvider)
-					.onChange(async (value) => {
-						this.plugin.settings.selectedProvider = value;
-						await this.plugin.saveSettings();
-						this.display();
-					});
-			});
-
-		const selectedProvider =
-			this.plugin.settings.apiProviders.find(
-				(provider) =>
-					provider.name === this.plugin.settings.selectedProvider
-			) || DEFAULT_SETTINGS.apiProviders[0];
-
-		// API Key Setting
-		const apiKeySetting = new Setting(containerEl)
-			.setName("API Key")
-			.setDesc("Enter your API key")
-			.addText((text) =>
-				text
-					.setPlaceholder("Enter API key")
-					.setValue(selectedProvider.apiKey)
-					.onChange(async (value) => {
-						selectedProvider.apiKey = value;
-						await this.plugin.saveSettings();
-					})
-			)
-			.addButton((button) =>
-				button.setButtonText("Test").onClick(async () => {
-					await this.testAPIKey(selectedProvider);
-				})
-			);
-
-		// API Test Result
-		if (selectedProvider.lastTested) {
-			const resultText = selectedProvider.testResult
-				? "Success! API is working."
-				: "Error: API is not working.";
-			const resultColor = selectedProvider.testResult
-				? "var(--text-success)"
-				: "var(--text-error)";
-
-			apiKeySetting.setDesc(
-				`Last tested: ${selectedProvider.lastTested.toLocaleString()} - ${resultText}`
-			);
-			apiKeySetting.descEl.style.color = resultColor;
-		}
-		// Model Selection
-		new Setting(containerEl)
-			.setName("Model")
-			.setDesc("Select the model to use")
-			.addDropdown((dropdown) => {
-				selectedProvider.models.forEach((model) => {
-					dropdown.addOption(model.name, model.name);
-				});
-				dropdown
-					.setValue(this.plugin.settings.selectedModel)
-					.onChange(async (value) => {
-						this.plugin.settings.selectedModel = value;
-						await this.plugin.saveSettings();
-					});
-			});
-	}
-
-	async testAPIKey(provider: APIProvider): Promise<void> {
-		const apiTestMessageEl = document.createElement("div");
-		apiTestMessageEl.setText("Testing API...");
-		apiTestMessageEl.style.color = "var(--text-normal)";
-
-		try {
-			const aiProvider = AIFactory.getProvider(provider.name);
-			const result = await aiProvider.testAPI(provider.apiKey);
-
-			provider.testResult = result;
-			provider.lastTested = new Date();
-
-			if (result) {
-				apiTestMessageEl.setText("Success! API is working.");
-				apiTestMessageEl.style.color = "var(--text-success)";
-			} else {
-				apiTestMessageEl.setText("Error: API is not working.");
-				apiTestMessageEl.style.color = "var(--text-error)";
-			}
-		} catch (error) {
-			provider.testResult = false;
-			provider.lastTested = new Date();
-			apiTestMessageEl.setText(`Error: ${error.message}`);
-			apiTestMessageEl.style.color = "var(--text-error)";
-		}
-
-		await this.plugin.saveSettings();
-		this.display();
 	}
 
 	addFrontmatterSettings(containerEl: HTMLElement): void {
