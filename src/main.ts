@@ -39,20 +39,19 @@ export default class AutoClassifierPlugin extends Plugin {
 	}
 
 	async classifyTags(): Promise<void> {
-		const currentFile = this.app.workspace.getActiveFile();
-		if (!currentFile) {
-			new Notice("No active file.");
+		// 1. Check API Key
+		const selectedProvider = this.settings.apiProviders.find(
+			(p) => p.name === this.settings.selectedProvider
+		);
+		if (!selectedProvider || !selectedProvider.apiKey) {
+			new Notice("API key for the selected provider is not set.");
 			return;
 		}
 
-		const currentProvider = this.settings.selectedProvider;
-		const provider = AIFactory.getProvider(currentProvider);
-		const selectedProvider = this.settings.apiProviders.find(
-			(p) => p.name === currentProvider
-		);
-
-		if (!selectedProvider || !selectedProvider.apiKey) {
-			new Notice("API key for the selected provider is not set.");
+		// 2. Get input (content of the current file)
+		const currentFile = this.app.workspace.getActiveFile();
+		if (!currentFile) {
+			new Notice("No active file.");
 			return;
 		}
 
@@ -91,6 +90,11 @@ export default class AutoClassifierPlugin extends Plugin {
 				return;
 			}
 
+			const tagSetting = this.settings.frontmatter.find(
+				(m) => m.name === "tags"
+			);
+			const tagCount = tagSetting ? tagSetting.count : 3;
+			const tags = resOutput.split(",").slice(0, tagCount);
 			const preprocessedTags = this.metaDataManager.preprocessTags(tags);
 			await this.metaDataManager.insertToFrontMatter(
 				currentFile,
