@@ -96,7 +96,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 					});
 			});
 
-		// API Key 설정
+		// API Key Setting
 		new Setting(containerEl)
 			.setName("API Key")
 			.setDesc("Enter your API key")
@@ -111,7 +111,6 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 			)
 			.addButton((button) => button.setButtonText("Test"));
 
-		// 모델 설정
 		new Setting(containerEl)
 			.setName("Model")
 			.setDesc("Select the model to use")
