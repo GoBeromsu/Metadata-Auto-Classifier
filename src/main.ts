@@ -1,9 +1,5 @@
 import { Notice, Plugin } from "obsidian";
-import {
-	AutoClassifierSettings,
-	DEFAULT_SETTINGS,
-	AutoClassifierSettingTab,
-} from "./settings";
+import { AutoClassifierSettings, AutoClassifierSettingTab } from "./setting";
 import { AIFactory } from "api";
 import { MetaDataManager } from "./metaDataManager";
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from "templatess";

@@ -1,12 +1,12 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
 import AutoClassifierPlugin from "../main";
 import { APIProvider, DEFAULT_SETTINGS } from "./index";
 import { AIFactory } from "../api";
+import { Setting } from "obsidian";
 
 export class APISetting {
 	plugin: AutoClassifierPlugin;
 
-	constructor(app: App, plugin: AutoClassifierPlugin) {
+	constructor(plugin: AutoClassifierPlugin) {
 		this.plugin = plugin;
 	}
 
