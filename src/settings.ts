@@ -1,11 +1,14 @@
 import AutoClassifierPlugin from "main";
 import { App, PluginSettingTab, Setting } from "obsidian";
+import { AIFactory } from "./api";
 
 export interface APIProvider {
 	name: string;
 	apiKey: string;
 	baseUrl: string;
 	models: Model[];
+	lastTested: Date | null;
+	testResult: boolean | null;
 }
 
 export interface Model {
@@ -44,6 +47,8 @@ export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 					temperature: 0.7,
 				},
 			],
+			lastTested: null,
+			testResult: null,
 		},
 	],
 	selectedProvider: "OpenAI",
@@ -96,26 +101,47 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 					});
 			});
 
+		const selectedProvider = this.getSelectedProvider();
+
 		// API Key Setting
-		new Setting(containerEl)
+		const apiKeySetting = new Setting(containerEl)
 			.setName("API Key")
 			.setDesc("Enter your API key")
 			.addText((text) =>
 				text
 					.setPlaceholder("Enter API key")
-					.setValue(this.getSelectedProvider().apiKey)
+					.setValue(selectedProvider.apiKey)
 					.onChange(async (value) => {
-						this.getSelectedProvider().apiKey = value;
+						selectedProvider.apiKey = value;
 						await this.plugin.saveSettings();
 					})
 			)
-			.addButton((button) => button.setButtonText("Test"));
+			.addButton((button) =>
+				button.setButtonText("Test").onClick(async () => {
+					await this.testAPIKey(selectedProvider);
+				})
+			);
 
+		// API Test Result
+		if (selectedProvider.lastTested) {
+			const resultText = selectedProvider.testResult
+				? "Success! API is working."
+				: "Error: API is not working.";
+			const resultColor = selectedProvider.testResult
+				? "var(--text-success)"
+				: "var(--text-error)";
+
+			apiKeySetting.setDesc(
+				`Last tested: ${selectedProvider.lastTested.toLocaleString()} - ${resultText}`
+			);
+			apiKeySetting.descEl.style.color = resultColor;
+		}
+		// Model Selection
 		new Setting(containerEl)
 			.setName("Model")
 			.setDesc("Select the model to use")
 			.addDropdown((dropdown) => {
-				this.getSelectedProvider().models.forEach((model) => {
+				selectedProvider.models.forEach((model) => {
 					dropdown.addOption(model.name, model.name);
 				});
 				dropdown
@@ -125,6 +151,36 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					});
 			});
+	}
+
+	async testAPIKey(provider: APIProvider): Promise<void> {
+		const apiTestMessageEl = document.createElement("div");
+		apiTestMessageEl.setText("Testing API...");
+		apiTestMessageEl.style.color = "var(--text-normal)";
+
+		try {
+			const aiProvider = AIFactory.getProvider(provider.name);
+			const result = await aiProvider.testAPI(provider.apiKey);
+
+			provider.testResult = result;
+			provider.lastTested = new Date();
+
+			if (result) {
+				apiTestMessageEl.setText("Success! API is working.");
+				apiTestMessageEl.style.color = "var(--text-success)";
+			} else {
+				apiTestMessageEl.setText("Error: API is not working.");
+				apiTestMessageEl.style.color = "var(--text-error)";
+			}
+		} catch (error) {
+			provider.testResult = false;
+			provider.lastTested = new Date();
+			apiTestMessageEl.setText(`Error: ${error.message}`);
+			apiTestMessageEl.style.color = "var(--text-error)";
+		}
+
+		await this.plugin.saveSettings();
+		this.display();
 	}
 
 	addFrontmatterSettings(containerEl: HTMLElement): void {
