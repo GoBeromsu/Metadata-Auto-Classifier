@@ -120,17 +120,10 @@ export default class AutoClassifierPlugin extends Plugin {
 	} {
 		try {
 			const response = JSON.parse(responseRaw);
-			if (
-				typeof response.reliability === "number" &&
-				Array.isArray(response.output)
-			) {
-				return {
-					resOutput: response.output.join(", "),
-					resReliability: response.reliability,
-				};
-			} else {
-				throw new Error("Invalid response format");
-			}
+			return {
+				resOutput: response.output.join(", "),
+				resReliability: response.reliability,
+			};
 		} catch (error) {
 			console.error("Error parsing API response:", error);
 			new Notice(
