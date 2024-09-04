@@ -59,7 +59,18 @@ export default class AutoClassifierPlugin extends Plugin {
 		const tagCount = tagSetting ? tagSetting.count : 3;
 		const content = await this.app.vault.read(currentFile);
 		const chatRole = DEFAULT_CHAT_ROLE;
-		const promptTemplate = getPromptTemplate(false, tagCount, content);
+
+		// 현재 저장된 태그 가져오기
+		const currentTags = tagSetting?.refs || [];
+		const currentTagsString = currentTags.join(", ");
+
+		// 프롬프트 템플릿에 현재 태그 정보 추가
+		const promptTemplate = getPromptTemplate(
+			true,
+			tagCount,
+			content,
+			currentTagsString
+		);
 
 		// 4. Call API and process response
 		const provider = AIFactory.getProvider(this.settings.selectedProvider);
