@@ -108,7 +108,11 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 					});
 			});
 
-		const selectedProvider = this.getSelectedProvider();
+		const selectedProvider =
+			this.plugin.settings.apiProviders.find(
+				(provider) =>
+					provider.name === this.plugin.settings.selectedProvider
+			) || this.plugin.settings.apiProviders[0];
 
 		// API Key Setting
 		const apiKeySetting = new Setting(containerEl)
@@ -271,14 +275,5 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 			this.plugin.settings.frontmatter.push(tagSetting);
 		}
 		return tagSetting;
-	}
-
-	getSelectedProvider(): APIProvider {
-		return (
-			this.plugin.settings.apiProviders.find(
-				(provider) =>
-					provider.name === this.plugin.settings.selectedProvider
-			) || this.plugin.settings.apiProviders[0]
-		);
 	}
 }
