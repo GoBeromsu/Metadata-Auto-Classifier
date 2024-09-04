@@ -43,21 +43,21 @@ export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 					name: "gpt-3.5-turbo",
 					maxTokens: 150,
 					temperature: 0.7,
-				},
+				} as Model,
 			],
 			lastTested: null,
 			testResult: null,
 		},
-	],
+	] as APIProvider[],
 	selectedProvider: "OpenAI",
 	selectedModel: "gpt-3.5-turbo",
 	frontmatter: [
 		{
 			name: "tags",
-			refs: [],
+			refs: [] as string[],
 			allowMultiple: true,
 			count: 5,
-		},
+		} as Frontmatter,
 	],
 };
 
@@ -112,7 +112,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 			this.plugin.settings.apiProviders.find(
 				(provider) =>
 					provider.name === this.plugin.settings.selectedProvider
-			) || this.plugin.settings.apiProviders[0];
+			) || DEFAULT_SETTINGS.apiProviders[0];
 
 		// API Key Setting
 		const apiKeySetting = new Setting(containerEl)
