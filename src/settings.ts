@@ -74,6 +74,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		this.addAPISettings(containerEl);
+		this.addFrontmatterSettings(containerEl);
 	}
 
 	addAPISettings(containerEl: HTMLElement): void {
@@ -125,6 +126,14 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 					});
 			});
 	}
+
+	addFrontmatterSettings(containerEl: HTMLElement): void {
+		containerEl.createEl("h2", { text: "Frontmatter" });
+
+		// Tag settings (default and non-removable)
+		this.addTagSettings(containerEl);
+	}
+
 	addTagSettings(containerEl: HTMLElement): void {
 		const tagSetting = this.plugin.settings.frontmatter.find(
 			(m) => m.name === "tag"
@@ -139,29 +148,28 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		};
 
 		new Setting(containerEl)
-			.setName("Tag Settings")
-			.setDesc("Default settings for automatic tag classification")
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOption("title", "Title")
-					.addOption("content", "Content")
-					.addOption("selection", "Selection")
-					.setValue(tagSetting.inputRange)
-					.onChange(
-						async (value: "title" | "content" | "selection") => {
-							tagSetting.inputRange = value;
+			.setName("Tags")
+			.setDesc("Default settings for automatic tagging")
+			.addText((text) =>
+				text
+					.setPlaceholder("Tag count")
+					.setValue(tagSetting.count.toString())
+					.onChange(async (value) => {
+						const count = parseInt(value, 10);
+						if (!isNaN(count) && count > 0) {
+							tagSetting.count = count;
 							await this.plugin.saveSettings();
 						}
-					)
+					})
 			)
-			.addSlider((slider) =>
-				slider
-					.setLimits(1, 10, 1)
-					.setValue(tagSetting.count)
-					.setDynamicTooltip()
-					.onChange(async (value) => {
-						tagSetting.count = value;
+			.addExtraButton((button) =>
+				button
+					.setIcon("reset")
+					.setTooltip("Set default count")
+					.onClick(async () => {
+						tagSetting.count = 3;
 						await this.plugin.saveSettings();
+						this.display();
 					})
 			);
 
