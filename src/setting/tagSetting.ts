@@ -26,7 +26,7 @@ export class TagSetting {
 	}
 
 	private addTagSettings(containerEl: HTMLElement): void {
-		const tagSetting = this.getOrCreateTagSetting();
+		const tagSetting = this.getTagSetting();
 
 		new Setting(containerEl)
 			.setName("Tags")
@@ -71,13 +71,13 @@ export class TagSetting {
 
 	private async fetchAndSaveTags(): Promise<void> {
 		const allTags = await this.metaDataManager.getAllTags();
-		const tagSetting = this.getOrCreateTagSetting();
+		const tagSetting = this.getTagSetting();
 		tagSetting.refs = allTags;
 		await this.plugin.saveSettings();
 		new Notice(`Fetched ${allTags.length} tags.`);
 	}
 
-	private getOrCreateTagSetting(): Frontmatter {
+	private getTagSetting(): Frontmatter {
 		let tagSetting = this.plugin.settings.frontmatter.find(
 			(m) => m.name === "tags"
 		);
