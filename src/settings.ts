@@ -68,6 +68,16 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
+	async loadSettings(): Promise<void> {
+		const savedData = await this.plugin.loadData();
+		this.plugin.settings = Object.assign({}, DEFAULT_SETTINGS, savedData);
+		await this.saveSettings();
+	}
+
+	async saveSettings(): Promise<void> {
+		await this.plugin.saveData(this.plugin.settings);
+	}
+
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();

@@ -27,11 +27,8 @@ export default class AutoClassifierPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			await this.loadData()
-		);
+		const settingTab = new AutoClassifierSettingTab(this.app, this);
+		await settingTab.loadSettings();
 	}
 
 	async saveSettings() {
