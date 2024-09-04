@@ -45,8 +45,4 @@ export class MetaDataManager {
 		}
 		return null;
 	}
-
-	preprocessTags(tags: string[]): string[] {
-		return tags.map((tag) => tag.replace(/\s+/g, "_").replace(/^#/, ""));
-	}
 }

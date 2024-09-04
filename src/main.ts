@@ -87,13 +87,7 @@ export default class AutoClassifierPlugin extends Plugin {
 				);
 				return;
 			}
-
-			const tagSetting = this.settings.frontmatter.find(
-				(m) => m.name === "tags"
-			);
-			const tagCount = tagSetting ? tagSetting.count : 3;
-			const tags = resOutput.split(",").slice(0, tagCount);
-			const preprocessedTags = this.metaDataManager.preprocessTags(tags);
+			const preprocessedTags = resOutput.split(",").slice(0, tagCount);
 			await this.metaDataManager.insertToFrontMatter(
 				currentFile,
 				"tags",
