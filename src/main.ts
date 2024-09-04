@@ -6,6 +6,7 @@ import {
 } from "./settings";
 import { AIFactory } from "api";
 import { MetaDataManager } from "./metaDataManager";
+import { DEFAULT_CHAT_ROLE, DEFAULT_PROMPT_TEMPLATE } from "templatess";
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
@@ -62,19 +63,28 @@ export default class AutoClassifierPlugin extends Plugin {
 
 		try {
 			const content = await this.app.vault.read(currentFile);
+			const chatRole = DEFAULT_CHAT_ROLE;
+			const promptTemplate = DEFAULT_PROMPT_TEMPLATE.replace(
+				"{{input}}",
+				content
+			);
+
 			const tagsResponse = await provider.callAPI(
-				"You are a tag retrieval system. Return only a JSON array of tags.",
-				`Retrieve ${tagCount} most relevant tags for this content: ${content}`,
+				chatRole,
+				promptTemplate,
 				selectedProvider.apiKey
 			);
 
 			let tags: string[];
 			try {
-				tags = JSON.parse(tagsResponse);
-				if (!Array.isArray(tags)) {
-					throw new Error("Response is not an array");
+				const parsedResponse = JSON.parse(tagsResponse);
+				if (
+					!parsedResponse.output ||
+					!Array.isArray(parsedResponse.output)
+				) {
+					throw new Error("Response is not in the correct format");
 				}
-				tags = tags.slice(0, tagCount);
+				tags = parsedResponse.output.slice(0, tagCount);
 			} catch (error) {
 				console.error("Failed to parse tag response:", error);
 				new Notice("Failed to parse tags from API response.");
