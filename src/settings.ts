@@ -74,7 +74,6 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		this.addAPISettings(containerEl);
-		this.addFrontmatterSettings(containerEl);
 	}
 
 	addAPISettings(containerEl: HTMLElement): void {
@@ -125,21 +124,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					});
 			});
-
-	addFrontmatterSettings(containerEl: HTMLElement): void {
-		containerEl.createEl("h2", { text: "Frontmatter" });
-
-		// Tag settings (default and non-removable)
-		this.addTagSettings(containerEl);
-
-		// Additional frontmatter fields
-		this.plugin.settings.frontmatter.forEach((frontmatter, index) => {
-			if (frontmatter.name !== "tag") {
-				// Skip the default tag field
-				this.addFrontmatterField(containerEl, frontmatter, index);
-			}
-		});
-
+	}
 	addTagSettings(containerEl: HTMLElement): void {
 		const tagSetting = this.plugin.settings.frontmatter.find(
 			(m) => m.name === "tag"
@@ -184,7 +169,6 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		if (!this.plugin.settings.frontmatter.some((m) => m.name === "tag")) {
 			this.plugin.settings.frontmatter.unshift(tagSetting);
 		}
-	}
 	}
 
 	getSelectedProvider(): APIProvider {
