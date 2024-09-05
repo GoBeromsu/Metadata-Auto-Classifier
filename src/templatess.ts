@@ -9,6 +9,9 @@ Instructions:
 4. Even if you're unsure, make a selection and adjust the reliability score accordingly.
 5. Provide your answer in valid JSON format.
 
+"""
+{{input}}
+"""
 Reference categories:
 {{reference}}
 
@@ -20,25 +23,10 @@ The "reliability" should be a number between 0 and 1.
 The "output" must be an array of up to {{tagCount}} categories, chosen based on relevance and similarity.
 `;
 
-export const DEFAULT_PROMPT_TEMPLATE_WO_REF = `Classify this content:
-"""
-{{input}}
-"""
-Answer in valid JSON format: {"reliability": number, "output": string[]}
-The "reliability" should be a number between 0 and 1.
-The "output" must be an array of exactly {{tagCount}} categories.
-Even if you are not sure, qualify the reliability and recommend {{tagCount}} proper categories.
-`;
-
-export function getPromptTemplate(
-	useRef: boolean,
-	tagCount: number,
-	input: string,
-	reference?: string
-): string {
-	let template = useRef ? DEFAULT_PROMPT_TEMPLATE : DEFAULT_PROMPT_TEMPLATE_WO_REF;
+export function getPromptTemplate(tagCount: number, input: string, reference?: string): string {
+	let template = DEFAULT_PROMPT_TEMPLATE;
 	template = template.replace(/{{tagCount}}/g, tagCount.toString());
-	if (useRef && reference) {
+	if (reference) {
 		const referenceArray = reference.split(',').map((item) => item.trim());
 		const cleanedReferenceArray = referenceArray.map((item) =>
 			item.replace(/^\s*\[\[/, '[[').replace(/\]\]\s*$/, ']]')
@@ -58,9 +46,6 @@ export function getPromptTemplate(
 		template = template.replace('{{dynamicExample}}', dynamicExample);
 	}
 	template = template.replace('{{input}}', input);
-
-	// Add logging for the prompt output
-	console.log('Generated Prompt Template:', template);
 
 	return template;
 }

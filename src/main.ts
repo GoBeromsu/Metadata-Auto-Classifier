@@ -96,7 +96,7 @@ export default class AutoClassifierPlugin extends Plugin {
 	): Promise<void> {
 		const currentValues = frontmatter.refs ?? [];
 		const currentValuesString = currentValues.join(', ');
-		const promptTemplate = getPromptTemplate(true, frontmatter.count, content, currentValuesString);
+		const promptTemplate = getPromptTemplate(frontmatter.count, content, currentValuesString);
 
 		await this.processAPIRequest(
 			selectedProvider,
