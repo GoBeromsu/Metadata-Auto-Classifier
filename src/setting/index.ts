@@ -1,6 +1,6 @@
-import { Provider, Model } from 'types/APIInterface';
 import AutoClassifierPlugin from 'main';
-import { App, PluginSettingTab } from 'obsidian';
+import { PluginSettingTab } from 'obsidian';
+import { Model, Provider } from 'types/APIInterface';
 
 import { MetaDataManager } from 'metaDataManager';
 
@@ -55,16 +55,6 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		this.metaDataManager = metaDataManager;
 		this.apiSetting = new APISetting(plugin);
 		this.tagSetting = new TagSetting(plugin, metaDataManager);
-	}
-
-	async loadSettings(): Promise<void> {
-		const savedData = await this.plugin.loadData();
-		this.plugin.settings = Object.assign({}, DEFAULT_SETTINGS, savedData);
-		await this.saveSettings();
-	}
-
-	async saveSettings(): Promise<void> {
-		await this.plugin.saveData(this.plugin.settings);
 	}
 
 	display(): void {
