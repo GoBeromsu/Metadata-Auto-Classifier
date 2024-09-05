@@ -3,7 +3,7 @@ import { Notice, Plugin } from 'obsidian';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from 'templatess';
 import { MetaDataManager } from './metaDataManager';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './setting';
-import { DEFAULT_SETTINGS } from 'constant';
+import { DEFAULT_SETTINGS, DEFAULT_TAG_SETTING } from 'constant';
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
@@ -24,8 +24,16 @@ export default class AutoClassifierPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-		await this.saveData(this.settings);
+		const loadedData = await this.loadData();
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
+
+		// Check if frontmatter is empty or undefined
+		if (!this.settings.frontmatter || this.settings.frontmatter.length === 0) {
+			// Only add the default tag setting if frontmatter is empty
+			this.settings.frontmatter = [DEFAULT_TAG_SETTING];
+		}
+
+		await this.saveSettings();
 	}
 
 	async saveSettings() {

@@ -7,7 +7,7 @@ import { MetaDataManager } from 'metaDataManager';
 import { APISetting } from './apiSetting';
 import { TagSetting } from './tagSetting';
 import { FrontmatterSetting } from './frontmatterSettings';
-import { DEFAULT_FRONTMATTER_SETTING, Frontmatter } from 'constant';
+import { DEFAULT_FRONTMATTER_SETTING, DEFAULT_TAG_SETTING, Frontmatter } from 'constant';
 
 export interface AutoClassifierSettings {
 	providers: Provider[];
@@ -48,33 +48,41 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 					.setButtonText('Add Frontmatter')
 					.setCta()
 					.onClick(() => {
-						if (!containerEl.querySelector('h2')) {
-							containerEl.createEl('h2', { text: 'Frontmatter Settings' });
-						}
-						// Add a thin divider line after the second frontmatter
-						if (this.plugin.settings.frontmatter.length >= 2) {
-							containerEl.createEl('hr', { cls: 'thin-divider' });
-						}
-						const newFrontmatter = { ...DEFAULT_FRONTMATTER_SETTING, id: this.generateId() };
-						this.plugin.settings.frontmatter.push(newFrontmatter);
-						this.plugin.saveSettings();
-
-						const newFrontmatterContainer = containerEl.createDiv();
-						this.frontmatterSetting.display(newFrontmatterContainer, newFrontmatter.id);
-						this.addDeleteButton(newFrontmatterContainer, newFrontmatter.id);
+						this.addNewFrontmatter(containerEl);
 					})
 			);
 
 		// Frontmatter Settings Section
-		const tagSettingContainer = containerEl.createDiv();
-		this.tagSetting.display(tagSettingContainer);
+		containerEl.createEl('h2', { text: 'Frontmatter Settings' });
 
-		// Display existing frontmatter settings
+		// Always display the tag setting
+		const tagContainer = containerEl.createDiv();
+		this.frontmatterSetting.display(tagContainer, DEFAULT_TAG_SETTING.id);
+
+		// Display other frontmatter settings
 		this.plugin.settings.frontmatter.forEach((frontmatter) => {
-			const frontmatterContainer = containerEl.createDiv();
-			this.frontmatterSetting.display(frontmatterContainer, frontmatter.id);
-			this.addDeleteButton(frontmatterContainer, frontmatter.id);
+			if (frontmatter.name !== 'tags') {
+				const frontmatterContainer = containerEl.createDiv();
+				this.frontmatterSetting.display(frontmatterContainer, frontmatter.id);
+				this.addDeleteButton(frontmatterContainer, frontmatter.id);
+			}
 		});
+	}
+
+	private addNewFrontmatter(containerEl: HTMLElement): void {
+		if (!containerEl.querySelector('h2')) {
+			containerEl.createEl('h2', { text: 'Frontmatter Settings' });
+		}
+
+		const newFrontmatter = { ...DEFAULT_FRONTMATTER_SETTING, id: this.generateId() };
+		this.plugin.settings.frontmatter.push(newFrontmatter);
+		this.plugin.saveSettings();
+
+		const newFrontmatterContainer = containerEl.createDiv();
+		// Add a thin divider line before the new frontmatter if it's not the first one
+
+		this.frontmatterSetting.display(newFrontmatterContainer, newFrontmatter.id);
+		this.addDeleteButton(newFrontmatterContainer, newFrontmatter.id);
 	}
 
 	private generateId(): number {
