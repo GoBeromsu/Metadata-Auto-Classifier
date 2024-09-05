@@ -1,19 +1,9 @@
 import { Setting } from 'obsidian';
-import AutoClassifierPlugin from '../main';
-import { MetaDataManager } from '../metaDataManager';
-
+import { BaseSetting } from './baseSetting';
 import { DEFAULT_FRONTMATTER_SETTING } from 'constant';
 import { Frontmatter } from 'types/APIInterface';
 
-export class FrontmatterSetting {
-	plugin: AutoClassifierPlugin;
-	metaDataManager: MetaDataManager;
-
-	constructor(plugin: AutoClassifierPlugin, metaDataManager: MetaDataManager) {
-		this.plugin = plugin;
-		this.metaDataManager = metaDataManager;
-	}
-
+export class FrontmatterSetting extends BaseSetting {
 	display(containerEl: HTMLElement): void {
 		containerEl.empty();
 		containerEl.createEl('h3', { text: 'Frontmatter Settings' });
@@ -21,8 +11,25 @@ export class FrontmatterSetting {
 	}
 
 	private addFrontmatterSettings(containerEl: HTMLElement): void {
-		const frontmatterSetting = this.getFrontmatterSetting();
+		const frontmatterSetting = this.getSetting('frontmatter');
 
+		this.addNameSetting(containerEl, frontmatterSetting);
+		this.addCountSetting(
+			containerEl,
+			frontmatterSetting,
+			'Number of Options to Select',
+			'Set the number of options that can be selected',
+			DEFAULT_FRONTMATTER_SETTING.count
+		);
+		this.addAllowMultipleSetting(containerEl, frontmatterSetting);
+
+		const optionsContainer = containerEl.createDiv('frontmatter-options');
+		this.renderOptions(optionsContainer, frontmatterSetting);
+
+		this.addAddOptionButton(containerEl, optionsContainer, frontmatterSetting);
+	}
+
+	private addNameSetting(containerEl: HTMLElement, frontmatterSetting: Frontmatter): void {
 		new Setting(containerEl)
 			.setName('Frontmatter Name')
 			.setDesc('Set the name for this frontmatter')
@@ -35,23 +42,9 @@ export class FrontmatterSetting {
 						await this.plugin.saveSettings();
 					})
 			);
+	}
 
-		new Setting(containerEl)
-			.setName('Number of Options to Select')
-			.setDesc('Set the number of options that can be selected')
-			.addText((text) =>
-				text
-					.setPlaceholder('Number of options')
-					.setValue(frontmatterSetting.count.toString())
-					.onChange(async (value) => {
-						const count = parseInt(value, 10);
-						if (!isNaN(count) && count > 0) {
-							frontmatterSetting.count = count;
-							await this.plugin.saveSettings();
-						}
-					})
-			);
-
+	private addAllowMultipleSetting(containerEl: HTMLElement, frontmatterSetting: Frontmatter): void {
 		new Setting(containerEl)
 			.setName('Allow Multiple')
 			.setDesc('Allow selecting multiple options')
@@ -61,22 +54,6 @@ export class FrontmatterSetting {
 					await this.plugin.saveSettings();
 				})
 			);
-
-		const optionsContainer = containerEl.createDiv('frontmatter-options');
-		this.renderOptions(optionsContainer, frontmatterSetting);
-
-		new Setting(containerEl).addButton((button) =>
-			button
-				.setButtonText('Add Option')
-				.setCta()
-				.onClick(() => {
-					if (!frontmatterSetting.refs) {
-						frontmatterSetting.refs = [];
-					}
-					frontmatterSetting.refs.push('');
-					this.renderOptions(optionsContainer, frontmatterSetting);
-				})
-		);
 	}
 
 	private renderOptions(container: HTMLElement, frontmatterSetting: Frontmatter): void {
@@ -108,12 +85,35 @@ export class FrontmatterSetting {
 		}
 	}
 
-	private getFrontmatterSetting(): Frontmatter {
-		let frontmatterSetting = this.plugin.settings.frontmatter.find((m) => m.name === 'frontmatter');
-		if (!frontmatterSetting) {
-			frontmatterSetting = { ...DEFAULT_FRONTMATTER_SETTING };
-			this.plugin.settings.frontmatter.push(frontmatterSetting);
+	private addAddOptionButton(
+		containerEl: HTMLElement,
+		optionsContainer: HTMLElement,
+		frontmatterSetting: Frontmatter
+	): void {
+		new Setting(containerEl)
+			.setName('Add Option')
+			.setDesc('Add a new option to the frontmatter')
+			.addButton((button) =>
+				button
+					.setButtonText('Add')
+					.setCta()
+					.onClick(async () => {
+						if (!frontmatterSetting.refs) {
+							frontmatterSetting.refs = [];
+						}
+						frontmatterSetting.refs.push('');
+						await this.plugin.saveSettings();
+						this.renderOptions(optionsContainer, frontmatterSetting);
+					})
+			);
+	}
+
+	protected getSetting(settingName: string): Frontmatter {
+		let setting = this.plugin.settings.frontmatter.find((m) => m.name === settingName);
+		if (!setting) {
+			setting = { ...DEFAULT_FRONTMATTER_SETTING };
+			this.plugin.settings.frontmatter.push(setting);
 		}
-		return frontmatterSetting;
+		return setting;
 	}
 }

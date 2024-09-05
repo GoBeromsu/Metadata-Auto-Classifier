@@ -1,5 +1,5 @@
 import AutoClassifierPlugin from 'main';
-import { PluginSettingTab } from 'obsidian';
+import { PluginSettingTab, Setting } from 'obsidian';
 import { Frontmatter, Provider } from 'types/APIInterface';
 
 import { MetaDataManager } from 'metaDataManager';
@@ -7,6 +7,7 @@ import { MetaDataManager } from 'metaDataManager';
 import { APISetting } from './apiSetting';
 import { TagSetting } from './tagSetting';
 import { FrontmatterSetting } from './frontmatterSettings';
+import { DEFAULT_FRONTMATTER_SETTING } from 'constant';
 
 export interface AutoClassifierSettings {
 	providers: Provider[];
@@ -38,13 +39,40 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		const apiSettingContainer = containerEl.createDiv();
 		this.apiSetting.display(apiSettingContainer);
 
-		// Frontmatter Settings Section
-		containerEl.createEl('h2', { text: 'Frontmatter' });
+		// Add button to create new frontmatter entry
+		new Setting(containerEl)
+			.setName('Add Frontmatter')
+			.setDesc('Add a new frontmatter entry')
+			.addButton((button) =>
+				button
+					.setButtonText('Add Frontmatter')
+					.setCta()
+					.onClick(() => {
+						const newFrontmatter = { ...DEFAULT_FRONTMATTER_SETTING };
+						this.plugin.settings.frontmatter.push(newFrontmatter);
+						this.plugin.saveSettings();
+
+						const newFrontmatterContainer = containerEl.createDiv();
+						this.frontmatterSetting.display(newFrontmatterContainer);
+						this.addDeleteButton(newFrontmatterContainer);
+					})
+			);
+		// Frontmatter Settings Sectio
 
 		const tagSettingContainer = containerEl.createDiv();
 		this.tagSetting.display(tagSettingContainer);
+	}
 
-		const frontmatterContainer = containerEl.createDiv();
-		this.frontmatterSetting.display(frontmatterContainer);
+	private addDeleteButton(container: HTMLElement): void {
+		new Setting(container).addButton((button) =>
+			button
+				.setButtonText('Delete')
+				.setWarning()
+				.onClick(() => {
+					// todo: 해당 프론트 매터 데이터도 사라져야 함
+					container.remove();
+					this.plugin.saveSettings();
+				})
+		);
 	}
 }
