@@ -52,12 +52,10 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 					})
 			);
 
-		// Frontmatter Settings Section
-		containerEl.createEl('h2', { text: 'Frontmatter Settings' });
-
-		// Always display the tag setting
+		// Tag Settings Section
+		containerEl.createEl('h2', { text: 'Tag Settings' });
 		const tagContainer = containerEl.createDiv();
-		this.frontmatterSetting.display(tagContainer, DEFAULT_TAG_SETTING.id);
+		this.tagSetting.display(tagContainer);
 
 		// Display other frontmatter settings
 		this.plugin.settings.frontmatter.forEach((frontmatter) => {

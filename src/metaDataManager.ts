@@ -31,7 +31,12 @@ export class MetaDataManager {
 					}
 				}
 			} else {
-				frontmatter[key] = value;
+				frontmatter[key] = Array.isArray(value) ? value : [value];
+			}
+
+			// Remove duplicates and empty strings
+			if (Array.isArray(frontmatter[key])) {
+				frontmatter[key] = [...new Set(frontmatter[key])].filter(Boolean);
 			}
 		});
 	}
@@ -41,6 +46,14 @@ export class MetaDataManager {
 		if (frontmatter) {
 			const { position, ...rest } = frontmatter;
 			return rest;
+		}
+		return null;
+	}
+
+	async getFrontMatterValue(file: TFile, key: string): Promise<any> {
+		const fileCache = this.app.metadataCache.getFileCache(file);
+		if (fileCache?.frontmatter && key in fileCache.frontmatter) {
+			return fileCache.frontmatter[key];
 		}
 		return null;
 	}
@@ -56,5 +69,28 @@ export class MetaDataManager {
 			}
 		});
 		return Array.from(tags);
+	}
+
+	async getSavedFrontMatterValue(file: TFile, key: string): Promise<any> {
+		const content = await this.app.vault.read(file);
+		const frontmatter = this.parseFrontMatter(content);
+		return frontmatter[key];
+	}
+
+	private parseFrontMatter(content: string): Record<string, any> {
+		const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n/;
+		const match = content.match(frontmatterRegex);
+		if (match) {
+			const frontmatterContent = match[1];
+			const frontmatter: Record<string, any> = {};
+			frontmatterContent.split('\n').forEach((line) => {
+				const [key, value] = line.split(':').map((part) => part.trim());
+				if (key && value) {
+					frontmatter[key] = value;
+				}
+			});
+			return frontmatter;
+		}
+		return {};
 	}
 }
