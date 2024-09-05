@@ -1,10 +1,10 @@
-import { DEFAULT_SETTINGS, DEFAULT_TAG_SETTING, Frontmatter } from 'constant';
+import { DEFAULT_SETTINGS, DEFAULT_TAG_SETTING } from 'constant';
 import { Notice, Plugin, TFile } from 'obsidian';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from 'templatess';
+import { Provider } from 'types/APIInterface';
 import { APIHandler } from './api/apiHandler';
 import { MetaDataManager } from './metaDataManager';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './setting';
-import { Provider } from 'types/APIInterface';
 
 export default class AutoClassifierPlugin extends Plugin {
 	apiHandler: APIHandler;
@@ -59,34 +59,62 @@ export default class AutoClassifierPlugin extends Plugin {
 			return;
 		}
 
+		const content = await this.app.vault.read(currentFile);
+		const selectedProvider = this.getSelectedProvider();
+		if (!selectedProvider) return;
+
+		const frontmatter = this.settings.frontmatter.find((fm) => fm.id === frontmatterId);
+		if (!frontmatter) {
+			new Notice(`No setting found for frontmatter ID ${frontmatterId}.`);
+			return;
+		}
+
+		await this.processFrontmatterItem(selectedProvider, currentFile, content, frontmatter);
+	}
+
+	private async processAllFrontmatter(): Promise<void> {
+		const currentFile = this.app.workspace.getActiveFile();
+		if (!currentFile) {
+			new Notice('No active file.');
+			return;
+		}
+
+		const content = await this.app.vault.read(currentFile);
+		const selectedProvider = this.getSelectedProvider();
+		if (!selectedProvider) return;
+
+		for (const frontmatter of this.settings.frontmatter) {
+			await this.processFrontmatterItem(selectedProvider, currentFile, content, frontmatter);
+		}
+	}
+
+	private async processFrontmatterItem(
+		selectedProvider: Provider,
+		currentFile: TFile,
+		content: string,
+		frontmatter: { id: number; name: string; count: number; refs?: string[] }
+	): Promise<void> {
+		const currentValues = frontmatter.refs ?? [];
+		const currentValuesString = currentValues.join(', ');
+		const promptTemplate = getPromptTemplate(true, frontmatter.count, content, currentValuesString);
+
+		await this.processAPIRequest(
+			selectedProvider,
+			currentFile,
+			frontmatter.name,
+			frontmatter.count,
+			promptTemplate
+		);
+	}
+
+	private getSelectedProvider(): Provider | undefined {
 		const selectedProvider = this.settings.providers.find(
 			(p) => p.name === this.settings.selectedProvider && p.apiKey
 		);
 		if (!selectedProvider) {
 			new Notice('API key for the selected provider is not set.');
-			return;
 		}
-
-		const metadataSetting = this.settings.frontmatter.find((fm) => fm.id === frontmatterId);
-		if (!metadataSetting) {
-			new Notice(`No setting found for frontmatter ID ${frontmatterId}.`);
-			return;
-		}
-
-		const count = metadataSetting.count;
-		const content = await this.app.vault.read(currentFile);
-		const currentValues = metadataSetting.refs ?? [];
-		const currentValuesString = currentValues.join(', ');
-
-		const promptTemplate = getPromptTemplate(true, count, content, currentValuesString);
-
-		await this.processAPIRequest(
-			selectedProvider,
-			currentFile,
-			metadataSetting.name,
-			count,
-			promptTemplate
-		);
+		return selectedProvider;
 	}
 
 	private async processAPIRequest(
@@ -105,17 +133,5 @@ export default class AutoClassifierPlugin extends Plugin {
 			key,
 			count
 		);
-	}
-
-	async processAllFrontmatter(): Promise<void> {
-		const currentFile = this.app.workspace.getActiveFile();
-		if (!currentFile) {
-			new Notice('No active file.');
-			return;
-		}
-
-		for (const frontmatter of this.settings.frontmatter) {
-			await this.classifyMetadata(frontmatter.id);
-		}
 	}
 }
