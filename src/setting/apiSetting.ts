@@ -86,6 +86,16 @@ export class APISetting {
 						await this.plugin.saveSettings();
 						new Notice(`Max tokens updated to ${maxTokens}`);
 					})
+			)
+			.addExtraButton((button) =>
+				button
+					.setIcon('reset')
+					.setTooltip('Set to default max tokens')
+					.onClick(async () => {
+						selectedProvider.maxTokens = 2048;
+						await this.plugin.saveSettings();
+						new Notice(`Max tokens reset to default: ${2048}`);
+					})
 			);
 	}
 
