@@ -53,7 +53,8 @@ export function getPromptTemplate(
   "output": [${dynamicOutput}]
 }`;
 
-		template = template.replace('{{reference}}', cleanedReferenceArray.join('\n- '));
+		// Keep the reference categories comma-separated
+		template = template.replace('{{reference}}', cleanedReferenceArray.join(', '));
 		template = template.replace('{{dynamicExample}}', dynamicExample);
 	}
 	template = template.replace('{{input}}', input);
