@@ -10,7 +10,7 @@ export class TagSetting extends BaseSetting {
 	}
 
 	private addTagSettings(containerEl: HTMLElement): void {
-		const tagSetting = this.getSetting('tags');
+		const tagSetting = this.getSetting(DEFAULT_TAG_SETTING.id);
 
 		this.addCountSetting(
 			containerEl,
@@ -27,7 +27,9 @@ export class TagSetting extends BaseSetting {
 			'Fetch All Tags',
 			'Fetch and save all tags from the vault',
 			async () => {
-				await this.fetchAndSaveMetadata('tags', () => this.metaDataManager.getAllTags());
+				await this.fetchAndSaveMetadata(DEFAULT_TAG_SETTING.id, () =>
+					this.metaDataManager.getAllTags()
+				);
 			}
 		);
 	}

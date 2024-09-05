@@ -1,17 +1,15 @@
 import { Setting } from 'obsidian';
 import { BaseSetting } from './baseSetting';
-import { DEFAULT_FRONTMATTER_SETTING } from 'constant';
-import { Frontmatter } from 'types/APIInterface';
+import { DEFAULT_FRONTMATTER_SETTING, Frontmatter } from 'constant';
 
 export class FrontmatterSetting extends BaseSetting {
-	display(containerEl: HTMLElement): void {
+	display(containerEl: HTMLElement, frontmatterId: number): void {
 		containerEl.empty();
-
-		this.addFrontmatterSettings(containerEl);
+		this.addFrontmatterSettings(containerEl, frontmatterId);
 	}
 
-	private addFrontmatterSettings(containerEl: HTMLElement): void {
-		const frontmatterSetting = this.getSetting('frontmatter');
+	private addFrontmatterSettings(containerEl: HTMLElement, frontmatterId: number): void {
+		const frontmatterSetting = this.getSetting(frontmatterId);
 
 		this.addNameSetting(containerEl, frontmatterSetting);
 		this.addCountSetting(
@@ -58,10 +56,10 @@ export class FrontmatterSetting extends BaseSetting {
 			);
 	}
 
-	protected getSetting(settingName: string): Frontmatter {
-		let setting = this.plugin.settings.frontmatter.find((m) => m.name === settingName);
+	protected getSetting(frontmatterId: number): Frontmatter {
+		let setting = this.plugin.settings.frontmatter.find((m) => m.id === frontmatterId);
 		if (!setting) {
-			setting = { ...DEFAULT_FRONTMATTER_SETTING };
+			setting = { ...DEFAULT_FRONTMATTER_SETTING, id: frontmatterId };
 			this.plugin.settings.frontmatter.push(setting);
 		}
 		return setting;

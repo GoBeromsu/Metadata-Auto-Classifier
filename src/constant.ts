@@ -1,5 +1,5 @@
 import { AutoClassifierSettings } from 'setting';
-import { Frontmatter, Provider } from 'types/APIInterface';
+import { Provider } from 'types/APIInterface';
 
 export const DEFAULT_MAX_TOKEN = 2048;
 const DEFAULT_TEMPERATURE = 0.7;
@@ -9,14 +9,6 @@ export enum DefaultProvider {
 	NAME = 'OpenAI',
 	BASE_URL = 'https://api.openai.com/v1',
 }
-
-// Default tag settings
-export const DEFAULT_TAG_SETTING: Frontmatter = {
-	name: 'tags',
-	refs: [],
-	allowMultiple: true,
-	count: 5,
-};
 
 // OpenAI model names
 export enum OpenAIModelName {
@@ -44,6 +36,26 @@ const DEFAULT_OPENAI_PROVIDER: Provider = {
 	testResult: null,
 	temperature: DEFAULT_TEMPERATURE,
 };
+// Default frontmatter setting
+export const DEFAULT_FRONTMATTER_SETTING = {
+	name: '',
+	count: 1,
+	refs: [],
+};
+
+// Default tag settings
+export const DEFAULT_TAG_SETTING: Frontmatter = {
+	id: 0,
+	name: 'tags',
+	refs: [],
+	count: 5,
+};
+export interface Frontmatter {
+	id: number;
+	name: string;
+	count: number;
+	refs: string[];
+}
 
 // Default settings for the Auto Classifier plugin
 export const DEFAULT_SETTINGS: AutoClassifierSettings = {
@@ -51,12 +63,4 @@ export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 	selectedProvider: DefaultProvider.NAME,
 	selectedModel: OpenAIModelName.GPT_4_OMNI,
 	frontmatter: [DEFAULT_TAG_SETTING],
-};
-
-// Default frontmatter setting
-export const DEFAULT_FRONTMATTER_SETTING: Frontmatter = {
-	name: 'frontmatter',
-	refs: [],
-	allowMultiple: false,
-	count: 1,
 };

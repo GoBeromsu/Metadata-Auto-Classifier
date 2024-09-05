@@ -22,12 +22,6 @@ export interface APIProvider {
 
 	testAPI(provider: Provider): Promise<boolean>;
 }
-export interface Frontmatter {
-	name: string;
-	refs?: string[];
-	allowMultiple: boolean;
-	count: number;
-}
 export interface Model {
 	name: string;
 }

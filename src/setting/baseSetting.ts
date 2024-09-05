@@ -1,7 +1,8 @@
-import { Setting, Notice } from 'obsidian';
+import { DEFAULT_FRONTMATTER_SETTING, Frontmatter } from 'constant';
+import { Notice, Setting } from 'obsidian';
+
 import AutoClassifierPlugin from '../main';
 import { MetaDataManager } from '../metaDataManager';
-import { Frontmatter } from 'types/APIInterface';
 
 export abstract class BaseSetting {
 	protected plugin: AutoClassifierPlugin;
@@ -12,7 +13,7 @@ export abstract class BaseSetting {
 		this.metaDataManager = metaDataManager;
 	}
 
-	abstract display(containerEl: HTMLElement): void;
+	abstract display(containerEl: HTMLElement, frontmatterId?: number): void;
 
 	protected addCountSetting(
 		containerEl: HTMLElement,
@@ -49,23 +50,25 @@ export abstract class BaseSetting {
 	}
 
 	protected async fetchAndSaveMetadata(
-		metadataType: string,
+		id: number,
 		fetchFunction: () => Promise<string[]>
 	): Promise<void> {
 		const allMetadata = await fetchFunction();
-		const setting = this.getSetting(metadataType);
+		const setting = this.getSetting(id);
 		setting.refs = allMetadata;
 		await this.plugin.saveSettings();
-		new Notice(`Fetched ${allMetadata.length} ${metadataType}.`);
+		new Notice(`Fetched ${allMetadata.length} ${id}.`);
 	}
 
-	protected getSetting(name: string): Frontmatter {
-		let setting = this.plugin.settings.frontmatter.find((m) => m.name === name);
-		if (!setting) {
-			setting = { name, count: 1, allowMultiple: false, refs: [] };
-			this.plugin.settings.frontmatter.push(setting);
+	protected getSetting(id: number): Frontmatter {
+		const setting = this.plugin.settings.frontmatter.find((f) => f.id === id);
+		if (setting) {
+			return setting;
+		} else {
+			const newSetting = { ...DEFAULT_FRONTMATTER_SETTING, id };
+			this.plugin.settings.frontmatter.push(newSetting);
+			return newSetting;
 		}
-		return setting;
 	}
 
 	protected addFetchButton(
