@@ -1,7 +1,7 @@
-import { Frontmatter } from "./index";
-import AutoClassifierPlugin from "../main";
 import { App, Notice, Setting } from "obsidian";
+import AutoClassifierPlugin from "../main";
 import { MetaDataManager } from "../metaDataManager";
+import { Frontmatter } from "./index";
 
 export const DEFAULT_TAG_SETTING: Frontmatter = {
 	name: "tags",

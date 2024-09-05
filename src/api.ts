@@ -81,7 +81,7 @@ export class OpenAIProvider implements AIProvider {
 				"This is a test prompt.",
 				apiKey,
 				undefined,
-				10  // 테스트를 위해 짧은 응답만 요청
+				10 // 테스트를 위해 짧은 응답만 요청
 			);
 			return true;
 		} catch (error) {

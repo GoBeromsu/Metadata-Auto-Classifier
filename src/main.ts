@@ -1,8 +1,8 @@
-import { Notice, Plugin } from "obsidian";
-import { AutoClassifierSettings, AutoClassifierSettingTab } from "./setting";
 import { AIFactory } from "api";
-import { MetaDataManager } from "./metaDataManager";
+import { Notice, Plugin } from "obsidian";
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from "templatess";
+import { MetaDataManager } from "./metaDataManager";
+import { AutoClassifierSettings, AutoClassifierSettingTab } from "./setting";
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;

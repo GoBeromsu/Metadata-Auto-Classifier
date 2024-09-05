@@ -1,10 +1,10 @@
 import AutoClassifierPlugin from "main";
-import { App, Notice, PluginSettingTab } from "obsidian";
+import { App, PluginSettingTab } from "obsidian";
 
 import { MetaDataManager } from "metaDataManager";
 
-import { TagSetting, DEFAULT_TAG_SETTING } from "./tagSetting";
 import { APISetting } from "./apiSetting";
+import { DEFAULT_TAG_SETTING, TagSetting } from "./tagSetting";
 
 export interface APIProvider {
 	name: string;
