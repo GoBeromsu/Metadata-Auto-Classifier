@@ -1,8 +1,8 @@
 import { Notice, TFile } from 'obsidian';
 
-import { Provider } from '../types/APIInterface';
+import { AIFactory } from '.';
 import { MetaDataManager } from '../metaDataManager';
-import { AIFactory } from 'api';
+import { Provider } from '../types/APIInterface';
 
 export class APIHandler {
 	constructor(private manifest: { name: string }, private metaDataManager: MetaDataManager) {}

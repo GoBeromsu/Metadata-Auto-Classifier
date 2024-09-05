@@ -1,11 +1,9 @@
-import { AIFactory } from 'api';
+import { DEFAULT_SETTINGS, DEFAULT_TAG_SETTING, Frontmatter } from 'constant';
 import { Notice, Plugin, TFile } from 'obsidian';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from 'templatess';
+import { APIHandler } from './api/apiHandler';
 import { MetaDataManager } from './metaDataManager';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './setting';
-import { DEFAULT_SETTINGS, DEFAULT_TAG_SETTING } from 'constant';
-import { Frontmatter } from 'constant';
-import { APIHandler } from './api/apiHandler';
 
 export default class AutoClassifierPlugin extends Plugin {
 	apiHandler: APIHandler;

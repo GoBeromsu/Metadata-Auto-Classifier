@@ -4,10 +4,10 @@ import { Provider } from 'types/APIInterface';
 
 import { MetaDataManager } from 'metaDataManager';
 
+import { DEFAULT_FRONTMATTER_SETTING, Frontmatter } from 'constant';
 import { APISetting } from './apiSetting';
-import { TagSetting } from './tagSetting';
 import { FrontmatterSetting } from './frontmatterSettings';
-import { DEFAULT_FRONTMATTER_SETTING, DEFAULT_TAG_SETTING, Frontmatter } from 'constant';
+import { TagSetting } from './tagSetting';
 
 export interface AutoClassifierSettings {
 	providers: Provider[];
