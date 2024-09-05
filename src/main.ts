@@ -20,7 +20,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			id: 'fetch-tags',
 			name: 'Fetch tags using current provider',
 			callback: async () => {
-				await this.classifyMetadata('tags');
+				await this.classifyMetadata(DEFAULT_TAG_SETTING.id);
 			},
 		});
 
@@ -52,7 +52,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	private async classifyMetadata(key: string): Promise<void> {
+	private async classifyMetadata(frontmatterId: number): Promise<void> {
 		const currentFile = this.app.workspace.getActiveFile();
 		if (!currentFile) {
 			new Notice('No active file.');
@@ -65,9 +65,9 @@ export default class AutoClassifierPlugin extends Plugin {
 			return;
 		}
 
-		const metadataSetting = this.settings.frontmatter.find((m) => m.name === key);
+		const metadataSetting = this.settings.frontmatter.find((fm) => fm.id === frontmatterId);
 		if (!metadataSetting) {
-			new Notice(`No setting found for ${key}.`);
+			new Notice(`No setting found for frontmatter ID ${frontmatterId}.`);
 			return;
 		}
 
@@ -77,7 +77,13 @@ export default class AutoClassifierPlugin extends Plugin {
 
 		const promptTemplate = this.preparePromptTemplate(count, content, currentValues);
 
-		await this.processAPIRequest(selectedProvider, currentFile, key, count, promptTemplate);
+		await this.processAPIRequest(
+			selectedProvider,
+			currentFile,
+			metadataSetting.name,
+			count,
+			promptTemplate
+		);
 	}
 
 	private getSelectedProvider(): Provider | undefined {
@@ -117,7 +123,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		}
 
 		for (const frontmatter of this.settings.frontmatter) {
-			await this.classifyMetadata(frontmatter.name);
+			await this.classifyMetadata(frontmatter.id);
 		}
 	}
 }
