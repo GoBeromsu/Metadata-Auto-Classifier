@@ -4,6 +4,7 @@ import { DEFAULT_CHAT_ROLE, getPromptTemplate } from 'templatess';
 import { APIHandler } from './api/apiHandler';
 import { MetaDataManager } from './metaDataManager';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './setting';
+import { Provider } from 'types/APIInterface';
 
 export default class AutoClassifierPlugin extends Plugin {
 	apiHandler: APIHandler;
@@ -19,7 +20,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			id: 'fetch-tags',
 			name: 'Fetch tags using current provider',
 			callback: async () => {
-				await this.classifyTags();
+				await this.classifyMetadata('tags');
 			},
 		});
 
@@ -51,42 +52,60 @@ export default class AutoClassifierPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	async classifyTags(): Promise<void> {
-		// 1. Check API Key
-		const selectedProvider = this.settings.providers.find(
-			(p) => p.name === this.settings.selectedProvider
-		);
-		if (!selectedProvider || !selectedProvider.apiKey) {
-			new Notice('API key for the selected provider is not set.');
-			return;
-		}
-
-		// 2. Get input (content of the current file)
+	private async classifyMetadata(key: string): Promise<void> {
 		const currentFile = this.app.workspace.getActiveFile();
 		if (!currentFile) {
 			new Notice('No active file.');
 			return;
 		}
 
-		// 3. Prepare input and prompt
-		const tagSetting = this.settings.frontmatter.find((m) => m.name === 'tags');
-		const tagCount = tagSetting ? tagSetting.count : 3;
+		const selectedProvider = this.getSelectedProvider();
+		if (!selectedProvider) {
+			new Notice('API key for the selected provider is not set.');
+			return;
+		}
+
+		const metadataSetting = this.settings.frontmatter.find((m) => m.name === key);
+		if (!metadataSetting) {
+			new Notice(`No setting found for ${key}.`);
+			return;
+		}
+
+		const count = metadataSetting.count;
 		const content = await this.app.vault.read(currentFile);
+		const currentValues = metadataSetting.refs ?? [];
+
+		const promptTemplate = this.preparePromptTemplate(count, content, currentValues);
+
+		await this.processAPIRequest(selectedProvider, currentFile, key, count, promptTemplate);
+	}
+
+	private getSelectedProvider(): Provider | undefined {
+		return this.settings.providers.find(
+			(p) => p.name === this.settings.selectedProvider && p.apiKey
+		);
+	}
+
+	private preparePromptTemplate(count: number, content: string, currentValues: string[]): string {
+		const currentValuesString = currentValues.join(', ');
+		return getPromptTemplate(true, count, content, currentValuesString);
+	}
+
+	private async processAPIRequest(
+		selectedProvider: Provider,
+		currentFile: TFile,
+		key: string,
+		count: number,
+		promptTemplate: string
+	): Promise<void> {
 		const chatRole = DEFAULT_CHAT_ROLE;
-
-		const currentTags = tagSetting?.refs || [];
-		const currentTagsString = currentTags.join(', ');
-
-		const promptTemplate = getPromptTemplate(true, tagCount, content, currentTagsString);
-
-		// 4. Call API and process response
 		await this.apiHandler.processAPIRequest(
 			chatRole,
 			promptTemplate,
 			selectedProvider,
 			currentFile,
-			'tags',
-			tagCount
+			key,
+			count
 		);
 	}
 
@@ -98,56 +117,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		}
 
 		for (const frontmatter of this.settings.frontmatter) {
-			if (frontmatter.name !== 'tags') {
-				// Skip 'tags' as it's handled separately
-				await this.classifyFrontmatter(frontmatter, currentFile);
-			}
+			await this.classifyMetadata(frontmatter.name);
 		}
-
-		// Process tags separately
-		const tagSetting = this.settings.frontmatter.find((m) => m.name === 'tags');
-		if (tagSetting) {
-			await this.classifyTags();
-		}
-	}
-
-	async classifyFrontmatter(frontmatter: Frontmatter, currentFile: TFile): Promise<void> {
-		// 1. Check API Key
-		const selectedProvider = this.settings.providers.find(
-			(p) => p.name === this.settings.selectedProvider
-		);
-		if (!selectedProvider || !selectedProvider.apiKey) {
-			new Notice('API key for the selected provider is not set.');
-			return;
-		}
-
-		// 2. Prepare input and prompt
-		const content = await this.app.vault.read(currentFile);
-		const chatRole = DEFAULT_CHAT_ROLE;
-
-		// Get current frontmatter values from the settings
-		const currentValues = frontmatter.refs || [];
-		console.log(`Saved frontmatter values for ${frontmatter.name}:`, currentValues);
-
-		const currentValuesString = currentValues.join(', ');
-
-		console.log(`Processed frontmatter value for ${frontmatter.name}:`, currentValuesString);
-
-		// Prepare prompt template
-		const promptTemplate = getPromptTemplate(true, frontmatter.count, content, currentValuesString);
-
-		// Log the prepared prompt template
-		console.log(`Prompt template for ${frontmatter.name}:`, promptTemplate);
-
-		// Call API and process response
-		const result = await this.apiHandler.processAPIRequest(
-			chatRole,
-			promptTemplate,
-			selectedProvider,
-			currentFile,
-			frontmatter.name,
-			frontmatter.count
-		);
-		console.log(result);
 	}
 }
