@@ -1,4 +1,4 @@
-# Metadata Auto Classifier for Obsidian
+# Metadata Auto Classifier
 
 Metadata Auto Classifier is an innovative Obsidian plugin that harnesses the power of AI to revolutionize your note-taking experience. By automatically generating and classifying metadata for your notes, this plugin streamlines your workflow and enhances the organization of your knowledge base.
 
