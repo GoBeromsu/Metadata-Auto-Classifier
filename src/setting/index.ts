@@ -48,6 +48,13 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 					.setButtonText('Add Frontmatter')
 					.setCta()
 					.onClick(() => {
+						if (!containerEl.querySelector('h2')) {
+							containerEl.createEl('h2', { text: 'Frontmatter Settings' });
+						}
+						// Add a thin divider line after the second frontmatter
+						if (this.plugin.settings.frontmatter.length >= 2) {
+							containerEl.createEl('hr', { cls: 'thin-divider' });
+						}
 						const newFrontmatter = { ...DEFAULT_FRONTMATTER_SETTING };
 						this.plugin.settings.frontmatter.push(newFrontmatter);
 						this.plugin.saveSettings();

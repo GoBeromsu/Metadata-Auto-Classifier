@@ -6,7 +6,7 @@ import { Frontmatter } from 'types/APIInterface';
 export class FrontmatterSetting extends BaseSetting {
 	display(containerEl: HTMLElement): void {
 		containerEl.empty();
-		containerEl.createEl('h3', { text: 'Frontmatter Settings' });
+
 		this.addFrontmatterSettings(containerEl);
 	}
 
