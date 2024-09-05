@@ -59,7 +59,9 @@ export default class AutoClassifierPlugin extends Plugin {
 			return;
 		}
 
-		const selectedProvider = this.getSelectedProvider();
+		const selectedProvider = this.settings.providers.find(
+			(p) => p.name === this.settings.selectedProvider && p.apiKey
+		);
 		if (!selectedProvider) {
 			new Notice('API key for the selected provider is not set.');
 			return;
@@ -74,8 +76,9 @@ export default class AutoClassifierPlugin extends Plugin {
 		const count = metadataSetting.count;
 		const content = await this.app.vault.read(currentFile);
 		const currentValues = metadataSetting.refs ?? [];
+		const currentValuesString = currentValues.join(', ');
 
-		const promptTemplate = this.preparePromptTemplate(count, content, currentValues);
+		const promptTemplate = getPromptTemplate(true, count, content, currentValuesString);
 
 		await this.processAPIRequest(
 			selectedProvider,
@@ -84,17 +87,6 @@ export default class AutoClassifierPlugin extends Plugin {
 			count,
 			promptTemplate
 		);
-	}
-
-	private getSelectedProvider(): Provider | undefined {
-		return this.settings.providers.find(
-			(p) => p.name === this.settings.selectedProvider && p.apiKey
-		);
-	}
-
-	private preparePromptTemplate(count: number, content: string, currentValues: string[]): string {
-		const currentValuesString = currentValues.join(', ');
-		return getPromptTemplate(true, count, content, currentValuesString);
 	}
 
 	private async processAPIRequest(
