@@ -1,96 +1,68 @@
-# Obsidian Sample Plugin
+# Metadata Auto Classifier for Obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+Metadata Auto Classifier is an innovative Obsidian plugin that harnesses the power of AI to revolutionize your note-taking experience. By automatically generating and classifying metadata for your notes, this plugin streamlines your workflow and enhances the organization of your knowledge base.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## 🚀 Features
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
+### 🧠 AI-Powered Metadata Generation
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+- **Intelligent Tag Suggestions**: Analyzes your note content and suggests relevant tags, helping you categorize information effortlessly.
+- **Custom Frontmatter Classification**: Automatically populates user-defined frontmatter fields based on note content, creating a rich, structured dataset within your vault.
 
-## First time developing plugins?
+### 🔧 Flexible Configuration
 
-Quick starting guide for new plugin devs:
+- **Multiple AI Providers**: Currently supports OpenAI's GPT models, with the potential to integrate other AI services in the future.
+- **Customizable Settings**: Tailor the plugin to your needs by adjusting the number of tags or frontmatter options generated.
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+### 🔄 Seamless Integration
 
-## Releasing new releases
+- **Works with Existing Metadata**: Respects and enhances your current tagging system and frontmatter structure.
+- **Non-Destructive Updates**: Adds new metadata without overwriting existing information, preserving your manual classifications.
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+### 🎛️ User-Friendly Interface
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+- **Easy-to-Use Commands**: Access the plugin's features through simple commands in Obsidian's command palette.
+- **Intuitive Settings Panel**: Configure API keys, adjust classification parameters, and manage frontmatter fields with ease.
 
-## Adding your plugin to the community plugin list
+## 🌟 Potential Use Cases
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+1. **Research Organization**: Automatically categorize research notes, making it easier to find related information across projects.
+2. **Content Creation**: Generate tags for blog posts or articles, improving SEO and content discoverability.
+3. **Personal Knowledge Management**: Enhance your Zettelkasten or other note-taking systems with AI-suggested connections and categories.
+4. **Project Management**: Automatically classify project notes by status, priority, or team member.
+5. **Learning and Study**: Organize study notes by subject, topic, or difficulty level without manual input.
+6. **Idea Generation**: Use AI-suggested tags to spark new connections between seemingly unrelated notes.
 
-## How to use
+## 🛠️ Installation
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+1. Open Obsidian and navigate to Settings > Community Plugins.
+2. Disable Safe Mode if it's currently enabled.
+3. Click on "Browse" and search for "Metadata Auto Classifier".
+4. Click "Install", then "Enable" to activate the plugin.
 
-## Manually installing the plugin
+## ⚙️ Configuration
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+1. Go to Settings > Metadata Auto Classifier.
+2. Enter your OpenAI API key.
+3. Configure tag settings and custom frontmatter fields according to your preferences.
+4. (Optional) Fetch existing tags from your vault to use as a reference for the AI.
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
+## 🖱️ Usage
 
-## Funding URL
+1. Open a note you want to classify.
+2. Use the command palette (Cmd/Ctrl + P) and search for:
+   - "Fetch tags using current provider" to generate tags.
+   - "Fetch all frontmatter using current provider" to populate custom frontmatter fields.
+3. Review and edit the AI-generated suggestions as needed.
 
-You can include funding URLs where people who use your plugin can financially support it.
+## 🤝 Contributing
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+We welcome contributions to enhance the Metadata Auto Classifier! Whether it's bug fixes, feature additions, or documentation improvements, your input is valuable. Please feel free to submit a Pull Request or open an issue for discussion.
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
+## 🆘 Support
 
-If you have multiple URLs, you can also do:
+If you encounter any issues or have suggestions for improvements, please don't hesitate to open an issue on our GitHub repository. We're committed to making this plugin as useful and robust as possible for the Obsidian community.
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+## 📜 License
 
-## API Documentation
-
-See https://github.com/obsidianmd/obsidian-api
+This project is licensed under the [MIT License](LICENSE).
