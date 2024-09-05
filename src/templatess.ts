@@ -19,12 +19,17 @@ Answer format is JSON {reliability:0~1, output:string[]}.
 Even if you are not sure, qualify the reliability and recommend {{tagCount}} proper categories.
 `;
 
-export function getPromptTemplate(useRef: boolean, tagCount: number, input: string, reference?: string): string {
-    let template = useRef ? DEFAULT_PROMPT_TEMPLATE : DEFAULT_PROMPT_TEMPLATE_WO_REF;
-    template = template.replace('{{tagCount}}', tagCount.toString());
-    template = template.replace('{{input}}', input);
-    if (useRef && reference) {
-        template = template.replace('{{reference}}', reference);
-    }
-    return template;
+export function getPromptTemplate(
+	useRef: boolean,
+	tagCount: number,
+	input: string,
+	reference?: string
+): string {
+	let template = useRef ? DEFAULT_PROMPT_TEMPLATE : DEFAULT_PROMPT_TEMPLATE_WO_REF;
+	template = template.replace('{{tagCount}}', tagCount.toString());
+	template = template.replace('{{input}}', input);
+	if (useRef && reference) {
+		template = template.replace('{{reference}}', reference);
+	}
+	return template;
 }

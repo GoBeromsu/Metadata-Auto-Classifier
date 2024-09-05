@@ -1,4 +1,4 @@
-import { App, TFile } from "obsidian";
+import { App, TFile } from 'obsidian';
 
 export class MetaDataManager {
 	private app: App;
@@ -37,8 +37,7 @@ export class MetaDataManager {
 	}
 
 	async getFrontMatter(file: TFile): Promise<Record<string, any> | null> {
-		const frontmatter =
-			this.app.metadataCache.getFileCache(file)?.frontmatter;
+		const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
 		if (frontmatter) {
 			const { position, ...rest } = frontmatter;
 			return rest;
@@ -52,7 +51,7 @@ export class MetaDataManager {
 			const cachedMetadata = this.app.metadataCache.getFileCache(file);
 			if (cachedMetadata && cachedMetadata.tags) {
 				cachedMetadata.tags.forEach((tag) => {
-					tags.add(tag.tag.replace(/^#/, ""));
+					tags.add(tag.tag.replace(/^#/, ''));
 				});
 			}
 		});

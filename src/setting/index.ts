@@ -1,10 +1,10 @@
-import AutoClassifierPlugin from "main";
-import { App, PluginSettingTab } from "obsidian";
+import AutoClassifierPlugin from 'main';
+import { App, PluginSettingTab } from 'obsidian';
 
-import { MetaDataManager } from "metaDataManager";
+import { MetaDataManager } from 'metaDataManager';
 
-import { APISetting } from "./apiSetting";
-import { DEFAULT_TAG_SETTING, TagSetting } from "./tagSetting";
+import { APISetting } from './apiSetting';
+import { DEFAULT_TAG_SETTING, TagSetting } from './tagSetting';
 
 export interface APIProvider {
 	name: string;
@@ -38,12 +38,12 @@ export interface Frontmatter {
 export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 	apiProviders: [
 		{
-			name: "OpenAI",
-			apiKey: "",
-			baseUrl: "https://api.openai.com/v1",
+			name: 'OpenAI',
+			apiKey: '',
+			baseUrl: 'https://api.openai.com/v1',
 			models: [
 				{
-					name: "gpt-3.5-turbo",
+					name: 'gpt-3.5-turbo',
 					maxTokens: 150,
 					temperature: 0.7,
 				} as Model,
@@ -52,8 +52,8 @@ export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 			testResult: null,
 		},
 	] as APIProvider[],
-	selectedProvider: "OpenAI",
-	selectedModel: "gpt-3.5-turbo",
+	selectedProvider: 'OpenAI',
+	selectedModel: 'gpt-3.5-turbo',
 	frontmatter: [DEFAULT_TAG_SETTING],
 };
 
@@ -89,7 +89,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 	}
 
 	addFrontmatterSettings(containerEl: HTMLElement): void {
-		containerEl.createEl("h2", { text: "Frontmatter" });
+		containerEl.createEl('h2', { text: 'Frontmatter' });
 		this.tagSetting.display(containerEl);
 	}
 }

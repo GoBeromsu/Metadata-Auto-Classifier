@@ -1,10 +1,10 @@
-import { App, Notice, Setting } from "obsidian";
-import AutoClassifierPlugin from "../main";
-import { MetaDataManager } from "../metaDataManager";
-import { Frontmatter } from "./index";
+import { App, Notice, Setting } from 'obsidian';
+import AutoClassifierPlugin from '../main';
+import { MetaDataManager } from '../metaDataManager';
+import { Frontmatter } from './index';
 
 export const DEFAULT_TAG_SETTING: Frontmatter = {
-	name: "tags",
+	name: 'tags',
 	refs: [] as string[],
 	allowMultiple: true,
 	count: 5,
@@ -20,7 +20,7 @@ export class TagSetting {
 	}
 
 	display(containerEl: HTMLElement): void {
-		containerEl.createEl("h3", { text: "Tag Settings" });
+		containerEl.createEl('h3', { text: 'Tag Settings' });
 		this.addTagSettings(containerEl);
 		this.addFetchTagsButton(containerEl);
 	}
@@ -29,11 +29,11 @@ export class TagSetting {
 		const tagSetting = this.getTagSetting();
 
 		new Setting(containerEl)
-			.setName("Tags")
-			.setDesc("Default settings for automatic tag assignment")
+			.setName('Tags')
+			.setDesc('Default settings for automatic tag assignment')
 			.addText((text) =>
 				text
-					.setPlaceholder("Number of tags")
+					.setPlaceholder('Number of tags')
 					.setValue(tagSetting.count.toString())
 					.onChange(async (value) => {
 						const count = parseInt(value, 10);
@@ -45,8 +45,8 @@ export class TagSetting {
 			)
 			.addExtraButton((button) =>
 				button
-					.setIcon("reset")
-					.setTooltip("Set to default count")
+					.setIcon('reset')
+					.setTooltip('Set to default count')
 					.onClick(async () => {
 						tagSetting.count = DEFAULT_TAG_SETTING.count;
 						await this.plugin.saveSettings();
@@ -57,11 +57,11 @@ export class TagSetting {
 
 	private addFetchTagsButton(containerEl: HTMLElement): void {
 		new Setting(containerEl)
-			.setName("Fetch All Tags")
-			.setDesc("Fetch and save all tags from the vault")
+			.setName('Fetch All Tags')
+			.setDesc('Fetch and save all tags from the vault')
 			.addButton((button) =>
 				button
-					.setButtonText("Fetch Tags")
+					.setButtonText('Fetch Tags')
 					.setCta()
 					.onClick(async () => {
 						await this.fetchAndSaveTags();
@@ -78,9 +78,7 @@ export class TagSetting {
 	}
 
 	private getTagSetting(): Frontmatter {
-		let tagSetting = this.plugin.settings.frontmatter.find(
-			(m) => m.name === "tags"
-		);
+		let tagSetting = this.plugin.settings.frontmatter.find((m) => m.name === 'tags');
 		if (!tagSetting) {
 			tagSetting = { ...DEFAULT_TAG_SETTING };
 			this.plugin.settings.frontmatter.push(tagSetting);
