@@ -3,6 +3,7 @@ import { Notice, Plugin } from 'obsidian';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from 'templatess';
 import { MetaDataManager } from './metaDataManager';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './setting';
+import { Provider } from 'types/APIInterface';
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
@@ -33,7 +34,7 @@ export default class AutoClassifierPlugin extends Plugin {
 
 	async classifyTags(): Promise<void> {
 		// 1. Check API Key
-		const selectedProvider = this.settings.apiProviders.find(
+		const selectedProvider = this.settings.providers.find(
 			(p) => p.name === this.settings.selectedProvider
 		);
 		if (!selectedProvider || !selectedProvider.apiKey) {
@@ -64,7 +65,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		// 4. Call API and process response
 		const provider = AIFactory.getProvider(this.settings.selectedProvider);
 		try {
-			const responseRaw = await provider.callAPI(chatRole, promptTemplate, selectedProvider.apiKey);
+			const responseRaw = await provider.callAPI(chatRole, promptTemplate, selectedProvider);
 
 			// 5. Process the response
 			const { resOutput, resReliability } = this.processAPIResponse(responseRaw);

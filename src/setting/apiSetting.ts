@@ -1,7 +1,7 @@
 import { Notice, Setting } from 'obsidian';
 import { AIFactory } from '../api';
 import AutoClassifierPlugin from '../main';
-import { APIProvider, DEFAULT_SETTINGS } from './index';
+import { Provider, Model } from '../types/APIInterface';
 
 export class APISetting {
 	plugin: AutoClassifierPlugin;
@@ -23,7 +23,7 @@ export class APISetting {
 			.setName('API Provider')
 			.setDesc('Select the API provider')
 			.addDropdown((dropdown) => {
-				this.plugin.settings.apiProviders.forEach((provider) => {
+				this.plugin.settings.providers.forEach((provider) => {
 					dropdown.addOption(provider.name, provider.name);
 				});
 				dropdown.setValue(this.plugin.settings.selectedProvider).onChange(async (value) => {
@@ -89,18 +89,18 @@ export class APISetting {
 			);
 	}
 
-	private getSelectedProvider(): APIProvider {
+	private getSelectedProvider(): Provider {
 		return (
-			this.plugin.settings.apiProviders.find(
+			this.plugin.settings.providers.find(
 				(provider) => provider.name === this.plugin.settings.selectedProvider
-			) || DEFAULT_SETTINGS.apiProviders[0]
+			) || this.plugin.settings.providers[0]
 		);
 	}
 
-	private async testAPIKey(provider: APIProvider): Promise<void> {
+	private async testAPIKey(provider: Provider): Promise<void> {
 		try {
 			const aiProvider = AIFactory.getProvider(provider.name);
-			const result = await aiProvider.testAPI(provider.apiKey);
+			const result = await aiProvider.testAPI(provider);
 
 			provider.testResult = result;
 			provider.lastTested = new Date();
@@ -114,7 +114,7 @@ export class APISetting {
 		}
 	}
 
-	private updateAPITestResult(apiKeySetting: Setting, provider: APIProvider): void {
+	private updateAPITestResult(apiKeySetting: Setting, provider: Provider): void {
 		if (provider.lastTested) {
 			const resultText = provider.testResult
 				? 'Success! API is working.'
