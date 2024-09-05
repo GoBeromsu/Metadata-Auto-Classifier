@@ -2,7 +2,6 @@ import { AIFactory } from 'api';
 import { Notice, Plugin } from 'obsidian';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from 'templatess';
 import { MetaDataManager } from './metaDataManager';
-import { Provider } from 'types/APIInterface';
 import { AutoClassifierSettings, AutoClassifierSettingTab, DEFAULT_SETTINGS } from './setting';
 
 export default class AutoClassifierPlugin extends Plugin {
@@ -20,7 +19,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			},
 		});
 
-		this.addSettingTab(new AutoClassifierSettingTab(this.app, this));
+		this.addSettingTab(new AutoClassifierSettingTab(this, this.metaDataManager));
 	}
 
 	async loadSettings() {

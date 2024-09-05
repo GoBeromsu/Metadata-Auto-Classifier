@@ -49,12 +49,12 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 	apiSetting: APISetting;
 	tagSetting: TagSetting;
 
-	constructor(app: App, plugin: AutoClassifierPlugin) {
-		super(app, plugin);
+	constructor(plugin: AutoClassifierPlugin, metaDataManager: MetaDataManager) {
+		super(plugin.app, plugin);
 		this.plugin = plugin;
-		this.metaDataManager = new MetaDataManager(app);
+		this.metaDataManager = metaDataManager;
 		this.apiSetting = new APISetting(plugin);
-		this.tagSetting = new TagSetting(app, plugin);
+		this.tagSetting = new TagSetting(plugin, metaDataManager);
 	}
 
 	async loadSettings(): Promise<void> {

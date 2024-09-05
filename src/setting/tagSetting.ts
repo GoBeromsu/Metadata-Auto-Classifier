@@ -14,9 +14,9 @@ export class TagSetting {
 	plugin: AutoClassifierPlugin;
 	metaDataManager: MetaDataManager;
 
-	constructor(app: App, plugin: AutoClassifierPlugin) {
+	constructor(plugin: AutoClassifierPlugin, metaDataManager: MetaDataManager) {
 		this.plugin = plugin;
-		this.metaDataManager = new MetaDataManager(app);
+		this.metaDataManager = metaDataManager;
 	}
 
 	display(containerEl: HTMLElement): void {
