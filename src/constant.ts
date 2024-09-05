@@ -1,5 +1,5 @@
 import { AutoClassifierSettings } from 'setting';
-import { Frontmatter, Model, Provider } from 'types/APIInterface';
+import { Frontmatter, Provider } from 'types/APIInterface';
 
 export const DEFAULT_MAX_TOKEN = 2048;
 const DEFAULT_TEMPERATURE = 0.7;
@@ -8,7 +8,6 @@ const DEFAULT_TEMPERATURE = 0.7;
 export enum DefaultProvider {
 	NAME = 'OpenAI',
 	BASE_URL = 'https://api.openai.com/v1',
-	MODEL = 'gpt-3.5-turbo',
 }
 
 // Default tag settings
@@ -19,15 +18,26 @@ export const DEFAULT_TAG_SETTING: Frontmatter = {
 	count: 5,
 };
 
+// OpenAI model names
+export enum OpenAIModelName {
+	GPT_3_5_TURBO = 'gpt-3.5-turbo',
+	GPT_4 = 'gpt-4',
+	GPT_4_32K = 'gpt-4-32k',
+	GPT_4_OMNI = 'gpt-4-omni',
+	GPT_4_MINI = 'gpt-4-mini',
+}
+
 // Default OpenAI provider configuration
 const DEFAULT_OPENAI_PROVIDER: Provider = {
 	name: DefaultProvider.NAME,
 	apiKey: '',
 	baseUrl: DefaultProvider.BASE_URL,
 	models: [
-		{
-			name: DefaultProvider.MODEL,
-		} as Model,
+		{ name: OpenAIModelName.GPT_3_5_TURBO },
+		{ name: OpenAIModelName.GPT_4 },
+		{ name: OpenAIModelName.GPT_4_32K },
+		{ name: OpenAIModelName.GPT_4_OMNI },
+		{ name: OpenAIModelName.GPT_4_MINI },
 	],
 	maxTokens: DEFAULT_MAX_TOKEN,
 	lastTested: null,
@@ -39,6 +49,6 @@ const DEFAULT_OPENAI_PROVIDER: Provider = {
 export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 	providers: [DEFAULT_OPENAI_PROVIDER],
 	selectedProvider: DefaultProvider.NAME,
-	selectedModel: DefaultProvider.MODEL,
+	selectedModel: OpenAIModelName.GPT_4_OMNI,
 	frontmatter: [DEFAULT_TAG_SETTING],
 };
