@@ -21,7 +21,6 @@ export class FrontmatterSetting extends BaseSetting {
 			'Set the number of options that can be selected',
 			DEFAULT_FRONTMATTER_SETTING.count
 		);
-		this.addAllowMultipleSetting(containerEl, frontmatterSetting);
 
 		const optionsContainer = containerEl.createDiv('frontmatter-options');
 		this.renderOptions(optionsContainer, frontmatterSetting);
@@ -41,18 +40,6 @@ export class FrontmatterSetting extends BaseSetting {
 						frontmatterSetting.name = value;
 						await this.plugin.saveSettings();
 					})
-			);
-	}
-
-	private addAllowMultipleSetting(containerEl: HTMLElement, frontmatterSetting: Frontmatter): void {
-		new Setting(containerEl)
-			.setName('Allow Multiple')
-			.setDesc('Allow selecting multiple options')
-			.addToggle((toggle) =>
-				toggle.setValue(frontmatterSetting.allowMultiple).onChange(async (value) => {
-					frontmatterSetting.allowMultiple = value;
-					await this.plugin.saveSettings();
-				})
 			);
 	}
 
