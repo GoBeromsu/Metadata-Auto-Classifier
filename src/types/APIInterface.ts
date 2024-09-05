@@ -9,10 +9,6 @@ export interface Provider {
 	temperature: number;
 }
 
-export interface Model {
-	name: string;
-}
-
 export interface APIProvider {
 	callAPI(
 		system_role: string,
@@ -25,4 +21,13 @@ export interface APIProvider {
 	): Promise<string>;
 
 	testAPI(provider: Provider): Promise<boolean>;
+}
+export interface Frontmatter {
+	name: string;
+	refs?: string[];
+	allowMultiple: boolean;
+	count: number;
+}
+export interface Model {
+	name: string;
 }

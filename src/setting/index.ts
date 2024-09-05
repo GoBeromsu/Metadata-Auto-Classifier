@@ -1,11 +1,11 @@
 import AutoClassifierPlugin from 'main';
 import { PluginSettingTab } from 'obsidian';
-import { Model, Provider } from 'types/APIInterface';
+import { Frontmatter, Provider } from 'types/APIInterface';
 
 import { MetaDataManager } from 'metaDataManager';
 
 import { APISetting } from './apiSetting';
-import { DEFAULT_TAG_SETTING, TagSetting } from './tagSetting';
+import { TagSetting } from './tagSetting';
 
 export interface AutoClassifierSettings {
 	providers: Provider[];
@@ -13,35 +13,6 @@ export interface AutoClassifierSettings {
 	selectedModel: string;
 	frontmatter: Frontmatter[];
 }
-
-export interface Frontmatter {
-	name: string;
-	refs?: string[];
-	allowMultiple: boolean;
-	count: number;
-}
-
-export const DEFAULT_SETTINGS: AutoClassifierSettings = {
-	providers: [
-		{
-			name: 'OpenAI',
-			apiKey: '',
-			baseUrl: 'https://api.openai.com/v1',
-			models: [
-				{
-					name: 'gpt-3.5-turbo',
-				} as Model,
-			],
-			maxTokens: 2048,
-			lastTested: null,
-			testResult: null,
-			temperature: 0.7,
-		},
-	] as Provider[],
-	selectedProvider: 'OpenAI',
-	selectedModel: 'gpt-3.5-turbo',
-	frontmatter: [DEFAULT_TAG_SETTING],
-};
 
 export class AutoClassifierSettingTab extends PluginSettingTab {
 	plugin: AutoClassifierPlugin;

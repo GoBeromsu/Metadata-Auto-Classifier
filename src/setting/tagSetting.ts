@@ -1,14 +1,9 @@
-import { App, Notice, Setting } from 'obsidian';
+import { Notice, Setting } from 'obsidian';
 import AutoClassifierPlugin from '../main';
 import { MetaDataManager } from '../metaDataManager';
-import { Frontmatter } from './index';
 
-export const DEFAULT_TAG_SETTING: Frontmatter = {
-	name: 'tags',
-	refs: [] as string[],
-	allowMultiple: true,
-	count: 5,
-};
+import { DEFAULT_TAG_SETTING } from 'constant';
+import { Frontmatter } from 'types/APIInterface';
 
 export class TagSetting {
 	plugin: AutoClassifierPlugin;

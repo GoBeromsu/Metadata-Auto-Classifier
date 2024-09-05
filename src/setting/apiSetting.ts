@@ -2,6 +2,7 @@ import { Notice, Setting } from 'obsidian';
 import { AIFactory } from '../api';
 import AutoClassifierPlugin from '../main';
 import { Provider } from '../types/APIInterface';
+import { DEFAULT_MAX_TOKEN } from 'constant';
 
 export class APISetting {
 	plugin: AutoClassifierPlugin;
@@ -91,9 +92,9 @@ export class APISetting {
 					.setIcon('reset')
 					.setTooltip('Set to default max tokens')
 					.onClick(async () => {
-						selectedProvider.maxTokens = 2048;
+						selectedProvider.maxTokens = DEFAULT_MAX_TOKEN;
 						await this.plugin.saveSettings();
-						new Notice(`Max tokens reset to default: ${2048}`);
+						new Notice(`Max tokens reset to default: ${DEFAULT_MAX_TOKEN}`);
 						this.display(containerEl);
 					})
 			);
