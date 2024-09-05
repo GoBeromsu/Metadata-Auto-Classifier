@@ -84,6 +84,7 @@ export class APISetting {
 						const maxTokens = parseInt(value);
 						selectedProvider.maxTokens = maxTokens;
 						await this.plugin.saveSettings();
+						new Notice(`Max tokens updated to ${maxTokens}`);
 					})
 			);
 	}
