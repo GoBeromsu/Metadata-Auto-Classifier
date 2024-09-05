@@ -73,6 +73,19 @@ export class APISetting {
 					await this.plugin.saveSettings();
 				});
 			});
+		new Setting(containerEl)
+			.setName('Max Tokens')
+			.setDesc('Set the maximum number of tokens for the selected model')
+			.addText((text) =>
+				text
+					.setPlaceholder('Enter max tokens')
+					.setValue(selectedProvider.maxTokens?.toString() || '')
+					.onChange(async (value) => {
+						const maxTokens = parseInt(value);
+						selectedProvider.maxTokens = maxTokens;
+						await this.plugin.saveSettings();
+					})
+			);
 	}
 
 	private getSelectedProvider(): APIProvider {

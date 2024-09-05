@@ -11,13 +11,14 @@ export interface APIProvider {
 	apiKey: string;
 	baseUrl: string;
 	models: Model[];
+	maxTokens: number;
 	lastTested: Date | null;
 	testResult: boolean | null;
 }
 
 export interface Model {
 	name: string;
-	maxTokens: number;
+
 	temperature: number;
 }
 
