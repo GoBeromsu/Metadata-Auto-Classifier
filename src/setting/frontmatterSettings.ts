@@ -22,10 +22,7 @@ export class FrontmatterSetting extends BaseSetting {
 			DEFAULT_FRONTMATTER_SETTING.count
 		);
 
-		const optionsContainer = containerEl.createDiv('frontmatter-options');
-		this.renderOptions(optionsContainer, frontmatterSetting);
-
-		this.addAddOptionButton(containerEl, optionsContainer, frontmatterSetting);
+		this.addOptionsSetting(containerEl, frontmatterSetting);
 	}
 
 	private addNameSetting(containerEl: HTMLElement, frontmatterSetting: Frontmatter): void {
@@ -43,54 +40,20 @@ export class FrontmatterSetting extends BaseSetting {
 			);
 	}
 
-	private renderOptions(container: HTMLElement, frontmatterSetting: Frontmatter): void {
-		container.empty();
-
-		if (frontmatterSetting.refs) {
-			frontmatterSetting.refs.forEach((option, index) => {
-				const optionSetting = new Setting(container)
-					.addText((text) => {
-						text.setValue(option).onChange(async (value) => {
-							frontmatterSetting.refs![index] = value;
-							await this.plugin.saveSettings();
-						});
-						return text;
-					})
-					.addExtraButton((button) =>
-						button
-							.setIcon('trash')
-							.setTooltip('Delete option')
-							.onClick(async () => {
-								frontmatterSetting.refs!.splice(index, 1);
-								await this.plugin.saveSettings();
-								this.renderOptions(container, frontmatterSetting);
-							})
-					);
-
-				optionSetting.controlEl.addClass('frontmatter-option');
-			});
-		}
-	}
-
-	private addAddOptionButton(
-		containerEl: HTMLElement,
-		optionsContainer: HTMLElement,
-		frontmatterSetting: Frontmatter
-	): void {
+	private addOptionsSetting(containerEl: HTMLElement, frontmatterSetting: Frontmatter): void {
 		new Setting(containerEl)
-			.setName('Add Option')
-			.setDesc('Add a new option to the frontmatter')
-			.addButton((button) =>
-				button
-					.setButtonText('Add')
-					.setCta()
-					.onClick(async () => {
-						if (!frontmatterSetting.refs) {
-							frontmatterSetting.refs = [];
-						}
-						frontmatterSetting.refs.push('');
+			.setName('Options')
+			.setDesc('Enter options separated by commas')
+			.addTextArea((text) =>
+				text
+					.setPlaceholder('Option1, Option2, Option3')
+					.setValue(frontmatterSetting.refs ? frontmatterSetting.refs.join(', ') : '')
+					.onChange(async (value) => {
+						frontmatterSetting.refs = value
+							.split(',')
+							.map((option) => option.trim())
+							.filter((option) => option !== '');
 						await this.plugin.saveSettings();
-						this.renderOptions(optionsContainer, frontmatterSetting);
 					})
 			);
 	}
