@@ -60,11 +60,18 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
-		this.apiSetting.display(containerEl);
-		this.addFrontmatterSettings(containerEl);
+
+		// API Settings Section
+		const apiSettingContainer = containerEl.createDiv();
+		this.apiSetting.display(apiSettingContainer);
+
+		// Frontmatter Settings Section
+		const frontmatterContainer = containerEl.createDiv();
+		this.addFrontmatterSettings(frontmatterContainer);
 	}
 
 	addFrontmatterSettings(containerEl: HTMLElement): void {
+		containerEl.empty(); // Clear existing content and redraw
 		containerEl.createEl('h2', { text: 'Frontmatter' });
 		this.tagSetting.display(containerEl);
 	}

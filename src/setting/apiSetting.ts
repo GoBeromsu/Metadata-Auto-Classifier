@@ -12,7 +12,6 @@ export class APISetting {
 
 	display(containerEl: HTMLElement): void {
 		containerEl.empty();
-
 		this.addAPIProviderSetting(containerEl);
 		this.addAPIKeySetting(containerEl);
 		this.addModelSetting(containerEl);
@@ -95,6 +94,7 @@ export class APISetting {
 						selectedProvider.maxTokens = 2048;
 						await this.plugin.saveSettings();
 						new Notice(`Max tokens reset to default: ${2048}`);
+						this.display(containerEl);
 					})
 			);
 	}

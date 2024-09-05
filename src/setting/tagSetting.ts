@@ -20,6 +20,7 @@ export class TagSetting {
 	}
 
 	display(containerEl: HTMLElement): void {
+		containerEl.empty();
 		containerEl.createEl('h3', { text: 'Tag Settings' });
 		this.addTagSettings(containerEl);
 		this.addFetchTagsButton(containerEl);
