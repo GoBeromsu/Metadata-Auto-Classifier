@@ -45,7 +45,7 @@ export class FrontmatterSetting extends BaseSetting {
 		new Setting(containerEl)
 			.setName('Options')
 			.setDesc('Enter options separated by commas')
-			.addTextArea((text) =>
+			.addTextArea((text) => {
 				text
 					.setPlaceholder('Option1, Option2, Option3')
 					.setValue(frontmatterSetting.refs ? frontmatterSetting.refs.join(', ') : '')
@@ -55,8 +55,11 @@ export class FrontmatterSetting extends BaseSetting {
 							.map((option) => option.trim())
 							.filter((option) => option !== '');
 						await this.plugin.saveSettings();
-					})
-			);
+					});
+				// Add CSS styles to expand the text area
+				text.inputEl.style.width = '100%';
+				text.inputEl.style.height = '150px'; // Adjust height as needed
+			});
 	}
 
 	protected getSetting(frontmatterId: number): Frontmatter {
