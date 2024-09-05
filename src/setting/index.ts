@@ -54,24 +54,29 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 
 						const newFrontmatterContainer = containerEl.createDiv();
 						this.frontmatterSetting.display(newFrontmatterContainer);
-						this.addDeleteButton(newFrontmatterContainer);
+						this.addDeleteButton(
+							newFrontmatterContainer,
+							this.plugin.settings.frontmatter.length - 1
+						);
 					})
 			);
-		// Frontmatter Settings Sectio
 
+		// Frontmatter Settings Section
 		const tagSettingContainer = containerEl.createDiv();
 		this.tagSetting.display(tagSettingContainer);
 	}
 
-	private addDeleteButton(container: HTMLElement): void {
+	private addDeleteButton(container: HTMLElement, frontmatterIndex: number): void {
 		new Setting(container).addButton((button) =>
 			button
 				.setButtonText('Delete')
 				.setWarning()
 				.onClick(() => {
-					// todo: 해당 프론트 매터 데이터도 사라져야 함
-					container.remove();
+					// Remove the frontmatter data from settings
+					this.plugin.settings.frontmatter.splice(frontmatterIndex, 1);
 					this.plugin.saveSettings();
+					// Remove the container element
+					container.remove();
 				})
 		);
 	}
