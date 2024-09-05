@@ -1,7 +1,7 @@
 import { Notice, Setting } from 'obsidian';
 import { AIFactory } from '../api';
 import AutoClassifierPlugin from '../main';
-import { Provider, Model } from '../types/APIInterface';
+import { Provider } from '../types/APIInterface';
 
 export class APISetting {
 	plugin: AutoClassifierPlugin;
@@ -52,10 +52,10 @@ export class APISetting {
 			.addButton((button) =>
 				button.setButtonText('Test').onClick(async () => {
 					await this.testAPIKey(selectedProvider);
+
+					this.updateAPITestResult(apiKeySetting, selectedProvider);
 				})
 			);
-
-		this.updateAPITestResult(apiKeySetting, selectedProvider);
 	}
 
 	private addModelSetting(containerEl: HTMLElement): void {
