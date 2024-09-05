@@ -2,8 +2,8 @@ import { AIFactory } from 'api';
 import { Notice, Plugin } from 'obsidian';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from 'templatess';
 import { MetaDataManager } from './metaDataManager';
-import { AutoClassifierSettings, AutoClassifierSettingTab } from './setting';
 import { Provider } from 'types/APIInterface';
+import { AutoClassifierSettings, AutoClassifierSettingTab, DEFAULT_SETTINGS } from './setting';
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
@@ -24,8 +24,8 @@ export default class AutoClassifierPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		const settingTab = new AutoClassifierSettingTab(this.app, this);
-		await settingTab.loadSettings();
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		await this.saveData(this.settings);
 	}
 
 	async saveSettings() {
