@@ -4,8 +4,8 @@
 	"version": "1.0.3",
 	"minAppVersion": "0.15.0",
 	"description": "Automatically classifies and applies metadata to your notes.",
-	"author": "Your Name",
-	"authorUrl": "https://your-website.com",
+	"author": "Beomsu Koh",
+	"authorUrl": "https://medium.com/@beromkoh",
 	"fundingUrl": "https://your-funding-url.com",
 	"isDesktopOnly": false
 }

@@ -1,6 +1,6 @@
 {
 	"name": "metadata-auto-classifier",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
 	"main": "main.js",
 	"scripts": {
