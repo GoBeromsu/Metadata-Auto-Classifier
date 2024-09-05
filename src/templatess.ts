@@ -5,7 +5,7 @@ export const DEFAULT_PROMPT_TEMPLATE = `Classify the given content using the pro
 Instructions:
 1. Use ONLY the categories provided in the reference list below.
 2. Do not modify, remove, or add any formatting to the reference categories (e.g., keep '[[]]' if present).
-3. Select exactly {{tagCount}} categories that best fit the content.
+3. Select up to {{tagCount}} categories based on relevance and similarity to the content. Choose fewer if appropriate.
 4. Even if you're unsure, make a selection and adjust the reliability score accordingly.
 5. Provide your answer in valid JSON format.
 
@@ -17,7 +17,7 @@ Example output:
 
 Answer in valid JSON format: {"reliability": number, "output": string[]}
 The "reliability" should be a number between 0 and 1.
-The "output" must be an array of exactly {{tagCount}} categories.
+The "output" must be an array of up to {{tagCount}} categories, chosen based on relevance and similarity.
 `;
 
 export const DEFAULT_PROMPT_TEMPLATE_WO_REF = `Classify this content:
