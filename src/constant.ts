@@ -52,3 +52,11 @@ export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 	selectedModel: OpenAIModelName.GPT_4_OMNI,
 	frontmatter: [DEFAULT_TAG_SETTING],
 };
+
+// Default frontmatter setting
+export const DEFAULT_FRONTMATTER_SETTING: Frontmatter = {
+	name: 'frontmatter',
+	refs: [],
+	allowMultiple: false,
+	count: 1,
+};
