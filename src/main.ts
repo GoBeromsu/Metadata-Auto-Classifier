@@ -16,12 +16,15 @@ export default class AutoClassifierPlugin extends Plugin {
 		await this.loadSettings();
 		this.metaDataManager = new MetaDataManager(this.app);
 		this.apiHandler = new APIHandler(this.manifest, this.metaDataManager);
-		this.addCommand({
-			id: 'fetch-tags',
-			name: 'Fetch tags using current provider',
-			callback: async () => {
-				await this.classifyMetadata(DEFAULT_TAG_SETTING.id);
-			},
+
+		this.settings.frontmatter.forEach((frontmatter) => {
+			this.addCommand({
+				id: `fetch-frontmatter-${frontmatter.id}`,
+				name: `Fetch frontmatter: ${frontmatter.name}`,
+				callback: async () => {
+					await this.classifyMetadata(frontmatter.id);
+				},
+			});
 		});
 
 		this.addCommand({
