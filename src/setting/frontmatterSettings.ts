@@ -56,9 +56,7 @@ export class FrontmatterSetting extends BaseSetting {
 							.filter((option) => option !== '');
 						await this.plugin.saveSettings();
 					});
-				// Add CSS styles to expand the text area
-				text.inputEl.style.width = '100%';
-				text.inputEl.style.height = '150px'; // Adjust height as needed
+				text.inputEl.addClass('frontmatter-options-textarea');
 			});
 	}
 

@@ -40,6 +40,7 @@ export class APISetting {
 		const apiKeySetting = new Setting(containerEl)
 			.setName('API Key')
 			.setDesc('Enter your API key')
+			.setClass('api-key-setting')
 			.addText((text) =>
 				text
 					.setPlaceholder('Enter API key')
@@ -130,10 +131,10 @@ export class APISetting {
 			const resultText = provider.testResult
 				? 'Success! API is working.'
 				: 'Error: API is not working.';
-			const resultColor = provider.testResult ? 'var(--text-success)' : 'var(--text-error)';
+			const resultClass = provider.testResult ? 'api-test-success' : 'api-test-error';
 
 			apiKeySetting.setDesc(`Last tested: ${provider.lastTested.toLocaleString()} - ${resultText}`);
-			apiKeySetting.descEl.style.color = resultColor;
+			apiKeySetting.descEl.classList.add(resultClass);
 		}
 	}
 }

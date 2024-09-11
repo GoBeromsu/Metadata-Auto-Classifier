@@ -6,3 +6,19 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+.api-key-setting .setting-item-control {
+	flex-wrap: wrap;
+}
+.api-test-success {
+	color: var(--text-success);
+}
+
+.api-test-error {
+	color: var(--text-error);
+}
+
+.frontmatter-options-textarea {
+	width: 100%;
+	height: 150px;
+}
