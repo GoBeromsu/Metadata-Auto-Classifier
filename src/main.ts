@@ -33,6 +33,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			callback: async () => {
 				await this.processAllFrontmatter();
 			},
+			hotkeys: [{ modifiers: ["Mod"], key: "A" }]
 		});
 
 		this.addSettingTab(new AutoClassifierSettingTab(this, this.metaDataManager));
