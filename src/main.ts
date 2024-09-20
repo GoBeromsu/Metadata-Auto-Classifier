@@ -57,42 +57,34 @@ export default class AutoClassifierPlugin extends Plugin {
 	}
 
 	private async classifyMetadata(frontmatterId: number): Promise<void> {
-		const currentFile = this.app.workspace.getActiveFile();
-		if (!currentFile) {
-			new Notice('No active file.');
-			return;
-		}
-		const currentContent = await this.metaDataManager.getMarkdownContentWithoutFrontmatter(
-			currentFile
-		);
-		const content = await this.app.vault.read(currentFile);
-		const selectedProvider = this.getSelectedProvider();
-		if (!selectedProvider) return;
-
-		const frontmatter = this.settings.frontmatter.find((fm) => fm.id === frontmatterId);
-		if (!frontmatter) {
-			new Notice(`No setting found for frontmatter ID ${frontmatterId}.`);
-			return;
-		}
-
-		await this.processFrontmatterItem(selectedProvider, currentFile, currentContent, frontmatter);
+		await this.processFrontmatter([frontmatterId]);
 	}
 
 	private async processAllFrontmatter(): Promise<void> {
+		const frontmatterIds = this.settings.frontmatter.map((fm) => fm.id);
+		await this.processFrontmatter(frontmatterIds);
+	}
+
+	private async processFrontmatter(frontmatterIds: number[]): Promise<void> {
 		const currentFile = this.app.workspace.getActiveFile();
 		if (!currentFile) {
 			new Notice('No active file.');
 			return;
 		}
+
 		const currentContent = await this.metaDataManager.getMarkdownContentWithoutFrontmatter(
 			currentFile
 		);
-		const content = await this.app.vault.read(currentFile);
-		console.log('what is content : ', content);
 		const selectedProvider = this.getSelectedProvider();
 		if (!selectedProvider) return;
 
-		for (const frontmatter of this.settings.frontmatter) {
+		for (const frontmatterId of frontmatterIds) {
+			const frontmatter = this.settings.frontmatter.find((fm) => fm.id === frontmatterId);
+			if (!frontmatter) {
+				new Notice(`No setting found for frontmatter ID ${frontmatterId}.`);
+				continue;
+			}
+
 			await this.processFrontmatterItem(selectedProvider, currentFile, currentContent, frontmatter);
 		}
 	}
