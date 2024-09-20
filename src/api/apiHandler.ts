@@ -18,9 +18,7 @@ export class APIHandler {
 		const provider = AIFactory.getProvider(selectedProvider.name);
 		try {
 			const responseRaw = await provider.callAPI(chatRole, promptTemplate, selectedProvider);
-			console.log('Raw API response:', responseRaw);
 			const { resOutput, resReliability } = this.processAPIResponse(responseRaw);
-			console.log('Processed API response:', { resOutput, resReliability });
 
 			if (!resOutput || resReliability === undefined) {
 				return;
