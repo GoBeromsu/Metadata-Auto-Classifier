@@ -18,21 +18,26 @@ export class MetaDataManager {
 		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
 			frontmatter = frontmatter || {};
 
-			// Function to remove spaces
-			const removeSpaces = (str: string) => str.replace(/\s+/g, '');
+			// Function to remove spaces, except in wiki links
+			const processString = (str: string) => {
+				return str.replace(/(\[\[.*?\]\])|(\S+)/g, (match, wikiLink, word) => {
+					if (wikiLink) return wikiLink; // Preserve wiki links
+					return word.replace(/\s+/g, ''); // Remove spaces in other cases
+				});
+			};
 
 			// Process the value
-			const processedValue = Array.isArray(value) ? value.map(removeSpaces) : removeSpaces(value);
+			const processedValue = Array.isArray(value) ? value.map(processString) : processString(value);
 
 			if (frontmatter[key] && !overwrite) {
 				if (Array.isArray(frontmatter[key])) {
 					frontmatter[key] = [
-						...frontmatter[key].map(removeSpaces),
+						...frontmatter[key].map(processString),
 						...(Array.isArray(processedValue) ? processedValue : [processedValue]),
 					];
 				} else {
 					frontmatter[key] = [
-						removeSpaces(frontmatter[key]),
+						processString(frontmatter[key]),
 						...(Array.isArray(processedValue) ? processedValue : [processedValue]),
 					];
 				}
@@ -42,7 +47,6 @@ export class MetaDataManager {
 
 			// Remove duplicates and empty strings
 			if (Array.isArray(frontmatter[key])) {
-				frontmatter[key] = [...new Set(frontmatter[key])].filter(Boolean);
 				frontmatter[key] = [...new Set(frontmatter[key])].filter(Boolean);
 			}
 		});
