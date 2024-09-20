@@ -18,7 +18,7 @@ export class FrontmatterSetting extends BaseSetting {
 		this.addCountSetting(
 			containerEl,
 			frontmatterSetting,
-			'Number of Options to Select',
+			'Number of options to select',
 			'Set the number of options that can be selected',
 			DEFAULT_FRONTMATTER_SETTING.count
 		);
@@ -28,7 +28,7 @@ export class FrontmatterSetting extends BaseSetting {
 
 	private addNameSetting(containerEl: HTMLElement, frontmatterSetting: Frontmatter): void {
 		new Setting(containerEl)
-			.setName('Frontmatter Name')
+			.setName('Frontmatter name')
 			.setDesc('Set the name for this frontmatter')
 			.addText((text) =>
 				text

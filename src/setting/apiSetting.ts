@@ -20,7 +20,7 @@ export class APISetting {
 
 	private addAPIProviderSetting(containerEl: HTMLElement): void {
 		new Setting(containerEl)
-			.setName('API Provider')
+			.setName('API provider')
 			.setDesc('Select the API provider')
 			.addDropdown((dropdown) => {
 				this.plugin.settings.providers.forEach((provider) => {
@@ -38,7 +38,7 @@ export class APISetting {
 		const selectedProvider = this.getSelectedProvider();
 
 		const apiKeySetting = new Setting(containerEl)
-			.setName('API Key')
+			.setName('API key')
 			.setDesc('Enter your API key')
 			.setClass('api-key-setting')
 			.addText((text) =>
@@ -75,7 +75,7 @@ export class APISetting {
 				});
 			});
 		new Setting(containerEl)
-			.setName('Max Tokens')
+			.setName('Max tokens')
 			.setDesc('Set the maximum number of tokens for the selected model')
 			.addText((text) =>
 				text

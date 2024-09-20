@@ -35,13 +35,11 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		// API Settings Section
 		const apiSettingContainer = containerEl.createDiv();
 		this.apiSetting.display(apiSettingContainer);
 
-		// Add button to create new frontmatter entry
 		new Setting(containerEl)
-			.setName('Add Frontmatter')
+			.setName('Add frontmatter')
 			.setDesc('Add a new frontmatter entry')
 			.addButton((button) =>
 				button
@@ -52,12 +50,10 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 					})
 			);
 
-		// Tag Settings Section
-		containerEl.createEl('h2', { text: 'Tag Settings' });
+		new Setting(containerEl).setName('Tag settings').setHeading();
 		const tagContainer = containerEl.createDiv();
 		this.tagSetting.display(tagContainer);
 
-		// Display other frontmatter settings
 		this.plugin.settings.frontmatter.forEach((frontmatter) => {
 			if (frontmatter.name !== 'tags') {
 				const frontmatterContainer = containerEl.createDiv();
@@ -69,7 +65,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 
 	private addNewFrontmatter(containerEl: HTMLElement): void {
 		if (!containerEl.querySelector('h2')) {
-			containerEl.createEl('h2', { text: 'Frontmatter Settings' });
+			new Setting(containerEl).setName('Frontmatter settings').setHeading();
 		}
 
 		const newFrontmatter = { ...DEFAULT_FRONTMATTER_SETTING, id: this.generateId() };
@@ -77,7 +73,6 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		this.plugin.saveSettings();
 
 		const newFrontmatterContainer = containerEl.createDiv();
-		// Add a thin divider line before the new frontmatter if it's not the first one
 
 		this.frontmatterSetting.display(newFrontmatterContainer, newFrontmatter.id);
 		this.addDeleteButton(newFrontmatterContainer, newFrontmatter.id);
@@ -93,12 +88,10 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 				.setButtonText('Delete')
 				.setWarning()
 				.onClick(() => {
-					// Remove the frontmatter data from settings
 					this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
 						(f) => f.id !== frontmatterId
 					);
 					this.plugin.saveSettings();
-					// Remove the container element
 					container.remove();
 				})
 		);

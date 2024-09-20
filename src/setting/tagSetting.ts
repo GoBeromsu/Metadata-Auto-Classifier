@@ -1,10 +1,11 @@
+import { Setting } from 'obsidian';
 import { BaseSetting } from './baseSetting';
 import { DEFAULT_TAG_SETTING } from 'constant';
 
 export class TagSetting extends BaseSetting {
 	display(containerEl: HTMLElement): void {
 		containerEl.empty();
-		containerEl.createEl('h3', { text: 'Tag Settings' });
+		new Setting(containerEl).setName('Tag settings').setHeading();
 		this.addTagSettings(containerEl);
 		this.addFetchTagsButton(containerEl);
 	}
@@ -24,7 +25,7 @@ export class TagSetting extends BaseSetting {
 	private addFetchTagsButton(containerEl: HTMLElement): void {
 		this.addFetchButton(
 			containerEl,
-			'Fetch All Tags',
+			'Fetch all tags',
 			'Fetch and save all tags from the vault',
 			async () => {
 				await this.fetchAndSaveMetadata(DEFAULT_TAG_SETTING.id, () =>

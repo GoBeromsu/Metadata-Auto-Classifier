@@ -23,7 +23,7 @@ export abstract class BaseSetting {
 		defaultCount: number
 	): void {
 		new Setting(containerEl)
-			.setName(name)
+			.setName(name.toLowerCase())
 			.setDesc(desc)
 			.addText((text) =>
 				text
@@ -78,7 +78,7 @@ export abstract class BaseSetting {
 		fetchFunction: () => Promise<void>
 	): void {
 		new Setting(containerEl)
-			.setName(name)
+			.setName(name.toLowerCase())
 			.setDesc(desc)
 			.addButton((button) => button.setButtonText(`Fetch ${name}`).setCta().onClick(fetchFunction));
 	}
