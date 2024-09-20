@@ -1,4 +1,5 @@
 import { App, TFile } from 'obsidian';
+import { getFrontMatterInfo } from 'obsidian';
 
 export class MetaDataManager {
 	private app: App;
@@ -69,5 +70,11 @@ export class MetaDataManager {
 
 	async getSavedFrontMatterValue(file: TFile, key: string): Promise<any> {
 		return this.app.metadataCache.getFileCache(file)?.frontmatter?.[key];
+	}
+
+	async getMarkdownContentWithoutFrontmatter(file: TFile): Promise<string> {
+		const content = await this.app.vault.read(file);
+		const { contentStart } = getFrontMatterInfo(content);
+		return content.slice(contentStart).trim();
 	}
 }

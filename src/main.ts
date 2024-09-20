@@ -62,7 +62,9 @@ export default class AutoClassifierPlugin extends Plugin {
 			new Notice('No active file.');
 			return;
 		}
-
+		const currentContent = await this.metaDataManager.getMarkdownContentWithoutFrontmatter(
+			currentFile
+		);
 		const content = await this.app.vault.read(currentFile);
 		const selectedProvider = this.getSelectedProvider();
 		if (!selectedProvider) return;
@@ -73,7 +75,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			return;
 		}
 
-		await this.processFrontmatterItem(selectedProvider, currentFile, content, frontmatter);
+		await this.processFrontmatterItem(selectedProvider, currentFile, currentContent, frontmatter);
 	}
 
 	private async processAllFrontmatter(): Promise<void> {
@@ -82,13 +84,16 @@ export default class AutoClassifierPlugin extends Plugin {
 			new Notice('No active file.');
 			return;
 		}
-
+		const currentContent = await this.metaDataManager.getMarkdownContentWithoutFrontmatter(
+			currentFile
+		);
 		const content = await this.app.vault.read(currentFile);
+		console.log('what is content : ', content);
 		const selectedProvider = this.getSelectedProvider();
 		if (!selectedProvider) return;
 
 		for (const frontmatter of this.settings.frontmatter) {
-			await this.processFrontmatterItem(selectedProvider, currentFile, content, frontmatter);
+			await this.processFrontmatterItem(selectedProvider, currentFile, currentContent, frontmatter);
 		}
 	}
 
