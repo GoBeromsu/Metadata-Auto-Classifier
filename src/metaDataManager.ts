@@ -20,9 +20,9 @@ export class MetaDataManager {
 
 			// Function to remove spaces, except in wiki links
 			const processString = (str: string) => {
-				return str.replace(/(\[\[.*?\]\])|(\S+)/g, (match, wikiLink, word) => {
-					if (wikiLink) return wikiLink; // Preserve wiki links
-					return word.replace(/\s+/g, ''); // Remove spaces in other cases
+				return str.replace(/(\[\[.*?\]\])|([^\[\]]+)/g, (match, wikiLink, word) => {
+					if (wikiLink) return wikiLink;
+					return word.replace(/\s+/g, '');
 				});
 			};
 
