@@ -27,7 +27,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		super(plugin.app, plugin);
 		this.plugin = plugin;
 		this.metaDataManager = metaDataManager;
-		this.apiSetting = new Api(plugin, metaDataManager);
+		this.apiSetting = new Api(plugin);
 		this.tagSetting = new Tag(plugin, metaDataManager);
 		this.frontmatterSetting = new Frontmatter(plugin, metaDataManager);
 	}
