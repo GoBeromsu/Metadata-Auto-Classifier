@@ -41,56 +41,33 @@ export class MetaDataManager {
 		});
 	}
 
-	async getFrontMatter(file: TFile): Promise<Record<string, any> | null> {
-		const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
-		if (frontmatter) {
-			const { position, ...rest } = frontmatter;
-			return rest;
-		}
-		return null;
-	}
-
-	async getFrontMatterValue(file: TFile, key: string): Promise<any> {
-		const fileCache = this.app.metadataCache.getFileCache(file);
-		if (fileCache?.frontmatter && key in fileCache.frontmatter) {
-			return fileCache.frontmatter[key];
-		}
-		return null;
-	}
-
 	async getAllTags(): Promise<string[]> {
 		const tags = new Set<string>();
-		this.app.vault.getMarkdownFiles().forEach((file) => {
+		const files = this.app.vault.getMarkdownFiles();
+
+		for (const file of files) {
 			const cachedMetadata = this.app.metadataCache.getFileCache(file);
-			if (cachedMetadata && cachedMetadata.tags) {
-				cachedMetadata.tags.forEach((tag) => {
-					tags.add(tag.tag.replace(/^#/, ''));
+
+			// frontmatter tags
+			const frontmatterTags = cachedMetadata?.frontmatter?.tags;
+			if (Array.isArray(frontmatterTags)) {
+				frontmatterTags.forEach((tag) => {
+					if (typeof tag === 'string') {
+						tags.add(tag.replace(/^#/, ''));
+					}
 				});
 			}
-		});
+
+			// inline tags
+			if (cachedMetadata?.tags) {
+				cachedMetadata.tags.forEach((tag) => tags.add(tag.tag.replace(/^#/, '')));
+			}
+		}
+
 		return Array.from(tags);
 	}
 
 	async getSavedFrontMatterValue(file: TFile, key: string): Promise<any> {
-		const content = await this.app.vault.read(file);
-		const frontmatter = this.parseFrontMatter(content);
-		return frontmatter[key];
-	}
-
-	private parseFrontMatter(content: string): Record<string, any> {
-		const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n/;
-		const match = content.match(frontmatterRegex);
-		if (match) {
-			const frontmatterContent = match[1];
-			const frontmatter: Record<string, any> = {};
-			frontmatterContent.split('\n').forEach((line) => {
-				const [key, value] = line.split(':').map((part) => part.trim());
-				if (key && value) {
-					frontmatter[key] = value;
-				}
-			});
-			return frontmatter;
-		}
-		return {};
+		return this.app.metadataCache.getFileCache(file)?.frontmatter?.[key];
 	}
 }
