@@ -1,10 +1,15 @@
 import { DEFAULT_MAX_TOKEN } from 'constant';
+import AutoClassifierPlugin from 'main';
 import { Notice, Setting } from 'obsidian';
 import { AIFactory } from '../api';
 import { Provider } from '../types/APIInterface';
-import { BaseSettingStrategy } from './SettingStrategy';
 
-export class Api extends BaseSettingStrategy {
+export class Api {
+	protected plugin: AutoClassifierPlugin;
+
+	constructor(plugin: AutoClassifierPlugin) {
+		this.plugin = plugin;
+	}
 	display(containerEl: HTMLElement): void {
 		containerEl.empty();
 		this.addAPIProviderSetting(containerEl);
