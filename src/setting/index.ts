@@ -51,9 +51,10 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 					})
 			);
 
-		new Setting(containerEl).setName('Tag settings').setHeading();
+		new Setting(containerEl).setName('Tag').setHeading();
 		const tagContainer = containerEl.createDiv();
 		this.tagSetting.display(tagContainer);
+		new Setting(containerEl).setName('Frontmatter').setHeading();
 
 		this.plugin.settings.frontmatter.forEach((frontmatter) => {
 			if (frontmatter.name !== 'tags') {

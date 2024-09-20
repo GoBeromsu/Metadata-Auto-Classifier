@@ -5,7 +5,6 @@ import { DEFAULT_TAG_SETTING } from '../constant';
 export class Tag extends BaseSettingStrategy {
 	display(containerEl: HTMLElement): void {
 		containerEl.empty();
-		new Setting(containerEl).setName('Tag settings').setHeading();
 		this.addTagSettings(containerEl);
 	}
 

@@ -5,9 +5,6 @@ import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from '../constant';
 export class Frontmatter extends BaseSettingStrategy {
 	display(containerEl: HTMLElement, frontmatterId: number): void {
 		containerEl.empty();
-		if (this.plugin.settings.frontmatter.length > 1) {
-			containerEl.createEl('hr', { cls: 'thin-divider' });
-		}
 		this.addFrontmatterSettings(containerEl, frontmatterId);
 	}
 
