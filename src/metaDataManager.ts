@@ -17,26 +17,31 @@ export class MetaDataManager {
 		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
 			frontmatter = frontmatter || {};
 
+			// 공백 제거 함수
+			const removeSpaces = (str: string) => str.replace(/\s+/g, '');
+
+			// value를 처리
+			const processedValue = Array.isArray(value) ? value.map(removeSpaces) : removeSpaces(value);
+
 			if (frontmatter[key] && !overwrite) {
 				if (Array.isArray(frontmatter[key])) {
-					if (Array.isArray(value)) {
-						frontmatter[key].push(...value);
-					} else {
-						frontmatter[key].push(value);
-					}
+					frontmatter[key] = [
+						...frontmatter[key].map(removeSpaces),
+						...(Array.isArray(processedValue) ? processedValue : [processedValue]),
+					];
 				} else {
-					if (Array.isArray(value)) {
-						frontmatter[key] = [frontmatter[key], ...value];
-					} else {
-						frontmatter[key] = [frontmatter[key], value];
-					}
+					frontmatter[key] = [
+						removeSpaces(frontmatter[key]),
+						...(Array.isArray(processedValue) ? processedValue : [processedValue]),
+					];
 				}
 			} else {
-				frontmatter[key] = Array.isArray(value) ? value : [value];
+				frontmatter[key] = processedValue;
 			}
 
 			// Remove duplicates and empty strings
 			if (Array.isArray(frontmatter[key])) {
+				frontmatter[key] = [...new Set(frontmatter[key])].filter(Boolean);
 				frontmatter[key] = [...new Set(frontmatter[key])].filter(Boolean);
 			}
 		});
