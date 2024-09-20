@@ -8,6 +8,7 @@ export class MetaDataManager {
 		this.app = app;
 	}
 
+	// Insert or update a key-value pair in the frontmatter of a file
 	async insertToFrontMatter(
 		file: TFile,
 		key: string,
@@ -17,10 +18,10 @@ export class MetaDataManager {
 		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
 			frontmatter = frontmatter || {};
 
-			// 공백 제거 함수
+			// Function to remove spaces
 			const removeSpaces = (str: string) => str.replace(/\s+/g, '');
 
-			// value를 처리
+			// Process the value
 			const processedValue = Array.isArray(value) ? value.map(removeSpaces) : removeSpaces(value);
 
 			if (frontmatter[key] && !overwrite) {
@@ -47,6 +48,7 @@ export class MetaDataManager {
 		});
 	}
 
+	// Get all tags from the vault
 	async getAllTags(): Promise<string[]> {
 		const tags = new Set<string>();
 		const files = this.app.vault.getMarkdownFiles();
@@ -54,7 +56,7 @@ export class MetaDataManager {
 		for (const file of files) {
 			const cachedMetadata = this.app.metadataCache.getFileCache(file);
 
-			// frontmatter tags
+			// Frontmatter tags
 			const frontmatterTags = cachedMetadata?.frontmatter?.tags;
 			if (Array.isArray(frontmatterTags)) {
 				frontmatterTags.forEach((tag) => {
@@ -64,7 +66,7 @@ export class MetaDataManager {
 				});
 			}
 
-			// inline tags
+			// Inline tags
 			if (cachedMetadata?.tags) {
 				cachedMetadata.tags.forEach((tag) => tags.add(tag.tag.replace(/^#/, '')));
 			}
@@ -73,10 +75,12 @@ export class MetaDataManager {
 		return Array.from(tags);
 	}
 
+	// Get the value of a specific key from the frontmatter of a file
 	async getSavedFrontMatterValue(file: TFile, key: string): Promise<any> {
 		return this.app.metadataCache.getFileCache(file)?.frontmatter?.[key];
 	}
 
+	// Get the markdown content of a file without the frontmatter
 	async getMarkdownContentWithoutFrontmatter(file: TFile): Promise<string> {
 		const content = await this.app.vault.read(file);
 		const { contentStart } = getFrontMatterInfo(content);

@@ -12,6 +12,7 @@ export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
 	metaDataManager: MetaDataManager;
 
+	// Initialize the plugin
 	async onload() {
 		await this.loadSettings();
 		this.metaDataManager = new MetaDataManager(this.app);
@@ -39,6 +40,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		this.addSettingTab(new AutoClassifierSettingTab(this, this.metaDataManager));
 	}
 
+	// Load plugin settings
 	async loadSettings() {
 		const loadedData = await this.loadData();
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
@@ -52,19 +54,23 @@ export default class AutoClassifierPlugin extends Plugin {
 		await this.saveSettings();
 	}
 
+	// Save plugin settings
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
 
+	// Classify metadata for a specific frontmatter
 	private async classifyMetadata(frontmatterId: number): Promise<void> {
 		await this.processFrontmatter([frontmatterId]);
 	}
 
+	// Process all frontmatter
 	private async processAllFrontmatter(): Promise<void> {
 		const frontmatterIds = this.settings.frontmatter.map((fm) => fm.id);
 		await this.processFrontmatter(frontmatterIds);
 	}
 
+	// Process frontmatter for given IDs
 	private async processFrontmatter(frontmatterIds: number[]): Promise<void> {
 		const currentFile = this.app.workspace.getActiveFile();
 		if (!currentFile) {
@@ -89,6 +95,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		}
 	}
 
+	// Process a single frontmatter item
 	private async processFrontmatterItem(
 		selectedProvider: Provider,
 		currentFile: TFile,
@@ -110,6 +117,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		);
 	}
 
+	// Get the selected provider
 	private getSelectedProvider(): Provider | undefined {
 		const selectedProvider = this.settings.providers.find(
 			(p) => p.name === this.settings.selectedProvider && p.apiKey

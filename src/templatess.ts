@@ -25,6 +25,7 @@ The "reliability" should be a number between 0 and 1.
 The "output" must be an array of up to {{tagCount}} categories, chosen based on relevance and similarity.
 `;
 
+// Generate a prompt template based on the given parameters
 export function getPromptTemplate(tagCount: number, input: string, reference?: string): string {
 	let template = DEFAULT_PROMPT_TEMPLATE;
 	template = template.replace(/{{tagCount}}/g, tagCount.toString());
