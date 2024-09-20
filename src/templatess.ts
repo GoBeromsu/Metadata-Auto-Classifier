@@ -9,14 +9,16 @@ Instructions:
 4. Even if you're unsure, make a selection and adjust the reliability score accordingly.
 5. Provide your answer in valid JSON format.
 
-"""
-{{input}}
-"""
 Reference categories:
 {{reference}}
 
 Example output:
 {{dynamicExample}}
+
+Input:
+"""
+{{input}}
+"""
 
 Answer in valid JSON format: {"reliability": number, "output": string[]}
 The "reliability" should be a number between 0 and 1.

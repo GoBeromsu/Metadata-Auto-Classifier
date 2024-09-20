@@ -33,7 +33,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			callback: async () => {
 				await this.processAllFrontmatter();
 			},
-			hotkeys: [{ modifiers: ["Mod", "Shift"], key: "F" }]
+			hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'F' }],
 		});
 
 		this.addSettingTab(new AutoClassifierSettingTab(this, this.metaDataManager));
@@ -102,12 +102,14 @@ export default class AutoClassifierPlugin extends Plugin {
 		const currentValuesString = currentValues.join(', ');
 		const promptTemplate = getPromptTemplate(frontmatter.count, content, currentValuesString);
 
-		await this.processAPIRequest(
+		const chatRole = DEFAULT_CHAT_ROLE;
+		await this.apiHandler.processAPIRequest(
+			chatRole,
+			promptTemplate,
 			selectedProvider,
 			currentFile,
 			frontmatter.name,
-			frontmatter.count,
-			promptTemplate
+			frontmatter.count
 		);
 	}
 
@@ -119,23 +121,5 @@ export default class AutoClassifierPlugin extends Plugin {
 			new Notice('API key for the selected provider is not set.');
 		}
 		return selectedProvider;
-	}
-
-	private async processAPIRequest(
-		selectedProvider: Provider,
-		currentFile: TFile,
-		key: string,
-		count: number,
-		promptTemplate: string
-	): Promise<void> {
-		const chatRole = DEFAULT_CHAT_ROLE;
-		await this.apiHandler.processAPIRequest(
-			chatRole,
-			promptTemplate,
-			selectedProvider,
-			currentFile,
-			key,
-			count
-		);
 	}
 }
