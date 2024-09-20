@@ -7,7 +7,6 @@ export class Tag extends BaseSettingStrategy {
 		containerEl.empty();
 		new Setting(containerEl).setName('Tag settings').setHeading();
 		this.addTagSettings(containerEl);
-		this.addFetchTagsButton(containerEl);
 	}
 
 	private addTagSettings(containerEl: HTMLElement): void {
@@ -19,19 +18,6 @@ export class Tag extends BaseSettingStrategy {
 			'Tags',
 			'Default settings for automatic tag assignment',
 			DEFAULT_TAG_SETTING.count
-		);
-	}
-
-	private addFetchTagsButton(containerEl: HTMLElement): void {
-		this.addFetchButton(
-			containerEl,
-			'Fetch all tags',
-			'Fetch and save all tags from the vault',
-			async () => {
-				await this.fetchAndSaveMetadata(DEFAULT_TAG_SETTING.id, () =>
-					this.metaDataManager.getAllTags()
-				);
-			}
 		);
 	}
 }

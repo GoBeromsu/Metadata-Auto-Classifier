@@ -13,13 +13,6 @@ export interface SettingStrategy {
 		desc: string,
 		defaultCount: number
 	): void;
-	fetchAndSaveMetadata(id: number, fetchFunction: () => Promise<string[]>): Promise<void>;
-	addFetchButton(
-		containerEl: HTMLElement,
-		name: string,
-		desc: string,
-		fetchFunction: () => Promise<void>
-	): void;
 }
 
 export abstract class BaseSettingStrategy implements SettingStrategy {
@@ -75,23 +68,5 @@ export abstract class BaseSettingStrategy implements SettingStrategy {
 						this.display(containerEl);
 					})
 			);
-	}
-	async fetchAndSaveMetadata(id: number, fetchFunction: () => Promise<string[]>): Promise<void> {
-		const allMetadata = await fetchFunction();
-		const setting = this.getSetting(id);
-		setting.refs = allMetadata;
-		await this.plugin.saveSettings();
-		new Notice(`Fetched ${allMetadata.length} ${id}.`);
-	}
-	addFetchButton(
-		containerEl: HTMLElement,
-		name: string,
-		desc: string,
-		fetchFunction: () => Promise<void>
-	): void {
-		new Setting(containerEl)
-			.setName(name.toLowerCase())
-			.setDesc(desc)
-			.addButton((button) => button.setButtonText(`Fetch ${name}`).setCta().onClick(fetchFunction));
 	}
 }
