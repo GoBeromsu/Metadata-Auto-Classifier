@@ -1,8 +1,8 @@
 import { Setting } from 'obsidian';
-import { BaseSetting } from './baseSetting';
-import { DEFAULT_FRONTMATTER_SETTING, Frontmatter } from 'constant';
+import { BaseSettingStrategy } from './SettingStrategy';
+import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from '../constant';
 
-export class FrontmatterSetting extends BaseSetting {
+export class Frontmatter extends BaseSettingStrategy {
 	display(containerEl: HTMLElement, frontmatterId: number): void {
 		containerEl.empty();
 		if (this.plugin.settings.frontmatter.length > 1) {
@@ -26,22 +26,10 @@ export class FrontmatterSetting extends BaseSetting {
 		this.addOptionsSetting(containerEl, frontmatterSetting);
 	}
 
-	private addNameSetting(containerEl: HTMLElement, frontmatterSetting: Frontmatter): void {
-		new Setting(containerEl)
-			.setName('Frontmatter name')
-			.setDesc('Set the name for this frontmatter')
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter frontmatter name')
-					.setValue(frontmatterSetting.name)
-					.onChange(async (value) => {
-						frontmatterSetting.name = value;
-						await this.plugin.saveSettings();
-					})
-			);
-	}
-
-	private addOptionsSetting(containerEl: HTMLElement, frontmatterSetting: Frontmatter): void {
+	private addOptionsSetting(
+		containerEl: HTMLElement,
+		frontmatterSetting: FrontmatterTemplate
+	): void {
 		new Setting(containerEl)
 			.setName('Options')
 			.setDesc('Enter options separated by commas')
@@ -59,8 +47,21 @@ export class FrontmatterSetting extends BaseSetting {
 				text.inputEl.addClass('frontmatter-options-textarea');
 			});
 	}
-
-	protected getSetting(frontmatterId: number): Frontmatter {
+	private addNameSetting(containerEl: HTMLElement, frontmatterSetting: FrontmatterTemplate): void {
+		new Setting(containerEl)
+			.setName('Frontmatter name')
+			.setDesc('Set the name for this frontmatter')
+			.addText((text) =>
+				text
+					.setPlaceholder('Enter frontmatter name')
+					.setValue(frontmatterSetting.name)
+					.onChange(async (value) => {
+						frontmatterSetting.name = value;
+						await this.plugin.saveSettings();
+					})
+			);
+	}
+	getSetting(frontmatterId: number): FrontmatterTemplate {
 		let setting = this.plugin.settings.frontmatter.find((m) => m.id === frontmatterId);
 		if (!setting) {
 			setting = { ...DEFAULT_FRONTMATTER_SETTING, id: frontmatterId };

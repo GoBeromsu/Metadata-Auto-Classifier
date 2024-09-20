@@ -44,13 +44,13 @@ export const DEFAULT_FRONTMATTER_SETTING = {
 };
 
 // Default tag settings
-export const DEFAULT_TAG_SETTING: Frontmatter = {
+export const DEFAULT_TAG_SETTING: FrontmatterTemplate = {
 	id: 0,
 	name: 'tags',
 	refs: [],
 	count: 5,
 };
-export interface Frontmatter {
+export interface FrontmatterTemplate {
 	id: number;
 	name: string;
 	count: number;

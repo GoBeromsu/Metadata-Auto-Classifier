@@ -1,10 +1,28 @@
-import { DEFAULT_FRONTMATTER_SETTING, Frontmatter } from 'constant';
 import { Notice, Setting } from 'obsidian';
-
+import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from '../constant';
 import AutoClassifierPlugin from '../main';
 import { MetaDataManager } from '../metaDataManager';
 
-export abstract class BaseSetting {
+export interface SettingStrategy {
+	display(containerEl: HTMLElement, frontmatterId?: number): void;
+	getSetting(id: number): FrontmatterTemplate;
+	addCountSetting(
+		containerEl: HTMLElement,
+		setting: FrontmatterTemplate,
+		name: string,
+		desc: string,
+		defaultCount: number
+	): void;
+	fetchAndSaveMetadata(id: number, fetchFunction: () => Promise<string[]>): Promise<void>;
+	addFetchButton(
+		containerEl: HTMLElement,
+		name: string,
+		desc: string,
+		fetchFunction: () => Promise<void>
+	): void;
+}
+
+export abstract class BaseSettingStrategy implements SettingStrategy {
 	protected plugin: AutoClassifierPlugin;
 	protected metaDataManager: MetaDataManager;
 
@@ -15,9 +33,19 @@ export abstract class BaseSetting {
 
 	abstract display(containerEl: HTMLElement, frontmatterId?: number): void;
 
-	protected addCountSetting(
+	getSetting(id: number): FrontmatterTemplate {
+		const setting = this.plugin.settings.frontmatter.find((f) => f.id === id);
+		if (setting) {
+			return setting;
+		} else {
+			const newSetting = { ...DEFAULT_FRONTMATTER_SETTING, id };
+			this.plugin.settings.frontmatter.push(newSetting);
+			return newSetting;
+		}
+	}
+	addCountSetting(
 		containerEl: HTMLElement,
-		setting: Frontmatter,
+		setting: FrontmatterTemplate,
 		name: string,
 		desc: string,
 		defaultCount: number
@@ -48,30 +76,14 @@ export abstract class BaseSetting {
 					})
 			);
 	}
-
-	protected async fetchAndSaveMetadata(
-		id: number,
-		fetchFunction: () => Promise<string[]>
-	): Promise<void> {
+	async fetchAndSaveMetadata(id: number, fetchFunction: () => Promise<string[]>): Promise<void> {
 		const allMetadata = await fetchFunction();
 		const setting = this.getSetting(id);
 		setting.refs = allMetadata;
 		await this.plugin.saveSettings();
 		new Notice(`Fetched ${allMetadata.length} ${id}.`);
 	}
-
-	protected getSetting(id: number): Frontmatter {
-		const setting = this.plugin.settings.frontmatter.find((f) => f.id === id);
-		if (setting) {
-			return setting;
-		} else {
-			const newSetting = { ...DEFAULT_FRONTMATTER_SETTING, id };
-			this.plugin.settings.frontmatter.push(newSetting);
-			return newSetting;
-		}
-	}
-
-	protected addFetchButton(
+	addFetchButton(
 		containerEl: HTMLElement,
 		name: string,
 		desc: string,

@@ -4,31 +4,32 @@ import { Provider } from 'types/APIInterface';
 
 import { MetaDataManager } from 'metaDataManager';
 
-import { DEFAULT_FRONTMATTER_SETTING, Frontmatter } from 'constant';
-import { APISetting } from './apiSetting';
-import { FrontmatterSetting } from './frontmatterSettings';
-import { TagSetting } from './tagSetting';
+import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from 'constant';
+
+import { Api } from './Api';
+import { Frontmatter } from './Frontmatter';
+import { Tag } from './Tag';
 
 export interface AutoClassifierSettings {
 	providers: Provider[];
 	selectedProvider: string;
 	selectedModel: string;
-	frontmatter: Frontmatter[];
+	frontmatter: FrontmatterTemplate[];
 }
 
 export class AutoClassifierSettingTab extends PluginSettingTab {
 	plugin: AutoClassifierPlugin;
 	metaDataManager: MetaDataManager;
-	apiSetting: APISetting;
-	tagSetting: TagSetting;
-	frontmatterSetting: FrontmatterSetting;
+	apiSetting: Api;
+	tagSetting: Tag;
+	frontmatterSetting: Frontmatter;
 	constructor(plugin: AutoClassifierPlugin, metaDataManager: MetaDataManager) {
 		super(plugin.app, plugin);
 		this.plugin = plugin;
 		this.metaDataManager = metaDataManager;
-		this.apiSetting = new APISetting(plugin);
-		this.tagSetting = new TagSetting(plugin, metaDataManager);
-		this.frontmatterSetting = new FrontmatterSetting(plugin, metaDataManager);
+		this.apiSetting = new Api(plugin, metaDataManager);
+		this.tagSetting = new Tag(plugin, metaDataManager);
+		this.frontmatterSetting = new Frontmatter(plugin, metaDataManager);
 	}
 
 	display(): void {

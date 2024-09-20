@@ -1,8 +1,8 @@
 import { Setting } from 'obsidian';
-import { BaseSetting } from './baseSetting';
-import { DEFAULT_TAG_SETTING } from 'constant';
+import { BaseSettingStrategy } from './SettingStrategy';
+import { DEFAULT_TAG_SETTING } from '../constant';
 
-export class TagSetting extends BaseSetting {
+export class Tag extends BaseSettingStrategy {
 	display(containerEl: HTMLElement): void {
 		containerEl.empty();
 		new Setting(containerEl).setName('Tag settings').setHeading();
