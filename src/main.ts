@@ -18,6 +18,11 @@ export default class AutoClassifierPlugin extends Plugin {
 		this.metaDataManager = new MetaDataManager(this.app);
 		this.apiHandler = new APIHandler(this.manifest, this.metaDataManager);
 
+		this.setupCommand();
+		this.addSettingTab(new AutoClassifierSettingTab(this, this.metaDataManager));
+	}
+
+	setupCommand() {
 		this.settings.frontmatter.forEach((frontmatter) => {
 			this.addCommand({
 				id: `fetch-frontmatter-${frontmatter.id}`,
@@ -36,10 +41,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			},
 			hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'F' }],
 		});
-
-		this.addSettingTab(new AutoClassifierSettingTab(this, this.metaDataManager));
 	}
-
 	// Load plugin settings
 	async loadSettings() {
 		const loadedData = await this.loadData();
