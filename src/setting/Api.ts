@@ -3,6 +3,7 @@ import AutoClassifierPlugin from 'main';
 import { Notice, Setting } from 'obsidian';
 import { AIFactory } from '../api';
 import { Provider } from '../types/APIInterface';
+import { ErrorHandler } from 'error/errorHandler';
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;
@@ -118,10 +119,7 @@ export class Api {
 
 			await this.plugin.saveSettings();
 		} catch (error) {
-			console.error('Error occurred during API test:', error);
-			provider.testResult = false;
-			provider.lastTested = new Date();
-			await this.plugin.saveSettings();
+			ErrorHandler.handle(error as Error, 'API Key Testing');
 		}
 	}
 

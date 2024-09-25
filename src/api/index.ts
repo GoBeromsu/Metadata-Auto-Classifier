@@ -1,3 +1,5 @@
+import { APIError } from 'error/APIError';
+import { ErrorHandler } from 'error/errorHandler';
 import { requestUrl, RequestUrlParam } from 'obsidian';
 import { APIProvider, Provider } from 'types/APIInterface';
 
@@ -19,7 +21,7 @@ export class OpenAIProvider implements APIProvider {
 		};
 
 		const data = {
-			model: provider.models[0].name, // Assuming the first model is the default
+			model: provider.models[0].name,
 			messages: [
 				{ role: 'system', content: system_role },
 				{ role: 'user', content: user_prompt },
@@ -38,37 +40,25 @@ export class OpenAIProvider implements APIProvider {
 			body: JSON.stringify(data),
 		};
 
-		try {
-			const response = await requestUrl(requestParam);
-			if (response.status !== 200) {
-				throw new Error(`API request failed with status ${response.status}`);
-			}
-			const responseData = response.json;
-			if (responseData.choices && responseData.choices.length > 0) {
-				return responseData.choices[0].message.content.trim();
-			} else {
-				throw new Error('No response from the API');
-			}
-		} catch (error) {
-			console.error('Error calling OpenAI API:', error);
-			throw error;
+		const response = await requestUrl(requestParam);
+		if (response.status !== 200) {
+			throw new APIError(`API request failed with status ${response.status}`);
+		}
+		const responseData = response.json;
+
+		if (responseData.choices && responseData.choices.length > 0) {
+			return responseData.choices[0].message.content.trim();
+		} else {
+			throw new APIError('No response from the API');
 		}
 	}
 
 	async testAPI(provider: Provider): Promise<boolean> {
 		try {
-			await this.callAPI(
-				'You are a test system.',
-				'This is a test prompt.',
-				provider,
-				undefined,
-				undefined,
-				undefined,
-				undefined
-			);
+			await this.callAPI('You are a test system.', 'This is a test prompt.', provider);
 			return true;
 		} catch (error) {
-			console.error('OpenAI API test failed:', error);
+			ErrorHandler.handle(error as Error, 'OpenAI API Test');
 			return false;
 		}
 	}
@@ -79,7 +69,6 @@ export class AIFactory {
 		switch (providerName.toLowerCase()) {
 			case 'openai':
 				return new OpenAIProvider();
-			// Add other AI providers here
 			default:
 				throw new Error(`Unknown AI provider: ${providerName}`);
 		}

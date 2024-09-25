@@ -1,4 +1,5 @@
 import { Notice, TFile } from 'obsidian';
+import { ErrorHandler } from '../error/errorHandler';
 
 import { AIFactory } from '.';
 import { MetaDataManager } from '../metaDataManager';
@@ -15,12 +16,20 @@ export class APIHandler {
 		key: string,
 		count: number
 	): Promise<void> {
-		const provider = AIFactory.getProvider(selectedProvider.name);
 		try {
-			const responseRaw = await provider.callAPI(chatRole, promptTemplate, selectedProvider);
+			const providerInstance = AIFactory.getProvider(selectedProvider.name);
+			const responseRaw = await providerInstance.callAPI(
+				chatRole,
+				promptTemplate,
+				selectedProvider
+			);
 			const { resOutput, resReliability } = this.processAPIResponse(responseRaw);
 
 			if (!resOutput || resReliability === undefined) {
+				ErrorHandler.handle(
+					new Error('responseRaw is null or reliability is undefined'),
+					`Target Frontmatter ${key}`
+				);
 				return;
 			}
 
@@ -33,8 +42,7 @@ export class APIHandler {
 			await this.metaDataManager.insertToFrontMatter(currentFile, key, preprocessedValues, false);
 			new Notice(`✅ ${preprocessedValues.length} ${key} added: ${preprocessedValues.join(', ')}`);
 		} catch (error) {
-			console.error(`Error occurred while classifying and adding ${key}:`, error);
-			new Notice(`An error occurred while classifying and adding ${key}.`);
+			ErrorHandler.handle(error as Error, `Target Frontmatter ${key}`);
 		}
 	}
 
@@ -52,8 +60,10 @@ export class APIHandler {
 				resReliability: response.reliability,
 			};
 		} catch (error) {
-			console.error('Error parsing API response:', error);
-			new Notice(`⛔ ${this.manifest.name}: Output format error (output: ${responseRaw})`);
+			ErrorHandler.handle(
+				error as Error,
+				`⛔ ${this.manifest.name}: Output format error (output: ${responseRaw})`
+			);
 			return { resOutput: null, resReliability: undefined };
 		}
 	}
