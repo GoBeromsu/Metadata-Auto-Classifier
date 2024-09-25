@@ -1,9 +1,9 @@
-import { DEFAULT_SETTINGS, DEFAULT_TAG_SETTING } from 'constant';
 import { Notice, Plugin, TFile } from 'obsidian';
+import { DEFAULT_SETTINGS, DEFAULT_TAG_SETTING } from './constant';
 
 import { APIHandler } from './api/apiHandler';
 
-import FrontMatterHandler from 'frontmatterHandler';
+import FrontMatterHandler from './frontmatterHandler';
 import { Provider } from 'types/apiInterface';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './settings';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from './templates';
