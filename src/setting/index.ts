@@ -2,9 +2,9 @@ import AutoClassifierPlugin from 'main';
 import { PluginSettingTab, Setting } from 'obsidian';
 import { Provider } from 'types/APIInterface';
 
-import { FrontMatterHandler } from 'metaDataManager';
+import FrontMatterHandler from '../FrontMatterHandler';
 
-import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from 'constant';
+import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from '../constant';
 
 import { Api } from './Api';
 import { Frontmatter } from './Frontmatter';

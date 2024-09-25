@@ -1,9 +1,9 @@
 import { DEFAULT_MAX_TOKEN } from 'constant';
+import { ErrorHandler } from 'error/errorHandler';
 import AutoClassifierPlugin from 'main';
 import { Notice, Setting } from 'obsidian';
 import { AIFactory } from '../api';
 import { Provider } from '../types/APIInterface';
-import { ErrorHandler } from 'error/errorHandler';
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;

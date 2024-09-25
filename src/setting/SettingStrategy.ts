@@ -1,8 +1,7 @@
-import { Notice, Setting } from 'obsidian';
+import { Setting } from 'obsidian';
 import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from '../constant';
+import FrontMatterHandler from '../FrontMatterHandler';
 import AutoClassifierPlugin from '../main';
-import { FrontMatterHandler } from '../FrontMatterHandler';
-
 export interface SettingStrategy {
 	display(containerEl: HTMLElement, frontmatterId?: number): void;
 	getSetting(id: number): FrontmatterTemplate;
