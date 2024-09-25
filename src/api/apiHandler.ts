@@ -1,6 +1,6 @@
 import { AIFactory } from '.';
 import { ErrorHandler } from '../error/errorHandler';
-import { Provider } from '../types/APIInterface';
+import { Provider } from '../types/apiInterface';
 
 export class APIHandler {
 	async processAPIRequest(

@@ -1,14 +1,14 @@
 import AutoClassifierPlugin from 'main';
 import { PluginSettingTab, Setting } from 'obsidian';
-import { Provider } from 'types/APIInterface';
+import { Provider } from 'types/apiInterface';
 
-import FrontMatterHandler from '../FrontMatterHandler';
+import FrontMatterHandler from '../frontmatterHandler';
 
 import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from '../constant';
 
-import { Api } from './Api';
-import { Frontmatter } from './Frontmatter';
-import { Tag } from './Tag';
+import { Api } from './api';
+import { Frontmatter } from './frontmatter';
+import { Tag } from './tag';
 
 export interface AutoClassifierSettings {
 	providers: Provider[];

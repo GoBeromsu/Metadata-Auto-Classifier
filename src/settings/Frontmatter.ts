@@ -1,6 +1,6 @@
 import { Setting } from 'obsidian';
 import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from '../constant';
-import { BaseSettingStrategy } from './SettingStrategy';
+import { BaseSettingStrategy } from './settingStrategy';
 
 export class Frontmatter extends BaseSettingStrategy {
 	display(containerEl: HTMLElement, frontmatterId: number): void {

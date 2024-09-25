@@ -1,5 +1,5 @@
 import { Notice } from 'obsidian';
-import { APIError } from './APIError';
+import { APIError } from './apiError';
 
 export class ErrorHandler {
 	private static formatErrorMessage(error: Error, context: string): string {

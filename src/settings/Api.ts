@@ -3,7 +3,7 @@ import { ErrorHandler } from 'error/errorHandler';
 import AutoClassifierPlugin from 'main';
 import { Notice, Setting } from 'obsidian';
 import { AIFactory } from '../api';
-import { Provider } from '../types/APIInterface';
+import { Provider } from '../types/apiInterface';
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;

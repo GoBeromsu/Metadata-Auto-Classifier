@@ -1,5 +1,5 @@
 import { Setting } from 'obsidian';
-import { BaseSettingStrategy } from './SettingStrategy';
+import { BaseSettingStrategy } from './settingStrategy';
 import { DEFAULT_TAG_SETTING } from '../constant';
 
 export class Tag extends BaseSettingStrategy {

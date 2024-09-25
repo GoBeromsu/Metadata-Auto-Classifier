@@ -1,7 +1,7 @@
-import { APIError } from 'error/APIError';
+import { APIError } from 'error/apiError';
 import { ErrorHandler } from 'error/errorHandler';
 import { requestUrl, RequestUrlParam } from 'obsidian';
-import { APIProvider, Provider } from 'types/APIInterface';
+import { APIProvider, Provider } from 'types/apiInterface';
 
 export class OpenAIProvider implements APIProvider {
 	private static baseUrl = 'https://api.openai.com/v1/chat/completions';

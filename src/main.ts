@@ -1,10 +1,12 @@
 import { DEFAULT_SETTINGS, DEFAULT_TAG_SETTING } from 'constant';
-import FrontMatterHandler from 'FrontMatterHandler';
 import { Notice, Plugin, TFile } from 'obsidian';
-import { DEFAULT_CHAT_ROLE, getPromptTemplate } from 'templatess';
-import { Provider } from 'types/APIInterface';
+
 import { APIHandler } from './api/apiHandler';
+
+import FrontMatterHandler from 'frontmatterHandler';
+import { Provider } from 'types/apiInterface';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './settings';
+import { DEFAULT_CHAT_ROLE, getPromptTemplate } from './templates';
 
 export default class AutoClassifierPlugin extends Plugin {
 	apiHandler: APIHandler;

@@ -1,5 +1,5 @@
 import { AutoClassifierSettings } from 'settings';
-import { Provider } from 'types/APIInterface';
+import { Provider } from 'types/apiInterface';
 
 export const DEFAULT_MAX_TOKEN = 2048;
 const DEFAULT_TEMPERATURE = 0.7;
