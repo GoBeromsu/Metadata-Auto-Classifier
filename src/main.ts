@@ -3,23 +3,24 @@ import { Notice, Plugin, TFile } from 'obsidian';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from 'templatess';
 import { Provider } from 'types/APIInterface';
 import { APIHandler } from './api/apiHandler';
-import { MetaDataManager } from './metaDataManager';
+
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './setting';
+import FrontMatterHandler from 'FrontMatterHandler';
 
 export default class AutoClassifierPlugin extends Plugin {
 	apiHandler: APIHandler;
 
 	settings: AutoClassifierSettings;
-	metaDataManager: MetaDataManager;
+	frontMatterHandler: FrontMatterHandler;
 
 	// Initialize the plugin
 	async onload() {
 		await this.loadSettings();
-		this.metaDataManager = new MetaDataManager(this.app);
-		this.apiHandler = new APIHandler(this.manifest, this.metaDataManager);
+		this.frontMatterHandler = new FrontMatterHandler(this.app);
+		this.apiHandler = new APIHandler(this.manifest, this.frontMatterHandler);
 
 		this.setupCommand();
-		this.addSettingTab(new AutoClassifierSettingTab(this, this.metaDataManager));
+		this.addSettingTab(new AutoClassifierSettingTab(this, this.frontMatterHandler));
 	}
 
 	setupCommand() {
@@ -80,7 +81,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			return;
 		}
 
-		const currentContent = await this.metaDataManager.getMarkdownContentWithoutFrontmatter(
+		const currentContent = await this.frontMatterHandler.getMarkdownContentWithoutFrontmatter(
 			currentFile
 		);
 		const selectedProvider = this.getSelectedProvider();

@@ -2,11 +2,12 @@ import { Notice, TFile } from 'obsidian';
 import { ErrorHandler } from '../error/errorHandler';
 
 import { AIFactory } from '.';
-import { MetaDataManager } from '../metaDataManager';
+
+import FrontMatterHandler from 'FrontMatterHandler';
 import { Provider } from '../types/APIInterface';
 
 export class APIHandler {
-	constructor(private manifest: { name: string }, private metaDataManager: MetaDataManager) {}
+	constructor(private manifest: { name: string }, private frontmatterHandler: FrontMatterHandler) {}
 
 	async processAPIRequest(
 		chatRole: string,
@@ -39,7 +40,12 @@ export class APIHandler {
 			}
 
 			const preprocessedValues = resOutput.split(',').map((item) => item.trim());
-			await this.metaDataManager.insertToFrontMatter(currentFile, key, preprocessedValues, false);
+			await this.frontmatterHandler.insertToFrontMatter(
+				currentFile,
+				key,
+				preprocessedValues,
+				false
+			);
 			new Notice(`✅ ${preprocessedValues.length} ${key} added: ${preprocessedValues.join(', ')}`);
 		} catch (error) {
 			ErrorHandler.handle(error as Error, `Target Frontmatter ${key}`);

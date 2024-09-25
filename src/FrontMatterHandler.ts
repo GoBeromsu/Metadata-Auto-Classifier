@@ -1,7 +1,7 @@
 import { App, TFile } from 'obsidian';
 import { getFrontMatterInfo } from 'obsidian';
 
-export class MetaDataManager {
+export default class {
 	private app: App;
 
 	constructor(app: App) {

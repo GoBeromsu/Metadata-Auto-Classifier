@@ -1,7 +1,7 @@
 import { Notice, Setting } from 'obsidian';
 import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from '../constant';
 import AutoClassifierPlugin from '../main';
-import { MetaDataManager } from '../metaDataManager';
+import { FrontMatterHandler } from '../FrontMatterHandler';
 
 export interface SettingStrategy {
 	display(containerEl: HTMLElement, frontmatterId?: number): void;
@@ -17,9 +17,9 @@ export interface SettingStrategy {
 
 export abstract class BaseSettingStrategy implements SettingStrategy {
 	protected plugin: AutoClassifierPlugin;
-	protected metaDataManager: MetaDataManager;
+	protected metaDataManager: FrontMatterHandler;
 
-	constructor(plugin: AutoClassifierPlugin, metaDataManager: MetaDataManager) {
+	constructor(plugin: AutoClassifierPlugin, metaDataManager: FrontMatterHandler) {
 		this.plugin = plugin;
 		this.metaDataManager = metaDataManager;
 	}
