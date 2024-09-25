@@ -23,13 +23,13 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 	apiSetting: Api;
 	tagSetting: Tag;
 	frontmatterSetting: Frontmatter;
-	constructor(plugin: AutoClassifierPlugin, metaDataManager: FrontMatterHandler) {
+	constructor(plugin: AutoClassifierPlugin, frontMatterHandler: FrontMatterHandler) {
 		super(plugin.app, plugin);
 		this.plugin = plugin;
-		this.metaDataManager = metaDataManager;
+		this.metaDataManager = frontMatterHandler;
 		this.apiSetting = new Api(plugin);
-		this.tagSetting = new Tag(plugin, metaDataManager);
-		this.frontmatterSetting = new Frontmatter(plugin, metaDataManager);
+		this.tagSetting = new Tag(plugin, frontMatterHandler);
+		this.frontmatterSetting = new Frontmatter(plugin, frontMatterHandler);
 	}
 
 	display(): void {

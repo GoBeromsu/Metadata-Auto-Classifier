@@ -1,12 +1,7 @@
-import { App, TFile } from 'obsidian';
-import { getFrontMatterInfo } from 'obsidian';
+import { App, TFile, getFrontMatterInfo } from 'obsidian';
 
-export default class {
-	private app: App;
-
-	constructor(app: App) {
-		this.app = app;
-	}
+export default class FrontMatterHandler {
+	constructor(private app: App) {}
 
 	// Insert or update a key-value pair in the frontmatter of a file
 	async insertToFrontMatter(
