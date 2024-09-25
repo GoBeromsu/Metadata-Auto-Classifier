@@ -4,7 +4,7 @@ import { Notice, Plugin, TFile } from 'obsidian';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from 'templatess';
 import { Provider } from 'types/APIInterface';
 import { APIHandler } from './api/apiHandler';
-import { AutoClassifierSettings, AutoClassifierSettingTab } from './setting';
+import { AutoClassifierSettings, AutoClassifierSettingTab } from './settings';
 
 export default class AutoClassifierPlugin extends Plugin {
 	apiHandler: APIHandler;

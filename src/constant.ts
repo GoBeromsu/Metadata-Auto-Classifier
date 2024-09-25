@@ -1,4 +1,4 @@
-import { AutoClassifierSettings } from 'setting';
+import { AutoClassifierSettings } from 'settings';
 import { Provider } from 'types/APIInterface';
 
 export const DEFAULT_MAX_TOKEN = 2048;
