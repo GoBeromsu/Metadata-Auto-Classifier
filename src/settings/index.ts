@@ -5,10 +5,9 @@ import { Provider } from 'types/apiInterface';
 import FrontMatterHandler from '../frontmatterHandler';
 
 import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from '../constant';
-
+import { Tag } from './tag';
 import { Api } from './api';
 import { Frontmatter } from './frontmatter';
-import { Tag } from './tag';
 
 export interface AutoClassifierSettings {
 	providers: Provider[];
