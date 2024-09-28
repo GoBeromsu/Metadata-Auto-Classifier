@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"version": "1.1.8"
+		"version": "sh update-version.sh"
 	},
 	"keywords": [
 		"obsidian",
