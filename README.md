@@ -49,10 +49,14 @@ To install the beta version of the Metadata Auto Classifier plugin using the Bet
 
 
 ## 🖱️ Usage
+
+![](./assets/usecase.gif)
+
 1. Open a note you want to classify.
 2. Use the command palette (Cmd/Ctrl + P) and search for:
    - "Fetch tags using current provider" to generate tags.
    - "Fetch all frontmatter using current provider" to populate custom frontmatter fields.
+   - Also, you can fetch single frontmatter field using command palette.
 3. Review and edit the AI-generated suggestions as needed.
 
 ## 📋 Current Features
