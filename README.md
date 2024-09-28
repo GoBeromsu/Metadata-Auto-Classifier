@@ -29,16 +29,24 @@ Metadata Auto Classifier is an innovative Obsidian plugin that harnesses the pow
 6. **Idea Generation**: Use AI-suggested tags to spark new connections between seemingly unrelated notes.
 
 ## 🛠️ Installation
+> **Note**: The plugin is on process of being reviewed for the Obsidian Community Plugins. Once the review is complete, we will update this README with the official installation instructions. In the meantime, you can install the beta version using the instructions below.
 1. Open Obsidian and navigate to Settings > Community Plugins.
 2. Disable Safe Mode if it's currently enabled.
 3. Click on "Browse" and search for "Metadata Auto Classifier".
 4. Click "Install", then "Enable" to activate the plugin.
 
-## ⚙️ Configuration
-1. Go to Settings > Metadata Auto Classifier.
-2. Enter your OpenAI API key.
-3. Configure tag settings and custom frontmatter fields according to your preferences.
-4. (Optional) Fetch existing tags from your vault to use as a reference for the AI.
+### 📦 Manual Installation (Beta)
+To install the beta version of the Metadata Auto Classifier plugin using the Beta Reviewers Auto-update Tool (BRAT):
+
+1. Install BRAT from the Obsidian Community Plugins browser
+2. In the BRAT settings, click on "Add Beta plugin".
+3. Enter the following GitHub repository URL: 
+   ```
+   https://github.com/beromkoh/obsidian-metadata-auto-classifier
+   ```
+4. Click "Add Plugin" to install the beta version.
+   ![](./assets/brat-install.gif)
+
 
 ## 🖱️ Usage
 1. Open a note you want to classify.
