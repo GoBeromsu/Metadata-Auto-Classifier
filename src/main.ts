@@ -121,7 +121,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
 
 		const tagSetting = this.settings.frontmatter.find((fm) => fm.name === 'tags');
-		console.log(tagSetting);
+
 		if (tagSetting && tagSetting.refs.length == 0) {
 			tagSetting.refs = await this.frontMatterHandler.getAllTags();
 		}
