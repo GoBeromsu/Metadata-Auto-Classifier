@@ -1,5 +1,5 @@
 import { requestUrl, RequestUrlParam } from 'obsidian';
-import { APIProvider, Provider } from '../types/apiInterface';
+import { APIProvider, Provider, StructuredOutput } from '../types/apiInterface';
 import { APIError } from '../error/apiError';
 import { ErrorHandler } from '../error/errorHandler';
 
@@ -14,7 +14,7 @@ export class OpenAIProvider implements APIProvider {
 		top_p: number = 0.95,
 		frequency_penalty: number = 0,
 		presence_penalty: number = 0.5
-	): Promise<string> {
+	): Promise<StructuredOutput> {
 		const headers: Record<string, string> = {
 			Authorization: `Bearer ${provider.apiKey}`,
 			'Content-Type': 'application/json',
@@ -31,6 +31,7 @@ export class OpenAIProvider implements APIProvider {
 			top_p: top_p,
 			frequency_penalty: frequency_penalty,
 			presence_penalty: presence_penalty,
+			response_format: { type: 'json_object' },
 		};
 
 		const requestParam: RequestUrlParam = {
@@ -47,7 +48,8 @@ export class OpenAIProvider implements APIProvider {
 		const responseData = response.json;
 
 		if (responseData.choices && responseData.choices.length > 0) {
-			return responseData.choices[0].message.content.trim();
+			const content = responseData.choices[0].message.content.trim();
+			return JSON.parse(content) as StructuredOutput;
 		} else {
 			throw new APIError('No response from the API');
 		}

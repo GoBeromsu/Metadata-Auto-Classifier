@@ -9,6 +9,11 @@ export interface Provider {
 	temperature: number;
 }
 
+export interface StructuredOutput {
+	output: string[];
+	reliability: number;
+}
+
 export interface APIProvider {
 	callAPI(
 		system_role: string,
@@ -18,10 +23,11 @@ export interface APIProvider {
 		top_p?: number,
 		frequency_penalty?: number,
 		presence_penalty?: number
-	): Promise<string>;
+	): Promise<StructuredOutput>;
 
 	testAPI(provider: Provider): Promise<boolean>;
 }
+
 export interface Model {
 	name: string;
 }
