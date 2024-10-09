@@ -20,5 +20,6 @@ git commit -m "Bump version to $VERSION"
 
 # Create and push tag
 git tag $VERSION
+git push origin $VERSION 
 git push origin --tags
 git push
