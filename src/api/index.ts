@@ -10,7 +10,7 @@ export class OpenAIProvider implements APIProvider {
 		system_role: string,
 		user_prompt: string,
 		provider: Provider,
-		temperature: number = 0,
+		temperature: number = 0.5,
 		top_p: number = 0.95,
 		frequency_penalty: number = 0,
 		presence_penalty: number = 0.5
