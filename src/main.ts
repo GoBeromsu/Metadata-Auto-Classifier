@@ -1,5 +1,5 @@
 import { Notice, Plugin, TFile } from 'obsidian';
-import { DEFAULT_SETTINGS, DEFAULT_TAG_SETTING } from './constant';
+import { DEFAULT_SETTINGS, DEFAULT_TAG_SETTING, FrontmatterTemplate } from './constant';
 
 import { APIHandler } from './api/apiHandler';
 
@@ -14,10 +14,9 @@ export default class AutoClassifierPlugin extends Plugin {
 	frontMatterHandler: FrontMatterHandler;
 
 	async onload() {
-		await this.loadSettings();
-
 		this.apiHandler = new APIHandler();
 		this.frontMatterHandler = new FrontMatterHandler(this.app);
+		await this.loadSettings();
 
 		this.setupCommand();
 		this.addSettingTab(new AutoClassifierSettingTab(this, this.frontMatterHandler));
@@ -29,7 +28,7 @@ export default class AutoClassifierPlugin extends Plugin {
 				id: `fetch-frontmatter-${frontmatter.id}`,
 				name: `Fetch frontmatter: ${frontmatter.name}`,
 				callback: async () => {
-					await this.classifyFrontmatter(frontmatter.id);
+					await this.processFrontmatter([frontmatter.id]);
 				},
 			});
 		});
@@ -42,10 +41,6 @@ export default class AutoClassifierPlugin extends Plugin {
 			},
 			hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'F' }],
 		});
-	}
-
-	async classifyFrontmatter(frontmatterId: number): Promise<void> {
-		await this.processFrontmatter([frontmatterId]);
 	}
 
 	async processAllFrontmatter(): Promise<void> {
@@ -81,9 +76,16 @@ export default class AutoClassifierPlugin extends Plugin {
 		selectedProvider: Provider,
 		currentFile: TFile,
 		content: string,
-		frontmatter: { id: number; name: string; count: number; refs?: string[] }
+		frontmatter: FrontmatterTemplate
 	): Promise<void> {
-		const currentValues = frontmatter.refs ?? [];
+		const currentValues = frontmatter.refs;
+		if (currentValues.length === 0) {
+			new Notice(
+				`⛔ ${this.manifest.name}: No current values found for frontmatter ${frontmatter.name}`
+			);
+			return;
+		}
+
 		const currentValuesString = currentValues.join(', ');
 		const promptTemplate = getPromptTemplate(frontmatter.count, content, currentValuesString);
 
@@ -115,12 +117,14 @@ export default class AutoClassifierPlugin extends Plugin {
 
 	async loadSettings() {
 		const loadedData = await this.loadData();
+
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
 
-		if (!this.settings.frontmatter || this.settings.frontmatter.length === 0) {
-			this.settings.frontmatter = [DEFAULT_TAG_SETTING];
+		const tagSetting = this.settings.frontmatter.find((fm) => fm.name === 'tags');
+		console.log(tagSetting);
+		if (tagSetting && tagSetting.refs.length == 0) {
+			tagSetting.refs = await this.frontMatterHandler.getAllTags();
 		}
-
 		await this.saveSettings();
 	}
 
