@@ -1,10 +1,10 @@
 import { Notice, Plugin, TFile } from 'obsidian';
-import { DEFAULT_SETTINGS, DEFAULT_TAG_SETTING, FrontmatterTemplate } from './constant';
+import { DEFAULT_SETTINGS, FrontmatterTemplate } from './constant';
 
 import { APIHandler } from './api/apiHandler';
 
-import FrontMatterHandler from './frontmatterHandler';
 import { Provider } from 'types/apiInterface';
+import FrontMatterHandler from './frontmatterHandler';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './settings';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from './templates';
 
@@ -28,7 +28,7 @@ export default class AutoClassifierPlugin extends Plugin {
 				id: `fetch-frontmatter-${frontmatter.id}`,
 				name: `Fetch frontmatter: ${frontmatter.name}`,
 				callback: async () => {
-					await this.processFrontmatter([frontmatter.id]);
+					await this.processFrontmatter(frontmatter.id);
 				},
 			});
 		});
@@ -44,11 +44,13 @@ export default class AutoClassifierPlugin extends Plugin {
 	}
 
 	async processAllFrontmatter(): Promise<void> {
-		const frontmatterIds = this.getAllFrontmatterIds();
-		await this.processFrontmatter(frontmatterIds);
+		const frontmatterIds = this.settings.frontmatter.map((fm) => fm.id);
+		for (const frontmatterId of frontmatterIds) {
+			await this.processFrontmatter(frontmatterId);
+		}
 	}
 
-	async processFrontmatter(frontmatterIds: number[]): Promise<void> {
+	async processFrontmatter(frontmatterId: number): Promise<void> {
 		const currentFile = this.app.workspace.getActiveFile();
 		if (!currentFile) {
 			new Notice('No active file.');
@@ -59,17 +61,17 @@ export default class AutoClassifierPlugin extends Plugin {
 			currentFile
 		);
 		const selectedProvider = this.getSelectedProvider();
-		if (!selectedProvider) return;
-
-		for (const frontmatterId of frontmatterIds) {
-			const frontmatter = this.getFrontmatterById(frontmatterId);
-			if (!frontmatter) {
-				new Notice(`No setting found for frontmatter ID ${frontmatterId}.`);
-				continue;
-			}
-
-			await this.processFrontmatterItem(selectedProvider, currentFile, currentContent, frontmatter);
+		if (!selectedProvider) {
+			new Notice('No provider selected.');
+			return;
 		}
+
+		const frontmatter = this.getFrontmatterById(frontmatterId);
+		if (!frontmatter) {
+			new Notice(`No setting found for frontmatter ID ${frontmatterId}.`);
+			return;
+		}
+		await this.processFrontmatterItem(selectedProvider, currentFile, currentContent, frontmatter);
 	}
 
 	private async processFrontmatterItem(
@@ -140,9 +142,5 @@ export default class AutoClassifierPlugin extends Plugin {
 
 	private getFrontmatterById(id: number) {
 		return this.settings.frontmatter.find((fm) => fm.id === id);
-	}
-
-	private getAllFrontmatterIds(): number[] {
-		return this.settings.frontmatter.map((fm) => fm.id);
 	}
 }
