@@ -84,8 +84,8 @@ export default class AutoClassifierPlugin extends Plugin {
 			return;
 		}
 		const content = await this.frontMatterHandler.getMarkdownContentWithoutFrontmatter(currentFile);
-		const currentValuesString = currentValues.join(', ');
-		const promptTemplate = getPromptTemplate(frontmatter.count, content, currentValuesString);
+
+		const promptTemplate = getPromptTemplate(frontmatter.count, content, currentValues);
 
 		const chatRole = DEFAULT_CHAT_ROLE;
 		const apiResponse = await this.apiHandler.processAPIRequest(
