@@ -57,9 +57,6 @@ export default class AutoClassifierPlugin extends Plugin {
 			return;
 		}
 
-		const currentContent = await this.frontMatterHandler.getMarkdownContentWithoutFrontmatter(
-			currentFile
-		);
 		const selectedProvider = this.getSelectedProvider();
 		if (!selectedProvider) {
 			new Notice('No provider selected.');
@@ -71,13 +68,12 @@ export default class AutoClassifierPlugin extends Plugin {
 			new Notice(`No setting found for frontmatter ID ${frontmatterId}.`);
 			return;
 		}
-		await this.processFrontmatterItem(selectedProvider, currentFile, currentContent, frontmatter);
+		await this.processFrontmatterItem(selectedProvider, currentFile, frontmatter);
 	}
 
 	private async processFrontmatterItem(
 		selectedProvider: Provider,
 		currentFile: TFile,
-		content: string,
 		frontmatter: FrontmatterTemplate
 	): Promise<void> {
 		const currentValues = frontmatter.refs;
@@ -87,7 +83,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			);
 			return;
 		}
-
+		const content = await this.frontMatterHandler.getMarkdownContentWithoutFrontmatter(currentFile);
 		const currentValuesString = currentValues.join(', ');
 		const promptTemplate = getPromptTemplate(frontmatter.count, content, currentValuesString);
 
@@ -103,7 +99,7 @@ export default class AutoClassifierPlugin extends Plugin {
 				currentFile,
 				frontmatter.name,
 				apiResponse.output,
-				false
+				false // overwrite
 			);
 			new Notice(
 				`✅ ${apiResponse.output.length} ${frontmatter.name} added: ${apiResponse.output.join(
