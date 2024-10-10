@@ -1,7 +1,6 @@
 import { AutoClassifierSettings } from 'settings';
 import { Provider } from 'types/apiInterface';
 
-export const DEFAULT_MAX_TOKEN = 2048;
 const DEFAULT_TEMPERATURE = 0.7;
 
 // Default provider settings
@@ -31,7 +30,7 @@ const DEFAULT_OPENAI_PROVIDER: Provider = {
 		{ name: OpenAIModelName.GPT_4_OMNI },
 		{ name: OpenAIModelName.GPT_4_MINI },
 	],
-	maxTokens: DEFAULT_MAX_TOKEN,
+
 	lastTested: null,
 	testResult: null,
 	temperature: DEFAULT_TEMPERATURE,

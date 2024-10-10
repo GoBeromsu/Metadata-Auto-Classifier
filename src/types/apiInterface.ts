@@ -3,7 +3,6 @@ export interface Provider {
 	apiKey: string;
 	baseUrl: string;
 	models: Model[];
-	maxTokens: number;
 	lastTested: Date | null;
 	testResult: boolean | null;
 	temperature: number;

@@ -74,31 +74,6 @@ export class Api {
 					await this.plugin.saveSettings();
 				});
 			});
-		new Setting(containerEl)
-			.setName('Max tokens')
-			.setDesc('Set the maximum number of tokens for the selected model')
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter max tokens')
-					.setValue(selectedProvider.maxTokens?.toString() || '')
-					.onChange(async (value) => {
-						const maxTokens = parseInt(value);
-						selectedProvider.maxTokens = maxTokens;
-						await this.plugin.saveSettings();
-						new Notice(`Max tokens updated to ${maxTokens}`);
-					})
-			)
-			.addExtraButton((button) =>
-				button
-					.setIcon('reset')
-					.setTooltip('Set to default max tokens')
-					.onClick(async () => {
-						selectedProvider.maxTokens = DEFAULT_MAX_TOKEN;
-						await this.plugin.saveSettings();
-						new Notice(`Max tokens reset to default: ${DEFAULT_MAX_TOKEN}`);
-						this.display(containerEl);
-					})
-			);
 	}
 
 	private getSelectedProvider(): Provider {

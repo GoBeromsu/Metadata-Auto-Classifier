@@ -26,7 +26,6 @@ export class OpenAIProvider implements APIProvider {
 				{ role: 'system', content: system_role },
 				{ role: 'user', content: user_prompt },
 			],
-			max_tokens: provider.maxTokens,
 			temperature: temperature,
 			top_p: top_p,
 			frequency_penalty: frequency_penalty,
