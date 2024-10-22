@@ -65,10 +65,6 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 	}
 
 	private addNewFrontmatter(containerEl: HTMLElement): void {
-		if (!containerEl.querySelector('h2')) {
-			new Setting(containerEl).setName('Frontmatter settings').setHeading();
-		}
-
 		const newFrontmatter = { ...DEFAULT_FRONTMATTER_SETTING, id: this.generateId() };
 		this.plugin.settings.frontmatter.push(newFrontmatter);
 		this.plugin.saveSettings();
