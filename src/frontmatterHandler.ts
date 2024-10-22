@@ -1,4 +1,4 @@
-import { App, TFile, getFrontMatterInfo } from 'obsidian';
+import { App, TFile, getFrontMatterInfo, getAllTags, CachedMetadata } from 'obsidian';
 
 export default class FrontMatterHandler {
 	constructor(private app: App) {}
@@ -49,29 +49,15 @@ export default class FrontMatterHandler {
 
 	// Get all tags from the vault
 	async getAllTags(): Promise<string[]> {
-		const tags = new Set<string>();
-		const files = this.app.vault.getMarkdownFiles();
-
-		for (const file of files) {
+		const allTags = new Set<string>();
+		this.app.vault.getMarkdownFiles().forEach((file) => {
 			const cachedMetadata = this.app.metadataCache.getFileCache(file);
-
-			// Frontmatter tags
-			const frontmatterTags = cachedMetadata?.frontmatter?.tags;
-			if (Array.isArray(frontmatterTags)) {
-				frontmatterTags.forEach((tag) => {
-					if (typeof tag === 'string') {
-						tags.add(tag.replace(/^#/, ''));
-					}
-				});
+			if (cachedMetadata) {
+				const fileTags = getAllTags(cachedMetadata);
+				if (fileTags) fileTags.forEach((tag) => allTags.add(tag.slice(1))); // Remove the '#' prefix
 			}
-
-			// Inline tags
-			if (cachedMetadata?.tags) {
-				cachedMetadata.tags.forEach((tag) => tags.add(tag.tag.replace(/^#/, '')));
-			}
-		}
-
-		return Array.from(tags);
+		});
+		return Array.from(allTags);
 	}
 
 	// Get the value of a specific key from the frontmatter of a file
