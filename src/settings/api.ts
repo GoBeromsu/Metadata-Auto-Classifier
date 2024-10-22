@@ -1,6 +1,5 @@
-import { Notice, Setting } from 'obsidian';
+import { Setting } from 'obsidian';
 import { AIFactory } from '../api';
-import { DEFAULT_MAX_TOKEN } from '../constant';
 import { ErrorHandler } from '../error/errorHandler';
 import AutoClassifierPlugin from '../main';
 import { Provider } from '../types/apiInterface';
