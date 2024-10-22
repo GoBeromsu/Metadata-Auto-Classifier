@@ -11,7 +11,7 @@ export class Frontmatter extends BaseSettingStrategy {
 	private addFrontmatterSettings(containerEl: HTMLElement, frontmatterId: number): void {
 		const frontmatterSetting = this.getSetting(frontmatterId);
 
-		this.addNameSetting(containerEl, frontmatterSetting);
+		this.addNameSetting(containerEl, frontmatterSetting, frontmatterId);
 		this.addCountSetting(
 			containerEl,
 			frontmatterSetting,
@@ -44,7 +44,8 @@ export class Frontmatter extends BaseSettingStrategy {
 				text.inputEl.addClass('frontmatter-options-textarea');
 			});
 	}
-	private addNameSetting(containerEl: HTMLElement, frontmatterSetting: FrontmatterTemplate): void {
+
+	private addNameSetting(containerEl: HTMLElement, frontmatterSetting: FrontmatterTemplate, frontmatterId: number): void {
 		new Setting(containerEl)
 			.setName('Frontmatter name')
 			.setDesc('Set the name for this frontmatter')
@@ -56,8 +57,18 @@ export class Frontmatter extends BaseSettingStrategy {
 						frontmatterSetting.name = value;
 						await this.plugin.saveSettings();
 					})
+			)
+			.addButton((button) =>
+				button.setButtonText('Delete').setWarning().onClick(async () => {
+					this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
+						(f) => f.id !== frontmatterId
+					);
+					await this.plugin.saveSettings();
+					containerEl.remove(); // Remove the container element from the UI
+				})
 			);
 	}
+
 	getSetting(frontmatterId: number): FrontmatterTemplate {
 		let setting = this.plugin.settings.frontmatter.find((m) => m.id === frontmatterId);
 		if (!setting) {

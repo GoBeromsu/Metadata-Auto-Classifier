@@ -5,9 +5,9 @@ import { Provider } from 'types/apiInterface';
 import FrontMatterHandler from '../frontmatterHandler';
 
 import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from '../constant';
-import { Tag } from './tag';
 import { Api } from './api';
 import { Frontmatter } from './frontmatter';
+import { Tag } from './tag';
 
 export interface AutoClassifierSettings {
 	providers: Provider[];
@@ -59,7 +59,6 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 			if (frontmatter.name !== 'tags') {
 				const frontmatterContainer = containerEl.createDiv();
 				this.frontmatterSetting.display(frontmatterContainer, frontmatter.id);
-				this.addDeleteButton(frontmatterContainer, frontmatter.id);
 			}
 		});
 	}
@@ -70,27 +69,9 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		this.plugin.saveSettings();
 
 		const newFrontmatterContainer = containerEl.createDiv();
-
 		this.frontmatterSetting.display(newFrontmatterContainer, newFrontmatter.id);
-		this.addDeleteButton(newFrontmatterContainer, newFrontmatter.id);
 	}
-
 	private generateId(): number {
 		return Date.now();
-	}
-
-	private addDeleteButton(container: HTMLElement, frontmatterId: number): void {
-		new Setting(container).addButton((button) =>
-			button
-				.setButtonText('Delete')
-				.setWarning()
-				.onClick(() => {
-					this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
-						(f) => f.id !== frontmatterId
-					);
-					this.plugin.saveSettings();
-					container.remove();
-				})
-		);
 	}
 }
