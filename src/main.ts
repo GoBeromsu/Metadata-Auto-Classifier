@@ -39,7 +39,6 @@ export default class AutoClassifierPlugin extends Plugin {
 			callback: async () => {
 				await this.processAllFrontmatter();
 			},
-			hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'F' }],
 		});
 	}
 
