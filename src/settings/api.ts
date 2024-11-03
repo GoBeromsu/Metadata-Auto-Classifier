@@ -1,8 +1,8 @@
 import { Setting } from 'obsidian';
-import { AIFactory } from '../api';
-import { ErrorHandler } from '../error/errorHandler';
+import { AIFactory } from '../api/OpenAIProvider';
+import ErrorHandler from '../error/ErrorHandler';
 import AutoClassifierPlugin from '../main';
-import { Provider } from '../types/apiInterface';
+import { Provider } from '../types/interface';
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;

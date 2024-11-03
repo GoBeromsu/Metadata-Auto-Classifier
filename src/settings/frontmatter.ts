@@ -1,6 +1,6 @@
 import { Setting } from 'obsidian';
-import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from '../constant';
-import { BaseSettingStrategy } from './settingStrategy';
+import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from '../api/constant';
+import { BaseSettingStrategy } from './SettingStrategy';
 
 export class Frontmatter extends BaseSettingStrategy {
 	display(containerEl: HTMLElement, frontmatterId: number): void {
@@ -45,7 +45,11 @@ export class Frontmatter extends BaseSettingStrategy {
 			});
 	}
 
-	private addNameSetting(containerEl: HTMLElement, frontmatterSetting: FrontmatterTemplate, frontmatterId: number): void {
+	private addNameSetting(
+		containerEl: HTMLElement,
+		frontmatterSetting: FrontmatterTemplate,
+		frontmatterId: number
+	): void {
 		new Setting(containerEl)
 			.setName('Frontmatter name')
 			.setDesc('Set the name for this frontmatter')
@@ -59,13 +63,16 @@ export class Frontmatter extends BaseSettingStrategy {
 					})
 			)
 			.addButton((button) =>
-				button.setButtonText('Delete').setWarning().onClick(async () => {
-					this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
-						(f) => f.id !== frontmatterId
-					);
-					await this.plugin.saveSettings();
-					containerEl.remove(); // Remove the container element from the UI
-				})
+				button
+					.setButtonText('Delete')
+					.setWarning()
+					.onClick(async () => {
+						this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
+							(f) => f.id !== frontmatterId
+						);
+						await this.plugin.saveSettings();
+						containerEl.remove(); // Remove the container element from the UI
+					})
 			);
 	}
 

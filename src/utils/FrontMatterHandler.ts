@@ -1,4 +1,4 @@
-import { App, TFile, getFrontMatterInfo, getAllTags, CachedMetadata } from 'obsidian';
+import { App, TFile, getAllTags, getFrontMatterInfo } from 'obsidian';
 
 export default class FrontMatterHandler {
 	constructor(private app: App) {}

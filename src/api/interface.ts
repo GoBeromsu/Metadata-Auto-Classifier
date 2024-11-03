@@ -1,12 +1,4 @@
-export interface Provider {
-	name: string;
-	apiKey: string;
-	baseUrl: string;
-	models: Model[];
-	lastTested: Date | null;
-	testResult: boolean | null;
-	temperature: number;
-}
+import { Provider } from '../types/interface';
 
 export interface StructuredOutput {
 	output: string[];
@@ -25,8 +17,4 @@ export interface APIProvider {
 	): Promise<StructuredOutput>;
 
 	testAPI(provider: Provider): Promise<boolean>;
-}
-
-export interface Model {
-	name: string;
 }

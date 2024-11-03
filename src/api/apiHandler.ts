@@ -1,7 +1,7 @@
-import { AIFactory } from '.';
-import { ErrorHandler } from '../error/errorHandler';
-import { Provider, StructuredOutput } from '../types/apiInterface';
-
+import ErrorHandler from '../error/ErrorHandler';
+import { Provider } from '../types/interface';
+import { StructuredOutput } from './interface';
+import { AIFactory } from './OpenAIProvider';
 export class APIHandler {
 	async processAPIRequest(
 		chatRole: string,

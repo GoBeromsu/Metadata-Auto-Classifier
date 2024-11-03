@@ -1,5 +1,5 @@
-import { DEFAULT_TAG_SETTING } from '../constant';
-import { BaseSettingStrategy } from './settingStrategy';
+import { DEFAULT_TAG_SETTING } from '../api/constant';
+import { BaseSettingStrategy } from './SettingStrategy';
 
 export class Tag extends BaseSettingStrategy {
 	display(containerEl: HTMLElement): void {

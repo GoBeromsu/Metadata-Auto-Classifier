@@ -1,5 +1,5 @@
 import { AutoClassifierSettings } from 'settings';
-import { Provider } from 'types/apiInterface';
+import { Provider } from '../types/interface';
 
 const DEFAULT_TEMPERATURE = 0.7;
 
