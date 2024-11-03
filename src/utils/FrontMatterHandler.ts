@@ -19,9 +19,16 @@ export default class FrontMatterHandler {
 		await this.app.fileManager.processFrontMatter(file, (frontmatter: FrontMatter) => {
 			// Function to remove spaces, except in wiki links
 			const processString = (str: string) => {
-				return str.replace(/(\[\[.*?\]\])|([^\[\]]+)/g, (match, wikiLink, word) => {
-					if (wikiLink) return wikiLink;
-					return word.replace(/\s+/g, '');
+				// Split the string into wiki links [[...]] and regular text
+				// First capture group: (\[\[.*?\]\]) matches wiki links like [[Some Link]]
+				// Second capture group: ([^\[\]]+) matches any text that's not inside brackets
+				return str.replace(/(\[\[.*?\]\])|([^\[\]]+)/g, (fullMatch, wikiLinkMatch, regularTextMatch) => {
+					// Preserve wiki links exactly as they are
+					if (wikiLinkMatch) {
+						return wikiLinkMatch;
+					}
+					// Remove all whitespace from regular text
+					return regularTextMatch.replace(/\s+/g, '');
 				});
 			};
 
