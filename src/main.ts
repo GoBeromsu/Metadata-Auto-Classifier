@@ -3,7 +3,7 @@ import { DEFAULT_SETTINGS, FrontmatterTemplate } from './api/constant';
 
 import { APIHandler } from './api/ApiHandler';
 
-import { AutoClassifierSettings, AutoClassifierSettingTab } from './settings';
+import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
 import { Provider } from './types/interface';
 import FrontMatterHandler from './utils/FrontMatterHandler';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from './utils/templates';
