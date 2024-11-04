@@ -2,6 +2,7 @@ import { DEFAULT_FRONTMATTER_SETTING } from 'shared/constant';
 import { FrontmatterTemplate } from 'shared/constant';
 import { App, TFile, getAllTags, getFrontMatterInfo } from 'obsidian';
 import AutoClassifierPlugin from '../main';
+import { processString } from './index';
 
 interface FrontMatter {
 	[key: string]: string[];
@@ -24,24 +25,6 @@ export default class FrontMatterHandler {
 		overwrite = false
 	): Promise<void> {
 		await this.app.fileManager.processFrontMatter(file, (frontmatter: FrontMatter) => {
-			// Function to remove spaces, except in wiki links
-			const processString = (str: string) => {
-				// Split the string into wiki links [[...]] and regular text
-				// First capture group: (\[\[.*?\]\]) matches wiki links like [[Some Link]]
-				// Second capture group: ([^\[\]]+) matches any text that's not inside brackets
-				return str.replace(
-					/(\[\[.*?\]\])|([^\[\]]+)/g,
-					(fullMatch, wikiLinkMatch, regularTextMatch) => {
-						// Preserve wiki links exactly as they are
-						if (wikiLinkMatch) {
-							return wikiLinkMatch;
-						}
-						// Remove all whitespace from regular text
-						return regularTextMatch.replace(/\s+/g, '');
-					}
-				);
-			};
-
 			// Process the value
 			const processedValue = value.map(processString);
 
@@ -49,7 +32,6 @@ export default class FrontMatterHandler {
 				const existingValue = frontmatter[key].map(processString);
 				frontmatter[key] = [...existingValue, ...processedValue];
 			} else {
-				// If no existing value or overwrite is true, directly set processedValue
 				frontmatter[key] = processedValue;
 			}
 
