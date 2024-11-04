@@ -1,12 +1,19 @@
+import { DEFAULT_FRONTMATTER_SETTING } from 'shared/constant';
+import { FrontmatterTemplate } from 'shared/constant';
 import { App, TFile, getAllTags, getFrontMatterInfo } from 'obsidian';
+import AutoClassifierPlugin from '../main';
+
 interface FrontMatter {
 	[key: string]: string[];
 }
+
 export default class FrontMatterHandler {
 	private readonly app: App;
+	private readonly plugin: AutoClassifierPlugin;
 
-	constructor(app: App) {
-		this.app = app;
+	constructor(plugin: AutoClassifierPlugin) {
+		this.plugin = plugin;
+		this.app = plugin.app;
 	}
 
 	// Insert or update a key-value pair in the frontmatter of a file
@@ -22,14 +29,17 @@ export default class FrontMatterHandler {
 				// Split the string into wiki links [[...]] and regular text
 				// First capture group: (\[\[.*?\]\]) matches wiki links like [[Some Link]]
 				// Second capture group: ([^\[\]]+) matches any text that's not inside brackets
-				return str.replace(/(\[\[.*?\]\])|([^\[\]]+)/g, (fullMatch, wikiLinkMatch, regularTextMatch) => {
-					// Preserve wiki links exactly as they are
-					if (wikiLinkMatch) {
-						return wikiLinkMatch;
+				return str.replace(
+					/(\[\[.*?\]\])|([^\[\]]+)/g,
+					(fullMatch, wikiLinkMatch, regularTextMatch) => {
+						// Preserve wiki links exactly as they are
+						if (wikiLinkMatch) {
+							return wikiLinkMatch;
+						}
+						// Remove all whitespace from regular text
+						return regularTextMatch.replace(/\s+/g, '');
 					}
-					// Remove all whitespace from regular text
-					return regularTextMatch.replace(/\s+/g, '');
-				});
+				);
 			};
 
 			// Process the value
@@ -66,5 +76,39 @@ export default class FrontMatterHandler {
 		const content = await this.app.vault.read(file);
 		const { contentStart } = getFrontMatterInfo(content);
 		return content.slice(contentStart).trim();
+	}
+
+	// Moved from BaseSettingsComponent
+	getFrontmatterSetting(id: number): FrontmatterTemplate {
+		const setting = this.plugin.settings.frontmatter.find((f) => f.id === id);
+		if (!setting) {
+			const newSetting = { ...DEFAULT_FRONTMATTER_SETTING, id };
+			this.plugin.settings.frontmatter.push(newSetting);
+			return newSetting;
+		}
+		return setting;
+	}
+
+	async updateFrontmatterName(setting: FrontmatterTemplate, name: string): Promise<void> {
+		setting.name = name;
+		await this.plugin.saveSettings();
+	}
+
+	async updateFrontmatterCount(setting: FrontmatterTemplate, count: number): Promise<void> {
+		setting.count = count;
+		await this.plugin.saveSettings();
+	}
+
+	async updateFrontmatterOptions(setting: FrontmatterTemplate, options: string): Promise<void> {
+		setting.refs = options
+			.split(',')
+			.map((option) => option.trim())
+			.filter((option) => option !== '');
+		await this.plugin.saveSettings();
+	}
+
+	async deleteFrontmatter(id: number): Promise<void> {
+		this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter((f) => f.id !== id);
+		await this.plugin.saveSettings();
 	}
 }

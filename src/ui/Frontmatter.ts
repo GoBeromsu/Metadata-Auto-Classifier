@@ -1,15 +1,16 @@
 import { Setting } from 'obsidian';
-import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from '../api/constant';
-import { BaseSettingStrategy } from './SettingStrategy';
+import { DEFAULT_FRONTMATTER_SETTING } from 'shared/constant';
+import { FrontmatterTemplate } from 'shared/constant';
+import { BaseSettingsComponent } from './BaseSettingsComponent';
 
-export class Frontmatter extends BaseSettingStrategy {
+export class Frontmatter extends BaseSettingsComponent {
 	display(containerEl: HTMLElement, frontmatterId: number): void {
 		containerEl.empty();
 		this.addFrontmatterSettings(containerEl, frontmatterId);
 	}
 
 	private addFrontmatterSettings(containerEl: HTMLElement, frontmatterId: number): void {
-		const frontmatterSetting = this.getFrontmatterSetting(frontmatterId);
+		const frontmatterSetting = this.frontMatterHandler.getFrontmatterSetting(frontmatterId);
 
 		this.addNameSetting(containerEl, frontmatterSetting, frontmatterId);
 		this.addCountSetting(
@@ -35,11 +36,7 @@ export class Frontmatter extends BaseSettingStrategy {
 					.setPlaceholder('Option1, Option2, Option3')
 					.setValue(frontmatterSetting.refs ? frontmatterSetting.refs.join(', ') : '')
 					.onChange(async (value) => {
-						frontmatterSetting.refs = value
-							.split(',')
-							.map((option) => option.trim())
-							.filter((option) => option !== '');
-						await this.plugin.saveSettings();
+						await this.frontMatterHandler.updateFrontmatterOptions(frontmatterSetting, value);
 					});
 				text.inputEl.addClass('frontmatter-options-textarea');
 			});
@@ -58,8 +55,7 @@ export class Frontmatter extends BaseSettingStrategy {
 					.setPlaceholder('Enter frontmatter name')
 					.setValue(frontmatterSetting.name)
 					.onChange(async (value) => {
-						frontmatterSetting.name = value;
-						await this.plugin.saveSettings();
+						await this.frontMatterHandler.updateFrontmatterName(frontmatterSetting, value);
 					})
 			)
 			.addButton((button) =>
@@ -67,11 +63,8 @@ export class Frontmatter extends BaseSettingStrategy {
 					.setButtonText('Delete')
 					.setWarning()
 					.onClick(async () => {
-						this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
-							(f) => f.id !== frontmatterId
-						);
-						await this.plugin.saveSettings();
-						containerEl.remove(); // Remove the container element from the UI
+						await this.frontMatterHandler.deleteFrontmatter(frontmatterId);
+						containerEl.remove();
 					})
 			);
 	}

@@ -1,14 +1,14 @@
-import { DEFAULT_TAG_SETTING } from '../api/constant';
-import { BaseSettingStrategy } from './SettingStrategy';
+import { FrontmatterTemplate } from 'shared/constant';
+import { BaseSettingsComponent } from './BaseSettingsComponent';
 
-export class Tag extends BaseSettingStrategy {
+export class Tag extends BaseSettingsComponent {
 	display(containerEl: HTMLElement): void {
 		containerEl.empty();
 		this.addTagSettings(containerEl);
 	}
 
 	private addTagSettings(containerEl: HTMLElement): void {
-		const tagSetting = this.getFrontmatterSetting(DEFAULT_TAG_SETTING.id);
+		const tagSetting = this.frontMatterHandler.getFrontmatterSetting(DEFAULT_TAG_SETTING.id);
 
 		this.addCountSetting(
 			containerEl,
@@ -19,3 +19,11 @@ export class Tag extends BaseSettingStrategy {
 		);
 	}
 }
+// Default tag settings
+
+export const DEFAULT_TAG_SETTING: FrontmatterTemplate = {
+	id: 0,
+	name: 'tags',
+	refs: [],
+	count: 5,
+};

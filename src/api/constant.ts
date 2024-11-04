@@ -1,5 +1,6 @@
 import { AutoClassifierSettings } from 'ui';
 import { Provider } from '../types/interface';
+import { DEFAULT_TAG_SETTING } from 'ui/Tag';
 
 const DEFAULT_TEMPERATURE = 0.7;
 
@@ -35,27 +36,6 @@ const DEFAULT_OPENAI_PROVIDER: Provider = {
 	testResult: null,
 	temperature: DEFAULT_TEMPERATURE,
 };
-// Default frontmatter setting
-export const DEFAULT_FRONTMATTER_SETTING = {
-	name: '',
-	count: 1,
-	refs: [],
-};
-
-// Default tag settings
-export const DEFAULT_TAG_SETTING: FrontmatterTemplate = {
-	id: 0,
-	name: 'tags',
-	refs: [],
-	count: 5,
-};
-export interface FrontmatterTemplate {
-	id: number;
-	name: string;
-	count: number;
-	refs: string[];
-}
-
 // Default settings for the Auto Classifier plugin
 export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 	providers: [DEFAULT_OPENAI_PROVIDER],

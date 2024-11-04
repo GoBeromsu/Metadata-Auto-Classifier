@@ -33,14 +33,14 @@ export default class APIHandler {
 			return {
 				success: result,
 				timestamp: new Date(),
-				message: result ? 'Success! API is working.' : 'Error: API is not working.'
+				message: result ? 'Success! API is working.' : 'Error: API is not working.',
 			};
 		} catch (error) {
 			ErrorHandler.handle(error as Error, 'API Key Testing');
 			return {
 				success: false,
 				timestamp: new Date(),
-				message: 'Error: API is not working.'
+				message: 'Error: API is not working.',
 			};
 		}
 	}
