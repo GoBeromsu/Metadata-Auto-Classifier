@@ -1,10 +1,10 @@
 import { Notice, Plugin, TFile } from 'obsidian';
 import { DEFAULT_SETTINGS, FrontmatterTemplate } from './api/constant';
 
-import { APIHandler } from './api/ApiHandler';
+import APIHandler from './api/ApiHandler';
 
-import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
 import { Provider } from './types/interface';
+import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
 import FrontMatterHandler from './utils/FrontMatterHandler';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from './utils/templates';
 

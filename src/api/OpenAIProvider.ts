@@ -4,8 +4,8 @@ import ErrorHandler from '../error/ErrorHandler';
 import { Provider } from '../types/interface';
 import { APIProvider, StructuredOutput } from './interface';
 
-export class OpenAIProvider implements APIProvider {
-	private static baseUrl = 'https://api.openai.com/v1/chat/completions';
+export default class OpenAIProvider implements APIProvider {
+	private readonly baseUrl = 'https://api.openai.com/v1/chat/completions';
 
 	async callAPI(
 		system_role: string,
@@ -35,7 +35,7 @@ export class OpenAIProvider implements APIProvider {
 		};
 
 		const requestParam: RequestUrlParam = {
-			url: OpenAIProvider.baseUrl,
+			url: this.baseUrl,
 			method: 'POST',
 			headers: headers,
 			body: JSON.stringify(data),
@@ -62,17 +62,6 @@ export class OpenAIProvider implements APIProvider {
 		} catch (error) {
 			ErrorHandler.handle(error as Error, 'OpenAI API Test');
 			return false;
-		}
-	}
-}
-
-export class AIFactory {
-	static getProvider(providerName: string): APIProvider {
-		switch (providerName.toLowerCase()) {
-			case 'openai':
-				return new OpenAIProvider();
-			default:
-				throw new Error(`Unknown AI provider: ${providerName}`);
 		}
 	}
 }

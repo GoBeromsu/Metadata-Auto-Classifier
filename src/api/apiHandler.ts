@@ -1,8 +1,9 @@
 import ErrorHandler from '../error/ErrorHandler';
 import { Provider } from '../types/interface';
+import AIFactory from './AIFactory';
 import { StructuredOutput } from './interface';
-import { AIFactory } from './OpenAIProvider';
-export class APIHandler {
+
+export default class APIHandler {
 	async processAPIRequest(
 		chatRole: string,
 		promptTemplate: string,

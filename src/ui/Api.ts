@@ -1,5 +1,5 @@
+import AIFactory from 'api/AIFactory';
 import { Setting } from 'obsidian';
-import { AIFactory } from '../api/OpenAIProvider';
 import ErrorHandler from '../error/ErrorHandler';
 import AutoClassifierPlugin from '../main';
 import { Provider } from '../types/interface';
