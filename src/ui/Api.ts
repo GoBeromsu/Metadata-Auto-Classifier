@@ -1,5 +1,5 @@
 import { Setting } from 'obsidian';
-import { ApiHandler, APITestResult } from '../api/ApiHandler';
+import { ApiHandler, ApiTestResult } from '../api/ApiHandler';
 import AutoClassifierPlugin from '../main';
 import { Provider } from '../types/interface';
 
@@ -84,7 +84,7 @@ export class Api {
 		);
 	}
 
-	private updateAPITestResult(apiKeySetting: Setting, testResult: APITestResult): void {
+	private updateAPITestResult(apiKeySetting: Setting, testResult: ApiTestResult): void {
 		apiKeySetting.setDesc(
 			`Last tested: ${testResult.timestamp.toLocaleString()} - ${testResult.message}`
 		);
