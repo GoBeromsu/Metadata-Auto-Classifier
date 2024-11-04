@@ -9,7 +9,7 @@ export class Frontmatter extends BaseSettingStrategy {
 	}
 
 	private addFrontmatterSettings(containerEl: HTMLElement, frontmatterId: number): void {
-		const frontmatterSetting = this.getSetting(frontmatterId);
+		const frontmatterSetting = this.getFrontmatterSetting(frontmatterId);
 
 		this.addNameSetting(containerEl, frontmatterSetting, frontmatterId);
 		this.addCountSetting(
@@ -74,14 +74,5 @@ export class Frontmatter extends BaseSettingStrategy {
 						containerEl.remove(); // Remove the container element from the UI
 					})
 			);
-	}
-
-	getSetting(frontmatterId: number): FrontmatterTemplate {
-		let setting = this.plugin.settings.frontmatter.find((m) => m.id === frontmatterId);
-		if (!setting) {
-			setting = { ...DEFAULT_FRONTMATTER_SETTING, id: frontmatterId };
-			this.plugin.settings.frontmatter.push(setting);
-		}
-		return setting;
 	}
 }

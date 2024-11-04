@@ -8,7 +8,7 @@ export class Tag extends BaseSettingStrategy {
 	}
 
 	private addTagSettings(containerEl: HTMLElement): void {
-		const tagSetting = this.getSetting(DEFAULT_TAG_SETTING.id);
+		const tagSetting = this.getFrontmatterSetting(DEFAULT_TAG_SETTING.id);
 
 		this.addCountSetting(
 			containerEl,

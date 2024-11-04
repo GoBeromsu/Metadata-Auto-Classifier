@@ -5,7 +5,7 @@ import FrontMatterHandler from 'utils/FrontMatterHandler';
 import AutoClassifierPlugin from '../main';
 export interface SettingStrategy {
 	display(containerEl: HTMLElement, frontmatterId?: number): void;
-	getSetting(id: number): FrontmatterTemplate;
+	getFrontmatterSetting(id: number): FrontmatterTemplate;
 	addCountSetting(
 		containerEl: HTMLElement,
 		setting: FrontmatterTemplate,
@@ -17,24 +17,23 @@ export interface SettingStrategy {
 
 export abstract class BaseSettingStrategy implements SettingStrategy {
 	protected plugin: AutoClassifierPlugin;
-	protected metaDataManager: FrontMatterHandler;
+	protected frontMatterHandler: FrontMatterHandler;
 
 	constructor(plugin: AutoClassifierPlugin, metaDataManager: FrontMatterHandler) {
 		this.plugin = plugin;
-		this.metaDataManager = metaDataManager;
+		this.frontMatterHandler = metaDataManager;
 	}
 
 	abstract display(containerEl: HTMLElement, frontmatterId?: number): void;
 
-	getSetting(id: number): FrontmatterTemplate {
+	getFrontmatterSetting(id: number): FrontmatterTemplate {
 		const setting = this.plugin.settings.frontmatter.find((f) => f.id === id);
-		if (setting) {
-			return setting;
-		} else {
+		if (!setting) {
 			const newSetting = { ...DEFAULT_FRONTMATTER_SETTING, id };
 			this.plugin.settings.frontmatter.push(newSetting);
 			return newSetting;
 		}
+		return setting;
 	}
 	addCountSetting(
 		containerEl: HTMLElement,
