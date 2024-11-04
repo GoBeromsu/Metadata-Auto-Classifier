@@ -9,10 +9,8 @@ export default class OpenAIProvider implements APIProvider {
 		system_role: string,
 		user_prompt: string,
 		provider: Provider,
-		temperature?: number,
-		top_p: number = 0.95,
-		frequency_penalty: number = 0,
-		presence_penalty: number = 0.5
+		selectedModel: string,
+		temperature?: number
 	): Promise<StructuredOutput> {
 		const headers: Record<string, string> = {
 			Authorization: `Bearer ${provider.apiKey}`,
@@ -20,15 +18,12 @@ export default class OpenAIProvider implements APIProvider {
 		};
 
 		const data = {
-			model: provider.models[0].name,
+			model: selectedModel,
 			messages: [
 				{ role: 'system', content: system_role },
 				{ role: 'user', content: user_prompt },
 			],
 			temperature: temperature ?? provider.temperature,
-			top_p: top_p,
-			frequency_penalty: frequency_penalty,
-			presence_penalty: presence_penalty,
 			response_format: { type: 'json_object' },
 		};
 
@@ -55,7 +50,12 @@ export default class OpenAIProvider implements APIProvider {
 
 	async testAPI(provider: Provider): Promise<boolean> {
 		try {
-			await this.callAPI('You are a test system.', 'This is a test prompt.', provider);
+			await this.callAPI(
+				'You are a test system.',
+				'This is a test prompt.',
+				provider,
+				provider.models[0].name
+			);
 			return true;
 		} catch (error) {
 			ErrorHandler.handle(error as Error, 'OpenAI API Test');

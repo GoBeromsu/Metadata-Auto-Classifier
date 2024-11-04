@@ -10,10 +10,8 @@ export interface APIProvider {
 		system_role: string,
 		user_prompt: string,
 		provider: Provider,
-		temperature?: number,
-		top_p?: number,
-		frequency_penalty?: number,
-		presence_penalty?: number
+		selectedModel: string,
+		temperature?: number
 	): Promise<StructuredOutput>;
 
 	testAPI(provider: Provider): Promise<boolean>;

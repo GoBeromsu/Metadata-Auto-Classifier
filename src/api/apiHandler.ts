@@ -13,11 +13,17 @@ export default class APIHandler {
 	async processAPIRequest(
 		chatRole: string,
 		promptTemplate: string,
-		selectedProvider: Provider
+		selectedProvider: Provider,
+		selectedModel: string
 	): Promise<StructuredOutput> {
 		try {
 			const providerInstance = AIFactory.getProvider(selectedProvider.name);
-			const response = await providerInstance.callAPI(chatRole, promptTemplate, selectedProvider);
+			const response = await providerInstance.callAPI(
+				chatRole,
+				promptTemplate,
+				selectedProvider,
+				selectedModel
+			);
 			return response;
 		} catch (error) {
 			ErrorHandler.handle(error as Error, `API Request Error`);

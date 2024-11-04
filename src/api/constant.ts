@@ -18,10 +18,8 @@ export enum APIEndpoints {
 // OpenAI model names
 export enum OpenAIModelName {
 	GPT_3_5_TURBO = 'gpt-3.5-turbo',
-	GPT_4 = 'gpt-4',
-	GPT_4_32K = 'gpt-4-32k',
-	GPT_4_OMNI = 'gpt-4-omni',
-	GPT_4_MINI = 'gpt-4-mini',
+	GPT_4_OMNI = 'gpt-4o',
+	GPT_4_MINI = 'gpt-4o-mini',
 }
 
 // Default OpenAI provider configuration
@@ -31,8 +29,6 @@ const DEFAULT_OPENAI_PROVIDER: Provider = {
 	baseUrl: DefaultProvider.BASE_URL,
 	models: [
 		{ name: OpenAIModelName.GPT_3_5_TURBO },
-		{ name: OpenAIModelName.GPT_4 },
-		{ name: OpenAIModelName.GPT_4_32K },
 		{ name: OpenAIModelName.GPT_4_OMNI },
 		{ name: OpenAIModelName.GPT_4_MINI },
 	],

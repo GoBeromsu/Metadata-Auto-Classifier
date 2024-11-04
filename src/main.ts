@@ -88,10 +88,13 @@ export default class AutoClassifierPlugin extends Plugin {
 		const promptTemplate = getPromptTemplate(frontmatter.count, content, currentValues);
 
 		const chatRole = DEFAULT_CHAT_ROLE;
+		const selectedModel = this.settings.selectedModel;
+		console.log(selectedModel);
 		const apiResponse = await this.apiHandler.processAPIRequest(
 			chatRole,
 			promptTemplate,
-			selectedProvider
+			selectedProvider,
+			selectedModel
 		);
 
 		if (apiResponse && apiResponse.reliability > 0.2) {
