@@ -1,6 +1,6 @@
-import ErrorHandler from '../error/ErrorHandler';
+import { ErrorHandler } from '../error/ErrorHandler';
 import { Provider } from '../types/interface';
-import AIFactory from './AIFactory';
+import { AIFactory } from './AIFactory';
 import { StructuredOutput } from './interface';
 
 export interface APITestResult {
@@ -9,7 +9,7 @@ export interface APITestResult {
 	message: string;
 }
 
-export default class APIHandler {
+export class ApiHandler {
 	async processAPIRequest(
 		chatRole: string,
 		promptTemplate: string,

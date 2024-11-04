@@ -1,9 +1,9 @@
 import { Notice } from 'obsidian';
-import { APIError } from './APIError';
+import { ApiError } from './ApiError';
 
-export default class ErrorHandler {
+export class ErrorHandler {
 	private static formatErrorMessage(error: Error, context: string): string {
-		if (error instanceof APIError) {
+		if (error instanceof ApiError) {
 			return `API Error (${error.status}): ${error.message} in ${context}`;
 		}
 		return `Error: ${error.message} in ${context}`;

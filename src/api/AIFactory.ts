@@ -1,7 +1,7 @@
 import { APIProvider } from './interface';
-import OpenAIProvider from './OpenAIProvider';
+import { OpenAIProvider } from './OpenAIProvider';
 
-export default class AIFactory {
+export class AIFactory {
 	static getProvider(providerName: string): APIProvider {
 		switch (providerName.toLowerCase()) {
 			case 'openai':

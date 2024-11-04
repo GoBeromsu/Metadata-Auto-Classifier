@@ -2,7 +2,7 @@ import { Notice, Plugin, TFile } from 'obsidian';
 import { DEFAULT_SETTINGS } from './api/constant';
 import { FrontmatterTemplate } from 'shared/constant';
 
-import APIHandler from './api/ApiHandler';
+import { ApiHandler } from './api/ApiHandler';
 
 import { Provider } from './types/interface';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
@@ -10,12 +10,12 @@ import FrontMatterHandler from './frontmatter/FrontMatterHandler';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from './utils/templates';
 
 export default class AutoClassifierPlugin extends Plugin {
-	apiHandler: APIHandler;
+	apiHandler: ApiHandler;
 	settings: AutoClassifierSettings;
 	frontMatterHandler: FrontMatterHandler;
 
 	async onload() {
-		this.apiHandler = new APIHandler();
+		this.apiHandler = new ApiHandler();
 		this.frontMatterHandler = new FrontMatterHandler(this);
 		await this.loadSettings();
 

@@ -1,14 +1,14 @@
 import { Setting } from 'obsidian';
-import APIHandler, { APITestResult } from '../api/ApiHandler';
+import { ApiHandler, APITestResult } from '../api/ApiHandler';
 import AutoClassifierPlugin from '../main';
 import { Provider } from '../types/interface';
 
 export class Api {
-	private apiHandler: APIHandler;
+	private apiHandler: ApiHandler;
 	protected plugin: AutoClassifierPlugin;
 	constructor(plugin: AutoClassifierPlugin) {
 		this.plugin = plugin;
-		this.apiHandler = new APIHandler();
+		this.apiHandler = new ApiHandler();
 	}
 
 	display(containerEl: HTMLElement): void {

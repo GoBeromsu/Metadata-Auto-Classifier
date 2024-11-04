@@ -1,10 +1,10 @@
 import { requestUrl, RequestUrlParam } from 'obsidian';
-import { APIError } from '../error/APIError';
-import ErrorHandler from '../error/ErrorHandler';
+import { ApiError } from '../error/ApiError';
+import { ErrorHandler } from '../error/ErrorHandler';
 import { Provider } from '../types/interface';
 import { APIProvider, StructuredOutput } from './interface';
 
-export default class OpenAIProvider implements APIProvider {
+export class OpenAIProvider implements APIProvider {
 	async callAPI(
 		system_role: string,
 		user_prompt: string,
@@ -36,7 +36,7 @@ export default class OpenAIProvider implements APIProvider {
 
 		const response = await requestUrl(requestParam);
 		if (response.status !== 200) {
-			throw new APIError(`API request failed with status ${response.status}`);
+			throw new ApiError(`API request failed with status ${response.status}`);
 		}
 		const responseData = response.json;
 
@@ -44,7 +44,7 @@ export default class OpenAIProvider implements APIProvider {
 			const content = responseData.choices[0].message.content.trim();
 			return JSON.parse(content) as StructuredOutput;
 		} else {
-			throw new APIError('No response from the API');
+			throw new ApiError('No response from the API');
 		}
 	}
 
