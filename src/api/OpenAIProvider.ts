@@ -50,9 +50,15 @@ export class OpenAIProvider implements APIProvider {
 
 	async testAPI(provider: Provider): Promise<boolean> {
 		try {
+			/**
+			 * NOTE: When using JSON mode, the model must be explicitly instructed
+			 * to produce JSON via a system or user message.
+			 * @see https://platform.openai.com/docs/api-reference/chat
+			 */
 			await this.callAPI(
 				'You are a test system.',
-				'This is a test prompt.',
+
+				'Return a JSON object containing "status": "ok"',
 				provider,
 				provider.models[0].name
 			);
