@@ -10,6 +10,11 @@ export enum DefaultProvider {
 	BASE_URL = 'https://api.openai.com/v1',
 }
 
+// API Endpoints
+export enum APIEndpoints {
+	CHAT_COMPLETIONS = '/chat/completions',
+}
+
 // OpenAI model names
 export enum OpenAIModelName {
 	GPT_3_5_TURBO = 'gpt-3.5-turbo',

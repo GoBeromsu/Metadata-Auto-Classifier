@@ -5,13 +5,11 @@ import { Provider } from '../types/interface';
 import { APIProvider, StructuredOutput } from './interface';
 
 export default class OpenAIProvider implements APIProvider {
-	private readonly baseUrl = 'https://api.openai.com/v1/chat/completions';
-
 	async callAPI(
 		system_role: string,
 		user_prompt: string,
 		provider: Provider,
-		temperature: number = 0.5,
+		temperature?: number,
 		top_p: number = 0.95,
 		frequency_penalty: number = 0,
 		presence_penalty: number = 0.5
@@ -27,7 +25,7 @@ export default class OpenAIProvider implements APIProvider {
 				{ role: 'system', content: system_role },
 				{ role: 'user', content: user_prompt },
 			],
-			temperature: temperature,
+			temperature: temperature ?? provider.temperature,
 			top_p: top_p,
 			frequency_penalty: frequency_penalty,
 			presence_penalty: presence_penalty,
@@ -35,7 +33,7 @@ export default class OpenAIProvider implements APIProvider {
 		};
 
 		const requestParam: RequestUrlParam = {
-			url: this.baseUrl,
+			url: `${provider.baseUrl}/chat/completions`,
 			method: 'POST',
 			headers: headers,
 			body: JSON.stringify(data),
