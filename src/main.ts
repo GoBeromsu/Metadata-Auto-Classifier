@@ -76,6 +76,11 @@ export default class AutoClassifierPlugin extends Plugin {
 		currentFile: TFile,
 		frontmatter: FrontmatterTemplate
 	): Promise<void> {
+		if (frontmatter.name === 'tags') {
+			frontmatter.refs = await this.frontMatterHandler.getAllTags();
+			await this.saveSettings();
+		}
+
 		const currentValues = frontmatter.refs;
 		if (currentValues.length === 0) {
 			new Notice(
@@ -89,7 +94,7 @@ export default class AutoClassifierPlugin extends Plugin {
 
 		const chatRole = DEFAULT_CHAT_ROLE;
 		const selectedModel = this.settings.selectedModel;
-		console.log(selectedModel);
+
 		const apiResponse = await this.apiHandler.processAPIRequest(
 			chatRole,
 			promptTemplate,
@@ -118,14 +123,7 @@ export default class AutoClassifierPlugin extends Plugin {
 
 	async loadSettings() {
 		const loadedData = await this.loadData();
-
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
-
-		const tagSetting = this.settings.frontmatter.find((fm) => fm.name === 'tags');
-
-		if (tagSetting && tagSetting.refs.length == 0) {
-			tagSetting.refs = await this.frontMatterHandler.getAllTags();
-		}
 		await this.saveSettings();
 	}
 
