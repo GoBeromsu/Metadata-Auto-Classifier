@@ -14,14 +14,17 @@ export default class APIHandler {
 		chatRole: string,
 		promptTemplate: string,
 		selectedProvider: Provider
-	): Promise<StructuredOutput | null> {
+	): Promise<StructuredOutput> {
 		try {
 			const providerInstance = AIFactory.getProvider(selectedProvider.name);
 			const response = await providerInstance.callAPI(chatRole, promptTemplate, selectedProvider);
 			return response;
 		} catch (error) {
 			ErrorHandler.handle(error as Error, `API Request Error`);
-			return null;
+			return {
+				output: [],
+				reliability: 0,
+			};
 		}
 	}
 
