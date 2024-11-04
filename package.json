@@ -6,7 +6,8 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"version": "1.2.2"
+		"ci": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production --if-present",
+		"version": "node retag-version.sh"
 	},
 	"keywords": [
 		"obsidian",
@@ -18,11 +19,14 @@
 	"author": "Beomsu Koh",
 	"license": "MIT",
 	"devDependencies": {
+		"@codemirror/state": "^6.0.0",
+		"@codemirror/view": "^6.0.0",
 		"@types/node": "^16.11.6",
 		"@typescript-eslint/eslint-plugin": "5.29.0",
 		"@typescript-eslint/parser": "5.29.0",
 		"builtin-modules": "3.3.0",
 		"esbuild": "0.17.3",
+		"eslint": "^8.0.0",
 		"obsidian": "latest",
 		"tslib": "2.6.2",
 		"typescript": "5.4.5"
