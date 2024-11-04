@@ -1,15 +1,16 @@
-import AIFactory from 'api/AIFactory';
 import { Setting } from 'obsidian';
-import ErrorHandler from '../error/ErrorHandler';
+import APIHandler, { APITestResult } from '../api/ApiHandler';
 import AutoClassifierPlugin from '../main';
 import { Provider } from '../types/interface';
 
 export class Api {
+	private apiHandler: APIHandler;
 	protected plugin: AutoClassifierPlugin;
-
 	constructor(plugin: AutoClassifierPlugin) {
 		this.plugin = plugin;
+		this.apiHandler = new APIHandler();
 	}
+
 	display(containerEl: HTMLElement): void {
 		containerEl.empty();
 		this.addAPIProviderSetting(containerEl);
@@ -51,9 +52,9 @@ export class Api {
 			)
 			.addButton((button) =>
 				button.setButtonText('Test').onClick(async () => {
-					await this.testAPIKey(selectedProvider);
-
-					this.updateAPITestResult(apiKeySetting, selectedProvider);
+					const testResult = await this.apiHandler.testAPIKey(selectedProvider);
+					this.updateAPITestResult(apiKeySetting, testResult);
+					await this.plugin.saveSettings();
 				})
 			);
 	}
@@ -83,29 +84,10 @@ export class Api {
 		);
 	}
 
-	private async testAPIKey(provider: Provider): Promise<void> {
-		try {
-			const aiProvider = AIFactory.getProvider(provider.name);
-			const result = await aiProvider.testAPI(provider);
-
-			provider.testResult = result;
-			provider.lastTested = new Date();
-
-			await this.plugin.saveSettings();
-		} catch (error) {
-			ErrorHandler.handle(error as Error, 'API Key Testing');
-		}
-	}
-
-	private updateAPITestResult(apiKeySetting: Setting, provider: Provider): void {
-		if (provider.lastTested) {
-			const resultText = provider.testResult
-				? 'Success! API is working.'
-				: 'Error: API is not working.';
-			const resultClass = provider.testResult ? 'api-test-success' : 'api-test-error';
-
-			apiKeySetting.setDesc(`Last tested: ${provider.lastTested.toLocaleString()} - ${resultText}`);
-			apiKeySetting.descEl.classList.add(resultClass);
-		}
+	private updateAPITestResult(apiKeySetting: Setting, testResult: APITestResult): void {
+		apiKeySetting.setDesc(
+			`Last tested: ${testResult.timestamp.toLocaleString()} - ${testResult.message}`
+		);
+		apiKeySetting.descEl.classList.add(testResult.success ? 'api-test-success' : 'api-test-error');
 	}
 }

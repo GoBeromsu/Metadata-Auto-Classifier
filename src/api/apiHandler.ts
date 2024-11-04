@@ -3,6 +3,12 @@ import { Provider } from '../types/interface';
 import AIFactory from './AIFactory';
 import { StructuredOutput } from './interface';
 
+export interface APITestResult {
+	success: boolean;
+	timestamp: Date;
+	message: string;
+}
+
 export default class APIHandler {
 	async processAPIRequest(
 		chatRole: string,
@@ -19,23 +25,23 @@ export default class APIHandler {
 		}
 	}
 
-	// This function is no longer used because:
-	// 1. We now use OpenAI's JSON format API, which provides a consistent structure
-	// 2. Error handling is no longer necessary due to the reliable JSON format
-	// 3. The trimming of output items is now handled elsewhere in the codebase
-	private processAPIResponse(response: StructuredOutput): StructuredOutput | null {
+	async testAPIKey(provider: Provider): Promise<APITestResult> {
 		try {
-			console.log(response.output.map((item) => item.trim()));
+			const aiProvider = AIFactory.getProvider(provider.name);
+			const result = await aiProvider.testAPI(provider);
+
 			return {
-				output: response.output.map((item) => item.trim()),
-				reliability: response.reliability,
+				success: result,
+				timestamp: new Date(),
+				message: result ? 'Success! API is working.' : 'Error: API is not working.'
 			};
 		} catch (error) {
-			ErrorHandler.handle(
-				error as Error,
-				`⛔ Output format error (output: ${JSON.stringify(response)})`
-			);
-			return null;
+			ErrorHandler.handle(error as Error, 'API Key Testing');
+			return {
+				success: false,
+				timestamp: new Date(),
+				message: 'Error: API is not working.'
+			};
 		}
 	}
 }
