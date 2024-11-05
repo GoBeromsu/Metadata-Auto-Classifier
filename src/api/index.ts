@@ -1,7 +1,7 @@
 import { ErrorHandler } from 'error/ErrorHandler';
 import { AIProvider } from 'utils/constant';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
-import { OpenAI } from './OpenAIProvider';
+import { OpenAI } from './OpenAI';
 
 interface ApiTestResult {
 	success: boolean;
