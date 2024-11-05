@@ -1,8 +1,13 @@
 import { getFrontMatterInfo, MetadataCache, TFile } from 'obsidian';
-import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from 'shared/constant';
-import { generateId } from 'utils';
-import { FrontMatter, InsertFrontMatterParams, ProcessFrontMatterFn } from './interface';
 
+import { generateId } from 'utils';
+import { DEFAULT_FRONTMATTER_SETTING } from 'utils/constant';
+import {
+	FrontMatter,
+	FrontmatterTemplate,
+	InsertFrontMatterParams,
+	ProcessFrontMatterFn,
+} from 'utils/interface';
 /**
  * Processes a string by removing spaces except in wiki links
  * @param str String to process

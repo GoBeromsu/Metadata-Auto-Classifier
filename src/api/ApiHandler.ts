@@ -1,7 +1,8 @@
 import { ErrorHandler } from '../error/ErrorHandler';
-import { Provider } from '../types/interface';
-import { AiFactory } from './AiFactory';
-import { StructuredOutput } from './interface';
+
+import { getProvider } from './AiFactory';
+
+import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 
 export interface ApiTestResult {
 	success: boolean;
@@ -13,11 +14,11 @@ export class ApiHandler {
 	async processAPIRequest(
 		chatRole: string,
 		promptTemplate: string,
-		selectedProvider: Provider,
+		selectedProvider: ProviderConfig,
 		selectedModel: string
 	): Promise<StructuredOutput> {
 		try {
-			const providerInstance = AiFactory.getProvider(selectedProvider.name);
+			const providerInstance = getProvider(selectedProvider.name);
 			const response = await providerInstance.callAPI(
 				chatRole,
 				promptTemplate,
@@ -34,9 +35,9 @@ export class ApiHandler {
 		}
 	}
 
-	async testAPIKey(provider: Provider): Promise<ApiTestResult> {
+	async testAPIKey(provider: ProviderConfig): Promise<ApiTestResult> {
 		try {
-			const aiProvider = AiFactory.getProvider(provider.name);
+			const aiProvider: APIProvider = getProvider(provider.name);
 			const result = await aiProvider.testAPI(provider);
 
 			return {

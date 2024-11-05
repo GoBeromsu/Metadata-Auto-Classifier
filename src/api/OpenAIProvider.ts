@@ -1,14 +1,14 @@
 import { requestUrl, RequestUrlParam } from 'obsidian';
 import { ApiError } from '../error/ApiError';
 import { ErrorHandler } from '../error/ErrorHandler';
-import { Provider } from '../types/interface';
-import { APIProvider, StructuredOutput } from './interface';
+import { ProviderConfig } from '../utils/interface';
+import { APIProvider, StructuredOutput } from 'utils/interface';
 
 export class OpenAIProvider implements APIProvider {
 	async callAPI(
 		system_role: string,
 		user_prompt: string,
-		provider: Provider,
+		provider: ProviderConfig,
 		selectedModel: string,
 		temperature?: number
 	): Promise<StructuredOutput> {
@@ -48,7 +48,7 @@ export class OpenAIProvider implements APIProvider {
 		}
 	}
 
-	async testAPI(provider: Provider): Promise<boolean> {
+	async testAPI(provider: ProviderConfig): Promise<boolean> {
 		try {
 			/**
 			 * NOTE: When using JSON mode, the model must be explicitly instructed

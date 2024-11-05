@@ -1,10 +1,9 @@
 import { Notice, Plugin, TFile } from 'obsidian';
+import { DEFAULT_SETTINGS } from 'utils/constant';
+import { FrontmatterTemplate, ProviderConfig } from 'utils/interface';
 import { ApiHandler } from './api/ApiHandler';
-import { DEFAULT_SETTINGS } from './api/constant';
 import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
 
-import { FrontmatterTemplate } from 'shared/constant';
-import { Provider } from './types/interface';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from './utils/templates';
 
@@ -69,7 +68,7 @@ export default class AutoClassifierPlugin extends Plugin {
 	}
 
 	private processFrontmatterItem = async (
-		selectedProvider: Provider,
+		selectedProvider: ProviderConfig,
 		currentFile: TFile,
 		frontmatter: FrontmatterTemplate
 	): Promise<void> => {
@@ -134,7 +133,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	private getSelectedProvider(): Provider | undefined {
+	private getSelectedProvider(): ProviderConfig | undefined {
 		return this.settings.providers.find(
 			(p) => p.name === this.settings.selectedProvider && p.apiKey
 		);

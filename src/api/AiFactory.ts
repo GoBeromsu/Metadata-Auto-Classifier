@@ -1,13 +1,12 @@
-import { APIProvider } from './interface';
+import { AIProvider } from 'utils/constant';
+import { APIProvider } from 'utils/interface';
 import { OpenAIProvider } from './OpenAIProvider';
 
-export class AiFactory {
-	static getProvider(providerName: string): APIProvider {
-		switch (providerName.toLowerCase()) {
-			case 'openai':
-				return new OpenAIProvider();
-			default:
-				throw new Error(`Unknown AI provider: ${providerName}`);
-		}
+export const getProvider = (providerName: string): APIProvider => {
+	switch (providerName) {
+		case AIProvider.OpenAI:
+			return new OpenAIProvider();
+		default:
+			throw new Error(`Unknown AI provider: ${providerName}`);
 	}
-}
+};

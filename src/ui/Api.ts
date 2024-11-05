@@ -1,7 +1,7 @@
 import { Setting } from 'obsidian';
+import { ProviderConfig } from 'utils/interface';
 import { ApiHandler, ApiTestResult } from '../api/ApiHandler';
 import AutoClassifierPlugin from '../main';
-import { Provider } from '../types/interface';
 
 export class Api {
 	private apiHandler: ApiHandler;
@@ -76,7 +76,7 @@ export class Api {
 			});
 	}
 
-	private getSelectedProvider(): Provider {
+	private getSelectedProvider(): ProviderConfig {
 		return (
 			this.plugin.settings.providers.find(
 				(provider) => provider.name === this.plugin.settings.selectedProvider

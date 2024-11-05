@@ -1,8 +1,9 @@
 import { getFrontmatterSetting } from 'frontmatter';
 import { Setting } from 'obsidian';
-import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from 'shared/constant';
-import { BaseSettingsComponent } from './BaseSettingsComponent';
 
+import { DEFAULT_FRONTMATTER_SETTING } from 'utils/constant';
+import { BaseSettingsComponent } from './BaseSettingsComponent';
+import { FrontmatterTemplate } from 'utils/interface';
 export class Frontmatter extends BaseSettingsComponent {
 	display(containerEl: HTMLElement, frontmatterId: number): void {
 		containerEl.empty();

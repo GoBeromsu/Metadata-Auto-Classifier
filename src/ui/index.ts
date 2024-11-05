@@ -1,6 +1,6 @@
 import AutoClassifierPlugin from 'main';
 import { PluginSettingTab, Setting } from 'obsidian';
-import { Provider } from '../types/interface';
+import { ProviderConfig } from '../shared';
 
 import { addFrontmatterSetting } from 'frontmatter';
 import { FrontmatterTemplate } from 'shared/constant';
@@ -9,7 +9,7 @@ import { Frontmatter } from './Frontmatter';
 import { Tag } from './Tag';
 
 export interface AutoClassifierSettings {
-	providers: Provider[];
+	providers: ProviderConfig[];
 	selectedProvider: string;
 	selectedModel: string;
 	frontmatter: FrontmatterTemplate[];
