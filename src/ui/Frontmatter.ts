@@ -39,7 +39,11 @@ export class Frontmatter extends BaseSettingsComponent {
 					.setPlaceholder('Option1, Option2, Option3')
 					.setValue(frontmatterSetting.refs ? frontmatterSetting.refs.join(', ') : '')
 					.onChange(async (value) => {
-						await this.frontMatterHandler.updateFrontmatterOptions(frontmatterSetting, value);
+						frontmatterSetting.refs = value
+							.split(',')
+							.map((option) => option.trim())
+							.filter((option) => option !== '');
+						await this.plugin.saveSettings();
 					});
 				text.inputEl.addClass('frontmatter-options-textarea');
 			});
@@ -58,7 +62,8 @@ export class Frontmatter extends BaseSettingsComponent {
 					.setPlaceholder('Enter frontmatter name')
 					.setValue(frontmatterSetting.name)
 					.onChange(async (value) => {
-						await this.frontMatterHandler.updateFrontmatterName(frontmatterSetting, value);
+						frontmatterSetting.name = value;
+						await this.plugin.saveSettings();
 					})
 			)
 			.addButton((button) =>
@@ -66,7 +71,10 @@ export class Frontmatter extends BaseSettingsComponent {
 					.setButtonText('Delete')
 					.setWarning()
 					.onClick(async () => {
-						await this.frontMatterHandler.deleteFrontmatter(frontmatterId);
+						this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
+							(f) => f.id !== frontmatterId
+						);
+						await this.plugin.saveSettings();
 						containerEl.remove();
 					})
 			);

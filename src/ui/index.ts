@@ -2,8 +2,6 @@ import AutoClassifierPlugin from 'main';
 import { PluginSettingTab, Setting } from 'obsidian';
 import { Provider } from '../types/interface';
 
-import FrontMatterHandler from '../frontmatter/FrontMatterHandler';
-
 import { addFrontmatterSetting } from 'frontmatter';
 import { FrontmatterTemplate } from 'shared/constant';
 import { Api } from './Api';
@@ -19,17 +17,16 @@ export interface AutoClassifierSettings {
 
 export class AutoClassifierSettingTab extends PluginSettingTab {
 	plugin: AutoClassifierPlugin;
-	metaDataManager: FrontMatterHandler;
 	apiSetting: Api;
 	tagSetting: Tag;
 	frontmatterSetting: Frontmatter;
-	constructor(plugin: AutoClassifierPlugin, frontMatterHandler: FrontMatterHandler) {
+	constructor(plugin: AutoClassifierPlugin) {
 		super(plugin.app, plugin);
 		this.plugin = plugin;
-		this.metaDataManager = frontMatterHandler;
+
 		this.apiSetting = new Api(plugin);
-		this.tagSetting = new Tag(plugin, frontMatterHandler);
-		this.frontmatterSetting = new Frontmatter(plugin, frontMatterHandler);
+		this.tagSetting = new Tag(plugin);
+		this.frontmatterSetting = new Frontmatter(plugin);
 	}
 
 	display(): void {

@@ -2,20 +2,13 @@ import { Setting } from 'obsidian';
 import { FrontmatterTemplate } from 'shared/constant';
 
 import AutoClassifierPlugin from '../main';
-import FrontMatterHandler from 'frontmatter/FrontMatterHandler';
 
 export interface SettingsComponent {
 	display(containerEl: HTMLElement, frontmatterId?: number): void;
 }
 
 export abstract class BaseSettingsComponent implements SettingsComponent {
-	protected plugin: AutoClassifierPlugin;
-	protected frontMatterHandler: FrontMatterHandler;
-
-	constructor(plugin: AutoClassifierPlugin, frontMatterHandler: FrontMatterHandler) {
-		this.plugin = plugin;
-		this.frontMatterHandler = frontMatterHandler;
-	}
+	constructor(protected plugin: AutoClassifierPlugin) {}
 
 	abstract display(containerEl: HTMLElement, frontmatterId?: number): void;
 
@@ -36,7 +29,8 @@ export abstract class BaseSettingsComponent implements SettingsComponent {
 					.onChange(async (value) => {
 						const count = parseInt(value, 10);
 						if (!isNaN(count) && count > 0) {
-							await this.frontMatterHandler.updateFrontmatterCount(setting, count);
+							setting.count = count;
+							await this.plugin.saveSettings();
 						}
 					})
 			)
@@ -45,7 +39,8 @@ export abstract class BaseSettingsComponent implements SettingsComponent {
 					.setIcon('reset')
 					.setTooltip('Reset to default count')
 					.onClick(async () => {
-						await this.frontMatterHandler.updateFrontmatterCount(setting, defaultCount);
+						setting.count = defaultCount;
+						await this.plugin.saveSettings();
 						this.display(containerEl);
 					})
 			);

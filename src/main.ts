@@ -4,7 +4,6 @@ import { DEFAULT_SETTINGS } from './api/constant';
 import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
 
 import { FrontmatterTemplate } from 'shared/constant';
-import FrontMatterHandler from './frontmatter/FrontMatterHandler';
 import { Provider } from './types/interface';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from './utils/templates';
@@ -12,15 +11,13 @@ import { DEFAULT_CHAT_ROLE, getPromptTemplate } from './utils/templates';
 export default class AutoClassifierPlugin extends Plugin {
 	apiHandler: ApiHandler;
 	settings: AutoClassifierSettings;
-	frontMatterHandler: FrontMatterHandler;
 
 	async onload() {
 		this.apiHandler = new ApiHandler();
-		this.frontMatterHandler = new FrontMatterHandler(this);
 		await this.loadSettings();
 
 		this.setupCommand();
-		this.addSettingTab(new AutoClassifierSettingTab(this, this.frontMatterHandler));
+		this.addSettingTab(new AutoClassifierSettingTab(this));
 	}
 
 	setupCommand() {
