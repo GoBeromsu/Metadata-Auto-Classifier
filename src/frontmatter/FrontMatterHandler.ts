@@ -40,19 +40,6 @@ export default class FrontMatterHandler {
 		});
 	}
 
-	// Get all tags from the vault
-	async getAllTags(): Promise<string[]> {
-		const allTags = new Set<string>();
-		this.app.vault.getMarkdownFiles().forEach((file) => {
-			const cachedMetadata = this.app.metadataCache.getFileCache(file);
-			if (cachedMetadata) {
-				const fileTags = getAllTags(cachedMetadata);
-				if (fileTags) fileTags.forEach((tag) => allTags.add(tag.slice(1))); // Remove the '#' prefix
-			}
-		});
-		return Array.from(allTags);
-	}
-
 	// Get the markdown content of a file without the frontmatter
 	async getMarkdownContentWithoutFrontmatter(file: TFile): Promise<string> {
 		const content = await this.app.vault.read(file);

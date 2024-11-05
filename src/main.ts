@@ -1,12 +1,12 @@
 import { Notice, Plugin, TFile } from 'obsidian';
-import { DEFAULT_SETTINGS } from './api/constant';
-import { FrontmatterTemplate } from 'shared/constant';
-
 import { ApiHandler } from './api/ApiHandler';
+import { DEFAULT_SETTINGS } from './api/constant';
+import { getTags } from './frontmatter';
 
+import { FrontmatterTemplate } from 'shared/constant';
+import FrontMatterHandler from './frontmatter/FrontMatterHandler';
 import { Provider } from './types/interface';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
-import FrontMatterHandler from './frontmatter/FrontMatterHandler';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from './utils/templates';
 
 export default class AutoClassifierPlugin extends Plugin {
@@ -77,11 +77,12 @@ export default class AutoClassifierPlugin extends Plugin {
 		frontmatter: FrontmatterTemplate
 	): Promise<void> {
 		if (frontmatter.name === 'tags') {
-			frontmatter.refs = await this.frontMatterHandler.getAllTags();
+			frontmatter.refs = await getTags(this.app.vault.getMarkdownFiles(), this.app.metadataCache);
 			await this.saveSettings();
 		}
 
 		const currentValues = frontmatter.refs;
+
 		if (currentValues.length === 0) {
 			new Notice(
 				`⛔ ${this.manifest.name}: No current values found for frontmatter ${frontmatter.name}`
