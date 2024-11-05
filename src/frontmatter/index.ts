@@ -1,4 +1,6 @@
 import { getFrontMatterInfo, MetadataCache, TFile } from 'obsidian';
+import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from 'shared/constant';
+import { generateId } from 'utils';
 
 /**
  * Processes a string by removing spaces except in wiki links
@@ -35,4 +37,23 @@ export const getTags = async (
 		return tags;
 	}, new Set<string>());
 	return [...allTags];
+};
+
+// Moved from BaseSettingsComponent
+export const getFrontmatterSetting = (
+	id: number,
+	settings: FrontmatterTemplate[]
+): FrontmatterTemplate => {
+	const setting = settings?.find((f) => f.id === id);
+	if (!setting) {
+		throw new Error('Setting not found');
+	}
+	return setting;
+};
+
+export const addFrontmatterSetting = (): FrontmatterTemplate => {
+	return {
+		...DEFAULT_FRONTMATTER_SETTING,
+		id: generateId(),
+	};
 };

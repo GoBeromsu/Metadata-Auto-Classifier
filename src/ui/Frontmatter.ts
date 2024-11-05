@@ -1,6 +1,6 @@
+import { getFrontmatterSetting } from 'frontmatter';
 import { Setting } from 'obsidian';
-import { DEFAULT_FRONTMATTER_SETTING } from 'shared/constant';
-import { FrontmatterTemplate } from 'shared/constant';
+import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from 'shared/constant';
 import { BaseSettingsComponent } from './BaseSettingsComponent';
 
 export class Frontmatter extends BaseSettingsComponent {
@@ -10,7 +10,10 @@ export class Frontmatter extends BaseSettingsComponent {
 	}
 
 	private addFrontmatterSettings(containerEl: HTMLElement, frontmatterId: number): void {
-		const frontmatterSetting = this.frontMatterHandler.getFrontmatterSetting(frontmatterId);
+		const frontmatterSetting = getFrontmatterSetting(
+			frontmatterId,
+			this.plugin.settings.frontmatter
+		);
 
 		this.addNameSetting(containerEl, frontmatterSetting, frontmatterId);
 		this.addCountSetting(

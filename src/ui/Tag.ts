@@ -1,3 +1,4 @@
+import { getFrontmatterSetting } from 'frontmatter';
 import { FrontmatterTemplate } from 'shared/constant';
 import { BaseSettingsComponent } from './BaseSettingsComponent';
 
@@ -8,7 +9,10 @@ export class Tag extends BaseSettingsComponent {
 	}
 
 	private addTagSettings(containerEl: HTMLElement): void {
-		const tagSetting = this.frontMatterHandler.getFrontmatterSetting(DEFAULT_TAG_SETTING.id);
+		const tagSetting = getFrontmatterSetting(
+			DEFAULT_TAG_SETTING.id,
+			this.plugin.settings.frontmatter
+		);
 
 		this.addCountSetting(
 			containerEl,

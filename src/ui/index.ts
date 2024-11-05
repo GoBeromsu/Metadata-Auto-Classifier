@@ -4,7 +4,7 @@ import { Provider } from '../types/interface';
 
 import FrontMatterHandler from '../frontmatter/FrontMatterHandler';
 
-import { DEFAULT_FRONTMATTER_SETTING } from 'shared/constant';
+import { addFrontmatterSetting } from 'frontmatter';
 import { FrontmatterTemplate } from 'shared/constant';
 import { Api } from './Api';
 import { Frontmatter } from './Frontmatter';
@@ -65,14 +65,11 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 	}
 
 	private addNewFrontmatter(containerEl: HTMLElement): void {
-		const newFrontmatter = { ...DEFAULT_FRONTMATTER_SETTING, id: this.generateId() };
+		const newFrontmatter = addFrontmatterSetting();
 		this.plugin.settings.frontmatter.push(newFrontmatter);
 		this.plugin.saveSettings();
 
 		const newFrontmatterContainer = containerEl.createDiv();
 		this.frontmatterSetting.display(newFrontmatterContainer, newFrontmatter.id);
-	}
-	private generateId(): number {
-		return Date.now();
 	}
 }

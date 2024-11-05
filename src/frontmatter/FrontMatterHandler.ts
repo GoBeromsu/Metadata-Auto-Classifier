@@ -1,5 +1,5 @@
 import { App, TFile } from 'obsidian';
-import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from 'shared/constant';
+import { FrontmatterTemplate } from 'shared/constant';
 import AutoClassifierPlugin from '../main';
 import { processString } from './index';
 
@@ -37,17 +37,6 @@ export default class FrontMatterHandler {
 			// Remove duplicates and empty strings
 			frontmatter[key] = [...new Set(frontmatter[key])].filter(Boolean);
 		});
-	}
-
-	// Moved from BaseSettingsComponent
-	getFrontmatterSetting(id: number): FrontmatterTemplate {
-		const setting = this.plugin.settings.frontmatter.find((f) => f.id === id);
-		if (!setting) {
-			const newSetting = { ...DEFAULT_FRONTMATTER_SETTING, id };
-			this.plugin.settings.frontmatter.push(newSetting);
-			return newSetting;
-		}
-		return setting;
 	}
 
 	async updateFrontmatterName(setting: FrontmatterTemplate, name: string): Promise<void> {
