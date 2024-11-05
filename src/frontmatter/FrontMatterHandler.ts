@@ -16,29 +16,6 @@ export default class FrontMatterHandler {
 		this.app = plugin.app;
 	}
 
-	// Insert or update a key-value pair in the frontmatter of a file
-	async insertToFrontMatter(
-		file: TFile,
-		key: string,
-		value: string[],
-		overwrite = false
-	): Promise<void> {
-		await this.app.fileManager.processFrontMatter(file, (frontmatter: FrontMatter) => {
-			// Process the value
-			const processedValue = value.map(processString);
-
-			if (frontmatter[key] && !overwrite) {
-				const existingValue = frontmatter[key].map(processString);
-				frontmatter[key] = [...existingValue, ...processedValue];
-			} else {
-				frontmatter[key] = processedValue;
-			}
-
-			// Remove duplicates and empty strings
-			frontmatter[key] = [...new Set(frontmatter[key])].filter(Boolean);
-		});
-	}
-
 	async updateFrontmatterName(setting: FrontmatterTemplate, name: string): Promise<void> {
 		setting.name = name;
 		await this.plugin.saveSettings();

@@ -1,6 +1,7 @@
 import { getFrontMatterInfo, MetadataCache, TFile } from 'obsidian';
 import { DEFAULT_FRONTMATTER_SETTING, FrontmatterTemplate } from 'shared/constant';
 import { generateId } from 'utils';
+import { FrontMatter, InsertFrontMatterParams, ProcessFrontMatterFn } from './interface';
 
 /**
  * Processes a string by removing spaces except in wiki links
@@ -56,4 +57,19 @@ export const addFrontmatterSetting = (): FrontmatterTemplate => {
 		...DEFAULT_FRONTMATTER_SETTING,
 		id: generateId(),
 	};
+};
+
+export const insertToFrontMatter = async (
+	processFrontMatter: ProcessFrontMatterFn,
+	params: InsertFrontMatterParams
+): Promise<void> => {
+	await processFrontMatter(params.file, (frontmatter: FrontMatter) => {
+		const processedValue = params.value.map(processString);
+		const frontmatterKey = params.overwrite
+			? [...frontmatter[params.key].map(processString), ...processedValue]
+			: processedValue;
+
+		// Remove duplicates and empty strings
+		frontmatter[params.key] = [...new Set(frontmatterKey)].filter(Boolean);
+	});
 };

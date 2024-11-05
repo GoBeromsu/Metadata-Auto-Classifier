@@ -1,7 +1,7 @@
 import { Notice, Plugin, TFile } from 'obsidian';
 import { ApiHandler } from './api/ApiHandler';
 import { DEFAULT_SETTINGS } from './api/constant';
-import { getContentWithoutFrontmatter, getTags } from './frontmatter';
+import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
 
 import { FrontmatterTemplate } from 'shared/constant';
 import FrontMatterHandler from './frontmatter/FrontMatterHandler';
@@ -71,11 +71,11 @@ export default class AutoClassifierPlugin extends Plugin {
 		await this.processFrontmatterItem(selectedProvider, currentFile, frontmatter);
 	}
 
-	private async processFrontmatterItem(
+	private processFrontmatterItem = async (
 		selectedProvider: Provider,
 		currentFile: TFile,
 		frontmatter: FrontmatterTemplate
-	): Promise<void> {
+	): Promise<void> => {
 		if (frontmatter.name === 'tags') {
 			frontmatter.refs = await getTags(this.app.vault.getMarkdownFiles(), this.app.metadataCache);
 			await this.saveSettings();
@@ -105,12 +105,16 @@ export default class AutoClassifierPlugin extends Plugin {
 		);
 
 		if (apiResponse && apiResponse.reliability > 0.2) {
-			await this.frontMatterHandler.insertToFrontMatter(
-				currentFile,
-				frontmatter.name,
-				apiResponse.output,
-				false // overwrite
-			);
+			const processFrontMatter = (file: TFile, fn: (frontmatter: any) => void) =>
+				this.app.fileManager.processFrontMatter(file, fn);
+
+			await insertToFrontMatter(processFrontMatter, {
+				file: currentFile,
+				key: frontmatter.name,
+				value: apiResponse.output,
+				overwrite: false,
+			});
+
 			new Notice(
 				`✅ ${apiResponse.output.length} ${frontmatter.name} added: ${apiResponse.output.join(
 					', '
@@ -121,7 +125,7 @@ export default class AutoClassifierPlugin extends Plugin {
 				`⛔ ${this.manifest.name}: Response has low reliability (${apiResponse.reliability})`
 			);
 		}
-	}
+	};
 
 	async loadSettings() {
 		const loadedData = await this.loadData();
