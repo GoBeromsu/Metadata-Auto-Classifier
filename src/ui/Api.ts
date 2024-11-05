@@ -1,8 +1,8 @@
 import { Setting } from 'obsidian';
 import { ProviderConfig } from 'utils/interface';
 
-import AutoClassifierPlugin from '../main';
 import { validateAPIKey } from 'api';
+import AutoClassifierPlugin from '../main';
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;

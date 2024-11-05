@@ -1,8 +1,8 @@
 import { requestUrl, RequestUrlParam } from 'obsidian';
+import { APIProvider, StructuredOutput } from 'utils/interface';
 import { ApiError } from '../error/ApiError';
 import { ErrorHandler } from '../error/ErrorHandler';
 import { ProviderConfig } from '../utils/interface';
-import { APIProvider, StructuredOutput } from 'utils/interface';
 
 export class OpenAI implements APIProvider {
 	async callAPI(

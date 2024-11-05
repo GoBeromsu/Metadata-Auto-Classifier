@@ -1,7 +1,7 @@
 import { getFrontmatterSetting } from 'frontmatter';
-import { FrontmatterTemplate } from 'shared/constant';
-import { BaseSettingsComponent } from './BaseSettingsComponent';
 
+import { BaseSettingsComponent } from './BaseSettingsComponent';
+import { FrontmatterTemplate } from 'utils/interface';
 export class Tag extends BaseSettingsComponent {
 	display(containerEl: HTMLElement): void {
 		containerEl.empty();

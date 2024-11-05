@@ -1,9 +1,9 @@
 import AutoClassifierPlugin from 'main';
 import { PluginSettingTab, Setting } from 'obsidian';
-import { ProviderConfig } from '../shared';
 
 import { addFrontmatterSetting } from 'frontmatter';
-import { FrontmatterTemplate } from 'shared/constant';
+
+import { FrontmatterTemplate, ProviderConfig } from 'utils/interface';
 import { Api } from './Api';
 import { Frontmatter } from './Frontmatter';
 import { Tag } from './Tag';
