@@ -48,7 +48,7 @@ export class OpenAIProvider implements APIProvider {
 		}
 	}
 
-	async testAPI(provider: ProviderConfig): Promise<boolean> {
+	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
 		try {
 			/**
 			 * NOTE: When using JSON mode, the model must be explicitly instructed

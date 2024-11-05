@@ -47,5 +47,5 @@ export interface APIProvider {
 		temperature?: number
 	): Promise<StructuredOutput>;
 
-	testAPI(provider: ProviderConfig): Promise<boolean>;
+	verifyConnection(provider: ProviderConfig): Promise<boolean>;
 }

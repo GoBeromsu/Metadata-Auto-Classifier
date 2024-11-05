@@ -1,18 +1,16 @@
 import { Notice, Plugin, TFile } from 'obsidian';
 import { DEFAULT_SETTINGS } from 'utils/constant';
 import { FrontmatterTemplate, ProviderConfig } from 'utils/interface';
-import { ApiHandler } from './api/ApiHandler';
 import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
 
+import { processAPIRequest } from 'api';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from './utils/templates';
 
 export default class AutoClassifierPlugin extends Plugin {
-	apiHandler: ApiHandler;
 	settings: AutoClassifierSettings;
 
 	async onload() {
-		this.apiHandler = new ApiHandler();
 		await this.loadSettings();
 
 		this.setupCommand();
@@ -93,7 +91,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		const chatRole = DEFAULT_CHAT_ROLE;
 		const selectedModel = this.settings.selectedModel;
 
-		const apiResponse = await this.apiHandler.processAPIRequest(
+		const apiResponse = await processAPIRequest(
 			chatRole,
 			promptTemplate,
 			selectedProvider,

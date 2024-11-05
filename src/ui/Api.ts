@@ -1,14 +1,13 @@
 import { Setting } from 'obsidian';
 import { ProviderConfig } from 'utils/interface';
-import { ApiHandler, ApiTestResult } from '../api/ApiHandler';
+
 import AutoClassifierPlugin from '../main';
+import { validateAPIKey } from 'api';
 
 export class Api {
-	private apiHandler: ApiHandler;
 	protected plugin: AutoClassifierPlugin;
 	constructor(plugin: AutoClassifierPlugin) {
 		this.plugin = plugin;
-		this.apiHandler = new ApiHandler();
 	}
 
 	display(containerEl: HTMLElement): void {
@@ -52,8 +51,11 @@ export class Api {
 			)
 			.addButton((button) =>
 				button.setButtonText('Test').onClick(async () => {
-					const testResult = await this.apiHandler.testAPIKey(selectedProvider);
-					this.updateAPITestResult(apiKeySetting, testResult);
+					const testResult = await validateAPIKey(selectedProvider);
+					apiKeySetting.setDesc(testResult.message);
+					apiKeySetting.descEl.classList.add(
+						testResult.success ? 'api-test-success' : 'api-test-error'
+					);
 					await this.plugin.saveSettings();
 				})
 			);
@@ -82,12 +84,5 @@ export class Api {
 				(provider) => provider.name === this.plugin.settings.selectedProvider
 			) || this.plugin.settings.providers[0]
 		);
-	}
-
-	private updateAPITestResult(apiKeySetting: Setting, testResult: ApiTestResult): void {
-		apiKeySetting.setDesc(
-			`Last tested: ${testResult.timestamp.toLocaleString()} - ${testResult.message}`
-		);
-		apiKeySetting.descEl.classList.add(testResult.success ? 'api-test-success' : 'api-test-error');
 	}
 }
