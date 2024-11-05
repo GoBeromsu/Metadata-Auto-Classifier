@@ -1,7 +1,7 @@
 import { Notice, Plugin, TFile } from 'obsidian';
 import { ApiHandler } from './api/ApiHandler';
 import { DEFAULT_SETTINGS } from './api/constant';
-import { getTags } from './frontmatter';
+import { getContentWithoutFrontmatter, getTags } from './frontmatter';
 
 import { FrontmatterTemplate } from 'shared/constant';
 import FrontMatterHandler from './frontmatter/FrontMatterHandler';
@@ -89,7 +89,8 @@ export default class AutoClassifierPlugin extends Plugin {
 			);
 			return;
 		}
-		const content = await this.frontMatterHandler.getMarkdownContentWithoutFrontmatter(currentFile);
+		const currentContent = await this.app.vault.read(currentFile);
+		const content = getContentWithoutFrontmatter(currentContent);
 
 		const promptTemplate = getPromptTemplate(frontmatter.count, content, currentValues);
 

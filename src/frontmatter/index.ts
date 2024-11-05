@@ -1,4 +1,4 @@
-import { MetadataCache, TFile } from 'obsidian';
+import { getFrontMatterInfo, MetadataCache, TFile } from 'obsidian';
 
 /**
  * Processes a string by removing spaces except in wiki links
@@ -12,6 +12,16 @@ export const processString = (str: string): string => {
 		}
 		return regularTextMatch.replace(/\s+/g, '');
 	});
+};
+
+/**
+ * Extracts the content of a markdown file excluding frontmatter
+ * @param content - The full content of the markdown file
+ * @returns The content without frontmatter
+ */
+export const getContentWithoutFrontmatter = (content: string): string => {
+	const { contentStart } = getFrontMatterInfo(content);
+	return content.slice(contentStart);
 };
 
 // Get all tags from the vault
