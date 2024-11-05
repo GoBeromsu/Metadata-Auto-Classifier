@@ -4,7 +4,7 @@ import { ErrorHandler } from '../error/ErrorHandler';
 import { ProviderConfig } from '../utils/interface';
 import { APIProvider, StructuredOutput } from 'utils/interface';
 
-export class OpenAIProvider implements APIProvider {
+export class OpenAI implements APIProvider {
 	async callAPI(
 		system_role: string,
 		user_prompt: string,
