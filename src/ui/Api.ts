@@ -2,7 +2,6 @@ import { Setting } from 'obsidian';
 import { ProviderConfig } from 'utils/interface';
 
 import { validateAPIKey } from 'api';
-import AutoClassifierPlugin from '../main';
 import { getDefaultEndpoint } from 'utils';
 
 export class Api {
@@ -86,12 +85,12 @@ export class Api {
 		if (selectedProvider.name === 'Custom') {
 			setting.addText((text) => {
 				const currentModel = selectedProvider.models[0]?.name;
-
 				return text
 					.setPlaceholder('Enter model name')
 					.setValue(currentModel)
 					.onChange(async (value) => {
 						this.plugin.settings.selectedModel = value;
+						selectedProvider.models[0].name = value;
 						await this.plugin.saveSettings();
 					});
 			});
