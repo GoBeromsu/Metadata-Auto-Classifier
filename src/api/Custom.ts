@@ -19,6 +19,26 @@ export class Custom implements APIProvider {
 				{ role: 'user', content: promptTemplate },
 			],
 			temperature: provider.temperature,
+			response_format: {
+				type: 'json_schema',
+				json_schema: {
+					name: 'structured_output',
+					strict: true,
+					schema: {
+						type: 'object',
+						properties: {
+							output: {
+								type: 'array',
+								items: { type: 'string' },
+							},
+							reliability: {
+								type: 'number',
+							},
+						},
+						required: ['output', 'reliability'],
+					},
+				},
+			},
 		};
 		const requestParam: RequestUrlParam = {
 			url: `${provider.baseUrl}${provider.endpoint}`,
