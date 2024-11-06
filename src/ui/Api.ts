@@ -3,6 +3,7 @@ import { ProviderConfig } from 'utils/interface';
 
 import { validateAPIKey } from 'api';
 import AutoClassifierPlugin from '../main';
+import { getDefaultEndpoint } from 'utils';
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;
@@ -14,13 +15,12 @@ export class Api {
 		containerEl.empty();
 		this.addAPIProviderSetting(containerEl);
 		this.addAPIKeySetting(containerEl);
-
 		const selectedProvider = this.getSelectedProvider();
-
 		this.addModelSetting(containerEl, selectedProvider);
 		if (selectedProvider.name === 'Custom') {
 			this.addBaseURLSetting(containerEl, selectedProvider);
 		}
+		this.addEndpointSetting(containerEl, selectedProvider);
 	}
 
 	private addAPIProviderSetting(containerEl: HTMLElement): void {
@@ -38,7 +38,20 @@ export class Api {
 				});
 			});
 	}
-
+	private addEndpointSetting(containerEl: HTMLElement, selectedProvider: ProviderConfig): void {
+		new Setting(containerEl)
+			.setName('Endpoint')
+			.setDesc('Enter the endpoint for your API')
+			.addText((text) =>
+				text
+					.setPlaceholder(getDefaultEndpoint(selectedProvider.name))
+					.setValue(selectedProvider?.endpoint)
+					.onChange(async (value) => {
+						selectedProvider.endpoint = value;
+						await this.plugin.saveSettings();
+					})
+			);
+	}
 	private addAPIKeySetting(containerEl: HTMLElement): void {
 		const selectedProvider = this.getSelectedProvider();
 

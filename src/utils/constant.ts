@@ -20,7 +20,7 @@ export enum OpenAIModelName {
 	GPT_4_MINI = 'gpt-4o-mini',
 }
 // Default OpenAI provider configuration
-const DEFAULT_OPENAI_PROVIDER: ProviderConfig = {
+export const OPENAI_PROVIDER: ProviderConfig = {
 	name: AIProvider.OpenAI,
 	apiKey: '',
 	baseUrl: 'https://api.openai.com/v1',
@@ -35,7 +35,7 @@ const DEFAULT_OPENAI_PROVIDER: ProviderConfig = {
 	testResult: null,
 	temperature: DEFAULT_TEMPERATURE,
 };
-const CUSTOM_PROVIDER: ProviderConfig = {
+export const CUSTOM_PROVIDER: ProviderConfig = {
 	name: AIProvider.Custom,
 	apiKey: '',
 	baseUrl: '',
@@ -50,7 +50,7 @@ const CUSTOM_PROVIDER: ProviderConfig = {
 };
 // Default settings for the Auto Classifier plugin
 export const DEFAULT_SETTINGS: AutoClassifierSettings = {
-	providers: [DEFAULT_OPENAI_PROVIDER, CUSTOM_PROVIDER],
+	providers: [OPENAI_PROVIDER, CUSTOM_PROVIDER],
 	selectedProvider: AIProvider.OpenAI,
 	selectedModel: OpenAIModelName.GPT_4_OMNI,
 	frontmatter: [DEFAULT_TAG_SETTING],
