@@ -23,8 +23,8 @@ export enum OpenAIModelName {
 export const OPENAI_PROVIDER: ProviderConfig = {
 	name: AIProvider.OpenAI,
 	apiKey: '',
-	baseUrl: 'https://api.openai.com/v1',
-	endpoint: '/chat/completions',
+	baseUrl: 'https://api.openai.com',
+	endpoint: '/v1/chat/completions',
 	models: [
 		{ name: OpenAIModelName.GPT_3_5_TURBO },
 		{ name: OpenAIModelName.GPT_4_OMNI },
