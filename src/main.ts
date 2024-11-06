@@ -6,6 +6,7 @@ import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './fr
 import { processAPIRequest } from 'api';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from './utils/templates';
+import { mergeDefaults } from 'utils';
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
@@ -122,8 +123,9 @@ export default class AutoClassifierPlugin extends Plugin {
 	};
 
 	async loadSettings() {
-		const loadedData = await this.loadData();
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
+		const loadedData = (await this.loadData()) as AutoClassifierSettings;
+
+		this.settings = mergeDefaults(DEFAULT_SETTINGS, loadedData);
 		await this.saveSettings();
 	}
 

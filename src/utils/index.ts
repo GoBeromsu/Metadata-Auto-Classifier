@@ -14,3 +14,14 @@ export const getDefaultEndpoint = (providerName: string): string => {
 			return CUSTOM_PROVIDER.endpoint;
 	}
 };
+export const mergeDefaults = (defaults: any, target: any): any => {
+	Object.entries(defaults).forEach(([key, value]) => {
+		if (!(key in target)) {
+			target[key] = value;
+			console.log(`Adding missing field: ${key}`, { default: value });
+		} else if (typeof value === 'object' && value !== null) {
+			target[key] = mergeDefaults(value, target[key]);
+		}
+	});
+	return target;
+};
