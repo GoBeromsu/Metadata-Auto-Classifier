@@ -1,11 +1,12 @@
 import { getFrontmatterSetting } from 'frontmatter';
 
 import { BaseSettingsComponent } from './BaseSettingsComponent';
-import { FrontmatterTemplate } from 'utils/interface';
+import { DEFAULT_TAG_SETTING } from 'utils/constant';
 export class Tag extends BaseSettingsComponent {
 	display(containerEl: HTMLElement): void {
 		containerEl.empty();
 		this.addTagSettings(containerEl);
+		this.addOverwriteSetting(containerEl, DEFAULT_TAG_SETTING);
 	}
 
 	private addTagSettings(containerEl: HTMLElement): void {
@@ -23,11 +24,3 @@ export class Tag extends BaseSettingsComponent {
 		);
 	}
 }
-// Default tag settings
-
-export const DEFAULT_TAG_SETTING: FrontmatterTemplate = {
-	id: 0,
-	name: 'tags',
-	refs: [],
-	count: 5,
-};

@@ -5,7 +5,8 @@ export interface FrontmatterTemplate {
 	name: string;
 	count: number;
 	refs: string[];
-} // Default frontmatter setting
+	overwrite: boolean;
+}
 export interface ProviderConfig {
 	name: string;
 	apiKey: string;
@@ -32,7 +33,7 @@ export interface InsertFrontMatterParams {
 	file: TFile;
 	key: string;
 	value: string[];
-	overwrite?: boolean;
+	overwrite: boolean;
 }
 export interface StructuredOutput {
 	output: string[];

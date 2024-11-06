@@ -17,6 +17,7 @@ export class Frontmatter extends BaseSettingsComponent {
 		);
 
 		this.addNameSetting(containerEl, frontmatterSetting, frontmatterId);
+		this.addOverwriteSetting(containerEl, frontmatterSetting);
 		this.addCountSetting(
 			containerEl,
 			frontmatterSetting,

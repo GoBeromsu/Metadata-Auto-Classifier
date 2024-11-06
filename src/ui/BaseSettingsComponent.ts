@@ -1,7 +1,7 @@
 import { Setting } from 'obsidian';
 
-import AutoClassifierPlugin from '../main';
 import { FrontmatterTemplate } from 'utils/interface';
+import AutoClassifierPlugin from '../main';
 
 export interface SettingsComponent {
 	display(containerEl: HTMLElement, frontmatterId?: number): void;
@@ -43,6 +43,18 @@ export abstract class BaseSettingsComponent implements SettingsComponent {
 						await this.plugin.saveSettings();
 						this.display(containerEl);
 					})
+			);
+	}
+
+	addOverwriteSetting(containerEl: HTMLElement, setting: FrontmatterTemplate): void {
+		new Setting(containerEl)
+			.setName('Overwrite mode')
+			.setDesc('Toggle between append and overwrite mode')
+			.addToggle((toggle) =>
+				toggle.setValue(setting.overwrite).onChange(async (value) => {
+					setting.overwrite = value;
+					await this.plugin.saveSettings();
+				})
 			);
 	}
 }

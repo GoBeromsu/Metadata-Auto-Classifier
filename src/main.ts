@@ -106,7 +106,7 @@ export default class AutoClassifierPlugin extends Plugin {
 				file: currentFile,
 				key: frontmatter.name,
 				value: apiResponse.output,
-				overwrite: false,
+				overwrite: frontmatter.overwrite,
 			});
 
 			new Notice(

@@ -1,11 +1,11 @@
 import { AutoClassifierSettings } from 'ui';
-import { DEFAULT_TAG_SETTING } from 'ui/Tag';
-import { ProviderConfig } from './interface';
+import { FrontmatterTemplate, ProviderConfig } from './interface';
 
 export const DEFAULT_FRONTMATTER_SETTING = {
 	name: '',
 	count: 1,
 	refs: [],
+	overwrite: false,
 };
 const DEFAULT_TEMPERATURE = 0.7;
 // Default provider settings
@@ -48,10 +48,18 @@ export const CUSTOM_PROVIDER: ProviderConfig = {
 	lastTested: null,
 	testResult: null,
 };
+export const DEFAULT_TAG_SETTING: FrontmatterTemplate = {
+	id: 0,
+	name: 'tags',
+	refs: [],
+	count: 5,
+	overwrite: false,
+};
+
 // Default settings for the Auto Classifier plugin
 export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 	providers: [OPENAI_PROVIDER, CUSTOM_PROVIDER],
 	selectedProvider: AIProvider.OpenAI,
 	selectedModel: OpenAIModelName.GPT_4_OMNI,
 	frontmatter: [DEFAULT_TAG_SETTING],
-};
+}; // Default tag settings
