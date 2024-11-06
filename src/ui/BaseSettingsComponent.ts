@@ -52,7 +52,7 @@ export abstract class BaseSettingsComponent implements SettingsComponent {
 			.setDesc('Toggle between append and overwrite mode')
 			.addToggle((toggle) =>
 				toggle.setValue(setting.overwrite).onChange(async (value) => {
-					this.plugin.settings.frontmatter[setting.id].overwrite = value;
+					setting.overwrite = value;
 					await this.plugin.saveSettings();
 				})
 			);
