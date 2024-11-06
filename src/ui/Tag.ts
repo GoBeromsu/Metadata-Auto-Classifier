@@ -6,7 +6,7 @@ export class Tag extends BaseSettingsComponent {
 	display(containerEl: HTMLElement): void {
 		containerEl.empty();
 		this.addTagSettings(containerEl);
-		this.addOverwriteSetting(containerEl, DEFAULT_TAG_SETTING);
+		this.addOverwriteSetting(containerEl, this.plugin.settings.frontmatter[DEFAULT_TAG_SETTING.id]);
 	}
 
 	private addTagSettings(containerEl: HTMLElement): void {
