@@ -17,10 +17,9 @@ export class Api {
 
 		const selectedProvider = this.getSelectedProvider();
 
+		this.addModelSetting(containerEl, selectedProvider);
 		if (selectedProvider.name === 'Custom') {
 			this.addBaseURLSetting(containerEl, selectedProvider);
-		} else if (selectedProvider.models) {
-			this.addModelSetting(containerEl, selectedProvider);
 		}
 	}
 
@@ -69,10 +68,22 @@ export class Api {
 	}
 
 	private addModelSetting(containerEl: HTMLElement, selectedProvider: ProviderConfig): void {
-		new Setting(containerEl)
-			.setName('Model')
-			.setDesc('Select the model to use')
-			.addDropdown((dropdown) => {
+		const setting = new Setting(containerEl).setName('Model').setDesc('Select the model to use');
+
+		if (selectedProvider.name === 'Custom') {
+			setting.addText((text) => {
+				const currentModel = selectedProvider.models[0]?.name;
+
+				return text
+					.setPlaceholder('Enter model name')
+					.setValue(currentModel)
+					.onChange(async (value) => {
+						this.plugin.settings.selectedModel = value;
+						await this.plugin.saveSettings();
+					});
+			});
+		} else {
+			setting.addDropdown((dropdown) => {
 				selectedProvider.models.forEach((model) => {
 					dropdown.addOption(model.name, model.name);
 				});
@@ -81,6 +92,7 @@ export class Api {
 					await this.plugin.saveSettings();
 				});
 			});
+		}
 	}
 
 	private addBaseURLSetting(containerEl: HTMLElement, selectedProvider: ProviderConfig): void {

@@ -38,7 +38,11 @@ const CUSTOM_PROVIDER: ProviderConfig = {
 	name: AIProvider.Custom,
 	apiKey: '',
 	baseUrl: '',
-	models: [],
+	models: [
+		{
+			name: '',
+		},
+	],
 	lastTested: null,
 	testResult: null,
 };
