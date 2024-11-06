@@ -3,6 +3,7 @@ import { ProviderConfig } from 'utils/interface';
 
 import { validateAPIKey } from 'api';
 import { getDefaultEndpoint } from 'utils';
+import AutoClassifierPlugin from 'main';
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;
