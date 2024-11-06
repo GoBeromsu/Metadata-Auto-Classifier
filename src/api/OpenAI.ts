@@ -28,7 +28,7 @@ export class OpenAI implements APIProvider {
 		};
 
 		const requestParam: RequestUrlParam = {
-			url: `${provider.baseUrl}/chat/completions`,
+			url: `${provider.baseUrl}${provider.endpoint}`,
 			method: 'POST',
 			headers: headers,
 			body: JSON.stringify(data),

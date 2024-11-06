@@ -10,6 +10,7 @@ export interface ProviderConfig {
 	name: string;
 	apiKey: string;
 	baseUrl: string;
+	endpoint: string;
 	models: Model[];
 	lastTested: Date | null;
 	testResult: boolean | null;
