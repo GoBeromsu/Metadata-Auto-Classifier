@@ -13,7 +13,7 @@ export interface ProviderConfig {
 	models: Model[];
 	lastTested: Date | null;
 	testResult: boolean | null;
-	temperature: number;
+	temperature?: number;
 }
 
 interface Model {

@@ -9,15 +9,14 @@ export const DEFAULT_FRONTMATTER_SETTING = {
 };
 const DEFAULT_TEMPERATURE = 0.7;
 // Default provider settings
+export enum AIProvider {
+	OpenAI = 'OpenAI',
+	Custom = 'Custom',
+}
 
 export enum DefaultProvider {
 	NAME = 'OpenAI',
 	BASE_URL = 'https://api.openai.com/v1',
-}
-// API Endpoints
-
-export enum APIEndpoints {
-	CHAT_COMPLETIONS = '/chat/completions',
 }
 // OpenAI model names
 
@@ -41,14 +40,18 @@ const DEFAULT_OPENAI_PROVIDER: ProviderConfig = {
 	testResult: null,
 	temperature: DEFAULT_TEMPERATURE,
 };
+const CUSTOM_PROVIDER: ProviderConfig = {
+	name: AIProvider.Custom,
+	apiKey: '',
+	baseUrl: '',
+	models: [],
+	lastTested: null,
+	testResult: null,
+};
 // Default settings for the Auto Classifier plugin
 export const DEFAULT_SETTINGS: AutoClassifierSettings = {
-	providers: [DEFAULT_OPENAI_PROVIDER],
-	selectedProvider: DefaultProvider.NAME,
+	providers: [DEFAULT_OPENAI_PROVIDER, CUSTOM_PROVIDER],
+	selectedProvider: AIProvider.OpenAI,
 	selectedModel: OpenAIModelName.GPT_4_OMNI,
 	frontmatter: [DEFAULT_TAG_SETTING],
 };
-
-export enum AIProvider {
-	OpenAI = 'openai',
-}

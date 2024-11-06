@@ -14,7 +14,14 @@ export class Api {
 		containerEl.empty();
 		this.addAPIProviderSetting(containerEl);
 		this.addAPIKeySetting(containerEl);
-		this.addModelSetting(containerEl);
+
+		const selectedProvider = this.getSelectedProvider();
+
+		if (selectedProvider.name === 'Custom') {
+			this.addBaseURLSetting(containerEl, selectedProvider);
+		} else if (selectedProvider.models) {
+			this.addModelSetting(containerEl, selectedProvider);
+		}
 	}
 
 	private addAPIProviderSetting(containerEl: HTMLElement): void {
@@ -61,9 +68,7 @@ export class Api {
 			);
 	}
 
-	private addModelSetting(containerEl: HTMLElement): void {
-		const selectedProvider = this.getSelectedProvider();
-
+	private addModelSetting(containerEl: HTMLElement, selectedProvider: ProviderConfig): void {
 		new Setting(containerEl)
 			.setName('Model')
 			.setDesc('Select the model to use')
@@ -76,6 +81,21 @@ export class Api {
 					await this.plugin.saveSettings();
 				});
 			});
+	}
+
+	private addBaseURLSetting(containerEl: HTMLElement, selectedProvider: ProviderConfig): void {
+		new Setting(containerEl)
+			.setName('Base URL')
+			.setDesc('Enter the base URL for your custom API endpoint')
+			.addText((text) =>
+				text
+					.setPlaceholder('https://api.example.com')
+					.setValue(selectedProvider.baseUrl || '')
+					.onChange(async (value) => {
+						selectedProvider.baseUrl = value;
+						await this.plugin.saveSettings();
+					})
+			);
 	}
 
 	private getSelectedProvider(): ProviderConfig {

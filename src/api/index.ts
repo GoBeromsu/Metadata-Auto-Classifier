@@ -2,6 +2,7 @@ import { ErrorHandler } from 'error/ErrorHandler';
 import { AIProvider } from 'utils/constant';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 import { OpenAI } from './OpenAI';
+import { Custom } from './Custom';
 
 interface ApiTestResult {
 	success: boolean;
@@ -12,6 +13,8 @@ export const getProvider = (providerName: string): APIProvider => {
 	switch (providerName) {
 		case AIProvider.OpenAI:
 			return new OpenAI();
+		case AIProvider.Custom:
+			return new Custom();
 		default:
 			throw new Error(`Unknown AI provider: ${providerName}`);
 	}
