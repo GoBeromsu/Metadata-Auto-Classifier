@@ -131,10 +131,9 @@ export default class AutoClassifierPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+	// erase key validation
 	private getSelectedProvider(): ProviderConfig | undefined {
-		return this.settings.providers.find(
-			(p) => p.name === this.settings.selectedProvider && p.apiKey
-		);
+		return this.settings.providers.find((p) => p.name === this.settings.selectedProvider);
 	}
 
 	private getFrontmatterById(id: number) {
