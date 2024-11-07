@@ -123,8 +123,7 @@ export default class AutoClassifierPlugin extends Plugin {
 	};
 
 	async loadSettings() {
-		const loadedData = (await this.loadData()) as AutoClassifierSettings;
-
+		const loadedData = (await this.loadData()) || {};
 		this.settings = mergeDefaults(DEFAULT_SETTINGS, loadedData);
 		await this.saveSettings();
 	}
