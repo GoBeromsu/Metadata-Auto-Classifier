@@ -35,6 +35,10 @@ export class Api {
 				});
 				dropdown.setValue(this.plugin.settings.selectedProvider).onChange(async (value) => {
 					this.plugin.settings.selectedProvider = value;
+					const newProvider = this.plugin.settings.providers.find((p) => p.name === value);
+					if (newProvider && newProvider.models.length > 0) {
+						this.plugin.settings.selectedModel = newProvider.models[0].name;
+					}
 					await this.plugin.saveSettings();
 					this.display(containerEl);
 				});
