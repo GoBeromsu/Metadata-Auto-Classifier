@@ -4,6 +4,7 @@ import { ProviderConfig } from 'utils/interface';
 import { validateAPIKey } from 'api';
 import { getDefaultEndpoint } from 'utils';
 import AutoClassifierPlugin from 'main';
+import { CustomFormatModal } from './CustomFormatModal';
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;
@@ -19,6 +20,7 @@ export class Api {
 		this.addModelSetting(containerEl, selectedProvider);
 		if (selectedProvider.name === 'Custom') {
 			this.addBaseURLSetting(containerEl, selectedProvider);
+			this.addCustomFormatSetting(containerEl, selectedProvider);
 		}
 		this.addEndpointSetting(containerEl, selectedProvider);
 	}
@@ -120,6 +122,18 @@ export class Api {
 						selectedProvider.baseUrl = value;
 						await this.plugin.saveSettings();
 					})
+			);
+	}
+
+	private addCustomFormatSetting(containerEl: HTMLElement, selectedProvider: ProviderConfig): void {
+		new Setting(containerEl)
+			.setName('Custom Request Format')
+			.setDesc('Enter custom JSON format for the API request')
+			.addButton((button) =>
+				button.setButtonText('Edit Format').onClick(() => {
+					const modal = new CustomFormatModal(this.plugin.app, selectedProvider, this.plugin);
+					modal.open();
+				})
 			);
 	}
 

@@ -15,7 +15,9 @@ export class Custom implements APIProvider {
 
 		const data = {
 			...createRequestBody(chatRole, promptTemplate, model, provider?.temperature),
-			response_format: LMSTUDIO_STRUCTURE_OUTPUT,
+			...(provider.customRequestFormat
+				? JSON.parse(provider.customRequestFormat)
+				: { response_format: LMSTUDIO_STRUCTURE_OUTPUT }),
 		};
 
 		const url = `${provider.baseUrl}${provider.endpoint}`;
