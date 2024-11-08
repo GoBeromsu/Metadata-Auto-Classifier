@@ -3,7 +3,7 @@ import { APIProvider, StructuredOutput } from 'utils/interface';
 import { ApiError } from '../error/ApiError';
 import { ErrorHandler } from '../error/ErrorHandler';
 import { ProviderConfig } from '../utils/interface';
-import { getHeaders } from 'api';
+import { getHeaders, getRequestParam } from 'api';
 
 export class OpenAI implements APIProvider {
 	async callAPI(
@@ -25,14 +25,10 @@ export class OpenAI implements APIProvider {
 			response_format: { type: 'json_object' },
 		};
 
-		const requestParam: RequestUrlParam = {
-			url: `${provider.baseUrl}${provider.endpoint}`,
-			method: 'POST',
-			headers: headers,
-			body: JSON.stringify(data),
-		};
-
+		const url = `${provider.baseUrl}${provider.endpoint}`;
+		const requestParam: RequestUrlParam = getRequestParam(url, headers, JSON.stringify(data));
 		const response = await requestUrl(requestParam);
+		
 		if (response.status !== 200) {
 			throw new ApiError(`API request failed with status ${response.status}`);
 		}

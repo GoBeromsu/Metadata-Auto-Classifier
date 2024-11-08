@@ -3,6 +3,7 @@ import { AIProvider } from 'utils/constant';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 import { OpenAI } from './OpenAI';
 import { Custom } from './Custom';
+import { RequestUrlParam } from 'obsidian';
 
 interface ApiTestResult {
 	success: boolean;
@@ -68,4 +69,17 @@ export const getHeaders = (apiKey?: string): Record<string, string> => {
 	}
 
 	return headers;
+};
+
+export const getRequestParam = (
+	url: string,
+	headers: Record<string, string>,
+	body?: string | ArrayBuffer
+): RequestUrlParam => {
+	return {
+		url,
+		method: 'POST',
+		headers,
+		body,
+	};
 };

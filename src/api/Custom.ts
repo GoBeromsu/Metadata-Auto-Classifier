@@ -1,4 +1,4 @@
-import { getHeaders } from 'api';
+import { getHeaders, getRequestParam } from 'api';
 import { ApiError } from 'error/ApiError';
 import { requestUrl, RequestUrlParam } from 'obsidian';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
@@ -40,12 +40,8 @@ export class Custom implements APIProvider {
 				},
 			},
 		};
-		const requestParam: RequestUrlParam = {
-			url: `${provider.baseUrl}${provider.endpoint}`,
-			method: 'POST',
-			headers: header,
-			body: JSON.stringify(data),
-		};
+		const url = `${provider.baseUrl}${provider.endpoint}`;
+		const requestParam: RequestUrlParam = getRequestParam(url, header, JSON.stringify(data));
 
 		const response = await requestUrl(requestParam);
 		if (response.status !== 200) {
