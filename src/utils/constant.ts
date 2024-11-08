@@ -63,3 +63,26 @@ export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 	selectedModel: OpenAIModelName.GPT_4_OMNI,
 	frontmatter: [DEFAULT_TAG_SETTING],
 }; // Default tag settings
+
+export const LMSTUDIO_STRUCTURE_OUTPUT = {
+	response_format: {
+		type: 'json_schema',
+		json_schema: {
+			name: 'structured_output',
+			strict: true,
+			schema: {
+				type: 'object',
+				properties: {
+					output: {
+						type: 'array',
+						items: { type: 'string' },
+					},
+					reliability: {
+						type: 'number',
+					},
+				},
+				required: ['output', 'reliability'],
+			},
+		},
+	},
+};

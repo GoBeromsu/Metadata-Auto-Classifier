@@ -1,6 +1,7 @@
-import { getHeaders, getRequestParam } from 'api';
+import { createRequestBody, getHeaders, getRequestParam } from 'api';
 import { ApiError } from 'error/ApiError';
 import { requestUrl, RequestUrlParam } from 'obsidian';
+import { LMSTUDIO_STRUCTURE_OUTPUT } from 'utils/constant';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 
 export class Custom implements APIProvider {
@@ -13,33 +14,10 @@ export class Custom implements APIProvider {
 		const header: Record<string, string> = getHeaders(provider.apiKey);
 
 		const data = {
-			model: model,
-			messages: [
-				{ role: 'system', content: chatRole },
-				{ role: 'user', content: promptTemplate },
-			],
-			temperature: provider.temperature,
-			response_format: {
-				type: 'json_schema',
-				json_schema: {
-					name: 'structured_output',
-					strict: true,
-					schema: {
-						type: 'object',
-						properties: {
-							output: {
-								type: 'array',
-								items: { type: 'string' },
-							},
-							reliability: {
-								type: 'number',
-							},
-						},
-						required: ['output', 'reliability'],
-					},
-				},
-			},
+			...createRequestBody(chatRole, promptTemplate, model, provider?.temperature),
+			response_format: LMSTUDIO_STRUCTURE_OUTPUT,
 		};
+
 		const url = `${provider.baseUrl}${provider.endpoint}`;
 		const requestParam: RequestUrlParam = getRequestParam(url, header, JSON.stringify(data));
 

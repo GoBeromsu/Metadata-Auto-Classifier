@@ -1,9 +1,9 @@
 import { ErrorHandler } from 'error/ErrorHandler';
+import { RequestUrlParam } from 'obsidian';
 import { AIProvider } from 'utils/constant';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
-import { OpenAI } from './OpenAI';
 import { Custom } from './Custom';
-import { RequestUrlParam } from 'obsidian';
+import { OpenAI } from './OpenAI';
 
 interface ApiTestResult {
 	success: boolean;
@@ -83,3 +83,28 @@ export const getRequestParam = (
 		body,
 	};
 };
+
+interface Message {
+	role: 'system' | 'user' | 'assistant';
+	content: string;
+}
+
+interface RequestBody {
+	model: string;
+	messages: Message[];
+	temperature?: number;
+}
+
+export const createRequestBody = (
+	chatRole: string,
+	promptTemplate: string,
+	model: string,
+	temperature?: number
+): RequestBody => ({
+	model,
+	messages: [
+		{ role: 'system', content: chatRole },
+		{ role: 'user', content: promptTemplate },
+	],
+	...(temperature && { temperature }),
+});
