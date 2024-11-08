@@ -77,10 +77,10 @@ export const insertToFrontMatter = async (
 ): Promise<void> => {
 	await processFrontMatter(params.file, (frontmatter: FrontMatter) => {
 		const processedValue = params.value.map(processString);
+		const existingValues = frontmatter[params.key] || [];
 		const frontmatterKey = params.overwrite
 			? processedValue
-			: [...frontmatter[params.key].map(processString), ...processedValue];
-		console.log('frontmatterKey', frontmatterKey, params.overwrite);
+			: [...existingValues.map(processString), ...processedValue];
 		// Remove duplicates and empty strings
 		frontmatter[params.key] = [...new Set(frontmatterKey)].filter(Boolean);
 	});
