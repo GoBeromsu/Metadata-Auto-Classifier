@@ -9,8 +9,11 @@ export class Custom implements APIProvider {
 		provider: ProviderConfig,
 		model: string
 	): Promise<StructuredOutput> {
+		const apiKey = provider.apiKey ? `Bearer ${provider.apiKey}` : '';
+
 		const header: Record<string, string> = {
 			'Content-Type': 'application/json',
+			Authorization: apiKey,
 		};
 		const data = {
 			model: model,
