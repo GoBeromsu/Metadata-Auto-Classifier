@@ -3,6 +3,7 @@ import { APIProvider, StructuredOutput } from 'utils/interface';
 import { ApiError } from '../error/ApiError';
 import { ErrorHandler } from '../error/ErrorHandler';
 import { ProviderConfig } from '../utils/interface';
+import { getHeaders } from 'api';
 
 export class OpenAI implements APIProvider {
 	async callAPI(
@@ -12,10 +13,7 @@ export class OpenAI implements APIProvider {
 		selectedModel: string,
 		temperature?: number
 	): Promise<StructuredOutput> {
-		const headers: Record<string, string> = {
-			Authorization: `Bearer ${provider.apiKey}`,
-			'Content-Type': 'application/json',
-		};
+		const headers: Record<string, string> = getHeaders(provider.apiKey);
 
 		const data = {
 			model: selectedModel,

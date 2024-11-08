@@ -57,3 +57,15 @@ export const validateAPIKey = async (provider: ProviderConfig): Promise<ApiTestR
 		message,
 	};
 };
+
+export const getHeaders = (apiKey?: string): Record<string, string> => {
+	const headers: Record<string, string> = {
+		'Content-Type': 'application/json',
+	};
+
+	if (apiKey) {
+		headers.Authorization = `Bearer ${apiKey}`;
+	}
+
+	return headers;
+};

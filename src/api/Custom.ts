@@ -1,3 +1,4 @@
+import { getHeaders } from 'api';
 import { ApiError } from 'error/ApiError';
 import { requestUrl, RequestUrlParam } from 'obsidian';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
@@ -9,12 +10,8 @@ export class Custom implements APIProvider {
 		provider: ProviderConfig,
 		model: string
 	): Promise<StructuredOutput> {
-		const apiKey = provider.apiKey ? `Bearer ${provider.apiKey}` : '';
+		const header: Record<string, string> = getHeaders(provider.apiKey);
 
-		const header: Record<string, string> = {
-			'Content-Type': 'application/json',
-			Authorization: apiKey,
-		};
 		const data = {
 			model: model,
 			messages: [
