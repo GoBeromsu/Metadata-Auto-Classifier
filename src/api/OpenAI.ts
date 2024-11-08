@@ -22,7 +22,6 @@ export class OpenAI implements APIProvider {
 
 		const url = `${provider.baseUrl}${provider.endpoint}`;
 		const requestParam: RequestUrlParam = getRequestParam(url, headers, JSON.stringify(data));
-		console.log(requestParam);
 		const response = await requestUrl(requestParam);
 
 		if (response.status !== 200) {
