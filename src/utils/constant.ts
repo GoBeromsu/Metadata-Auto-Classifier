@@ -65,24 +65,22 @@ export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 }; // Default tag settings
 
 export const LMSTUDIO_STRUCTURE_OUTPUT = {
-	response_format: {
-		type: 'json_schema',
-		json_schema: {
-			name: 'structured_output',
-			strict: true,
-			schema: {
-				type: 'object',
-				properties: {
-					output: {
-						type: 'array',
-						items: { type: 'string' },
-					},
-					reliability: {
-						type: 'number',
-					},
+	type: 'json_schema',
+	json_schema: {
+		name: 'structured_output',
+		strict: true,
+		schema: {
+			type: 'object',
+			properties: {
+				output: {
+					type: 'array',
+					items: { type: 'string' },
 				},
-				required: ['output', 'reliability'],
+				reliability: {
+					type: 'number',
+				},
 			},
+			required: ['output', 'reliability'],
 		},
 	},
 };
