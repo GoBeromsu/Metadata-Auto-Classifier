@@ -15,9 +15,7 @@ export class Custom implements APIProvider {
 		const headers: Record<string, string> = getHeaders(provider.apiKey);
 		const data = {
 			...createRequestBody(system_role, user_prompt, selectedModel, temperature),
-			...(provider.customRequestFormat
-				? JSON.parse(provider.customRequestFormat)
-				: { response_format: LMSTUDIO_STRUCTURE_OUTPUT }),
+			...{ response_format: LMSTUDIO_STRUCTURE_OUTPUT },
 		};
 
 		const response = await this.makeApiRequest(provider, headers, data);

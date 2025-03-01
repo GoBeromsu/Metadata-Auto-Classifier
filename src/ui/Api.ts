@@ -4,7 +4,6 @@ import { ProviderConfig } from 'utils/interface';
 import { validateAPIKey } from 'api';
 import AutoClassifierPlugin from 'main';
 import { getDefaultEndpoint } from 'utils';
-import { CustomFormatModal } from './CustomFormatModal';
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;
@@ -37,7 +36,6 @@ export class Api {
 
 			this.addBaseURLSetting(containerEl, selectedProvider);
 			this.addEndpointSetting(containerEl, selectedProvider);
-			this.addCustomFormatSetting(containerEl, selectedProvider);
 		} else {
 			this.addEndpointSetting(containerEl, selectedProvider);
 		}
@@ -208,25 +206,6 @@ export class Api {
 		baseUrlInfo.createEl('small', {
 			text: 'Examples: https://api.openai.com, http://localhost:1234, https://api.anthropic.com',
 			cls: 'baseurl-example',
-		});
-	}
-
-	private addCustomFormatSetting(containerEl: HTMLElement, selectedProvider: ProviderConfig): void {
-		const formatSetting = new Setting(containerEl)
-			.setName('Custom Request Format')
-			.setDesc('Configure the JSON format for API requests')
-			.addButton((button) =>
-				button.setButtonText('Edit Format').onClick(() => {
-					const modal = new CustomFormatModal(this.plugin.app, selectedProvider, this.plugin);
-					modal.open();
-				})
-			);
-
-		// Add format info
-		const formatInfo = formatSetting.descEl.createEl('div', { cls: 'format-info' });
-		formatInfo.createEl('small', {
-			text: 'Define how your request body should be structured for your API provider',
-			cls: 'format-description',
 		});
 	}
 
