@@ -15,9 +15,9 @@ export enum AIProvider {
 }
 
 export enum OpenAIModelName {
-	GPT_3_5_TURBO = 'gpt-3.5-turbo',
-	GPT_4_OMNI = 'gpt-4o',
-	GPT_4_MINI = 'gpt-4o-mini',
+	GPT_4_5_PREVIEW = 'gpt-4.5-preview-2025-02-27',
+	O3_MINI_2025 = 'o3-mini-2025-1-31',
+	GPT_4O_MINI_2024 = 'gpt-4o-mini-2024-07-18',
 }
 // Default OpenAI provider configuration
 export const OPENAI_PROVIDER: ProviderConfig = {
@@ -26,9 +26,9 @@ export const OPENAI_PROVIDER: ProviderConfig = {
 	baseUrl: 'https://api.openai.com',
 	endpoint: '/v1/chat/completions',
 	models: [
-		{ name: OpenAIModelName.GPT_3_5_TURBO },
-		{ name: OpenAIModelName.GPT_4_OMNI },
-		{ name: OpenAIModelName.GPT_4_MINI },
+		{ name: OpenAIModelName.GPT_4_5_PREVIEW },
+		{ name: OpenAIModelName.O3_MINI_2025 },
+		{ name: OpenAIModelName.GPT_4O_MINI_2024 },
 	],
 
 	lastTested: null,
@@ -60,7 +60,7 @@ export const DEFAULT_TAG_SETTING: FrontmatterTemplate = {
 export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 	providers: [OPENAI_PROVIDER, CUSTOM_PROVIDER],
 	selectedProvider: AIProvider.OpenAI,
-	selectedModel: OpenAIModelName.GPT_4_OMNI,
+	selectedModel: OpenAIModelName.GPT_4O_MINI_2024,
 	frontmatter: [DEFAULT_TAG_SETTING],
 }; // Default tag settings
 
