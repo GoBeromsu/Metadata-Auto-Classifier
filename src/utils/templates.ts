@@ -12,17 +12,10 @@ Instructions:
 Reference categories:
 {{reference}}
 
-Example output:
-{{dynamicExample}}
-
 Input:
 """
 {{input}}
 """
-
-Answer in valid JSON format: {"reliability": number, "output": string[]}
-The "reliability" should be a number between 0 and 1.
-The "output" must be an array of up to {{tagCount}} categories, chosen based on relevance and similarity.
 `;
 
 // Generate a prompt template based on the given parameters
@@ -33,21 +26,7 @@ export function getPromptTemplate(
 ): string {
 	let template = DEFAULT_PROMPT_TEMPLATE;
 	template = template.replace(/{{tagCount}}/g, tagCount.toString());
-
-	const exampleCount = Math.min(3, reference.length);
-	const exampleReferences = reference.slice(0, exampleCount);
-
-	const dynamicOutput = exampleReferences.map((ref) => `"${ref}"`).join(', ');
-
-	const dynamicExample = `{
-  "reliability": 0.8,
-  "output": [${dynamicOutput}]
-}`;
-
-	// Keep the reference categories comma-separated
 	template = template.replace('{{reference}}', reference.join(', '));
-	template = template.replace('{{dynamicExample}}', dynamicExample);
-
 	template = template.replace('{{input}}', input);
 
 	return template;
