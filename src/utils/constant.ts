@@ -17,7 +17,7 @@ export enum AIProvider {
 export enum OpenAIModelName {
 	GPT_4_5_PREVIEW = 'gpt-4.5-preview-2025-02-27',
 	O3_MINI_2025 = 'o3-mini-2025-1-31',
-	GPT_4O_MINI_2024 = 'gpt-4o-mini-2024-07-18',
+	GPT_4O_MINI = 'gpt-4o-mini',
 }
 // Default OpenAI provider configuration
 export const OPENAI_PROVIDER: ProviderConfig = {
@@ -28,7 +28,7 @@ export const OPENAI_PROVIDER: ProviderConfig = {
 	models: [
 		{ name: OpenAIModelName.GPT_4_5_PREVIEW },
 		{ name: OpenAIModelName.O3_MINI_2025 },
-		{ name: OpenAIModelName.GPT_4O_MINI_2024 },
+		{ name: OpenAIModelName.GPT_4O_MINI },
 	],
 
 	lastTested: null,
@@ -60,7 +60,7 @@ export const DEFAULT_TAG_SETTING: FrontmatterTemplate = {
 export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 	providers: [OPENAI_PROVIDER, CUSTOM_PROVIDER],
 	selectedProvider: AIProvider.OpenAI,
-	selectedModel: OpenAIModelName.GPT_4O_MINI_2024,
+	selectedModel: OpenAIModelName.GPT_4_5_PREVIEW,
 	frontmatter: [DEFAULT_TAG_SETTING],
 }; // Default tag settings
 
@@ -82,5 +82,29 @@ export const LMSTUDIO_STRUCTURE_OUTPUT = {
 			},
 			required: ['output', 'reliability'],
 		},
+	},
+};
+
+export const OPENAI_STRUCTURE_OUTPUT = {
+	type: 'json_schema',
+	json_schema: {
+		name: 'metadata_classifier',
+		schema: {
+			type: 'object',
+			properties: {
+				output: {
+					type: 'array',
+					items: { type: 'string' },
+					description: 'Array of classified tags or categories',
+				},
+				reliability: {
+					type: 'number',
+					description: 'A number between 0 and 1 indicating confidence in the classification',
+				},
+			},
+			required: ['output', 'reliability'],
+			additionalProperties: false,
+		},
+		strict: true,
 	},
 };

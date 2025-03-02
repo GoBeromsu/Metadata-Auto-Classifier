@@ -88,23 +88,3 @@ interface Message {
 	role: 'system' | 'user' | 'assistant';
 	content: string;
 }
-
-interface RequestBody {
-	model: string;
-	messages: Message[];
-	temperature?: number;
-}
-
-export const createRequestBody = (
-	chatRole: string,
-	promptTemplate: string,
-	model: string,
-	temperature?: number
-): RequestBody => ({
-	model,
-	messages: [
-		{ role: 'system', content: chatRole },
-		{ role: 'user', content: promptTemplate },
-	],
-	...(temperature && { temperature }),
-});

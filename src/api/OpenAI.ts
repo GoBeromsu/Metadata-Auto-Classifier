@@ -1,7 +1,8 @@
-import { createRequestBody, getHeaders, getRequestParam } from 'api';
+import { getHeaders, getRequestParam } from 'api';
 import { requestUrl, RequestUrlParam } from 'obsidian';
 import { APIProvider, StructuredOutput } from 'utils/interface';
 import { ApiError } from '../error/ApiError';
+import { OPENAI_STRUCTURE_OUTPUT } from '../utils/constant';
 import { ProviderConfig } from '../utils/interface';
 
 export class OpenAI implements APIProvider {
@@ -13,12 +14,22 @@ export class OpenAI implements APIProvider {
 		temperature?: number
 	): Promise<StructuredOutput> {
 		const headers: Record<string, string> = getHeaders(provider.apiKey);
-		const data = {
-			...createRequestBody(system_role, user_prompt, selectedModel, temperature),
-			response_format: { type: 'json_object' },
-		};
-		const response = await this.makeApiRequest(provider, headers, data);
 
+		// Create messages array for the OpenAI API
+		const messages = [
+			{ role: 'system', content: system_role },
+			{ role: 'user', content: user_prompt },
+		];
+
+		// Create the request data
+		const data = {
+			model: selectedModel,
+			messages: messages,
+			temperature: temperature || provider.temperature,
+			response_format: OPENAI_STRUCTURE_OUTPUT,
+		};
+
+		const response = await this.makeApiRequest(provider, headers, data);
 		return this.processApiResponse(response);
 	}
 
@@ -30,39 +41,40 @@ export class OpenAI implements APIProvider {
 		const url = `${provider.baseUrl}${provider.endpoint}`;
 		const requestParam: RequestUrlParam = getRequestParam(url, headers, JSON.stringify(data));
 
-		const response = await requestUrl(requestParam);
-		if (response.status !== 200) {
-			throw new ApiError(`API request failed with status ${response.status}`);
+		try {
+			const response = await requestUrl(requestParam);
+			if (response.status !== 200) {
+				console.error('API Error Response:', response.text);
+				throw new ApiError(`API request failed with status ${response.status}: ${response.text}`);
+			}
+			return response.json;
+		} catch (error) {
+			console.error('API Request Error:', error);
+			throw error;
 		}
-
-		return response.json;
 	}
 
 	private processApiResponse(responseData: any): StructuredOutput {
-		if (responseData.choices && responseData.choices.length > 0) {
-			const content = responseData.choices[0].message.content.trim();
-			return JSON.parse(content) as StructuredOutput;
-		} else {
-			throw new ApiError('No response from the API');
+		// Handle different response formats from various models
+		const messageContent = responseData.choices[0].message.content;
+
+		// Some newer models might return parsed JSON directly
+		if (typeof messageContent === 'object' && messageContent !== null) {
+			return messageContent as StructuredOutput;
 		}
+
+		// Otherwise parse the content as JSON
+		const content = messageContent.trim();
+		return JSON.parse(content) as StructuredOutput;
 	}
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
-		try {
-			/**
-			 * NOTE: When using JSON mode, the model must be explicitly instructed
-			 * to produce JSON via a system or user message.
-			 * @see https://platform.openai.com/docs/api-reference/chat
-			 */
-			await this.callAPI(
-				'You are a test system.',
-				'Return a JSON object containing "status": "ok"',
-				provider,
-				provider.models[0].name
-			);
-			return true;
-		} catch (error) {
-			return false;
-		}
+		await this.callAPI(
+			'You are a test system. You must respond with valid JSON.',
+			'Return a JSON object containing {"output": [], "reliability": 0}',
+			provider,
+			provider.models[0]?.name
+		);
+		return true;
 	}
 }

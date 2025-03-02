@@ -1,4 +1,4 @@
-import { createRequestBody, getHeaders, getRequestParam } from 'api';
+import { getHeaders, getRequestParam } from 'api';
 import { ApiError } from 'error/ApiError';
 import { requestUrl, RequestUrlParam } from 'obsidian';
 import { LMSTUDIO_STRUCTURE_OUTPUT } from 'utils/constant';
@@ -13,13 +13,22 @@ export class Custom implements APIProvider {
 		temperature?: number
 	): Promise<StructuredOutput> {
 		const headers: Record<string, string> = getHeaders(provider.apiKey);
+
+		// Create messages array for the API
+		const messages = [
+			{ role: 'system', content: system_role },
+			{ role: 'user', content: user_prompt },
+		];
+
+		// Create the request data
 		const data = {
-			...createRequestBody(system_role, user_prompt, selectedModel, temperature),
-			...{ response_format: LMSTUDIO_STRUCTURE_OUTPUT },
+			model: selectedModel,
+			messages: messages,
+			temperature: temperature || provider.temperature,
+			response_format: LMSTUDIO_STRUCTURE_OUTPUT,
 		};
 
 		const response = await this.makeApiRequest(provider, headers, data);
-
 		return this.processApiResponse(response);
 	}
 
@@ -30,38 +39,42 @@ export class Custom implements APIProvider {
 	): Promise<any> {
 		const url = `${provider.baseUrl}${provider.endpoint}`;
 		const requestParam: RequestUrlParam = getRequestParam(url, headers, JSON.stringify(data));
+		console.log('Custom API Request:', JSON.stringify(data, null, 2));
 
-		const response = await requestUrl(requestParam);
-		if (response.status !== 200) {
-			throw new ApiError(`API request failed with status ${response.status}`);
+		try {
+			const response = await requestUrl(requestParam);
+			if (response.status !== 200) {
+				console.error('API Error Response:', response.text);
+				throw new ApiError(`API request failed with status ${response.status}: ${response.text}`);
+			}
+			return response.json;
+		} catch (error) {
+			console.error('API Request Error:', error);
+			throw error;
 		}
-
-		return response.json;
 	}
 
 	private processApiResponse(responseData: any): StructuredOutput {
-		if (responseData.choices && responseData.choices.length > 0) {
-			const content = responseData.choices[0].message.content.trim();
-			return JSON.parse(content) as StructuredOutput;
-		} else {
-			throw new ApiError('No response from the API');
+		// Handle different response formats from various models
+		const messageContent = responseData.choices[0].message.content;
+
+		// Some models might return parsed JSON directly
+		if (typeof messageContent === 'object' && messageContent !== null) {
+			return messageContent as StructuredOutput;
 		}
+
+		// Otherwise parse the content as JSON
+		const content = messageContent.trim();
+		return JSON.parse(content) as StructuredOutput;
 	}
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
-		try {
-			await this.callAPI(
-				'You are a test system.',
-				`Return a JSON object like ${JSON.stringify({
-					output: [],
-					reliability: 0,
-				})}`,
-				provider,
-				provider.models[0]?.name
-			);
-			return true;
-		} catch (error) {
-			return false;
-		}
+		await this.callAPI(
+			'You are a test system. You must respond with valid JSON.',
+			`Return a JSON object containing {"output": [], "reliability": 0}`,
+			provider,
+			provider.models[0]?.name
+		);
+		return true;
 	}
 }
