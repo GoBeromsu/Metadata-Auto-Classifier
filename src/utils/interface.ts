@@ -16,6 +16,7 @@ export interface ProviderConfig {
 	lastTested: Date | null;
 	testResult: boolean | null;
 	temperature?: number;
+	selectedModel?: string;
 }
 
 interface Model {

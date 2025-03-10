@@ -50,11 +50,25 @@ export class Api {
 					dropdown.addOption(provider.name, provider.name);
 				});
 				dropdown.setValue(this.plugin.settings.selectedProvider).onChange(async (value) => {
+					// Store the current model selection for the previous provider
+					const previousProvider = this.getSelectedProvider();
+					previousProvider.selectedModel = this.plugin.settings.selectedModel;
+
+					// Update the selected provider
 					this.plugin.settings.selectedProvider = value;
+
+					// Get the new provider
 					const newProvider = this.plugin.settings.providers.find((p) => p.name === value);
-					if (newProvider && newProvider.models.length > 0) {
-						this.plugin.settings.selectedModel = newProvider.models[0].name;
+					if (newProvider) {
+						// Use the stored model if available, otherwise use the first model
+						if (newProvider.selectedModel) {
+							this.plugin.settings.selectedModel = newProvider.selectedModel;
+						} else if (newProvider.models.length > 0) {
+							this.plugin.settings.selectedModel = newProvider.models[0].name;
+							newProvider.selectedModel = newProvider.models[0].name;
+						}
 					}
+
 					await this.plugin.saveSettings();
 					this.display(containerEl);
 				});
@@ -156,6 +170,7 @@ export class Api {
 					.setValue(currentModel)
 					.onChange(async (value) => {
 						this.plugin.settings.selectedModel = value;
+						selectedProvider.selectedModel = value;
 
 						// Ensure there's at least one model in the array
 						if (selectedProvider.models.length === 0) {
@@ -181,6 +196,7 @@ export class Api {
 				});
 				dropdown.setValue(this.plugin.settings.selectedModel).onChange(async (value) => {
 					this.plugin.settings.selectedModel = value;
+					selectedProvider.selectedModel = value;
 					await this.plugin.saveSettings();
 				});
 			});

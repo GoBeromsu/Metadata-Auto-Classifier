@@ -34,6 +34,7 @@ export const OPENAI_PROVIDER: ProviderConfig = {
 	lastTested: null,
 	testResult: null,
 	temperature: DEFAULT_TEMPERATURE,
+	selectedModel: OpenAIModelName.GPT_4O_MINI,
 };
 export const CUSTOM_PROVIDER: ProviderConfig = {
 	name: AIProvider.Custom,
@@ -46,6 +47,7 @@ export const CUSTOM_PROVIDER: ProviderConfig = {
 		},
 	],
 	lastTested: null,
+	selectedModel: '',
 	testResult: null,
 };
 export const DEFAULT_TAG_SETTING: FrontmatterTemplate = {

@@ -90,7 +90,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		const promptTemplate = getPromptTemplate(frontmatter.count, content, currentValues);
 
 		const chatRole = DEFAULT_CHAT_ROLE;
-		const selectedModel = this.settings.selectedModel;
+		const selectedModel = selectedProvider.selectedModel || this.settings.selectedModel;
 
 		const apiResponse = await processAPIRequest(
 			chatRole,
@@ -125,6 +125,14 @@ export default class AutoClassifierPlugin extends Plugin {
 	async loadSettings() {
 		const loadedData = (await this.loadData()) || {};
 		this.settings = mergeDefaults(DEFAULT_SETTINGS, loadedData);
+
+		// Ensure each provider has a selectedModel property
+		this.settings.providers.forEach((provider) => {
+			if (!provider.selectedModel && provider.models.length > 0) {
+				provider.selectedModel = provider.models[0].name;
+			}
+		});
+
 		await this.saveSettings();
 	}
 
@@ -134,7 +142,15 @@ export default class AutoClassifierPlugin extends Plugin {
 
 	// erase key validation
 	private getSelectedProvider(): ProviderConfig | undefined {
-		return this.settings.providers.find((p) => p.name === this.settings.selectedProvider);
+		const provider = this.settings.providers.find((p) => p.name === this.settings.selectedProvider);
+
+		// If the provider exists but doesn't have a selectedModel, set it
+		if (provider && !provider.selectedModel && provider.models.length > 0) {
+			provider.selectedModel = provider.models[0].name;
+			this.saveSettings();
+		}
+
+		return provider;
 	}
 
 	private getFrontmatterById(id: number) {
