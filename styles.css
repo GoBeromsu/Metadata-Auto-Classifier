@@ -82,31 +82,44 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* Frontmatter UI Styles */
+:root {
+	/* 커스텀 CSS 변수 추가 */
+	--control-spacing: 16px;
+	--primary-border-radius: 8px;
+	--secondary-border-radius: 4px;
+	--animation-speed: 0.2s;
+	--card-padding: 20px;
+	--control-height: 36px;
+	--control-item-width: 120px;
+}
+
+/* 전체 컨테이너 및 카드 스타일링 */
 .frontmatter-container {
-	margin-bottom: 20px;
+	margin-bottom: 28px;
 }
 
 .frontmatter-card {
 	background-color: var(--background-secondary);
-	border-radius: 8px;
-	padding: 16px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+	border-radius: var(--primary-border-radius);
+	padding: var(--card-padding);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 	border: 1px solid var(--background-modifier-border);
-	transition: box-shadow 0.3s ease;
+	transition: all var(--animation-speed) ease;
 }
 
 .frontmatter-card:hover {
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+	transform: translateY(-1px);
 }
 
-/* Header Section */
+/* 헤더 섹션 스타일링 개선 */
 .frontmatter-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	width: 100%;
-	margin-bottom: 12px;
-	padding-bottom: 8px;
+	margin-bottom: 20px;
+	padding-bottom: 12px;
 	border-bottom: 1px solid var(--background-modifier-border);
 }
 
@@ -114,344 +127,50 @@ If your plugin does not need CSS, delete this file.
 	display: flex;
 	flex-direction: column;
 	flex: 1;
+	min-width: 0; /* 텍스트 오버플로우 방지 */
 }
 
 .frontmatter-label {
-	font-size: 0.8rem;
+	font-size: 0.85rem;
 	color: var(--text-muted);
-	margin-bottom: 4px;
+	margin-bottom: 6px;
+	font-weight: 500;
 }
 
 .frontmatter-name-input {
-	font-size: 1rem;
+	font-size: 1.1rem;
 	font-weight: 500;
 	width: 100%;
-	padding: 4px 8px;
-	border-radius: 4px;
+	padding: 8px 12px;
+	border-radius: var(--secondary-border-radius);
 	border: 1px solid var(--background-modifier-border);
-	background-color: var(--background-secondary);
+	background-color: var(--background-primary);
+	transition: border-color var(--animation-speed) ease, box-shadow var(--animation-speed) ease;
 }
 
-/* Settings Container */
+.frontmatter-name-input:focus {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb), 0.2);
+	outline: none;
+}
+
+/* 컨트롤 영역 스타일링 */
 .frontmatter-settings-container {
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
-}
-
-.frontmatter-settings-row {
-	display: flex;
-	flex-wrap: wrap;
 	gap: 20px;
 }
 
-/* Setting Items */
-.setting-item {
-	min-width: 200px;
-	flex-grow: 1;
-}
-
-.setting-label {
-	display: block;
-	font-weight: 600;
-	margin-bottom: 6px;
-	color: var(--text-normal);
-}
-
-.setting-description {
-	font-size: 12px;
-	color: var(--text-muted);
-	margin-top: 4px;
-}
-
-/* Dropdown */
-.dropdown-container {
-	position: relative;
-}
-
-.dropdown {
-	width: 100%;
-	padding: 8px 12px;
-	border-radius: 4px;
-	border: 1px solid var(--background-modifier-border);
-	background-color: var(--background-primary);
-	appearance: none;
-	font-size: 14px;
-	cursor: pointer;
-}
-
-.dropdown:focus {
-	border-color: var(--interactive-accent);
-	outline: none;
-}
-
-/* Toggle Switch */
-.toggle-container {
-	display: flex;
-	flex-direction: column;
-}
-
-.toggle-switch-container {
-	margin-top: 6px;
-}
-
-.toggle-switch-container .setting-item {
-	padding: 0;
-	border: none;
-}
-
-.toggle-switch-container .setting-item-info,
-.toggle-switch-container .setting-item-description {
-	display: none;
-}
-
-.toggle-switch-container .setting-item-control {
-	justify-content: flex-start;
-}
-
-/* Options Section */
-.options-section {
-	margin-top: 4px;
-	background: var(--background-primary-alt);
-	border-radius: 6px;
-	padding: 12px;
-}
-
-.options-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 12px;
-}
-
-.options-title {
-	margin: 0;
-	font-size: 14px;
-	font-weight: 600;
-}
-
-.options-description {
-	font-size: 12px;
-	color: var(--text-muted);
-	margin: 6px 0 12px;
-}
-
-.browse-button {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	padding: 6px 12px;
-	background-color: var(--interactive-accent);
-	color: var(--text-on-accent);
-	border-radius: 4px;
-	cursor: pointer;
-	font-size: 12px;
-	transition: background-color 0.2s ease;
-}
-
-.browse-button:hover {
-	background-color: var(--interactive-accent-hover);
-}
-
-.browse-button svg {
-	width: 16px;
-	height: 16px;
-}
-
-.textarea-container {
-	width: 100%;
-}
-
-.options-textarea {
-	width: 100%;
-	min-height: 80px;
-	border-radius: 4px;
-	border: 1px solid var(--background-modifier-border);
-	background-color: var(--background-primary);
-	padding: 8px;
-	resize: vertical;
-	font-family: var(--font-text);
-	font-size: 14px;
-}
-
-.options-textarea:focus {
-	border-color: var(--interactive-accent);
-	outline: none;
-}
-
-/* Section Containers */
-.section-container {
-	margin-top: 32px;
-	padding-top: 24px;
-	border-top: 1px solid var(--background-modifier-border);
-}
-
-.section-heading {
-	font-size: 18px;
-	font-weight: 600;
-	margin: 0 0 16px 0;
-	color: var(--text-normal);
-}
-
-.frontmatters-container {
-	display: flex;
-	flex-direction: column;
-	gap: 20px;
-}
-
-/* Add Frontmatter Container */
-.add-frontmatter-container {
-	margin-top: 24px;
-	background-color: var(--background-secondary);
-	border-radius: 8px;
-	padding: 16px;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 20px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-	border: 1px dashed var(--background-modifier-border);
-}
-
-.add-frontmatter-title-section {
-	flex: 1;
-	min-width: 220px;
-}
-
-.add-frontmatter-title {
-	margin: 0;
-	font-size: 16px;
-	font-weight: 600;
-	color: var(--text-normal);
-}
-
-.add-frontmatter-description {
-	margin: 4px 0 0;
-	font-size: 12px;
-	color: var(--text-muted);
-}
-
-.add-frontmatter-controls {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	flex-wrap: wrap;
-}
-
-.add-frontmatter-select-container {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-}
-
-.add-frontmatter-label {
-	font-size: 12px;
-	color: var(--text-muted);
-}
-
-.add-frontmatter-dropdown {
-	min-width: 150px;
-}
-
-.add-frontmatter-btn {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 8px 16px;
-	background-color: var(--interactive-accent);
-	color: var(--text-on-accent);
-	border-radius: 4px;
-	cursor: pointer;
-	font-weight: 500;
-	transition: background-color 0.2s ease;
-}
-
-.add-frontmatter-btn:hover {
-	background-color: var(--interactive-accent-hover);
-}
-
-.add-frontmatter-btn svg {
-	width: 16px;
-	height: 16px;
-}
-
-/* Newly added frontmatter highlight */
-@keyframes highlight-new {
-	0% {
-		box-shadow: 0 0 0 2px var(--interactive-accent);
-	}
-	100% {
-		box-shadow: 0 0 0 0 transparent;
-	}
-}
-
-.newly-added {
-	animation: highlight-new 2s ease-out;
-}
-
-/* Tooltip */
-.tooltip {
-	position: relative;
-}
-
-.tooltip:hover:after {
-	content: attr(aria-label);
-	position: absolute;
-	top: -30px;
-	right: 0;
-	background: var(--background-modifier-hover);
-	color: var(--text-normal);
-	padding: 4px 8px;
-	border-radius: 4px;
-	font-size: 12px;
-	white-space: nowrap;
-	z-index: 10;
-}
-
-/* Section header container */
-.section-header-container {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 16px;
-}
-
-/* Simple add frontmatter button */
-.add-frontmatter-simple-btn {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 6px 12px;
-	background-color: var(--interactive-accent);
-	color: var(--text-on-accent);
-	border-radius: 4px;
-	cursor: pointer;
-	font-size: 14px;
-	font-weight: 500;
-	transition: all 0.2s ease;
-}
-
-.add-frontmatter-simple-btn:hover {
-	background-color: var(--interactive-accent-hover);
-	transform: translateY(-1px);
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.add-frontmatter-simple-btn svg {
-	width: 16px;
-	height: 16px;
-}
-
-/* Frontmatter controls layout */
+/* 컨트롤 행 레이아웃 개선 */
 .frontmatter-controls-row {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-	align-items: center;
+	align-items: stretch;
 	width: 100%;
-	margin-bottom: 12px;
-	gap: 8px;
+	margin-bottom: 16px;
+	gap: 16px;
+	flex-wrap: wrap;
 }
 
 .control-item {
@@ -459,44 +178,86 @@ If your plugin does not need CSS, delete this file.
 	flex-direction: column;
 	align-items: flex-start;
 	flex: 1;
-	min-width: 0;
-	padding: 4px;
+	min-width: var(--control-item-width);
+	padding: 8px;
+	background-color: var(--background-primary);
+	border-radius: var(--secondary-border-radius);
+	transition: background-color var(--animation-speed) ease;
+}
+
+.control-item:hover {
+	background-color: var(--background-primary-alt);
 }
 
 .control-label {
 	display: flex;
 	align-items: center;
-	gap: 4px;
-	font-size: 0.8rem;
+	gap: 6px;
+	font-size: 0.85rem;
 	font-weight: 500;
-	margin-bottom: 4px;
+	margin-bottom: 8px;
+	color: var(--text-normal);
+}
+
+.control-label svg {
+	width: 16px;
+	height: 16px;
 	color: var(--text-muted);
 }
 
 .control-input {
 	width: 100%;
-	font-size: 0.9rem;
-	border-radius: 4px;
+	height: var(--control-height);
+	font-size: 0.95rem;
+	border-radius: var(--secondary-border-radius);
 	border: 1px solid var(--background-modifier-border);
 	background-color: var(--background-secondary);
-	padding: 4px 8px;
+	padding: 8px 12px;
+	transition: all var(--animation-speed) ease;
 }
 
 .control-input:focus {
 	box-shadow: 0 0 0 2px var(--interactive-accent);
+	border-color: var(--interactive-accent);
 	outline: none;
 }
 
-/* Toggle switch styling */
+/* 드롭다운 스타일링 */
+.dropdown {
+	width: 100%;
+	height: var(--control-height);
+	padding: 8px 32px 8px 12px;
+	border-radius: var(--secondary-border-radius);
+	border: 1px solid var(--background-modifier-border);
+	background-color: var(--background-secondary);
+	appearance: none;
+	font-size: 0.95rem;
+	cursor: pointer;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 8px center;
+	background-size: 16px;
+}
+
+.dropdown:focus {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb), 0.2);
+	outline: none;
+}
+
+/* 토글 스위치 스타일링 */
 .toggle-wrapper {
-	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: var(--control-height);
 }
 
 .toggle {
 	position: relative;
 	display: inline-block;
-	width: 36px;
-	height: 20px;
+	width: 44px;
+	height: 24px;
 	cursor: pointer;
 }
 
@@ -513,20 +274,21 @@ If your plugin does not need CSS, delete this file.
 	right: 0;
 	bottom: 0;
 	background-color: var(--background-modifier-border);
-	border-radius: 10px;
+	border-radius: 34px;
 	transition: 0.3s;
 }
 
 .toggle-slider:before {
 	position: absolute;
 	content: '';
-	height: 16px;
-	width: 16px;
-	left: 2px;
-	bottom: 2px;
-	background-color: var(--background-primary);
+	height: 18px;
+	width: 18px;
+	left: 3px;
+	bottom: 3px;
+	background-color: white;
 	border-radius: 50%;
 	transition: 0.3s;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 input:checked + .toggle-slider {
@@ -534,34 +296,57 @@ input:checked + .toggle-slider {
 }
 
 input:checked + .toggle-slider:before {
-	transform: translateX(16px);
+	transform: translateX(20px);
 }
 
-/* Number input specific styling */
+/* 숫자 입력 필드 스타일링 */
 .number-input {
 	width: 100%;
 	text-align: center;
+	font-weight: 500;
 }
 
-/* Delete button in controls row */
+/* 삭제 버튼 스타일링 */
+.delete-control {
+	min-width: var(--control-item-width);
+	background-color: rgba(var(--text-error-rgb), 0.05);
+	border: 1px solid rgba(var(--text-error-rgb), 0.2);
+	transition: all var(--animation-speed) ease;
+}
+
+.delete-control:hover {
+	background-color: rgba(var(--text-error-rgb), 0.1);
+	border-color: rgba(var(--text-error-rgb), 0.3);
+}
+
+.delete-control .control-label {
+	color: var(--text-error);
+}
+
+.delete-control .control-label svg {
+	color: var(--text-error);
+}
+
 .delete-btn-wrapper {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	height: var(--control-height);
 }
 
 .delete-frontmatter-btn {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background-color: var(--background-modifier-error-hover);
+	background-color: rgba(var(--text-error-rgb), 0.2);
 	color: var(--text-error);
-	padding: 6px;
-	border-radius: 4px;
+	padding: 8px;
+	border-radius: var(--secondary-border-radius);
 	cursor: pointer;
-	transition: all 0.2s ease;
+	transition: all var(--animation-speed) ease;
 	width: 100%;
-	height: 28px;
+	height: 100%;
+	font-weight: 500;
 }
 
 .delete-frontmatter-btn:hover {
@@ -571,6 +356,190 @@ input:checked + .toggle-slider:before {
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.delete-control .control-label {
-	color: var(--text-error);
+/* 옵션 섹션 스타일링 */
+.options-section {
+	margin-top: 12px;
+	background: var(--background-primary);
+	border-radius: var(--secondary-border-radius);
+	padding: 16px;
+	border: 1px solid var(--background-modifier-border);
+}
+
+.options-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.options-title {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.options-description {
+	font-size: 0.85rem;
+	color: var(--text-muted);
+	margin: 8px 0 12px;
+	line-height: 1.5;
+}
+
+.browse-button {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-radius: var(--secondary-border-radius);
+	cursor: pointer;
+	font-size: 0.9rem;
+	font-weight: 500;
+	transition: all var(--animation-speed) ease;
+}
+
+.browse-button:hover {
+	background-color: var(--interactive-accent-hover);
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.browse-button svg {
+	width: 16px;
+	height: 16px;
+}
+
+.textarea-container {
+	width: 100%;
+}
+
+.options-textarea {
+	width: 100%;
+	min-height: 90px;
+	border-radius: var(--secondary-border-radius);
+	border: 1px solid var(--background-modifier-border);
+	background-color: var(--background-secondary);
+	padding: 12px;
+	resize: vertical;
+	font-family: var(--font-text);
+	font-size: 0.95rem;
+	line-height: 1.5;
+	transition: all var(--animation-speed) ease;
+}
+
+.options-textarea:focus {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb), 0.2);
+	outline: none;
+}
+
+/* 섹션 컨테이너 스타일링 */
+.section-container {
+	margin-top: 40px;
+	padding-top: 32px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.section-heading {
+	font-size: 1.3rem;
+	font-weight: 600;
+	margin: 0 0 20px 0;
+	color: var(--text-normal);
+}
+
+.frontmatters-container {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
+
+/* 새 프론트매터 추가 버튼 */
+.section-header-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.add-frontmatter-simple-btn {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 16px;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-radius: var(--secondary-border-radius);
+	cursor: pointer;
+	font-size: 0.95rem;
+	font-weight: 500;
+	transition: all 0.2s ease;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add-frontmatter-simple-btn:hover {
+	background-color: var(--interactive-accent-hover);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.add-frontmatter-simple-btn svg {
+	width: 18px;
+	height: 18px;
+}
+
+/* 새로 추가된 프론트매터 하이라이트 */
+@keyframes highlight-new {
+	0% {
+		box-shadow: 0 0 0 3px var(--interactive-accent);
+	}
+	100% {
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+	}
+}
+
+.newly-added {
+	animation: highlight-new 2s ease-out;
+}
+
+/* 미디어 쿼리 - 모바일 반응형 레이아웃 */
+@media (max-width: 768px) {
+	.frontmatter-controls-row {
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.control-item {
+		width: 100%;
+		min-width: 100%;
+	}
+
+	.frontmatter-card {
+		padding: 16px;
+	}
+
+	.options-section {
+		padding: 12px;
+	}
+}
+
+/* 툴팁 스타일 */
+.tooltip {
+	position: relative;
+}
+
+.tooltip:hover:after {
+	content: attr(aria-label);
+	position: absolute;
+	top: -34px;
+	right: 0;
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+	padding: 6px 10px;
+	border-radius: var(--secondary-border-radius);
+	font-size: 0.85rem;
+	white-space: nowrap;
+	z-index: 10;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
