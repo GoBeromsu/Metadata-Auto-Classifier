@@ -80,3 +80,497 @@ If your plugin does not need CSS, delete this file.
 	text-align: center;
 	color: var(--text-muted);
 }
+
+/* Frontmatter UI Styles */
+.frontmatter-container {
+	margin-bottom: 20px;
+}
+
+.frontmatter-card {
+	background-color: var(--background-secondary);
+	border-radius: 8px;
+	padding: 16px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+	border: 1px solid var(--background-modifier-border);
+	transition: box-shadow 0.3s ease;
+}
+
+.frontmatter-card:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Section */
+.frontmatter-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	margin-bottom: 12px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.frontmatter-name-container {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
+.frontmatter-label {
+	font-size: 0.8rem;
+	color: var(--text-muted);
+	margin-bottom: 4px;
+}
+
+.frontmatter-name-input {
+	font-size: 1rem;
+	font-weight: 500;
+	width: 100%;
+	padding: 4px 8px;
+	border-radius: 4px;
+	border: 1px solid var(--background-modifier-border);
+	background-color: var(--background-secondary);
+}
+
+/* Settings Container */
+.frontmatter-settings-container {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.frontmatter-settings-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 20px;
+}
+
+/* Setting Items */
+.setting-item {
+	min-width: 200px;
+	flex-grow: 1;
+}
+
+.setting-label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 6px;
+	color: var(--text-normal);
+}
+
+.setting-description {
+	font-size: 12px;
+	color: var(--text-muted);
+	margin-top: 4px;
+}
+
+/* Dropdown */
+.dropdown-container {
+	position: relative;
+}
+
+.dropdown {
+	width: 100%;
+	padding: 8px 12px;
+	border-radius: 4px;
+	border: 1px solid var(--background-modifier-border);
+	background-color: var(--background-primary);
+	appearance: none;
+	font-size: 14px;
+	cursor: pointer;
+}
+
+.dropdown:focus {
+	border-color: var(--interactive-accent);
+	outline: none;
+}
+
+/* Toggle Switch */
+.toggle-container {
+	display: flex;
+	flex-direction: column;
+}
+
+.toggle-switch-container {
+	margin-top: 6px;
+}
+
+.toggle-switch-container .setting-item {
+	padding: 0;
+	border: none;
+}
+
+.toggle-switch-container .setting-item-info,
+.toggle-switch-container .setting-item-description {
+	display: none;
+}
+
+.toggle-switch-container .setting-item-control {
+	justify-content: flex-start;
+}
+
+/* Options Section */
+.options-section {
+	margin-top: 4px;
+	background: var(--background-primary-alt);
+	border-radius: 6px;
+	padding: 12px;
+}
+
+.options-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.options-title {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.options-description {
+	font-size: 12px;
+	color: var(--text-muted);
+	margin: 6px 0 12px;
+}
+
+.browse-button {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 12px;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 12px;
+	transition: background-color 0.2s ease;
+}
+
+.browse-button:hover {
+	background-color: var(--interactive-accent-hover);
+}
+
+.browse-button svg {
+	width: 16px;
+	height: 16px;
+}
+
+.textarea-container {
+	width: 100%;
+}
+
+.options-textarea {
+	width: 100%;
+	min-height: 80px;
+	border-radius: 4px;
+	border: 1px solid var(--background-modifier-border);
+	background-color: var(--background-primary);
+	padding: 8px;
+	resize: vertical;
+	font-family: var(--font-text);
+	font-size: 14px;
+}
+
+.options-textarea:focus {
+	border-color: var(--interactive-accent);
+	outline: none;
+}
+
+/* Section Containers */
+.section-container {
+	margin-top: 32px;
+	padding-top: 24px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.section-heading {
+	font-size: 18px;
+	font-weight: 600;
+	margin: 0 0 16px 0;
+	color: var(--text-normal);
+}
+
+.frontmatters-container {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+/* Add Frontmatter Container */
+.add-frontmatter-container {
+	margin-top: 24px;
+	background-color: var(--background-secondary);
+	border-radius: 8px;
+	padding: 16px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 20px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+	border: 1px dashed var(--background-modifier-border);
+}
+
+.add-frontmatter-title-section {
+	flex: 1;
+	min-width: 220px;
+}
+
+.add-frontmatter-title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.add-frontmatter-description {
+	margin: 4px 0 0;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.add-frontmatter-controls {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.add-frontmatter-select-container {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.add-frontmatter-label {
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.add-frontmatter-dropdown {
+	min-width: 150px;
+}
+
+.add-frontmatter-btn {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 16px;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: 500;
+	transition: background-color 0.2s ease;
+}
+
+.add-frontmatter-btn:hover {
+	background-color: var(--interactive-accent-hover);
+}
+
+.add-frontmatter-btn svg {
+	width: 16px;
+	height: 16px;
+}
+
+/* Newly added frontmatter highlight */
+@keyframes highlight-new {
+	0% {
+		box-shadow: 0 0 0 2px var(--interactive-accent);
+	}
+	100% {
+		box-shadow: 0 0 0 0 transparent;
+	}
+}
+
+.newly-added {
+	animation: highlight-new 2s ease-out;
+}
+
+/* Tooltip */
+.tooltip {
+	position: relative;
+}
+
+.tooltip:hover:after {
+	content: attr(aria-label);
+	position: absolute;
+	top: -30px;
+	right: 0;
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 12px;
+	white-space: nowrap;
+	z-index: 10;
+}
+
+/* Section header container */
+.section-header-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+/* Simple add frontmatter button */
+.add-frontmatter-simple-btn {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 12px;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+	transition: all 0.2s ease;
+}
+
+.add-frontmatter-simple-btn:hover {
+	background-color: var(--interactive-accent-hover);
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add-frontmatter-simple-btn svg {
+	width: 16px;
+	height: 16px;
+}
+
+/* Frontmatter controls layout */
+.frontmatter-controls-row {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	margin-bottom: 12px;
+	gap: 8px;
+}
+
+.control-item {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	flex: 1;
+	min-width: 0;
+	padding: 4px;
+}
+
+.control-label {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 0.8rem;
+	font-weight: 500;
+	margin-bottom: 4px;
+	color: var(--text-muted);
+}
+
+.control-input {
+	width: 100%;
+	font-size: 0.9rem;
+	border-radius: 4px;
+	border: 1px solid var(--background-modifier-border);
+	background-color: var(--background-secondary);
+	padding: 4px 8px;
+}
+
+.control-input:focus {
+	box-shadow: 0 0 0 2px var(--interactive-accent);
+	outline: none;
+}
+
+/* Toggle switch styling */
+.toggle-wrapper {
+	position: relative;
+}
+
+.toggle {
+	position: relative;
+	display: inline-block;
+	width: 36px;
+	height: 20px;
+	cursor: pointer;
+}
+
+.toggle input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.toggle-slider {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: var(--background-modifier-border);
+	border-radius: 10px;
+	transition: 0.3s;
+}
+
+.toggle-slider:before {
+	position: absolute;
+	content: '';
+	height: 16px;
+	width: 16px;
+	left: 2px;
+	bottom: 2px;
+	background-color: var(--background-primary);
+	border-radius: 50%;
+	transition: 0.3s;
+}
+
+input:checked + .toggle-slider {
+	background-color: var(--interactive-accent);
+}
+
+input:checked + .toggle-slider:before {
+	transform: translateX(16px);
+}
+
+/* Number input specific styling */
+.number-input {
+	width: 100%;
+	text-align: center;
+}
+
+/* Delete button in controls row */
+.delete-btn-wrapper {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.delete-frontmatter-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--background-modifier-error-hover);
+	color: var(--text-error);
+	padding: 6px;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	width: 100%;
+	height: 28px;
+}
+
+.delete-frontmatter-btn:hover {
+	background-color: var(--text-error);
+	color: white;
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.delete-control .control-label {
+	color: var(--text-error);
+}

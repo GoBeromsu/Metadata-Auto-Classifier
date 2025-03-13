@@ -6,6 +6,7 @@ export interface FrontmatterTemplate {
 	count: number;
 	refs: string[];
 	overwrite: boolean;
+	linkType: 'Normal' | 'WikiLink';
 }
 export interface ProviderConfig {
 	name: string;
@@ -35,6 +36,7 @@ export interface InsertFrontMatterParams {
 	key: string;
 	value: string[];
 	overwrite: boolean;
+	linkType?: 'Normal' | 'WikiLink';
 }
 export interface StructuredOutput {
 	output: string[];

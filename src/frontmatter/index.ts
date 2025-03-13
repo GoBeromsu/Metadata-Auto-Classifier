@@ -11,15 +11,36 @@ import {
 /**
  * Processes a string by removing spaces except in wiki links
  * @param str String to process
+ * @param linkType Link type ('Normal' or 'WikiLink')
  * @returns Processed string with spaces removed except in wiki links
  */
-export const processString = (str: string): string => {
-	return str.replace(/(\[\[.*?\]\])|([^\[\]]+)/g, (fullMatch, wikiLinkMatch, regularTextMatch) => {
-		if (wikiLinkMatch) {
-			return wikiLinkMatch;
-		}
-		return regularTextMatch.replace(/\s+/g, '');
-	});
+
+export const processString = (str: string, linkType?: 'Normal' | 'WikiLink'): string => {
+	// If it's a WikiLink type and the string is wrapped in [[]], strip the brackets but preserve internal spaces
+	if (linkType === 'WikiLink' && str.startsWith('[[') && str.endsWith(']]')) {
+		return str.slice(2, -2);
+	}
+
+	// For WikiLink types, spaces should be preserved
+	if (linkType === 'WikiLink') {
+		return str;
+	}
+
+	// Regular processing for normal text (non-WikiLink)
+	return str.replace(/\s+/g, '');
+};
+
+/**
+ * Wraps the string in wiki link format if linkType is WikiLink
+ * @param str String to process
+ * @param linkType Link type ('Normal' or 'WikiLink')
+ * @returns String wrapped in [[]] if linkType is WikiLink, otherwise returns the original string
+ */
+export const formatStringByLinkType = (str: string, linkType?: 'Normal' | 'WikiLink'): string => {
+	if (linkType === 'WikiLink' && !str.startsWith('[[') && !str.endsWith(']]')) {
+		return `[[${str}]]`;
+	}
+	return str;
 };
 
 /**
@@ -64,10 +85,13 @@ export const getFrontmatterSetting = (
 	return setting;
 };
 
-export const addFrontmatterSetting = (): FrontmatterTemplate => {
+export const addFrontmatterSetting = (
+	linkType: 'Normal' | 'WikiLink' = 'Normal'
+): FrontmatterTemplate => {
 	return {
 		...DEFAULT_FRONTMATTER_SETTING,
 		id: generateId(),
+		linkType,
 	};
 };
 
@@ -76,12 +100,26 @@ export const insertToFrontMatter = async (
 	params: InsertFrontMatterParams
 ): Promise<void> => {
 	await processFrontMatter(params.file, (frontmatter: FrontMatter) => {
-		const processedValue = params.value.map(processString);
+		// Process values based on linkType
+		const processedValue = params.value.map((item) => processString(item, params.linkType));
 		const existingValues = frontmatter[params.key] || [];
-		const frontmatterKey = params.overwrite
+
+		// Process existing values if needed
+		const processedExistingValues = existingValues.map((item) =>
+			processString(item, params.linkType)
+		);
+
+		// Combine values based on overwrite setting
+		let combinedValues = params.overwrite
 			? processedValue
-			: [...existingValues.map(processString), ...processedValue];
+			: [...processedExistingValues, ...processedValue];
+
 		// Remove duplicates and empty strings
-		frontmatter[params.key] = [...new Set(frontmatterKey)].filter(Boolean);
+		combinedValues = [...new Set(combinedValues)].filter(Boolean);
+
+		// Format back to Wiki links if needed
+		frontmatter[params.key] = combinedValues.map((item) =>
+			formatStringByLinkType(item, params.linkType)
+		);
 	});
 };

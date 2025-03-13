@@ -1,5 +1,5 @@
 import AutoClassifierPlugin from 'main';
-import { PluginSettingTab, Setting } from 'obsidian';
+import { PluginSettingTab, setIcon } from 'obsidian';
 
 import { addFrontmatterSetting } from 'frontmatter';
 
@@ -36,37 +36,70 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		const apiSettingContainer = containerEl.createDiv();
 		this.apiSetting.display(apiSettingContainer);
 
-		new Setting(containerEl)
-			.setName('Add frontmatter')
-			.setDesc('Add a new frontmatter entry')
-			.addButton((button) =>
-				button
-					.setButtonText('Add Frontmatter')
-					.setCta()
-					.onClick(() => {
-						this.addNewFrontmatter(containerEl);
-					})
-			);
-
-		new Setting(containerEl).setName('Tag').setHeading();
-		const tagContainer = containerEl.createDiv();
+		// Tags section
+		const tagSectionContainer = containerEl.createDiv({ cls: 'section-container tag-section' });
+		tagSectionContainer.createEl('h2', { text: 'Tags', cls: 'section-heading' });
+		const tagContainer = tagSectionContainer.createDiv();
 		this.tagSetting.display(tagContainer);
-		new Setting(containerEl).setName('Frontmatter').setHeading();
+
+		// Custom frontmatter section
+		const fmSectionContainer = containerEl.createDiv({
+			cls: 'section-container frontmatter-section',
+		});
+
+		// 섹션 헤더와 추가 버튼을 하나의 컨테이너에 배치
+		const fmHeaderContainer = fmSectionContainer.createDiv({ cls: 'section-header-container' });
+
+		// 헤더 제목
+		fmHeaderContainer.createEl('h2', { text: 'Custom Frontmatter', cls: 'section-heading' });
+
+		// 단순화된 추가 버튼
+		const addButton = fmHeaderContainer.createDiv({ cls: 'add-frontmatter-simple-btn' });
+		setIcon(addButton, 'plus');
+		addButton.createSpan({ text: 'Add Frontmatter' });
+
+		addButton.addEventListener('click', () => {
+			this.addNewFrontmatter(containerEl, 'Normal');
+		});
+
+		// Create a container for all frontmatter items
+		const frontmattersContainer = fmSectionContainer.createDiv({ cls: 'frontmatters-container' });
 
 		this.plugin.settings.frontmatter.forEach((frontmatter) => {
 			if (frontmatter.name !== 'tags') {
-				const frontmatterContainer = containerEl.createDiv();
+				const frontmatterContainer = frontmattersContainer.createDiv({
+					cls: 'frontmatter-container',
+				});
+				frontmatterContainer.setAttribute('data-frontmatter-id', frontmatter.id.toString());
 				this.frontmatterSetting.display(frontmatterContainer, frontmatter.id);
 			}
 		});
 	}
 
-	private addNewFrontmatter(containerEl: HTMLElement): void {
-		const newFrontmatter = addFrontmatterSetting();
+	private addNewFrontmatter(containerEl: HTMLElement, linkType: 'Normal' | 'WikiLink'): void {
+		const newFrontmatter = addFrontmatterSetting(linkType);
 		this.plugin.settings.frontmatter.push(newFrontmatter);
 		this.plugin.saveSettings();
 
-		const newFrontmatterContainer = containerEl.createDiv();
-		this.frontmatterSetting.display(newFrontmatterContainer, newFrontmatter.id);
+		// Find the frontmatters container to add the new frontmatter to
+		const frontmattersContainer = containerEl.querySelector('.frontmatters-container');
+		if (!frontmattersContainer) return;
+
+		const newFrontmatterContainer = document.createElement('div');
+		newFrontmatterContainer.className = 'frontmatter-container';
+		newFrontmatterContainer.setAttribute('data-frontmatter-id', newFrontmatter.id.toString());
+
+		frontmattersContainer.appendChild(newFrontmatterContainer);
+		this.frontmatterSetting.display(newFrontmatterContainer as HTMLElement, newFrontmatter.id);
+
+		// Scroll the new frontmatter into view
+		newFrontmatterContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+		// Add a temporary highlight to make it clear which one was added
+		newFrontmatterContainer.addClass('newly-added');
+		setTimeout(() => newFrontmatterContainer.removeClass('newly-added'), 2000);
 	}
 }
+
+export * from './SelectFrontmatterModal';
+export * from './WikiLinkSelector';

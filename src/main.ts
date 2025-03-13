@@ -4,7 +4,7 @@ import { FrontmatterTemplate, ProviderConfig } from 'utils/interface';
 import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
 
 import { processAPIRequest } from 'api';
-import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
+import { AutoClassifierSettings, AutoClassifierSettingTab, SelectFrontmatterModal } from './ui';
 import { DEFAULT_CHAT_ROLE, getPromptTemplate } from './utils/templates';
 import { mergeDefaults } from 'utils';
 
@@ -19,16 +19,53 @@ export default class AutoClassifierPlugin extends Plugin {
 	}
 
 	setupCommand() {
-		this.settings.frontmatter.forEach((frontmatter) => {
-			this.addCommand({
-				id: `fetch-frontmatter-${frontmatter.id}`,
-				name: `Fetch frontmatter: ${frontmatter.name}`,
-				callback: async () => {
-					await this.processFrontmatter(frontmatter.id);
-				},
-			});
+		// 단일 프론트매터 처리 명령
+		this.addCommand({
+			id: 'fetch-specific-frontmatter',
+			name: 'Fetch specific frontmatter',
+			callback: async () => {
+				// 현재 설정된 모든 프론트매터 목록을 표시하는 모달
+				const frontmatters = this.settings.frontmatter
+					.filter((fm) => fm.name !== 'tags') // 내장 태그는 별도로 처리
+					.map((fm) => ({
+						name: fm.name,
+						id: fm.id,
+					}));
+
+				if (frontmatters.length === 0) {
+					new Notice('No frontmatter settings defined. Please add some in settings.');
+					return;
+				}
+
+				// 간단한 선택 모달 표시
+				const modal = new SelectFrontmatterModal(
+					this.app,
+					frontmatters,
+					async (selected: number | null) => {
+						if (selected !== null) {
+							await this.processFrontmatter(selected);
+						}
+					}
+				);
+				modal.open();
+			},
 		});
 
+		// 태그 프론트매터 처리를 위한 별도 명령
+		this.addCommand({
+			id: 'fetch-tags',
+			name: 'Fetch frontmatter: tags',
+			callback: async () => {
+				const tagsFrontmatter = this.settings.frontmatter.find((fm) => fm.name === 'tags');
+				if (tagsFrontmatter) {
+					await this.processFrontmatter(tagsFrontmatter.id);
+				} else {
+					new Notice('Tags frontmatter not found.');
+				}
+			},
+		});
+
+		// 모든 프론트매터 처리 명령
 		this.addCommand({
 			id: 'fetch-all-frontmatter',
 			name: 'Fetch all frontmatter using current provider',
@@ -108,12 +145,17 @@ export default class AutoClassifierPlugin extends Plugin {
 				key: frontmatter.name,
 				value: apiResponse.output,
 				overwrite: frontmatter.overwrite,
+				linkType: frontmatter.linkType,
 			});
 
+			// Display the appropriate format in the notification based on linkType
+			const displayOutput =
+				frontmatter.linkType === 'WikiLink'
+					? apiResponse.output.map((item) => `[[${item}]]`)
+					: apiResponse.output;
+
 			new Notice(
-				`✅ ${apiResponse.output.length} ${frontmatter.name} added: ${apiResponse.output.join(
-					', '
-				)}`
+				`✅ ${apiResponse.output.length} ${frontmatter.name} added: ${displayOutput.join(', ')}`
 			);
 		} else if (apiResponse) {
 			new Notice(
