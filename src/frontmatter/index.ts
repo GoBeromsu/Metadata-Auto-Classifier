@@ -8,27 +8,6 @@ import {
 	InsertFrontMatterParams,
 	ProcessFrontMatterFn,
 } from 'utils/interface';
-/**
- * Processes a string by removing spaces except in wiki links
- * @param str String to process
- * @param linkType Link type ('Normal' or 'WikiLink')
- * @returns Processed string with spaces removed except in wiki links
- */
-
-export const processString = (str: string, linkType?: 'Normal' | 'WikiLink'): string => {
-	// If it's a WikiLink type and the string is wrapped in [[]], strip the brackets but preserve internal spaces
-	if (linkType === 'WikiLink' && str.startsWith('[[') && str.endsWith(']]')) {
-		return str.slice(2, -2);
-	}
-
-	// For WikiLink types, spaces should be preserved
-	if (linkType === 'WikiLink') {
-		return str;
-	}
-
-	// Regular processing for normal text (non-WikiLink)
-	return str.replace(/\s+/g, '');
-};
 
 /**
  * Wraps the string in wiki link format if linkType is WikiLink
@@ -101,18 +80,11 @@ export const insertToFrontMatter = async (
 ): Promise<void> => {
 	await processFrontMatter(params.file, (frontmatter: FrontMatter) => {
 		// Process values based on linkType
-		const processedValue = params.value.map((item) => processString(item, params.linkType));
+		const processedValue = params.value;
 		const existingValues = frontmatter[params.key] || [];
 
-		// Process existing values if needed
-		const processedExistingValues = existingValues.map((item) =>
-			processString(item, params.linkType)
-		);
-
 		// Combine values based on overwrite setting
-		let combinedValues = params.overwrite
-			? processedValue
-			: [...processedExistingValues, ...processedValue];
+		let combinedValues = params.overwrite ? processedValue : [...existingValues, ...processedValue];
 
 		// Remove duplicates and empty strings
 		combinedValues = [...new Set(combinedValues)].filter(Boolean);
