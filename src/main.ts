@@ -114,8 +114,11 @@ export default class AutoClassifierPlugin extends Plugin {
 		}
 
 		const currentValues = frontmatter.refs;
+		const processedValues = currentValues.map((value) =>
+			value.startsWith('[[') && value.endsWith(']]') ? value.slice(2, -2) : value
+		);
 
-		if (currentValues.length === 0) {
+		if (processedValues.length === 0) {
 			new Notice(
 				`⛔ ${this.manifest.name}: No current values found for frontmatter ${frontmatter.name}`
 			);
@@ -124,7 +127,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		const currentContent = await this.app.vault.read(currentFile);
 		const content = getContentWithoutFrontmatter(currentContent);
 
-		const promptTemplate = getPromptTemplate(frontmatter.count, content, currentValues);
+		const promptTemplate = getPromptTemplate(frontmatter.count, content, processedValues);
 
 		const chatRole = DEFAULT_CHAT_ROLE;
 		const selectedModel = selectedProvider.selectedModel || this.settings.selectedModel;

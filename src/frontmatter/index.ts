@@ -10,19 +10,6 @@ import {
 } from 'utils/interface';
 
 /**
- * Wraps the string in wiki link format if linkType is WikiLink
- * @param str String to process
- * @param linkType Link type ('Normal' or 'WikiLink')
- * @returns String wrapped in [[]] if linkType is WikiLink, otherwise returns the original string
- */
-export const formatStringByLinkType = (str: string, linkType?: 'Normal' | 'WikiLink'): string => {
-	if (linkType === 'WikiLink' && !str.startsWith('[[') && !str.endsWith(']]')) {
-		return `[[${str}]]`;
-	}
-	return str;
-};
-
-/**
  * Extracts the content of a markdown file excluding frontmatter
  * @param content - The full content of the markdown file
  * @returns The content without frontmatter
@@ -79,19 +66,18 @@ export const insertToFrontMatter = async (
 	params: InsertFrontMatterParams
 ): Promise<void> => {
 	await processFrontMatter(params.file, (frontmatter: FrontMatter) => {
-		// Process values based on linkType
-		const processedValue = params.value;
-		const existingValues = frontmatter[params.key] || [];
+		// Ensure values are in raw format for processing (API context)
+		const rawValues =
+			params.linkType === 'WikiLink' ? params.value.map((item) => `[[${item}]]`) : params.value;
 
+		const existingRawValues = frontmatter[params.key] || [];
 		// Combine values based on overwrite setting
-		let combinedValues = params.overwrite ? processedValue : [...existingValues, ...processedValue];
+		let combinedRawValues = params.overwrite ? rawValues : [...existingRawValues, ...rawValues];
 
 		// Remove duplicates and empty strings
-		combinedValues = [...new Set(combinedValues)].filter(Boolean);
+		combinedRawValues = [...new Set(combinedRawValues)].filter(Boolean);
 
-		// Format back to Wiki links if needed
-		frontmatter[params.key] = combinedValues.map((item) =>
-			formatStringByLinkType(item, params.linkType)
-		);
+		// Format back for storage context
+		frontmatter[params.key] = combinedRawValues;
 	});
 };

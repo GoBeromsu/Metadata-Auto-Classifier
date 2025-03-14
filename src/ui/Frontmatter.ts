@@ -1,7 +1,6 @@
 import { getFrontmatterSetting } from 'frontmatter';
-import { Notice, Setting, setIcon } from 'obsidian';
+import { setIcon } from 'obsidian';
 
-import { DEFAULT_FRONTMATTER_SETTING } from 'utils/constant';
 import { FrontmatterTemplate } from 'utils/interface';
 import { BaseSettingsComponent } from './BaseSettingsComponent';
 import { WikiLinkSelector } from './WikiLinkSelector';
@@ -53,8 +52,9 @@ export class Frontmatter extends BaseSettingsComponent {
 
 		// 변경 핸들러
 		select.addEventListener('change', async () => {
-			const value = select.value as 'Normal' | 'WikiLink';
-			frontmatterSetting.linkType = value;
+			const newLinkType = select.value as 'Normal' | 'WikiLink';
+
+			frontmatterSetting.linkType = newLinkType;
 			await this.plugin.saveSettings();
 
 			// 컨테이너 새로고침
@@ -207,17 +207,13 @@ export class Frontmatter extends BaseSettingsComponent {
 			browseButton.addEventListener('click', () => {
 				const wikiLinkSelector = new WikiLinkSelector(this.plugin.app);
 				wikiLinkSelector.openFileSelector((selectedLink) => {
-					// Get the current options
+					const formattedLink = `[[${selectedLink}]]`;
 					const currentOptions = frontmatterSetting.refs || [];
 
-					// Add the selected link if it's not already in the list
-					if (!currentOptions.includes(selectedLink)) {
-						frontmatterSetting.refs = [...currentOptions, selectedLink];
-						this.plugin.saveSettings().then(() => {
-							// Update the textarea
-							this.updateOptionsTextarea(sectionContainer, frontmatterSetting);
-						});
-					}
+					frontmatterSetting.refs = [...currentOptions, formattedLink];
+					this.plugin.saveSettings().then(() => {
+						this.updateOptionsTextarea(sectionContainer, frontmatterSetting);
+					});
 				});
 			});
 		}
@@ -238,38 +234,25 @@ export class Frontmatter extends BaseSettingsComponent {
 		// Format and set current values
 		let displayValue = '';
 		if (frontmatterSetting.refs && frontmatterSetting.refs.length > 0) {
-			// If it's WikiLink type, show them with [[]] for better visualization
-			if (frontmatterSetting.linkType === 'WikiLink') {
-				displayValue = frontmatterSetting.refs.map((ref) => `[[${ref}]]`).join(', ');
-			} else {
-				displayValue = frontmatterSetting.refs.join(', ');
-			}
+			displayValue = frontmatterSetting.refs.join(', ');
 		}
 		textarea.value = displayValue;
 
 		// Add change handler
 		textarea.addEventListener('change', async () => {
-			// When saving, remove the [[]] if it's WikiLink type
-			if (frontmatterSetting.linkType === 'WikiLink') {
-				frontmatterSetting.refs = textarea.value
-					.split(',')
-					.map((option) => {
-						// 외부 공백만 제거
-						const trimmedOption = option.trim();
-						// Remove [[]] if present, preserve internal spaces
-						if (trimmedOption.startsWith('[[') && trimmedOption.endsWith(']]')) {
-							return trimmedOption.slice(2, -2); // 내부 공백 유지
-						}
-						return trimmedOption;
-					})
-					.filter(Boolean);
-			} else {
-				frontmatterSetting.refs = textarea.value
-					.split(',')
-					.map((option) => option.trim())
-					.filter(Boolean);
-			}
+			// 입력 값은 콤마로 분리
+			const inputOptions = textarea.value
+				.split(',')
+				.map((option) => option.trim())
+				.filter(Boolean);
+
+			// 입력된 값들을 현재 링크 타입에 맞는 포맷으로 저장
+			frontmatterSetting.refs = inputOptions;
+
 			await this.plugin.saveSettings();
+
+			// 텍스트 영역 업데이트 (표시를 위해)
+			this.updateOptionsTextarea(sectionContainer, frontmatterSetting);
 		});
 	}
 
@@ -279,14 +262,10 @@ export class Frontmatter extends BaseSettingsComponent {
 	): void {
 		const textarea = containerEl.querySelector('.options-textarea');
 		if (textarea) {
-			// Format based on link type
+			// 현재 저장된 값들 그대로 표시 (이미 올바른 형식으로 저장되어 있음)
 			let displayValue = '';
 			if (frontmatterSetting.refs && frontmatterSetting.refs.length > 0) {
-				if (frontmatterSetting.linkType === 'WikiLink') {
-					displayValue = frontmatterSetting.refs.map((ref) => `[[${ref}]]`).join(', ');
-				} else {
-					displayValue = frontmatterSetting.refs.join(', ');
-				}
+				displayValue = frontmatterSetting.refs.join(', ');
 			}
 			(textarea as HTMLTextAreaElement).value = displayValue;
 		}
