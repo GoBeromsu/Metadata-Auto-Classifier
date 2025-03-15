@@ -114,9 +114,13 @@ export default class AutoClassifierPlugin extends Plugin {
 		}
 
 		const currentValues = frontmatter.refs;
-		const processedValues = currentValues.map((value) =>
-			value.startsWith('[[') && value.endsWith(']]') ? value.slice(2, -2) : value
-		);
+
+		const processedValues =
+			frontmatter.linkType === 'WikiLink'
+				? currentValues.map((value) =>
+						value.startsWith('[[') && value.endsWith(']]') ? value.slice(2, -2) : value
+				  )
+				: currentValues;
 
 		if (processedValues.length === 0) {
 			new Notice(
