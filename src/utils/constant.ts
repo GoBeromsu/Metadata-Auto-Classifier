@@ -47,9 +47,6 @@ export const OPENROUTER_PROVIDER: ProviderConfig = {
 	endpoint: '/api/v1/chat/completions',
 	models: [
 		{
-			name: 'google/gemma-3-27b-it:free',
-		},
-		{
 			name: 'google/gemini-2.0-flash-exp:free',
 		},
 		{
