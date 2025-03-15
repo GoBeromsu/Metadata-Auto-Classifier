@@ -13,6 +13,7 @@ const DEFAULT_TEMPERATURE = 0.7;
 export enum AIProvider {
 	OpenAI = 'OpenAI',
 	Custom = 'Custom',
+	OpenRouter = 'OpenRouter',
 }
 
 export enum OpenAIModelName {
@@ -38,6 +39,32 @@ export const OPENAI_PROVIDER: ProviderConfig = {
 	temperature: DEFAULT_TEMPERATURE,
 	selectedModel: OpenAIModelName.GPT_4O_MINI,
 };
+
+export const OPENROUTER_PROVIDER: ProviderConfig = {
+	name: AIProvider.OpenRouter,
+	apiKey: '',
+	baseUrl: 'https://openrouter.ai',
+	endpoint: '/api/v1/chat/completions',
+	models: [
+		{
+			name: 'google/gemma-3-27b-it:free',
+		},
+		{
+			name: 'google/gemini-2.0-flash-exp:free',
+		},
+		{
+			name: 'meta-llama/llama-3.3-70b-instruct',
+		},
+		{
+			name: 'deepseek/deepseek-r1',
+		},
+	],
+	lastTested: null,
+	testResult: null,
+	temperature: DEFAULT_TEMPERATURE,
+	selectedModel: 'openrouter/auto',
+};
+
 export const CUSTOM_PROVIDER: ProviderConfig = {
 	name: AIProvider.Custom,
 	apiKey: '',
@@ -63,7 +90,7 @@ export const DEFAULT_TAG_SETTING: FrontmatterTemplate = {
 
 // Default settings for the Auto Classifier plugin
 export const DEFAULT_SETTINGS: AutoClassifierSettings = {
-	providers: [OPENAI_PROVIDER, CUSTOM_PROVIDER],
+	providers: [OPENAI_PROVIDER, CUSTOM_PROVIDER, OPENROUTER_PROVIDER],
 	selectedProvider: AIProvider.OpenAI,
 	selectedModel: OpenAIModelName.GPT_4O_MINI,
 	frontmatter: [DEFAULT_TAG_SETTING],
@@ -91,6 +118,30 @@ export const LMSTUDIO_STRUCTURE_OUTPUT = {
 };
 
 export const OPENAI_STRUCTURE_OUTPUT = {
+	type: 'json_schema',
+	json_schema: {
+		name: 'metadata_classifier',
+		schema: {
+			type: 'object',
+			properties: {
+				output: {
+					type: 'array',
+					items: { type: 'string' },
+					description: 'Array of classified tags or categories',
+				},
+				reliability: {
+					type: 'number',
+					description: 'A number between 0 and 1 indicating confidence in the classification',
+				},
+			},
+			required: ['output', 'reliability'],
+			additionalProperties: false,
+		},
+		strict: true,
+	},
+};
+
+export const OPENROUTER_STRUCTURE_OUTPUT = {
 	type: 'json_schema',
 	json_schema: {
 		name: 'metadata_classifier',
