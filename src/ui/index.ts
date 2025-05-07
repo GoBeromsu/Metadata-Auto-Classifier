@@ -1,5 +1,5 @@
 import AutoClassifierPlugin from 'main';
-import { PluginSettingTab, setIcon } from 'obsidian';
+import { PluginSettingTab, ButtonComponent, Setting } from 'obsidian';
 
 import { addFrontmatterSetting } from 'frontmatter';
 
@@ -33,12 +33,14 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
+		// API Settings Section
 		const apiSettingContainer = containerEl.createDiv();
 		this.apiSetting.display(apiSettingContainer);
 
 		// Tags section
 		const tagSectionContainer = containerEl.createDiv({ cls: 'section-container tag-section' });
-		tagSectionContainer.createEl('h2', { text: 'Tags', cls: 'section-heading' });
+		new Setting(tagSectionContainer).setName('Tags').setHeading().setClass('section-heading');
+
 		const tagContainer = tagSectionContainer.createDiv();
 		this.tagSetting.display(tagContainer);
 
@@ -49,15 +51,18 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 
 		const fmHeaderContainer = fmSectionContainer.createDiv({ cls: 'section-header-container' });
 
-		fmHeaderContainer.createEl('h2', { text: 'Custom Frontmatter', cls: 'section-heading' });
+		new Setting(fmHeaderContainer)
+			.setName('Custom Frontmatter')
+			.setHeading()
+			.setClass('section-heading');
 
-		const addButton = fmHeaderContainer.createDiv({ cls: 'add-frontmatter-simple-btn' });
-		setIcon(addButton, 'plus');
-		addButton.createSpan({ text: 'Add Frontmatter' });
-
-		addButton.addEventListener('click', () => {
-			this.addNewFrontmatter(containerEl, 'Normal');
-		});
+		new ButtonComponent(fmHeaderContainer)
+			.setButtonText('Add Frontmatter')
+			.setIcon('plus')
+			.setCta()
+			.onClick(() => {
+				this.addNewFrontmatter(containerEl, 'Normal');
+			});
 
 		// Create a container for all frontmatter items
 		const frontmattersContainer = fmSectionContainer.createDiv({ cls: 'frontmatters-container' });
@@ -82,17 +87,15 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		const frontmattersContainer = containerEl.querySelector('.frontmatters-container');
 		if (!frontmattersContainer) return;
 
-		const newFrontmatterContainer = document.createElement('div');
-		newFrontmatterContainer.className = 'frontmatter-container';
+		const newFrontmatterContainer = frontmattersContainer.createDiv({
+			cls: 'frontmatter-container',
+		});
+
 		newFrontmatterContainer.setAttribute('data-frontmatter-id', newFrontmatter.id.toString());
+		this.frontmatterSetting.display(newFrontmatterContainer, newFrontmatter.id);
 
-		frontmattersContainer.appendChild(newFrontmatterContainer);
-		this.frontmatterSetting.display(newFrontmatterContainer as HTMLElement, newFrontmatter.id);
+		newFrontmatterContainer.scrollIntoView({ block: 'center' });
 
-		// Scroll the new frontmatter into view
-		newFrontmatterContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-		// Add a temporary highlight to make it clear which one was added
 		newFrontmatterContainer.addClass('newly-added');
 		setTimeout(() => newFrontmatterContainer.removeClass('newly-added'), 2000);
 	}

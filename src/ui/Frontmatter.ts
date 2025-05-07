@@ -1,5 +1,13 @@
 import { getFrontmatterSetting } from 'frontmatter';
-import { setIcon } from 'obsidian';
+import {
+	setIcon,
+	Setting,
+	DropdownComponent,
+	ToggleComponent,
+	ButtonComponent,
+	TextComponent,
+	TextAreaComponent,
+} from 'obsidian';
 
 import { FrontmatterTemplate } from 'utils/interface';
 import { BaseSettingsComponent } from './BaseSettingsComponent';
@@ -25,124 +33,98 @@ export class Frontmatter extends BaseSettingsComponent {
 			this.plugin.settings.frontmatter
 		);
 
-		// Add header with name and delete button (삭제 버튼은 옮길 예정)
+		// Add header with name and delete button
 		this.addHeaderSection(containerEl, frontmatterSetting, frontmatterId);
 
-		// 모든 주요 설정을 하나의 행에 배치
+		// Settings container
 		const settingsContainer = containerEl.createDiv({ cls: 'frontmatter-settings-container' });
 		const settingsRow = settingsContainer.createDiv({ cls: 'frontmatter-controls-row' });
 
-		// 1. Link Type (아이콘 + 드롭다운)
+		// 1. Link Type setting
 		const linkTypeContainer = settingsRow.createDiv({ cls: 'control-item link-type-control' });
 		const linkTypeLabel = linkTypeContainer.createDiv({ cls: 'control-label' });
 		setIcon(linkTypeLabel, 'link');
 		linkTypeLabel.createSpan({ text: 'Link Type' });
 
-		// 드롭다운 컨테이너
-		const select = linkTypeContainer.createEl('select', { cls: 'dropdown control-input' });
+		new DropdownComponent(linkTypeContainer)
+			.addOption('Normal', 'Normal')
+			.addOption('WikiLink', 'WikiLink')
+			.setValue(frontmatterSetting.linkType || 'Normal')
+			.onChange(async (value) => {
+				frontmatterSetting.linkType = value as 'Normal' | 'WikiLink';
+				await this.plugin.saveSettings();
 
-		const normalOption = select.createEl('option', { text: 'Normal' });
-		normalOption.value = 'Normal';
+				// 컨테이너 새로고침
+				const frontmatterContainer = containerEl.closest('.frontmatter-container');
+				if (frontmatterContainer) {
+					frontmatterContainer.empty();
+					frontmatterContainer.addClass('frontmatter-container');
+					this.display(frontmatterContainer as HTMLElement, frontmatterSetting.id);
+				}
+			});
 
-		const wikiOption = select.createEl('option', { text: 'Wiki Link' });
-		wikiOption.value = 'WikiLink';
-
-		// 현재 값 설정
-		select.value = frontmatterSetting.linkType || 'Normal';
-
-		// 변경 핸들러
-		select.addEventListener('change', async () => {
-			const newLinkType = select.value as 'Normal' | 'WikiLink';
-
-			frontmatterSetting.linkType = newLinkType;
-			await this.plugin.saveSettings();
-
-			// 컨테이너 새로고침
-			const frontmatterContainer = containerEl.closest('.frontmatter-container');
-			if (frontmatterContainer) {
-				frontmatterContainer.empty();
-				frontmatterContainer.addClass('frontmatter-container');
-				this.display(frontmatterContainer as HTMLElement, frontmatterSetting.id);
-			}
-		});
-
-		// 2. Overwrite Toggle (아이콘 + 토글)
+		// 2. Overwrite Toggle
 		const overwriteContainer = settingsRow.createDiv({ cls: 'control-item overwrite-control' });
 		const overwriteLabel = overwriteContainer.createDiv({ cls: 'control-label' });
 		setIcon(overwriteLabel, 'refresh-cw');
 		overwriteLabel.createSpan({ text: 'Overwrite' });
 
-		// 토글 컨테이너
 		const toggleContainer = overwriteContainer.createDiv({ cls: 'control-input toggle-wrapper' });
-		const toggleLabel = toggleContainer.createEl('label', { cls: 'toggle' });
-		const checkbox = toggleLabel.createEl('input', { type: 'checkbox' });
-		checkbox.checked = frontmatterSetting.overwrite;
-		toggleLabel.createEl('span', { cls: 'toggle-slider' });
+		new ToggleComponent(toggleContainer)
+			.setValue(frontmatterSetting.overwrite)
+			.onChange(async (value) => {
+				frontmatterSetting.overwrite = value;
+				await this.plugin.saveSettings();
+			});
 
-		checkbox.addEventListener('change', async () => {
-			frontmatterSetting.overwrite = checkbox.checked;
-			await this.plugin.saveSettings();
-		});
-
-		// 3. Count (아이콘 + 입력)
+		// 3. Count
 		const countContainer = settingsRow.createDiv({ cls: 'control-item count-control' });
 		const countLabel = countContainer.createDiv({ cls: 'control-label' });
 		setIcon(countLabel, 'hash');
 		countLabel.createSpan({ text: 'Count' });
 
-		// 카운트 입력
-		const countInput = countContainer.createEl('input', {
-			type: 'number',
-			value: frontmatterSetting.count.toString(),
-			cls: 'control-input number-input',
-			attr: {
-				min: '1',
-				max: '20',
-			},
-		});
+		new TextComponent(countContainer)
+			.setPlaceholder('Enter count')
+			.setValue(frontmatterSetting.count.toString())
+			.onChange(async (value) => {
+				const count = parseInt(value, 10);
+				if (!isNaN(count) && count > 0) {
+					frontmatterSetting.count = count;
+					await this.plugin.saveSettings();
+				}
+			});
 
-		countInput.addEventListener('change', async () => {
-			const count = parseInt(countInput.value, 10);
-			if (!isNaN(count) && count > 0) {
-				frontmatterSetting.count = count;
-				await this.plugin.saveSettings();
-			}
-		});
-
-		// 4. 삭제 버튼 (헤더에서 컨트롤 영역으로 이동)
+		// 4. Delete button
 		const deleteContainer = settingsRow.createDiv({ cls: 'control-item delete-control' });
 		const deleteLabel = deleteContainer.createDiv({ cls: 'control-label' });
 		setIcon(deleteLabel, 'trash-2');
 		deleteLabel.createSpan({ text: 'Delete' });
 
-		// 삭제 버튼 컨테이너
 		const deleteButtonContainer = deleteContainer.createDiv({
 			cls: 'control-input delete-btn-wrapper',
 		});
-		const deleteButton = deleteButtonContainer.createDiv({ cls: 'delete-frontmatter-btn' });
-		setIcon(deleteButton, 'trash-2');
 
-		deleteButton.addEventListener('click', async (e) => {
-			// 이벤트 버블링 방지
-			e.stopPropagation();
-			e.preventDefault();
+		new ButtonComponent(deleteButtonContainer)
+			.setIcon('trash-2')
+			.setClass('delete-frontmatter-btn')
+			.onClick(async (e) => {
+				e.stopPropagation();
+				e.preventDefault();
 
-			// 확인 다이얼로그
-			if (confirm(`Are you sure you want to delete "${frontmatterSetting.name}" frontmatter?`)) {
-				this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
-					(f) => f.id !== frontmatterId
-				);
-				await this.plugin.saveSettings();
+				if (confirm(`Are you sure you want to delete "${frontmatterSetting.name}" frontmatter?`)) {
+					this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
+						(f) => f.id !== frontmatterId
+					);
+					await this.plugin.saveSettings();
 
-				// 상위 컨테이너 찾기 및 제거
-				const parentContainer = containerEl.closest('.frontmatter-container');
-				if (parentContainer) {
-					parentContainer.remove();
+					const parentContainer = containerEl.closest('.frontmatter-container');
+					if (parentContainer) {
+						parentContainer.remove();
+					}
 				}
-			}
-		});
+			});
 
-		// Options section (available options)
+		// Options section
 		this.addOptionsSection(settingsContainer, frontmatterSetting);
 	}
 
@@ -153,40 +135,24 @@ export class Frontmatter extends BaseSettingsComponent {
 	): void {
 		const headerEl = containerEl.createDiv({ cls: 'frontmatter-header' });
 
-		// Create name input container
-		const nameContainer = headerEl.createDiv({ cls: 'frontmatter-name-container' });
-
-		// Add a label
-		nameContainer.createEl('label', { text: 'Frontmatter Key', cls: 'frontmatter-label' });
-
-		// Add name input
-		const nameInput = nameContainer.createEl('input', {
-			type: 'text',
-			value: frontmatterSetting.name,
-			placeholder: 'Enter frontmatter name',
-			cls: 'frontmatter-name-input',
-		});
-
-		// input 값이 변경될 때마다 (키 입력 중에) 값을 업데이트
-		nameInput.addEventListener('input', async () => {
-			frontmatterSetting.name = nameInput.value;
-		});
-
-		// 포커스를 잃었을 때 저장 - 이름이 즉시 저장되도록
-		nameInput.addEventListener('blur', async () => {
-			await this.plugin.saveSettings();
-		});
-
-		// 엔터 키로도 저장 가능하도록
-		nameInput.addEventListener('keydown', async (e) => {
-			if (e.key === 'Enter') {
-				await this.plugin.saveSettings();
-				nameInput.blur();
-			}
-		});
-
-		// 삭제 버튼은 컨트롤 영역으로 이동했으므로 여기서는 제거
+		// Setting 컴포넌트로 변경
+		new Setting(headerEl)
+			.setName('Frontmatter Key')
+			.setClass('frontmatter-name-setting')
+			.addText((text) => {
+				text
+					.setPlaceholder('Enter frontmatter name')
+					.setValue(frontmatterSetting.name)
+					.onChange(async (value) => {
+						frontmatterSetting.name = value;
+					})
+					.inputEl.addEventListener('blur', async () => {
+						await this.plugin.saveSettings();
+					});
+			});
 	}
+
+	private textAreaComponent: TextAreaComponent; // TextAreaComponent 참조 저장용 프로퍼티
 
 	private addOptionsSection(
 		containerEl: HTMLElement,
@@ -194,80 +160,68 @@ export class Frontmatter extends BaseSettingsComponent {
 	): void {
 		const sectionContainer = containerEl.createDiv({ cls: 'options-section' });
 
-		// Add section header with label and browse button
-		const sectionHeader = sectionContainer.createDiv({ cls: 'options-header' });
-		sectionHeader.createEl('h3', { text: 'Available Options', cls: 'options-title' });
+		// 헤더를 Setting 컴포넌트로 변경
+		const optionsHeaderSetting = new Setting(sectionContainer)
+			.setName('Available Options')
+			.setClass('options-header')
+			.setHeading();
 
-		// Add browse button if WikiLink type (with icon)
+		// Add browse button if WikiLink type
 		if (frontmatterSetting.linkType === 'WikiLink') {
-			const browseButton = sectionHeader.createDiv({ cls: 'browse-button' });
-			setIcon(browseButton, 'folder');
-			browseButton.createSpan({ text: 'Browse Files' });
+			optionsHeaderSetting.addButton((button) => {
+				button
+					.setIcon('folder')
+					.setClass('browse-button')
+					.setButtonText('Browse Files')
+					.onClick(() => {
+						const wikiLinkSelector = new WikiLinkSelector(this.plugin.app);
+						wikiLinkSelector.openFileSelector((selectedLink) => {
+							const formattedLink = `[[${selectedLink}]]`;
+							const currentOptions = frontmatterSetting.refs || [];
 
-			browseButton.addEventListener('click', () => {
-				const wikiLinkSelector = new WikiLinkSelector(this.plugin.app);
-				wikiLinkSelector.openFileSelector((selectedLink) => {
-					const formattedLink = `[[${selectedLink}]]`;
-					const currentOptions = frontmatterSetting.refs || [];
-
-					frontmatterSetting.refs = [...currentOptions, formattedLink];
-					this.plugin.saveSettings().then(() => {
-						this.updateOptionsTextarea(sectionContainer, frontmatterSetting);
+							frontmatterSetting.refs = [...currentOptions, formattedLink];
+							this.plugin.saveSettings().then(() => {
+								this.updateOptionsTextarea(frontmatterSetting);
+							});
+						});
 					});
-				});
 			});
 		}
 
-		// Options description
-		sectionContainer.createEl('p', {
-			text: 'Enter values that the AI can use as suggestions, separated by commas.',
-			cls: 'options-description',
-		});
+		// Description을 Setting 컴포넌트로 변경
+		new Setting(sectionContainer)
+			.setDesc('Enter values that the AI can use as suggestions, separated by commas.')
+			.setClass('options-description');
 
 		// Textarea for options
 		const textareaContainer = sectionContainer.createDiv({ cls: 'textarea-container' });
-		const textarea = textareaContainer.createEl('textarea', {
-			cls: 'options-textarea',
-			placeholder: 'Option1, Option2, Option3...',
-		});
 
-		// Format and set current values
 		let displayValue = '';
 		if (frontmatterSetting.refs && frontmatterSetting.refs.length > 0) {
 			displayValue = frontmatterSetting.refs.join(', ');
 		}
-		textarea.value = displayValue;
 
-		// Add change handler
-		textarea.addEventListener('change', async () => {
-			// 입력 값은 콤마로 분리
-			const inputOptions = textarea.value
-				.split(',')
-				.map((option) => option.trim())
-				.filter(Boolean);
+		this.textAreaComponent = new TextAreaComponent(textareaContainer)
+			.setPlaceholder('Option1, Option2, Option3...')
+			.setValue(displayValue)
+			.onChange(async (value) => {
+				const inputOptions = value
+					.split(',')
+					.map((option) => option.trim())
+					.filter(Boolean);
 
-			// 입력된 값들을 현재 링크 타입에 맞는 포맷으로 저장
-			frontmatterSetting.refs = inputOptions;
-
-			await this.plugin.saveSettings();
-
-			// 텍스트 영역 업데이트 (표시를 위해)
-			this.updateOptionsTextarea(sectionContainer, frontmatterSetting);
-		});
+				frontmatterSetting.refs = inputOptions;
+				await this.plugin.saveSettings();
+			});
 	}
 
-	private updateOptionsTextarea(
-		containerEl: HTMLElement,
-		frontmatterSetting: FrontmatterTemplate
-	): void {
-		const textarea = containerEl.querySelector('.options-textarea');
-		if (textarea) {
-			// 현재 저장된 값들 그대로 표시 (이미 올바른 형식으로 저장되어 있음)
+	private updateOptionsTextarea(frontmatterSetting: FrontmatterTemplate): void {
+		if (this.textAreaComponent) {
 			let displayValue = '';
 			if (frontmatterSetting.refs && frontmatterSetting.refs.length > 0) {
 				displayValue = frontmatterSetting.refs.join(', ');
 			}
-			(textarea as HTMLTextAreaElement).value = displayValue;
+			this.textAreaComponent.setValue(displayValue);
 		}
 	}
 }
