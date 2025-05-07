@@ -38,6 +38,7 @@ export const OPENAI_PROVIDER: ProviderConfig = {
 	testResult: null,
 	temperature: DEFAULT_TEMPERATURE,
 	selectedModel: OpenAIModelName.GPT_4_1_MINI,
+	customPromptTemplate: undefined,
 };
 
 export const OPENROUTER_PROVIDER: ProviderConfig = {
@@ -47,19 +48,17 @@ export const OPENROUTER_PROVIDER: ProviderConfig = {
 	endpoint: '/api/v1/chat/completions',
 	models: [
 		{
-			name: 'google/gemini-2.0-flash-exp:free',
+			name: 'meta-llama/llama-4-maverick:free',
 		},
 		{
-			name: 'meta-llama/llama-3.3-70b-instruct',
-		},
-		{
-			name: 'deepseek/deepseek-r1',
+			name: 'meta-llama/llama-4-scout:free',
 		},
 	],
 	lastTested: null,
 	testResult: null,
 	temperature: DEFAULT_TEMPERATURE,
 	selectedModel: 'openrouter/auto',
+	customPromptTemplate: undefined,
 };
 
 export const CUSTOM_PROVIDER: ProviderConfig = {
@@ -75,6 +74,7 @@ export const CUSTOM_PROVIDER: ProviderConfig = {
 	lastTested: null,
 	testResult: null,
 	selectedModel: '',
+	customPromptTemplate: undefined,
 };
 export const DEFAULT_TAG_SETTING: FrontmatterTemplate = {
 	id: 0,

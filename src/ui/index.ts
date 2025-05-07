@@ -47,13 +47,10 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 			cls: 'section-container frontmatter-section',
 		});
 
-		// 섹션 헤더와 추가 버튼을 하나의 컨테이너에 배치
 		const fmHeaderContainer = fmSectionContainer.createDiv({ cls: 'section-header-container' });
 
-		// 헤더 제목
 		fmHeaderContainer.createEl('h2', { text: 'Custom Frontmatter', cls: 'section-heading' });
 
-		// 단순화된 추가 버튼
 		const addButton = fmHeaderContainer.createDiv({ cls: 'add-frontmatter-simple-btn' });
 		setIcon(addButton, 'plus');
 		addButton.createSpan({ text: 'Add Frontmatter' });

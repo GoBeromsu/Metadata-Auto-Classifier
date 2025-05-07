@@ -18,6 +18,7 @@ export interface ProviderConfig {
 	testResult: boolean | null;
 	temperature?: number;
 	selectedModel?: string;
+	customPromptTemplate?: string;
 }
 
 interface Model {
@@ -45,7 +46,7 @@ export interface StructuredOutput {
 
 export interface APIProvider {
 	callAPI(
-		system_role: string,
+		systemRole: string,
 		user_prompt: string,
 		provider: ProviderConfig,
 		selectedModel: string,

@@ -6,7 +6,7 @@ import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 
 export class Custom implements APIProvider {
 	async callAPI(
-		system_role: string,
+		systemRole: string,
 		user_prompt: string,
 		provider: ProviderConfig,
 		selectedModel: string,
@@ -16,7 +16,7 @@ export class Custom implements APIProvider {
 
 		// Create messages array for the API
 		const messages = [
-			{ role: 'system', content: system_role },
+			{ role: 'system', content: systemRole },
 			{ role: 'user', content: user_prompt },
 		];
 

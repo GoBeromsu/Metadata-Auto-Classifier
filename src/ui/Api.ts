@@ -4,6 +4,7 @@ import { ProviderConfig } from 'utils/interface';
 import { validateAPIKey } from 'api';
 import AutoClassifierPlugin from 'main';
 import { getDefaultEndpoint } from 'utils';
+import { DEFAULT_PROMPT_TEMPLATE } from 'utils/templates';
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;
@@ -25,6 +26,7 @@ export class Api {
 		this.addAPIKeySetting(containerEl);
 		const selectedProvider = this.getSelectedProvider();
 		this.addModelSetting(containerEl, selectedProvider);
+		this.addCustomPromptSetting(containerEl, selectedProvider);
 
 		if (selectedProvider.name === 'Custom') {
 			// Add custom provider guidance section
@@ -222,6 +224,52 @@ export class Api {
 		baseUrlInfo.createEl('small', {
 			text: 'Examples: https://api.openai.com, http://localhost:1234, https://api.anthropic.com',
 			cls: 'baseurl-example',
+		});
+	}
+
+	private addCustomPromptSetting(containerEl: HTMLElement, selectedProvider: ProviderConfig): void {
+		const currentTemplate = selectedProvider.customPromptTemplate || DEFAULT_PROMPT_TEMPLATE;
+
+		const customPromptSetting = new Setting(containerEl)
+			.setName('Classification Rules')
+			.setDesc('Customize the prompt template for classification requests')
+			.addTextArea((text) => {
+				const textArea = text
+					.setPlaceholder(DEFAULT_PROMPT_TEMPLATE)
+					.setValue(currentTemplate)
+					.onChange(async (value) => {
+						selectedProvider.customPromptTemplate = value ? value : DEFAULT_PROMPT_TEMPLATE;
+						await this.plugin.saveSettings();
+					});
+
+				textArea.inputEl.rows = 10;
+				textArea.inputEl.cols = 50;
+				return textArea;
+			})
+			.addExtraButton((button) =>
+				button
+					.setIcon('reset')
+					.setTooltip('Reset to default template')
+					.onClick(async () => {
+						// Use default template instead of undefined
+						selectedProvider.customPromptTemplate = DEFAULT_PROMPT_TEMPLATE;
+						await this.plugin.saveSettings();
+
+						// Update the text area with the default template
+						const textAreaComponent = customPromptSetting.components[0] as any;
+						if (textAreaComponent && textAreaComponent.setValue) {
+							textAreaComponent.setValue(DEFAULT_PROMPT_TEMPLATE);
+						} else {
+							this.display(containerEl);
+						}
+					})
+			);
+
+		// Add info about template variables
+		const templateInfo = customPromptSetting.descEl.createEl('div', { cls: 'template-info' });
+		templateInfo.createEl('small', {
+			text: 'Available variables: {{tagCount}}, {{reference}}, {{input}}',
+			cls: 'template-variables',
 		});
 	}
 
