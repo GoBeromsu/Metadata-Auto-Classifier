@@ -1,14 +1,10 @@
 import { getFrontmatterSetting } from 'frontmatter';
 import {
-	setIcon,
 	Setting,
-	DropdownComponent,
-	ToggleComponent,
-	ButtonComponent,
-	TextComponent,
-	TextAreaComponent,
+	TextAreaComponent
 } from 'obsidian';
 
+import { DEFAULT_FRONTMATTER_SETTING } from 'utils/constant';
 import { FrontmatterTemplate } from 'utils/interface';
 import { BaseSettingsComponent } from './BaseSettingsComponent';
 import { WikiLinkSelector } from './WikiLinkSelector';
@@ -87,11 +83,11 @@ export class Frontmatter extends BaseSettingsComponent {
 			.setClass('control-setting')
 			.addDropdown((dropdown) => {
 				dropdown
-					.addOption('Normal', 'Normal')
 					.addOption('WikiLink', 'WikiLink')
-					.setValue(frontmatterSetting.linkType || 'Normal')
+					.addOption('Normal', 'Normal')
+					.setValue(frontmatterSetting.linkType || DEFAULT_FRONTMATTER_SETTING.linkType)
 					.onChange(async (value) => {
-						frontmatterSetting.linkType = value as 'Normal' | 'WikiLink';
+						frontmatterSetting.linkType = value as 'WikiLink' | 'Normal';
 						await this.plugin.saveSettings();
 
 						// 컨테이너 새로고침

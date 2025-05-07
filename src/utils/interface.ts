@@ -6,7 +6,7 @@ export interface FrontmatterTemplate {
 	count: number;
 	refs: string[];
 	overwrite: boolean;
-	linkType: 'Normal' | 'WikiLink';
+	linkType: 'WikiLink' | 'Normal';
 }
 export interface ProviderConfig {
 	name: string;

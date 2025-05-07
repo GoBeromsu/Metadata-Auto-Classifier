@@ -61,7 +61,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 					.setButtonText('Add Frontmatter')
 					.setCta()
 					.onClick(() => {
-						this.addNewFrontmatter(containerEl, 'Normal');
+						this.addNewFrontmatter(containerEl);
 					});
 			});
 
@@ -79,7 +79,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		});
 	}
 
-	private addNewFrontmatter(containerEl: HTMLElement, linkType: 'Normal' | 'WikiLink'): void {
+	private addNewFrontmatter(containerEl: HTMLElement, linkType?: 'Normal' | 'WikiLink'): void {
 		const newFrontmatter = addFrontmatterSetting(linkType);
 		this.plugin.settings.frontmatter.push(newFrontmatter);
 		this.plugin.saveSettings();

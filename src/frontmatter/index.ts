@@ -51,13 +51,11 @@ export const getFrontmatterSetting = (
 	return setting;
 };
 
-export const addFrontmatterSetting = (
-	linkType: 'Normal' | 'WikiLink' = 'Normal'
-): FrontmatterTemplate => {
+export const addFrontmatterSetting = (linkType?: 'Normal' | 'WikiLink'): FrontmatterTemplate => {
 	return {
 		...DEFAULT_FRONTMATTER_SETTING,
 		id: generateId(),
-		linkType,
+		...(linkType ? { linkType } : {}),
 	};
 };
 

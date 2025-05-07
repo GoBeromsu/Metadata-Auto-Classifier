@@ -6,7 +6,7 @@ export const DEFAULT_FRONTMATTER_SETTING = {
 	count: 1,
 	refs: [],
 	overwrite: false,
-	linkType: 'Normal' as const,
+	linkType: 'WikiLink' as const,
 };
 const DEFAULT_TEMPERATURE = 0.7;
 // Default provider settings
