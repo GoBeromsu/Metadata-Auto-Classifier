@@ -1,8 +1,5 @@
 import { getFrontmatterSetting } from 'frontmatter';
-import {
-	Setting,
-	TextAreaComponent
-} from 'obsidian';
+import { Setting, TextAreaComponent } from 'obsidian';
 
 import { DEFAULT_FRONTMATTER_SETTING } from 'utils/constant';
 import { FrontmatterTemplate } from 'utils/interface';
@@ -144,34 +141,31 @@ export class Frontmatter extends BaseSettingsComponent {
 			.setHeading()
 			.setClass('options-header');
 
-		// 설명 추가
 		optionsHeaderSetting.setDesc(
 			'Enter values that the AI can use as suggestions, separated by commas.'
 		);
 
-		// Add browse button if WikiLink type
-		if (frontmatterSetting.linkType === 'WikiLink') {
-			optionsHeaderSetting.addButton((button) => {
-				button
-					.setIcon('folder')
-					.setClass('browse-button')
-					.setButtonText('Browse Files')
-					.onClick(() => {
-						const wikiLinkSelector = new WikiLinkSelector(this.plugin.app);
-						wikiLinkSelector.openFileSelector((selectedLink) => {
-							const formattedLink = `[[${selectedLink}]]`;
-							const currentOptions = frontmatterSetting.refs || [];
+		optionsHeaderSetting.addButton((button) => {
+			button
+				.setIcon('folder')
+				.setClass('browse-button')
+				.setButtonText('Browse Files')
+				.onClick(() => {
+					const wikiLinkSelector = new WikiLinkSelector(this.plugin.app);
+					wikiLinkSelector.openFileSelector((selectedLink) => {
+						// Format the link based on current linkType
+						const formattedLink =
+							frontmatterSetting.linkType === 'WikiLink' ? `[[${selectedLink}]]` : selectedLink;
+						const currentOptions = frontmatterSetting.refs || [];
 
-							frontmatterSetting.refs = [...currentOptions, formattedLink];
-							this.plugin.saveSettings().then(() => {
-								this.updateOptionsTextarea(frontmatterSetting);
-							});
+						frontmatterSetting.refs = [...currentOptions, formattedLink];
+						this.plugin.saveSettings().then(() => {
+							this.updateOptionsTextarea(frontmatterSetting);
 						});
 					});
-			});
-		}
+				});
+		});
 
-		// Textarea for options - 충분한 공간 확보
 		const textareaContainer = containerEl.createDiv({ cls: 'textarea-container' });
 		textareaContainer.style.width = '100%';
 		textareaContainer.style.marginTop = '8px';
