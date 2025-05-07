@@ -71,7 +71,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		this.plugin.settings.frontmatter.forEach((frontmatter) => {
 			if (frontmatter.name !== 'tags') {
 				const frontmatterContainer = frontmattersContainer.createDiv({
-					cls: 'frontmatter-container',
+					cls: 'frontmatter-item-container',
 				});
 				frontmatterContainer.setAttribute('data-frontmatter-id', frontmatter.id.toString());
 				this.frontmatterSetting.display(frontmatterContainer, frontmatter.id);

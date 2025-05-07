@@ -264,13 +264,6 @@ export class Api {
 						}
 					})
 			);
-
-		// Add info about template variables
-		const templateInfo = customPromptSetting.descEl.createEl('div', { cls: 'template-info' });
-		templateInfo.createEl('small', {
-			text: 'Available variables: {{tagCount}}, {{reference}}, {{input}}',
-			cls: 'template-variables',
-		});
 	}
 
 	private getSelectedProvider(): ProviderConfig {
