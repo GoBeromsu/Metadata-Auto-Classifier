@@ -54,14 +54,15 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		new Setting(fmHeaderContainer)
 			.setName('Custom Frontmatter')
 			.setHeading()
-			.setClass('section-heading');
-
-		new ButtonComponent(fmHeaderContainer)
-			.setButtonText('Add Frontmatter')
-			.setIcon('plus')
-			.setCta()
-			.onClick(() => {
-				this.addNewFrontmatter(containerEl, 'Normal');
+			.setClass('section-heading')
+			.addButton((button) => {
+				button
+					.setIcon('plus')
+					.setButtonText('Add Frontmatter')
+					.setCta()
+					.onClick(() => {
+						this.addNewFrontmatter(containerEl, 'Normal');
+					});
 			});
 
 		// Create a container for all frontmatter items
