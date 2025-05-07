@@ -1,38 +1,30 @@
+// Constants for system behaviour and default prompt template
 export const DEFAULT_SYSTEM_ROLE = `You are a JSON classification assistant. Respond only with a valid JSON object.`;
 
-export const DEFAULT_PROMPT_TEMPLATE = `Classify the given content using the provided reference categories.
+export const DEFAULT_PROMPT_TEMPLATE = `Classify the following content using the reference categories provided.
 
 Instructions:
-1. Use ONLY the categories provided in the reference list below.
-2. Do not modify, remove, or add any formatting to the reference categories (e.g., keep '[[]]' if present).
-3. Select up to {{tagCount}} categories based on relevance and similarity to the content. Choose fewer if appropriate.
-4. Even if you're unsure, make a selection and adjust the reliability score accordingly.
-5. Provide your answer in valid JSON format.
-6. Nested categories (e.g., [[Parent > Child]]) are allowed
-
-Reference categories:
-{{reference}}
-
-Input:
-"""
-{{input}}
-"""
+1. Use **only** the categories listed in the reference.
+2. Do not modify, remove, or add any formatting to the reference categories (e.g., preserve brackets such as '[[]]').
+3. The tagCount limit must be followed conservatively. Do not choose more unless absolutely necessary.
+4. For each selected category, assign a "reliability" score between **0 and 1**, reflecting confidence in the classification (1 = certain, 0 = very unsure).
+5. **Nested categories are allowed.** Preserve full hierarchical structure when selecting nested tags.
 `;
 
-// Generate a prompt template based on the given parameters
 export function getPromptTemplate(
 	tagCount: number,
 	input: string,
 	reference: readonly string[],
-	customPromptTemplate?: string
+	customTemplate: string = DEFAULT_PROMPT_TEMPLATE
 ): string {
-	// Use DEFAULT_PROMPT_TEMPLATE if customPromptTemplate is not provided or empty
-	const template = customPromptTemplate ? customPromptTemplate : DEFAULT_PROMPT_TEMPLATE;
+	const referenceSection = `- Select **up to ${tagCount}** categories that are most relevant. If fewer categories are appropriate, select fewer.  
+Reference categories:  
+${reference.join(', ')}
 
-	// Apply replacements
-	let processedTemplate = template.replace(/{{tagCount}}/g, tagCount.toString());
-	processedTemplate = processedTemplate.replace('{{reference}}', reference.join(', '));
-	processedTemplate = processedTemplate.replace('{{input}}', input);
-
-	return processedTemplate;
+Content:
+"""
+${input}
+"""
+`;
+	return `${customTemplate}\n\n${referenceSection}`;
 }
