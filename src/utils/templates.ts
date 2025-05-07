@@ -1,4 +1,4 @@
-export const DEFAULT_SYSTEM_ROLE = `You are a JSON answer bot. Don't answer other words.`;
+export const DEFAULT_SYSTEM_ROLE = `You are a JSON classification assistant. Respond only with a valid JSON object.`;
 
 export const DEFAULT_PROMPT_TEMPLATE = `Classify the given content using the provided reference categories.
 
@@ -8,6 +8,7 @@ Instructions:
 3. Select up to {{tagCount}} categories based on relevance and similarity to the content. Choose fewer if appropriate.
 4. Even if you're unsure, make a selection and adjust the reliability score accordingly.
 5. Provide your answer in valid JSON format.
+6. Nested categories (e.g., [[Parent > Child]]) are allowed
 
 Reference categories:
 {{reference}}
@@ -22,12 +23,16 @@ Input:
 export function getPromptTemplate(
 	tagCount: number,
 	input: string,
-	reference: readonly string[]
+	reference: readonly string[],
+	customPromptTemplate?: string
 ): string {
-	let template = DEFAULT_PROMPT_TEMPLATE;
-	template = template.replace(/{{tagCount}}/g, tagCount.toString());
-	template = template.replace('{{reference}}', reference.join(', '));
-	template = template.replace('{{input}}', input);
+	// Use DEFAULT_PROMPT_TEMPLATE if customPromptTemplate is not provided or empty
+	const template = customPromptTemplate ? customPromptTemplate : DEFAULT_PROMPT_TEMPLATE;
 
-	return template;
+	// Apply replacements
+	let processedTemplate = template.replace(/{{tagCount}}/g, tagCount.toString());
+	processedTemplate = processedTemplate.replace('{{reference}}', reference.join(', '));
+	processedTemplate = processedTemplate.replace('{{input}}', input);
+
+	return processedTemplate;
 }

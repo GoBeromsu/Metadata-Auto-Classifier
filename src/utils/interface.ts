@@ -18,6 +18,7 @@ export interface ProviderConfig {
 	testResult: boolean | null;
 	temperature?: number;
 	selectedModel?: string;
+	customPromptTemplate?: string;
 }
 
 interface Model {

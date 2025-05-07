@@ -38,6 +38,7 @@ export const OPENAI_PROVIDER: ProviderConfig = {
 	testResult: null,
 	temperature: DEFAULT_TEMPERATURE,
 	selectedModel: OpenAIModelName.GPT_4_1_MINI,
+	customPromptTemplate: undefined,
 };
 
 export const OPENROUTER_PROVIDER: ProviderConfig = {
@@ -60,6 +61,7 @@ export const OPENROUTER_PROVIDER: ProviderConfig = {
 	testResult: null,
 	temperature: DEFAULT_TEMPERATURE,
 	selectedModel: 'openrouter/auto',
+	customPromptTemplate: undefined,
 };
 
 export const CUSTOM_PROVIDER: ProviderConfig = {
@@ -75,6 +77,7 @@ export const CUSTOM_PROVIDER: ProviderConfig = {
 	lastTested: null,
 	testResult: null,
 	selectedModel: '',
+	customPromptTemplate: undefined,
 };
 export const DEFAULT_TAG_SETTING: FrontmatterTemplate = {
 	id: 0,

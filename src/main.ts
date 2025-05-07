@@ -131,7 +131,12 @@ export default class AutoClassifierPlugin extends Plugin {
 		const currentContent = await this.app.vault.read(currentFile);
 		const content = getContentWithoutFrontmatter(currentContent);
 
-		const promptTemplate = getPromptTemplate(frontmatter.count, content, processedValues);
+		const promptTemplate = getPromptTemplate(
+			frontmatter.count,
+			content,
+			processedValues,
+			selectedProvider.customPromptTemplate
+		);
 
 		const selectedModel = selectedProvider.selectedModel || this.settings.selectedModel;
 
