@@ -5,7 +5,7 @@ import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './fr
 
 import { processAPIRequest } from 'api';
 import { AutoClassifierSettings, AutoClassifierSettingTab, SelectFrontmatterModal } from './ui';
-import { DEFAULT_CHAT_ROLE, getPromptTemplate } from './utils/templates';
+import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from './utils/templates';
 import { mergeDefaults } from 'utils';
 
 export default class AutoClassifierPlugin extends Plugin {
@@ -133,11 +133,10 @@ export default class AutoClassifierPlugin extends Plugin {
 
 		const promptTemplate = getPromptTemplate(frontmatter.count, content, processedValues);
 
-		const chatRole = DEFAULT_CHAT_ROLE;
 		const selectedModel = selectedProvider.selectedModel || this.settings.selectedModel;
 
 		const apiResponse = await processAPIRequest(
-			chatRole,
+			DEFAULT_SYSTEM_ROLE,
 			promptTemplate,
 			selectedProvider,
 			selectedModel

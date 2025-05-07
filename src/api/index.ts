@@ -25,7 +25,7 @@ export const getProvider = (providerName: string): APIProvider => {
 };
 
 export const processAPIRequest = async (
-	chatRole: string,
+	systemRole: string,
 	promptTemplate: string,
 	selectedProvider: ProviderConfig,
 	selectedModel: string
@@ -33,7 +33,7 @@ export const processAPIRequest = async (
 	try {
 		const providerInstance = getProvider(selectedProvider.name);
 		const response = await providerInstance.callAPI(
-			chatRole,
+			systemRole,
 			promptTemplate,
 			selectedProvider,
 			selectedModel

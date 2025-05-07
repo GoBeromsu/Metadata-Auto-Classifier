@@ -45,7 +45,7 @@ export interface StructuredOutput {
 
 export interface APIProvider {
 	callAPI(
-		system_role: string,
+		systemRole: string,
 		user_prompt: string,
 		provider: ProviderConfig,
 		selectedModel: string,

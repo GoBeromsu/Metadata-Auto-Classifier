@@ -1,4 +1,4 @@
-export const DEFAULT_CHAT_ROLE = `You are a JSON answer bot. Don't answer other words.`;
+export const DEFAULT_SYSTEM_ROLE = `You are a JSON answer bot. Don't answer other words.`;
 
 export const DEFAULT_PROMPT_TEMPLATE = `Classify the given content using the provided reference categories.
 

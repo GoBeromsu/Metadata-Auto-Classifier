@@ -7,7 +7,7 @@ import { ProviderConfig } from '../utils/interface';
 
 export class OpenAI implements APIProvider {
 	async callAPI(
-		system_role: string,
+		systemRole: string,
 		user_prompt: string,
 		provider: ProviderConfig,
 		selectedModel: string,
@@ -17,7 +17,7 @@ export class OpenAI implements APIProvider {
 
 		// Create messages array for the OpenAI API
 		const messages = [
-			{ role: 'system', content: system_role },
+			{ role: 'system', content: systemRole },
 			{ role: 'user', content: user_prompt },
 		];
 
