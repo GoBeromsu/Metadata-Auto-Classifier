@@ -3,6 +3,7 @@ import { ProviderConfig } from 'utils/interface';
 
 import { validateAPIKey } from 'api';
 import AutoClassifierPlugin from 'main';
+import { TextAreaComponent } from 'obsidian';
 import { getDefaultEndpoint } from 'utils';
 import { DEFAULT_PROMPT_TEMPLATE } from 'utils/templates';
 
@@ -17,30 +18,17 @@ export class Api {
 		// Add API section header with description
 		const apiHeader = containerEl.createEl('div', { cls: 'api-section-header' });
 		apiHeader.createEl('h2', { text: 'API Configuration' });
-		apiHeader.createEl('p', {
-			text: 'Configure your AI provider settings. Custom providers require additional configuration.',
-			cls: 'api-section-description',
-		});
 
 		this.addAPIProviderSetting(containerEl);
 		this.addAPIKeySetting(containerEl);
 		const selectedProvider = this.getSelectedProvider();
 		this.addModelSetting(containerEl, selectedProvider);
-		this.addCustomPromptSetting(containerEl, selectedProvider);
 
 		if (selectedProvider.name === 'Custom') {
-			// Add custom provider guidance section
-			const customGuide = containerEl.createEl('div', { cls: 'custom-provider-guide' });
-			customGuide.createEl('h3', {
-				text: 'Custom Provider Configuration',
-				cls: 'custom-guide-header',
-			});
-
 			this.addBaseURLSetting(containerEl, selectedProvider);
-			this.addEndpointSetting(containerEl, selectedProvider);
-		} else {
-			this.addEndpointSetting(containerEl, selectedProvider);
 		}
+		this.addEndpointSetting(containerEl, selectedProvider);
+		this.addCustomPromptSetting(containerEl, selectedProvider);
 	}
 
 	private addAPIProviderSetting(containerEl: HTMLElement): void {
@@ -233,19 +221,6 @@ export class Api {
 		const customPromptSetting = new Setting(containerEl)
 			.setName('Classification Rules')
 			.setDesc('Customize the prompt template for classification requests')
-			.addTextArea((text) => {
-				const textArea = text
-					.setPlaceholder(DEFAULT_PROMPT_TEMPLATE)
-					.setValue(currentTemplate)
-					.onChange(async (value) => {
-						selectedProvider.customPromptTemplate = value ? value : DEFAULT_PROMPT_TEMPLATE;
-						await this.plugin.saveSettings();
-					});
-
-				textArea.inputEl.rows = 10;
-				textArea.inputEl.cols = 50;
-				return textArea;
-			})
 			.addExtraButton((button) =>
 				button
 					.setIcon('reset')
@@ -256,14 +231,27 @@ export class Api {
 						await this.plugin.saveSettings();
 
 						// Update the text area with the default template
-						const textAreaComponent = customPromptSetting.components[0] as any;
-						if (textAreaComponent && textAreaComponent.setValue) {
-							textAreaComponent.setValue(DEFAULT_PROMPT_TEMPLATE);
-						} else {
-							this.display(containerEl);
-						}
+						textAreaComponent.setValue(DEFAULT_PROMPT_TEMPLATE);
 					})
 			);
+
+		// Create a container for the text area below the setting
+		const textAreaContainer = containerEl.createEl('div', { cls: 'custom-prompt-container' });
+
+		// Create and configure the text area component
+		const textAreaComponent = new TextAreaComponent(textAreaContainer);
+		textAreaComponent
+			.setPlaceholder(DEFAULT_PROMPT_TEMPLATE)
+			.setValue(currentTemplate)
+			.onChange(async (value) => {
+				selectedProvider.customPromptTemplate = value ? value : DEFAULT_PROMPT_TEMPLATE;
+				await this.plugin.saveSettings();
+			});
+
+		// Configure the text area appearance
+		textAreaComponent.inputEl.rows = 10;
+		textAreaComponent.inputEl.cols = 90;
+		textAreaComponent.inputEl.addClass('custom-prompt-textarea');
 	}
 
 	private getSelectedProvider(): ProviderConfig {
