@@ -98,26 +98,6 @@ export class FrontmatterModal extends Modal {
 				button.setButtonText('Cancel').onClick(() => {
 					this.close();
 				});
-			})
-			.addButton((button) => {
-				button
-					.setIcon('trash-2')
-					.setClass('delete-frontmatter-btn')
-					.setWarning()
-					.setButtonText('Delete')
-					.onClick(async () => {
-						if (
-							confirm(
-								`Are you sure you want to delete "${this.frontmatterSetting.name}" frontmatter?`
-							)
-						) {
-							this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
-								(f: FrontmatterTemplate) => f.id !== this.frontmatterSetting.id
-							);
-							await this.plugin.saveSettings();
-							this.close();
-						}
-					});
 			});
 	}
 
@@ -156,6 +136,7 @@ export class FrontmatterModal extends Modal {
 		const textareaContainer = containerEl.createDiv({ cls: 'textarea-container' });
 		textareaContainer.style.width = '100%';
 		textareaContainer.style.marginTop = '8px';
+		textareaContainer.style.minHeight = '100px';
 
 		let displayValue = '';
 		if (this.frontmatterSetting.refs && this.frontmatterSetting.refs.length > 0) {
@@ -175,6 +156,7 @@ export class FrontmatterModal extends Modal {
 			});
 		// Adjust text area height and width
 		this.textAreaComponent.inputEl.style.width = '100%';
+		this.textAreaComponent.inputEl.style.height = '100px';
 	}
 
 	private updateOptionsTextarea(): void {
@@ -213,6 +195,24 @@ export class Frontmatter extends BaseSettingsComponent {
 					.onClick(() => {
 						const modal = new FrontmatterModal(this.plugin.app, this.plugin, frontmatterSetting);
 						modal.open();
+					});
+			})
+			.addButton((button) => {
+				button
+					.setIcon('trash-2')
+					.setClass('delete-frontmatter-btn')
+					.setWarning()
+					.setTooltip('Delete Frontmatter')
+					.onClick(async () => {
+						if (
+							confirm(`Are you sure you want to delete "${frontmatterSetting.name}" frontmatter?`)
+						) {
+							this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
+								(f: FrontmatterTemplate) => f.id !== frontmatterSetting.id
+							);
+							await this.plugin.saveSettings();
+							containerEl.empty();
+						}
 					});
 			});
 	}
