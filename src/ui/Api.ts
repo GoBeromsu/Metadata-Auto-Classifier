@@ -1,9 +1,8 @@
-import { Setting } from 'obsidian';
+import { Setting, TextAreaComponent } from 'obsidian';
 import { ProviderConfig } from 'utils/interface';
 
 import { validateAPIKey } from 'api';
 import AutoClassifierPlugin from 'main';
-import { TextAreaComponent } from 'obsidian';
 import { getDefaultEndpoint } from 'utils';
 import { DEFAULT_PROMPT_TEMPLATE } from 'utils/templates';
 
@@ -231,16 +230,22 @@ export class Api {
 						await this.plugin.saveSettings();
 
 						// Update the text area with the default template
-						textAreaComponent.setValue(DEFAULT_PROMPT_TEMPLATE);
+						if (textAreaComponent) {
+							textAreaComponent.setValue(DEFAULT_PROMPT_TEMPLATE);
+						} else {
+							this.display(containerEl);
+						}
 					})
 			);
 
-		// Create a container for the text area below the setting
-		const textAreaContainer = containerEl.createEl('div', { cls: 'custom-prompt-container' });
+		// Create a container for the textarea below the setting
+		const textAreaContainer = containerEl.createDiv({ cls: 'custom-prompt-container' });
+		textAreaContainer.style.width = '100%';
+		textAreaContainer.style.marginTop = '8px';
+		textAreaContainer.style.marginBottom = '16px';
 
-		// Create and configure the text area component
-		const textAreaComponent = new TextAreaComponent(textAreaContainer);
-		textAreaComponent
+		// Create the TextAreaComponent in the dedicated container
+		const textAreaComponent = new TextAreaComponent(textAreaContainer)
 			.setPlaceholder(DEFAULT_PROMPT_TEMPLATE)
 			.setValue(currentTemplate)
 			.onChange(async (value) => {
@@ -248,10 +253,9 @@ export class Api {
 				await this.plugin.saveSettings();
 			});
 
-		// Configure the text area appearance
+		// Set the text area dimensions
 		textAreaComponent.inputEl.rows = 10;
-		textAreaComponent.inputEl.cols = 90;
-		textAreaComponent.inputEl.addClass('custom-prompt-textarea');
+		textAreaComponent.inputEl.style.width = '100%';
 	}
 
 	private getSelectedProvider(): ProviderConfig {

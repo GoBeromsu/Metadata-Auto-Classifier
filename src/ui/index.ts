@@ -1,5 +1,5 @@
 import AutoClassifierPlugin from 'main';
-import { PluginSettingTab, ButtonComponent, Setting } from 'obsidian';
+import { PluginSettingTab, Setting } from 'obsidian';
 
 import { addFrontmatterSetting } from 'frontmatter';
 
@@ -25,6 +25,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 
 		this.apiSetting = new Api(plugin);
+
 		this.tagSetting = new Tag(plugin);
 		this.frontmatterSetting = new Frontmatter(plugin);
 	}
@@ -37,13 +38,15 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		const apiSettingContainer = containerEl.createDiv();
 		this.apiSetting.display(apiSettingContainer);
 
+		containerEl.createEl('hr');
+
 		// Tags section
 		const tagSectionContainer = containerEl.createDiv({ cls: 'section-container tag-section' });
 		new Setting(tagSectionContainer).setName('Tags').setHeading().setClass('section-heading');
 
 		const tagContainer = tagSectionContainer.createDiv();
 		this.tagSetting.display(tagContainer);
-
+		containerEl.createEl('hr');
 		// Custom frontmatter section
 		const fmSectionContainer = containerEl.createDiv({
 			cls: 'section-container frontmatter-section',

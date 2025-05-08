@@ -175,7 +175,6 @@ export class FrontmatterModal extends Modal {
 			});
 		// Adjust text area height and width
 		this.textAreaComponent.inputEl.style.width = '100%';
-		this.textAreaComponent.inputEl.style.minHeight = '100px';
 	}
 
 	private updateOptionsTextarea(): void {
@@ -216,42 +215,5 @@ export class Frontmatter extends BaseSettingsComponent {
 						modal.open();
 					});
 			});
-	}
-
-	private addCustomPromptSetting(containerEl: HTMLElement, selectedProvider: ProviderConfig): void {
-		const currentTemplate = selectedProvider.customPromptTemplate || DEFAULT_PROMPT_TEMPLATE;
-
-		const settingContainer = new Setting(containerEl)
-			.setName('Classification Rules')
-			.setDesc('Customize the prompt template for classification requests');
-
-		// Create a TextAreaComponent directly
-		const textAreaComponent = new TextAreaComponent(settingContainer.controlEl);
-		textAreaComponent
-			.setPlaceholder(DEFAULT_PROMPT_TEMPLATE)
-			.setValue(currentTemplate)
-			.onChange(async (value) => {
-				selectedProvider.customPromptTemplate = value ? value : DEFAULT_PROMPT_TEMPLATE;
-				await this.plugin.saveSettings();
-			});
-
-		// Set the rows and columns
-		textAreaComponent.inputEl.rows = 10;
-		textAreaComponent.inputEl.cols = 50;
-
-		// Add the reset button
-		settingContainer.addExtraButton((button) =>
-			button
-				.setIcon('reset')
-				.setTooltip('Reset to default template')
-				.onClick(async () => {
-					// Use default template instead of undefined
-					selectedProvider.customPromptTemplate = DEFAULT_PROMPT_TEMPLATE;
-					await this.plugin.saveSettings();
-
-					// Update the text area with the default template
-					textAreaComponent.setValue(DEFAULT_PROMPT_TEMPLATE);
-				})
-		);
 	}
 }
