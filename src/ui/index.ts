@@ -62,7 +62,6 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 				button
 					.setIcon('plus')
 					.setButtonText('Add Frontmatter')
-					.setCta()
 					.onClick(() => {
 						this.addNewFrontmatter(containerEl);
 					});

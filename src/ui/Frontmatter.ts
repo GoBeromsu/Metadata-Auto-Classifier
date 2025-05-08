@@ -199,7 +199,7 @@ export class Frontmatter extends BaseSettingsComponent {
 			})
 			.addButton((button) => {
 				button
-					.setIcon('trash-2')
+					.setIcon('trash')
 					.setClass('delete-frontmatter-btn')
 					.setWarning()
 					.setTooltip('Delete Frontmatter')
