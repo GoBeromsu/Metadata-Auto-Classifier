@@ -91,6 +91,20 @@ export class FrontmatterModal extends Modal {
 					.setCta()
 					.onClick(async () => {
 						await this.plugin.saveSettings();
+
+						// Get the container element for this frontmatter by ID and update it
+						const frontmatterContainers = document.querySelectorAll('[data-frontmatter-id]');
+						for (const container of Array.from(frontmatterContainers)) {
+							const containerId = container.getAttribute('data-frontmatter-id');
+							if (containerId && parseInt(containerId) === this.frontmatterSetting.id) {
+								// Clear and redisplay the frontmatter
+								container.empty();
+								const frontmatter = new Frontmatter(this.plugin);
+								frontmatter.display(container as HTMLElement, this.frontmatterSetting.id);
+								break;
+							}
+						}
+
 						this.close();
 					});
 			})

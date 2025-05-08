@@ -29,6 +29,8 @@ export class SelectFrontmatterModal extends FuzzySuggestModal<FrontmatterOption>
 	}
 
 	onChooseItem(item: FrontmatterOption, evt: MouseEvent | KeyboardEvent): void {
-		this.callback(item.id);
+		if (this.callback) {
+			this.callback(item.id);
+		}
 	}
 }
