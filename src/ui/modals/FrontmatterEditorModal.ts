@@ -1,8 +1,8 @@
 import AutoClassifierPlugin from 'main';
 import { Modal, TextAreaComponent, App, Setting } from 'obsidian';
 import { FrontmatterTemplate } from 'utils/interface';
-import { SettingsComponentOptions } from './BaseSettingsComponent';
-import { WikiLinkSelector } from './WikiLinkSelector';
+import { SettingsComponentOptions } from 'ui/components/BaseSettings';
+import { WikiLinkSelector } from 'ui/components/WikiLinkSelector';
 
 export class ConfigurableSettingModal extends Modal {
 	readonly frontmatterSetting: FrontmatterTemplate;

@@ -1,9 +1,9 @@
 import { getFrontmatterSetting } from 'frontmatter';
-
-import { BaseSettingsComponent } from './BaseSettingsComponent';
+import AutoClassifierPlugin from 'main';
+import { BaseSettingsComponent } from 'ui/components/BaseSettings';
 
 export class Frontmatter extends BaseSettingsComponent {
-	constructor(plugin: any) {
+	constructor(plugin: AutoClassifierPlugin) {
 		super(plugin, {
 			showLinkType: true,
 			showOptions: true,

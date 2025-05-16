@@ -1,8 +1,9 @@
 import { DEFAULT_TAG_SETTING } from 'utils/constant';
-import { BaseSettingsComponent } from './BaseSettingsComponent';
+import { BaseSettingsComponent } from 'ui/components/BaseSettings';
+import AutoClassifierPlugin from 'main';
 
 export class Tag extends BaseSettingsComponent {
-	constructor(plugin: any) {
+	constructor(plugin: AutoClassifierPlugin) {
 		super(plugin, {
 			showLinkType: false,
 			showOptions: false,

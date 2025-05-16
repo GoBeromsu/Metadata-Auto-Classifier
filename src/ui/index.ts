@@ -4,9 +4,9 @@ import { PluginSettingTab, Setting } from 'obsidian';
 import { addFrontmatterSetting } from 'frontmatter';
 
 import { FrontmatterTemplate, ProviderConfig } from 'utils/interface';
-import { Api } from './Api';
-import { Frontmatter } from './Frontmatter';
-import { Tag } from './Tag';
+import { Api } from './containers/Api';
+import { Frontmatter } from './containers/Frontmatter';
+import { Tag } from './containers/Tag';
 
 export interface AutoClassifierSettings {
 	providers: ProviderConfig[];
@@ -86,5 +86,6 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 	}
 }
 
-export * from './SelectFrontmatterModal';
-export * from './WikiLinkSelector';
+export * from './components/WikiLinkSelector';
+export * from './modals/FrontmatterEditorModal';
+export * from './modals/FrontmatterSelectorModal';

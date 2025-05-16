@@ -1,8 +1,8 @@
+import AutoClassifierPlugin from 'main';
 import { Setting } from 'obsidian';
+import { ConfigurableSettingModal } from 'ui/modals/FrontmatterEditorModal';
 
 import { FrontmatterTemplate } from 'utils/interface';
-import AutoClassifierPlugin from '../main';
-import { ConfigurableSettingModal } from './ConfigurableSettingModal';
 
 export interface SettingsComponentOptions {
 	showLinkType?: boolean;
