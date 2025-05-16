@@ -2,59 +2,75 @@ import { Setting } from 'obsidian';
 
 import { FrontmatterTemplate } from 'utils/interface';
 import AutoClassifierPlugin from '../main';
+import { ConfigurableSettingModal } from './ConfigurableSettingModal';
+
+export interface SettingsComponentOptions {
+	showLinkType?: boolean;
+	showOptions?: boolean;
+	showTextArea?: boolean;
+}
 
 export interface SettingsComponent {
 	display(containerEl: HTMLElement, frontmatterId?: number): void;
 }
 
 export abstract class BaseSettingsComponent implements SettingsComponent {
-	constructor(protected plugin: AutoClassifierPlugin) {}
+	protected options: SettingsComponentOptions;
+
+	constructor(protected plugin: AutoClassifierPlugin, options: SettingsComponentOptions = {}) {
+		this.options = {
+			showLinkType: true,
+			showOptions: true,
+			showTextArea: true,
+			...options,
+		};
+	}
 
 	abstract display(containerEl: HTMLElement, frontmatterId?: number): void;
 
-	addCountSetting(
+	defaultSettings(
 		containerEl: HTMLElement,
-		setting: FrontmatterTemplate,
-		name: string,
-		desc: string,
-		defaultCount: number
+		frontmatterSetting: FrontmatterTemplate,
+		showDeleteButton: boolean = false
 	): void {
-		new Setting(containerEl)
-			.setName(name.toLowerCase())
-			.setDesc(desc)
-			.addText((text) =>
-				text
-					.setPlaceholder('Number of items')
-					.setValue(setting.count.toString())
-					.onChange(async (value) => {
-						const count = parseInt(value, 10);
-						if (!isNaN(count) && count > 0) {
-							setting.count = count;
-							await this.plugin.saveSettings();
-						}
-					})
-			)
-			.addExtraButton((button) =>
+		const setting = new Setting(containerEl)
+			.setName(frontmatterSetting.name || 'Please enter name')
+			.setDesc(`Type: ${frontmatterSetting.linkType}, Count: ${frontmatterSetting.count}`)
+			.addButton((button) => {
 				button
-					.setIcon('reset')
-					.setTooltip('Reset to default count')
-					.onClick(async () => {
-						setting.count = defaultCount;
-						await this.plugin.saveSettings();
-						this.display(containerEl);
-					})
-			);
-	}
+					.setIcon('pencil')
+					.setTooltip('Edit Frontmatter')
+					.onClick(() => {
+						const modal = new ConfigurableSettingModal(
+							this.plugin.app,
+							this.plugin,
+							frontmatterSetting,
+							this.options
+						);
 
-	addOverwriteSetting(containerEl: HTMLElement, setting: FrontmatterTemplate): void {
-		new Setting(containerEl)
-			.setName('Overwrite mode')
-			.setDesc('Toggle between append and overwrite mode')
-			.addToggle((toggle) =>
-				toggle.setValue(setting.overwrite).onChange(async (value) => {
-					setting.overwrite = value;
-					await this.plugin.saveSettings();
-				})
-			);
+						modal.open();
+					});
+			});
+
+		if (showDeleteButton) {
+			setting.addButton((button) => {
+				button
+					.setIcon('trash')
+					.setClass('delete-frontmatter-btn')
+					.setWarning()
+					.setTooltip('Delete Frontmatter')
+					.onClick(async () => {
+						if (
+							confirm(`Are you sure you want to delete "${frontmatterSetting.name}" frontmatter?`)
+						) {
+							this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
+								(f: FrontmatterTemplate) => f.id !== frontmatterSetting.id
+							);
+							await this.plugin.saveSettings();
+							containerEl.empty();
+						}
+					});
+			});
+		}
 	}
 }

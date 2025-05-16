@@ -6,8 +6,8 @@ interface FrontmatterOption {
 }
 
 export class SelectFrontmatterModal extends FuzzySuggestModal<FrontmatterOption> {
-	private options: FrontmatterOption[];
-	private callback: (selectedId: number | null) => void;
+	readonly options: FrontmatterOption[];
+	readonly callback: (selectedId: number | null) => void;
 
 	constructor(
 		app: App,

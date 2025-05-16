@@ -34,50 +34,32 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		// API Settings Section
 		const apiSettingContainer = containerEl.createDiv();
 		this.apiSetting.display(apiSettingContainer);
 
-		containerEl.createEl('hr');
+		containerEl.createEl('h2', { text: 'Frontmatters' });
+		const frontmattersContainer = containerEl.createDiv({ cls: 'frontmatters-container' });
 
-		// Tags section
-		const tagSectionContainer = containerEl.createDiv({ cls: 'section-container tag-section' });
-		new Setting(tagSectionContainer).setName('Tags').setHeading().setClass('section-heading');
-
-		const tagContainer = tagSectionContainer.createDiv();
-		this.tagSetting.display(tagContainer);
-		containerEl.createEl('hr');
-		// Custom frontmatter section
-		const fmSectionContainer = containerEl.createDiv({
-			cls: 'section-container frontmatter-section',
-		});
-
-		const fmHeaderContainer = fmSectionContainer.createDiv({ cls: 'section-header-container' });
-
-		new Setting(fmHeaderContainer)
-			.setName('Custom Frontmatter')
-			.setHeading()
-			.setClass('section-heading')
-			.addButton((button) => {
-				button
-					.setIcon('plus')
-					.setButtonText('Add Frontmatter')
-					.onClick(() => {
-						this.addNewFrontmatter(containerEl);
-					});
-			});
-
-		// Create a container for all frontmatter items
-		const frontmattersContainer = fmSectionContainer.createDiv({ cls: 'frontmatters-container' });
+		this.tagSetting.display(frontmattersContainer);
 
 		this.plugin.settings.frontmatter.forEach((frontmatter) => {
-			if (frontmatter.name !== 'tags') {
+			if (frontmatter.id !== 0) {
+				// Skip tag setting which has id 0
 				const frontmatterContainer = frontmattersContainer.createDiv({
 					cls: 'frontmatter-item-container',
 				});
 				frontmatterContainer.setAttribute('data-frontmatter-id', frontmatter.id.toString());
 				this.frontmatterSetting.display(frontmatterContainer, frontmatter.id);
 			}
+		});
+
+		new Setting(frontmattersContainer).addButton((button) => {
+			button
+				.setIcon('plus')
+				.setButtonText('Add Frontmatter')
+				.onClick(() => {
+					this.addNewFrontmatter(containerEl);
+				});
 		});
 	}
 
@@ -91,7 +73,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		if (!frontmattersContainer) return;
 
 		const newFrontmatterContainer = frontmattersContainer.createDiv({
-			cls: 'frontmatter-container',
+			cls: 'frontmatter-item-container',
 		});
 
 		newFrontmatterContainer.setAttribute('data-frontmatter-id', newFrontmatter.id.toString());
