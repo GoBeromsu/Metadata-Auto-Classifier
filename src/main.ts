@@ -135,6 +135,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			frontmatter.count,
 			content,
 			processedValues,
+			frontmatter.customQuery,
 			selectedProvider.customPromptTemplate
 		);
 

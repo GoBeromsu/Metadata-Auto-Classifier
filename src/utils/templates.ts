@@ -1,30 +1,61 @@
 // Constants for system behaviour and default prompt template
-export const DEFAULT_SYSTEM_ROLE = `You are a JSON classification assistant. Respond only with a valid JSON object.`;
+export const DEFAULT_SYSTEM_ROLE = `You are a JSON classification assistant. Respond only with a valid JSON object adhering to the specified schema.`;
 
-export const DEFAULT_PROMPT_TEMPLATE = `Classify the following content using the reference categories provided.
+export const DEFAULT_TASK_TEMPLATE = `<task>
+Classify the following content using the provided reference categories.
+</task>
 
-Instructions:
-1. Use **only** the categories listed in the reference.
-2. Do not modify, remove, or add any formatting to the reference categories (e.g., preserve brackets such as '[[]]').
-3. The tagCount limit must be followed conservatively. Do not choose more unless absolutely necessary.
-4. For each selected category, assign a "reliability" score between **0 and 1**, reflecting confidence in the classification (1 = certain, 0 = very unsure).
-5. **Nested categories are allowed.** Preserve full hierarchical structure when selecting nested tags.
+<instructions>
+1. Select only from the reference categories listed.
+2. Preserve the exact formatting of the reference categories, including brackets.
+3. Assign a "reliability" score between 0 and 1 to each selected category, indicating confidence in the classification.
+4. Maintain the full hierarchical structure for nested categories. (e.g. category/subcategory)
+</instructions>
 `;
 
 export function getPromptTemplate(
 	tagCount: number,
 	input: string,
 	reference: readonly string[],
-	customTemplate: string = DEFAULT_PROMPT_TEMPLATE
+	customQuery: string,
+	customTemplate: string = DEFAULT_TASK_TEMPLATE
 ): string {
-	const referenceSection = `- Select **up to ${tagCount}** categories that are most relevant. If fewer categories are appropriate, select fewer.  
-Reference categories:  
-${reference.join(', ')}
+	const outputStructureTemplate = `
+	<tag_count instruction>
+	Limit your selection to a maximum of {tagCount} categories, choosing fewer if appropriate.
+	</tag_count_instruction>
 
-Content:
-"""
-${input}
-"""
-`;
-	return `${customTemplate}\n\n${referenceSection}`;
+	<output_format>
+	{
+	  "classifications": [
+		{
+		  "category": "string",
+		  "reliability": number
+		}
+	  ]
+	}
+	</output_format>
+
+	<reference_categories>
+	{reference}
+	</reference_categories>
+
+	<classification_context>
+	{customQuery}
+	</classification_context>
+
+	<content>
+	{input}
+	</content>
+	`;
+
+	const completePrompt =
+		customTemplate +
+		outputStructureTemplate
+			.replace('{tagCount}', String(tagCount))
+			.replace('{reference}', reference.join(', '))
+			.replace('{input}', input)
+			.replace('{customQuery}', customQuery);
+
+	return completePrompt;
 }

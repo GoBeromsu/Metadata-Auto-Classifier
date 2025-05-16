@@ -7,6 +7,7 @@ export interface FrontmatterTemplate {
 	refs: string[];
 	overwrite: boolean;
 	linkType: 'WikiLink' | 'Normal';
+	customQuery: string;
 }
 export interface ProviderConfig {
 	name: string;

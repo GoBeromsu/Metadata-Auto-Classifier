@@ -7,6 +7,7 @@ export const DEFAULT_FRONTMATTER_SETTING = {
 	refs: [],
 	overwrite: false,
 	linkType: 'WikiLink' as const,
+	customQuery: '',
 };
 const DEFAULT_TEMPERATURE = 0.7;
 // Default provider settings
@@ -83,6 +84,7 @@ export const DEFAULT_TAG_SETTING: FrontmatterTemplate = {
 	count: 5,
 	overwrite: false,
 	linkType: 'Normal',
+	customQuery: '',
 };
 
 // Default settings for the Auto Classifier plugin

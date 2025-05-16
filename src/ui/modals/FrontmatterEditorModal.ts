@@ -60,6 +60,9 @@ export class ConfigurableSettingModal extends Modal {
 			this.addOptionsSection(contentEl);
 		}
 
+		// Custom Query section (always shown)
+		this.addCustomQuerySection(contentEl);
+
 		// Add save/cancel buttons
 		this.addActionButtons(contentEl);
 	}
@@ -179,6 +182,36 @@ export class ConfigurableSettingModal extends Modal {
 			}
 			this.textAreaComponent.setValue(displayValue);
 		}
+	}
+
+	private addCustomQuerySection(containerEl: HTMLElement): void {
+		// Custom Query section header
+		const customQueryHeaderSetting = new Setting(containerEl)
+			.setName('Custom Classification Rules')
+			.setHeading()
+			.setClass('custom-query-header');
+
+		customQueryHeaderSetting.setDesc(
+			'Add custom instructions to provide more context for classification.'
+		);
+
+		// Create a container for the textarea
+		const textareaContainer = containerEl.createDiv({ cls: 'textarea-container' });
+		textareaContainer.style.width = '100%';
+		textareaContainer.style.marginTop = '8px';
+		textareaContainer.style.minHeight = '100px';
+
+		// Create the TextAreaComponent
+		const customQueryTextArea = new TextAreaComponent(textareaContainer)
+			.setPlaceholder('Enter specific classification rules or additional context here...')
+			.setValue(this.frontmatterSetting.customQuery || '')
+			.onChange(async (value) => {
+				this.frontmatterSetting.customQuery = value;
+			});
+
+		// Adjust text area height and width
+		customQueryTextArea.inputEl.style.width = '100%';
+		customQueryTextArea.inputEl.style.height = '100px';
 	}
 
 	private addActionButtons(containerEl: HTMLElement): void {
