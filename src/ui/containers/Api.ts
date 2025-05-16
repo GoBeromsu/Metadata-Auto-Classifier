@@ -4,7 +4,7 @@ import { ProviderConfig } from 'utils/interface';
 import { validateAPIKey } from 'api';
 import AutoClassifierPlugin from 'main';
 import { getDefaultEndpoint } from 'utils';
-import { DEFAULT_PROMPT_TEMPLATE } from 'utils/templates';
+import { DEFAULT_TASK_TEMPLATE } from 'utils/templates';
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;
@@ -215,7 +215,7 @@ export class Api {
 	}
 
 	private addCustomPromptSetting(containerEl: HTMLElement, selectedProvider: ProviderConfig): void {
-		const currentTemplate = selectedProvider.customPromptTemplate || DEFAULT_PROMPT_TEMPLATE;
+		const currentTemplate = selectedProvider.customPromptTemplate ?? DEFAULT_TASK_TEMPLATE;
 
 		const customPromptSetting = new Setting(containerEl)
 			.setName('Classification Rules')
@@ -226,12 +226,12 @@ export class Api {
 					.setTooltip('Reset to default template')
 					.onClick(async () => {
 						// Use default template instead of undefined
-						selectedProvider.customPromptTemplate = DEFAULT_PROMPT_TEMPLATE;
+						selectedProvider.customPromptTemplate = DEFAULT_TASK_TEMPLATE;
 						await this.plugin.saveSettings();
 
 						// Update the text area with the default template
 						if (textAreaComponent) {
-							textAreaComponent.setValue(DEFAULT_PROMPT_TEMPLATE);
+							textAreaComponent.setValue(DEFAULT_TASK_TEMPLATE);
 						} else {
 							this.display(containerEl);
 						}
@@ -246,10 +246,10 @@ export class Api {
 
 		// Create the TextAreaComponent in the dedicated container
 		const textAreaComponent = new TextAreaComponent(textAreaContainer)
-			.setPlaceholder(DEFAULT_PROMPT_TEMPLATE)
+			.setPlaceholder(DEFAULT_TASK_TEMPLATE)
 			.setValue(currentTemplate)
 			.onChange(async (value) => {
-				selectedProvider.customPromptTemplate = value ? value : DEFAULT_PROMPT_TEMPLATE;
+				selectedProvider.customPromptTemplate = value;
 				await this.plugin.saveSettings();
 			});
 
