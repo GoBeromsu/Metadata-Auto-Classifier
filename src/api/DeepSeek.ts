@@ -1,6 +1,6 @@
 import { getHeaders, getRequestParam } from 'api';
 import { requestUrl, RequestUrlParam } from 'obsidian';
-import { API_CONSTANTS, DEEPSEEK_STRUCTURE_OUTPUT } from 'utils/constant';
+import { API_CONSTANTS, DEEPSEEK_STRUCTURE_OUTPUT } from 'utils/constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 import { ApiError } from './ApiError';
 

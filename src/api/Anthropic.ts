@@ -1,7 +1,7 @@
 import { getRequestParam } from 'api';
 import { ApiError } from './ApiError';
 import { requestUrl, RequestUrlParam } from 'obsidian';
-import { API_CONSTANTS, ANTHROPIC_TOOL_CONFIG } from 'utils/constant';
+import { API_CONSTANTS, ANTHROPIC_TOOL_CONFIG } from 'utils/constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 
 export class Anthropic implements APIProvider {

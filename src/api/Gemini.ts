@@ -2,7 +2,7 @@ import { getHeaders, getRequestParam } from 'api';
 import { requestUrl, RequestUrlParam } from 'obsidian';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 import { ApiError } from './ApiError';
-import { API_CONSTANTS, GEMINI_STRUCTURE_OUTPUT } from 'utils/constant';
+import { API_CONSTANTS, GEMINI_STRUCTURE_OUTPUT } from 'utils/constants';
 
 export class Gemini implements APIProvider {
 	async callAPI(

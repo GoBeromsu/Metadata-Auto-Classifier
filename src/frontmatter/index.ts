@@ -1,7 +1,7 @@
 import { getAllTags, getFrontMatterInfo, MetadataCache, TFile } from 'obsidian';
 
 import { generateId } from 'utils';
-import { DEFAULT_FRONTMATTER_SETTING } from 'utils/constant';
+import { DEFAULT_FRONTMATTER_SETTING } from 'utils/constants';
 import {
 	FrontMatter,
 	FrontmatterTemplate,

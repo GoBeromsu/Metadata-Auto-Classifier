@@ -1,4 +1,4 @@
-import { DEFAULT_TAG_SETTING } from 'utils/constant';
+import { DEFAULT_TAG_SETTING } from 'utils/constants';
 import { BaseSettingsComponent } from 'ui/components/BaseSettings';
 import AutoClassifierPlugin from 'main';
 

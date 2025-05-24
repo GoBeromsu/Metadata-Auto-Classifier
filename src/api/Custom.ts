@@ -1,7 +1,7 @@
 import { getHeaders, getRequestParam } from 'api';
 import { ApiError } from './ApiError';
 import { requestUrl, RequestUrlParam } from 'obsidian';
-import { API_CONSTANTS, LMSTUDIO_STRUCTURE_OUTPUT } from 'utils/constant';
+import { API_CONSTANTS, LMSTUDIO_STRUCTURE_OUTPUT } from 'utils/constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 
 export class Custom implements APIProvider {

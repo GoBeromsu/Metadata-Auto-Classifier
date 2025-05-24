@@ -1,7 +1,7 @@
 import { getHeaders, getRequestParam } from 'api';
 import { requestUrl, RequestUrlParam } from 'obsidian';
 import { APIProvider, StructuredOutput } from 'utils/interface';
-import { API_CONSTANTS, OPENAI_STRUCTURE_OUTPUT } from '../utils/constant';
+import { API_CONSTANTS, OPENAI_STRUCTURE_OUTPUT } from '../utils/constants';
 import { ProviderConfig } from '../utils/interface';
 import { ApiError } from './ApiError';
 

@@ -1,6 +1,6 @@
 import { processAPIRequest } from 'api';
 import { Notice, Plugin, TFile } from 'obsidian';
-import { DEFAULT_TAG_SETTING, getDefaultProviders } from 'utils/constant';
+import { DEFAULT_TAG_SETTING, getDefaultProviders } from 'utils/constants';
 import { FrontmatterTemplate, ProviderConfig } from 'utils/interface';
 import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
