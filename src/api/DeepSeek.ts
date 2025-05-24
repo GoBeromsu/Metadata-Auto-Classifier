@@ -1,8 +1,8 @@
 import { getHeaders, getRequestParam } from 'api';
 import { requestUrl, RequestUrlParam } from 'obsidian';
+import { API_CONSTANTS, DEEPSEEK_STRUCTURE_OUTPUT } from 'utils/constant';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 import { ApiError } from './ApiError';
-import { API_CONSTANTS } from 'utils/constant';
 
 export class DeepSeek implements APIProvider {
 	async callAPI(
@@ -20,12 +20,11 @@ export class DeepSeek implements APIProvider {
 			{ role: 'user', content: user_prompt },
 		];
 
-		// Create the request data
 		const data = {
 			model: selectedModel,
 			messages: messages,
 			temperature: temperature || provider.temperature,
-			response_format: { type: 'json_object' },
+			response_format: DEEPSEEK_STRUCTURE_OUTPUT,
 			max_tokens: API_CONSTANTS.DEFAULT_MAX_TOKENS, // Ensure JSON string is not truncated
 		};
 
@@ -56,26 +55,37 @@ export class DeepSeek implements APIProvider {
 	}
 
 	private processApiResponse(responseData: any): StructuredOutput {
-		try {
-			// Handle DeepSeek's response format
-			if (responseData.output && typeof responseData.reliability === 'number') {
-				return {
-					output: Array.isArray(responseData.output) ? responseData.output : [responseData.output],
-					reliability: Math.min(Math.max(responseData.reliability, 0), 1),
-				};
-			}
+		// Handle DeepSeek's response format - expect JSON object with classifications array
+		const messageContent = responseData.choices[0].message.content;
+		const parsedContent =
+			typeof messageContent === 'string' ? JSON.parse(messageContent) : messageContent;
 
-			// Handle potential empty content
-			throw new ApiError('Invalid or empty response format from DeepSeek API');
-		} catch (error) {
-			throw error;
+		// Process classifications array from templates.ts format
+		if (parsedContent.classifications && Array.isArray(parsedContent.classifications)) {
+			const output = parsedContent.classifications.map((item: any) => item.category);
+			const avgReliability =
+				parsedContent.classifications.reduce(
+					(sum: number, item: any) => sum + item.reliability,
+					0
+				) / parsedContent.classifications.length;
+
+			return {
+				output: output,
+				reliability: Math.min(Math.max(avgReliability, 0), 1),
+			};
 		}
+
+		// Fallback for direct output/reliability format
+		return {
+			output: Array.isArray(parsedContent.output) ? parsedContent.output : [parsedContent.output],
+			reliability: Math.min(Math.max(parsedContent.reliability || 0, 0), 1),
+		};
 	}
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
 		await this.callAPI(
-			'You are a test system. You must respond with valid JSON.',
-			'Return a JSON object containing {"output": [], "reliability": 0}',
+			API_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
+			API_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
 			provider,
 			provider.models[0]?.name
 		);

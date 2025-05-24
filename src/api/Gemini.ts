@@ -2,7 +2,7 @@ import { getHeaders, getRequestParam } from 'api';
 import { requestUrl, RequestUrlParam } from 'obsidian';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 import { ApiError } from './ApiError';
-import { GEMINI_STRUCTURE_OUTPUT } from 'utils/constant';
+import { API_CONSTANTS, GEMINI_STRUCTURE_OUTPUT } from 'utils/constant';
 
 export class Gemini implements APIProvider {
 	async callAPI(
@@ -20,13 +20,12 @@ export class Gemini implements APIProvider {
 			{ role: 'user', content: user_prompt },
 		];
 
-		// Create the request data
+		// Create the request data with Gemini structured output configuration
 		const data = {
 			model: selectedModel,
 			messages: messages,
 			temperature: temperature || provider.temperature,
-			response_mime_type: 'application/json',
-			response_schema: GEMINI_STRUCTURE_OUTPUT.json_schema,
+			...GEMINI_STRUCTURE_OUTPUT,
 		};
 
 		const response = await this.makeApiRequest(provider, headers, data);
@@ -57,24 +56,48 @@ export class Gemini implements APIProvider {
 
 	private processApiResponse(responseData: any): StructuredOutput {
 		try {
-			// Handle Gemini's response format
+			// Handle Gemini's structured output response format
 			if (responseData.output && typeof responseData.reliability === 'number') {
 				return {
 					output: Array.isArray(responseData.output) ? responseData.output : [responseData.output],
-					reliability: Math.min(Math.max(responseData.reliability, 0), 1),
+					reliability: Math.min(
+						Math.max(responseData.reliability, API_CONSTANTS.DEFAULT_RELIABILITY_MIN),
+						API_CONSTANTS.DEFAULT_RELIABILITY_MAX
+					),
 				};
+			}
+
+			// Handle potential different response structure from Gemini
+			if (responseData.candidates && responseData.candidates.length > 0) {
+				const candidate = responseData.candidates[0];
+				if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+					const content = candidate.content.parts[0].text;
+					if (content) {
+						const parsed = JSON.parse(content);
+						return {
+							output: Array.isArray(parsed.output) ? parsed.output : [parsed.output],
+							reliability: Math.min(
+								Math.max(parsed.reliability || 0, API_CONSTANTS.DEFAULT_RELIABILITY_MIN),
+								API_CONSTANTS.DEFAULT_RELIABILITY_MAX
+							),
+						};
+					}
+				}
 			}
 
 			throw new ApiError('Invalid response format from Gemini API');
 		} catch (error) {
-			throw error;
+			if (error instanceof ApiError) {
+				throw error;
+			}
+			throw new ApiError('Failed to parse response from Gemini API');
 		}
 	}
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
 		await this.callAPI(
-			'You are a test system. You must respond with valid JSON.',
-			'Return a JSON object containing {"output": [], "reliability": 0}',
+			API_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
+			API_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
 			provider,
 			provider.models[0]?.name
 		);

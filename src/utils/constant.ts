@@ -144,17 +144,30 @@ export const OPENROUTER_STRUCTURE_OUTPUT = {
 	},
 };
 
+// Gemini Structured Output Configuration
 export const GEMINI_STRUCTURE_OUTPUT = {
-	type: 'json_schema',
-	json_schema: {
+	response_mime_type: 'application/json',
+	response_schema: {
 		type: 'object',
 		properties: {
-			output: { type: 'array', items: { type: 'string' } },
-			reliability: { type: 'number' },
+			output: {
+				type: 'array',
+				items: { type: 'string' },
+				description: 'Array of classified tags or categories',
+			},
+			reliability: {
+				type: 'number',
+				description: 'A number between 0 and 1 indicating confidence in the classification',
+			},
 		},
 		required: ['output', 'reliability'],
-		propertyOrdering: ['output', 'reliability'],
+		additionalProperties: false,
 	},
+};
+
+// DeepSeek Structured Output Configuration
+export const DEEPSEEK_STRUCTURE_OUTPUT = {
+	type: 'json_object',
 };
 
 // API Common Constants
