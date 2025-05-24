@@ -14,8 +14,6 @@ export interface ProviderConfig {
 	apiKey: string;
 	baseUrl: string;
 	models: Model[];
-	lastTested: Date | null;
-	testResult: boolean | null;
 	temperature?: number;
 	customPromptTemplate?: string;
 }

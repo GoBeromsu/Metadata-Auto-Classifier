@@ -9,12 +9,12 @@
 		"baseUrl": "https://api.openai.com/v1/chat/completions",
 		"popularModels": [
 			{
-				"id": "gpt-4o-mini",
-				"name": "GPT-4o Mini"
+				"id": "gpt-4.1",
+				"name": "GPT-4.1"
 			},
 			{
-				"id": "gpt-4o",
-				"name": "GPT-4o"
+				"id": "gpt-4.1-mini",
+				"name": "GPT-4.1 Mini"
 			},
 			{
 				"id": "gpt-4-turbo",
@@ -35,16 +35,16 @@
 		"baseUrl": "https://api.anthropic.com/v1/messages",
 		"popularModels": [
 			{
-				"id": "claude-3-5-haiku-latest",
-				"name": "Claude 3.5 Haiku"
+				"id": "claude-opus-4-20250514",
+				"name": "Claude Opus 4"
 			},
 			{
-				"id": "claude-3-5-sonnet-latest",
-				"name": "Claude 3.5 Sonnet"
+				"id": "claude-sonnet-4-20250514",
+				"name": "Claude Sonnet 4"
 			},
 			{
-				"id": "claude-3-opus-20240229",
-				"name": "Claude 3 Opus"
+				"id": "claude-3-7-sonnet-20250219",
+				"name": "Claude Sonnet 3.7"
 			}
 		]
 	},
@@ -57,16 +57,16 @@
 		"baseUrl": "https://generativelanguage.googleapis.com/v1beta/chat/completions",
 		"popularModels": [
 			{
+				"id": "gemini-2.5-flash",
+				"name": "Gemini 2.5 Flash"
+			},
+			{
 				"id": "gemini-2.0-flash",
 				"name": "Gemini 2.0 Flash"
 			},
 			{
 				"id": "gemini-1.5-pro",
 				"name": "Gemini 1.5 Pro"
-			},
-			{
-				"id": "gemini-1.5-flash",
-				"name": "Gemini 1.5 Flash"
 			}
 		]
 	},
@@ -123,12 +123,12 @@
 		"baseUrl": "https://api.deepseek.com/v1/chat/completions",
 		"popularModels": [
 			{
-				"id": "deepseek-chat",
-				"name": "DeepSeek Chat"
+				"id": "deepseek-v3",
+				"name": "DeepSeek V3"
 			},
 			{
-				"id": "deepseek-reasoner",
-				"name": "DeepSeek Reasoner"
+				"id": "deepseek-r1",
+				"name": "DeepSeek R1"
 			}
 		]
 	}

@@ -1,15 +1,12 @@
-import { ErrorHandler } from 'error/ErrorHandler';
+import { CommonNotice } from 'ui/components/common/CommonNotice';
 import { RequestUrlParam } from 'obsidian';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 import { Anthropic } from './Anthropic';
 import { Custom } from './Custom';
 import { OpenAI } from './OpenAI';
 import { OpenRouter } from './OpenRouter';
-
-interface ApiTestResult {
-	success: boolean;
-	message: string;
-}
+import { Gemini } from './Gemini';
+import { DeepSeek } from './DeepSeek';
 
 export const getProvider = (providerName: string): APIProvider => {
 	switch (providerName) {
@@ -17,10 +14,14 @@ export const getProvider = (providerName: string): APIProvider => {
 			return new OpenAI();
 		case 'Anthropic':
 			return new Anthropic();
-		case 'OpenRouter':
-			return new OpenRouter();
 		case 'Custom':
 			return new Custom();
+		case 'OpenRouter':
+			return new OpenRouter();
+		case 'Gemini':
+			return new Gemini();
+		case 'DeepSeek':
+			return new DeepSeek();
 		default:
 			throw new Error(`Unknown AI provider: ${providerName}`);
 	}
@@ -42,26 +43,12 @@ export const processAPIRequest = async (
 		);
 		return response;
 	} catch (error) {
-		ErrorHandler.handle(error as Error, `API Request Error`);
+		CommonNotice.showError(error as Error, 'API Request');
 		return {
 			output: [],
 			reliability: 0,
 		};
 	}
-};
-
-export const validateAPIKey = async (provider: ProviderConfig): Promise<ApiTestResult> => {
-	const aiProvider: APIProvider = getProvider(provider.name);
-	const isValid = await aiProvider.verifyConnection(provider);
-
-	const message = isValid
-		? `Last tested: ${new Date().toLocaleString()} - Success! API is working.`
-		: `Last tested: ${new Date().toLocaleString()} - Error: API is not working.`;
-
-	return {
-		success: isValid,
-		message,
-	};
 };
 
 export const getHeaders = (apiKey?: string): Record<string, string> => {

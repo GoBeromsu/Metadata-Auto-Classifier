@@ -45,8 +45,6 @@ export class ProviderModal extends Modal {
 				apiKey: '',
 				baseUrl: '',
 				models: [],
-				lastTested: null,
-				testResult: null,
 				temperature: 0.7,
 				customPromptTemplate: undefined,
 			};

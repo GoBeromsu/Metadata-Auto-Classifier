@@ -1,10 +1,10 @@
 import { getHeaders, getRequestParam } from 'api';
-import { ApiError } from './ApiError';
 import { requestUrl, RequestUrlParam } from 'obsidian';
-import { API_CONSTANTS, LMSTUDIO_STRUCTURE_OUTPUT } from 'utils/constant';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
+import { ApiError } from './ApiError';
+import { API_CONSTANTS } from 'utils/constant';
 
-export class Custom implements APIProvider {
+export class DeepSeek implements APIProvider {
 	async callAPI(
 		systemRole: string,
 		user_prompt: string,
@@ -14,7 +14,7 @@ export class Custom implements APIProvider {
 	): Promise<StructuredOutput> {
 		const headers: Record<string, string> = getHeaders(provider.apiKey);
 
-		// Create messages array for the API
+		// Create messages array for the DeepSeek API
 		const messages = [
 			{ role: 'system', content: systemRole },
 			{ role: 'user', content: user_prompt },
@@ -25,7 +25,8 @@ export class Custom implements APIProvider {
 			model: selectedModel,
 			messages: messages,
 			temperature: temperature || provider.temperature,
-			response_format: LMSTUDIO_STRUCTURE_OUTPUT,
+			response_format: { type: 'json_object' },
+			max_tokens: API_CONSTANTS.DEFAULT_MAX_TOKENS, // Ensure JSON string is not truncated
 		};
 
 		const response = await this.makeApiRequest(provider, headers, data);
@@ -50,27 +51,31 @@ export class Custom implements APIProvider {
 			if (error instanceof ApiError) {
 				throw error;
 			}
-			throw new ApiError(`Failed to make request to Custom API: ${error.message}`);
+			throw new ApiError(`Failed to make request to DeepSeek API: ${error.message}`);
 		}
 	}
 
 	private processApiResponse(responseData: any): StructuredOutput {
-		const messageContent = responseData.choices[0].message.content;
+		try {
+			// Handle DeepSeek's response format
+			if (responseData.output && typeof responseData.reliability === 'number') {
+				return {
+					output: Array.isArray(responseData.output) ? responseData.output : [responseData.output],
+					reliability: Math.min(Math.max(responseData.reliability, 0), 1),
+				};
+			}
 
-		// Some models might return parsed JSON directly
-		if (typeof messageContent === 'object' && messageContent !== null) {
-			return messageContent as StructuredOutput;
+			// Handle potential empty content
+			throw new ApiError('Invalid or empty response format from DeepSeek API');
+		} catch (error) {
+			throw error;
 		}
-
-		// Otherwise parse the content as JSON
-		const content = messageContent.trim();
-		return JSON.parse(content) as StructuredOutput;
 	}
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
 		await this.callAPI(
-			API_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
-			API_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
+			'You are a test system. You must respond with valid JSON.',
+			'Return a JSON object containing {"output": [], "reliability": 0}',
 			provider,
 			provider.models[0]?.name
 		);

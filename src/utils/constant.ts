@@ -37,8 +37,6 @@ export const createProviderFromPreset = (presetId: string): ProviderConfig => {
 		apiKey: '',
 		baseUrl: preset.baseUrl,
 		models: [], // Start with empty models - user should add manually
-		lastTested: null,
-		testResult: null,
 		temperature: DEFAULT_TEMPERATURE,
 		customPromptTemplate: '',
 	};
@@ -146,10 +144,24 @@ export const OPENROUTER_STRUCTURE_OUTPUT = {
 	},
 };
 
+export const GEMINI_STRUCTURE_OUTPUT = {
+	type: 'json_schema',
+	json_schema: {
+		type: 'object',
+		properties: {
+			output: { type: 'array', items: { type: 'string' } },
+			reliability: { type: 'number' },
+		},
+		required: ['output', 'reliability'],
+		propertyOrdering: ['output', 'reliability'],
+	},
+};
+
 // API Common Constants
 export const API_CONSTANTS = {
+	DEFAULT_MAX_TOKENS: 32000,
 	DEFAULT_RELIABILITY_MIN: 0,
-	DEFAULT_RELIABILITY_MAX: 10,
+	DEFAULT_RELIABILITY_MAX: 1,
 	ANTHROPIC_VERSION: '2023-06-01',
 	OPENROUTER_TITLE: 'Metadata Auto Classifier',
 	VERIFY_CONNECTION_SYSTEM_PROMPT: 'You are a test system. You must respond with valid JSON.',

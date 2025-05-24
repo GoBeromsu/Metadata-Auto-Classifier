@@ -1,8 +1,8 @@
 import { getHeaders, getRequestParam } from 'api';
-import { ApiError } from 'error/ApiError';
 import { requestUrl, RequestUrlParam } from 'obsidian';
-import { OPENROUTER_STRUCTURE_OUTPUT, API_CONSTANTS } from 'utils/constant';
+import { API_CONSTANTS, OPENROUTER_STRUCTURE_OUTPUT } from 'utils/constant';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
+import { ApiError } from './ApiError';
 
 export class OpenRouter implements APIProvider {
 	async callAPI(

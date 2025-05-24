@@ -1,5 +1,5 @@
 import { getRequestParam } from 'api';
-import { ApiError } from 'error/ApiError';
+import { ApiError } from './ApiError';
 import { requestUrl, RequestUrlParam } from 'obsidian';
 import { API_CONSTANTS, ANTHROPIC_TOOL_CONFIG } from 'utils/constant';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
@@ -25,6 +25,7 @@ export class Anthropic implements APIProvider {
 		// Use tool calling for structured output
 		const data = {
 			model: selectedModel,
+			max_tokens: API_CONSTANTS.DEFAULT_MAX_TOKENS,
 			system: systemRole,
 			messages: messages,
 			temperature: temperature || provider.temperature,
