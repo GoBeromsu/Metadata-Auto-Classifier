@@ -78,6 +78,11 @@ export class Api {
 					tooltip: 'Edit',
 					onClick: () => this.openEditProviderModal(provider),
 				},
+				{
+					icon: 'trash',
+					tooltip: 'Delete',
+					onClick: () => this.deleteProvider(provider),
+				},
 			];
 
 			CommonSetting.create(containerEl, {
@@ -210,21 +215,23 @@ export class Api {
 	}
 
 	private async addProvider(provider: ProviderConfig): Promise<void> {
-		// Check for duplicate names
-		const existingProvider = this.plugin.settings.providers.find((p) => p.name === provider.name);
-		if (existingProvider) {
-			let counter = 1;
-			let newName = `${provider.name} (${counter})`;
-			while (this.plugin.settings.providers.find((p) => p.name === newName)) {
-				counter++;
-				newName = `${provider.name} (${counter})`;
-			}
-			provider.name = newName;
-		}
-
 		this.plugin.settings.providers.push(provider);
 		await this.plugin.saveSettings();
+		if (this.containerEl) {
+			this.display(this.containerEl);
+		}
+	}
 
+	private async deleteProvider(provider: ProviderConfig): Promise<void> {
+		this.plugin.settings.providers = this.plugin.settings.providers.filter((p) => p !== provider);
+
+		// Clear selection if deleted provider was selected
+		if (this.plugin.settings.selectedProvider === provider.name) {
+			this.plugin.settings.selectedProvider = '';
+			this.plugin.settings.selectedModel = '';
+		}
+
+		await this.plugin.saveSettings();
 		if (this.containerEl) {
 			this.display(this.containerEl);
 		}
@@ -238,7 +245,6 @@ export class Api {
 		if (index !== -1) {
 			this.plugin.settings.providers[index] = updatedProvider;
 			await this.plugin.saveSettings();
-
 			if (this.containerEl) {
 				this.display(this.containerEl);
 			}
@@ -249,23 +255,12 @@ export class Api {
 		const provider = this.plugin.settings.providers.find((p) => p.name === providerName);
 		if (!provider) return;
 
-		// Remove the model from the provider
 		provider.models = provider.models.filter((m) => m.name !== modelName);
 
-		// If this was the selected model, select another one
+		// Clear selection if deleted model was selected
 		if (this.plugin.settings.selectedModel === modelName) {
-			// Find the first available model from any provider
-			let newSelectedModel = '';
-			let newSelectedProvider = '';
-			for (const p of this.plugin.settings.providers) {
-				if (p.models.length > 0) {
-					newSelectedModel = p.models[0].name;
-					newSelectedProvider = p.name;
-					break;
-				}
-			}
-			this.plugin.settings.selectedModel = newSelectedModel;
-			this.plugin.settings.selectedProvider = newSelectedProvider;
+			this.plugin.settings.selectedModel = '';
+			this.plugin.settings.selectedProvider = '';
 		}
 
 		await this.plugin.saveSettings();
@@ -276,21 +271,7 @@ export class Api {
 		const provider = this.plugin.settings.providers.find((p) => p.name === providerName);
 		if (!provider) return;
 
-		// Check for duplicate model names within the provider
-		const existingModel = provider.models.find((m) => m.name === model.name);
-		if (existingModel) {
-			let counter = 1;
-			let newName = `${model.name} (${counter})`;
-			while (provider.models.find((m) => m.name === newName)) {
-				counter++;
-				newName = `${model.name} (${counter})`;
-			}
-			model.name = newName;
-		}
-
-		// Add the model to the provider
 		provider.models.push(model);
-
 		await this.plugin.saveSettings();
 		this.rerenderModelSection();
 	}
@@ -300,42 +281,23 @@ export class Api {
 		providerName: string,
 		updatedModel: ModelConfig
 	): Promise<void> {
-		// Find the original provider and model
+		// Remove from original provider
 		const originalProvider = this.plugin.settings.providers.find(
 			(p) => p.name === originalModel.provider
 		);
-		if (!originalProvider) return;
-
-		const modelIndex = originalProvider.models.findIndex((m) => m.name === originalModel.model);
-		if (modelIndex === -1) return;
-
-		// If provider changed, remove from old provider and add to new
-		if (originalModel.provider !== providerName) {
-			// Remove from original provider
-			originalProvider.models.splice(modelIndex, 1);
-
-			// Add to new provider
-			const newProvider = this.plugin.settings.providers.find((p) => p.name === providerName);
-			if (newProvider) {
-				// Check for duplicate model names in new provider
-				const existingModel = newProvider.models.find((m) => m.name === updatedModel.name);
-				if (existingModel) {
-					let counter = 1;
-					let newName = `${updatedModel.name} (${counter})`;
-					while (newProvider.models.find((m) => m.name === newName)) {
-						counter++;
-						newName = `${updatedModel.name} (${counter})`;
-					}
-					updatedModel.name = newName;
-				}
-				newProvider.models.push(updatedModel);
-			}
-		} else {
-			// Same provider, just update the model
-			originalProvider.models[modelIndex] = updatedModel;
+		if (originalProvider) {
+			originalProvider.models = originalProvider.models.filter(
+				(m) => m.name !== originalModel.model
+			);
 		}
 
-		// Update selected model if this was the selected one
+		// Add to new provider
+		const newProvider = this.plugin.settings.providers.find((p) => p.name === providerName);
+		if (newProvider) {
+			newProvider.models.push(updatedModel);
+		}
+
+		// Update selection if this was the selected model
 		if (this.plugin.settings.selectedModel === originalModel.model) {
 			this.plugin.settings.selectedModel = updatedModel.name;
 			this.plugin.settings.selectedProvider = providerName;
