@@ -1,9 +1,10 @@
 import AutoClassifierPlugin from 'main';
-import { PluginSettingTab, Setting } from 'obsidian';
+import { PluginSettingTab } from 'obsidian';
 
 import { addFrontmatterSetting } from 'frontmatter';
 
 import { FrontmatterTemplate, ProviderConfig } from 'utils/interface';
+import { CommonSetting } from './components/common/CommonSetting';
 import { Api } from './containers/Api';
 import { Frontmatter } from './containers/Frontmatter';
 import { Tag } from './containers/Tag';
@@ -53,13 +54,16 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 			}
 		});
 
-		new Setting(frontmattersContainer).addButton((button) => {
-			button
-				.setIcon('plus')
-				.setButtonText('Add Frontmatter')
-				.onClick(() => {
+		// Add Frontmatter button
+		CommonSetting.create(frontmattersContainer, {
+			name: '',
+			button: {
+				icon: 'plus',
+				text: 'Add frontmatter',
+				onClick: () => {
 					this.addNewFrontmatter(containerEl);
-				});
+				},
+			},
 		});
 	}
 
@@ -89,3 +93,4 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 export * from './components/WikiLinkSelector';
 export * from './modals/FrontmatterEditorModal';
 export * from './modals/FrontmatterSelectorModal';
+

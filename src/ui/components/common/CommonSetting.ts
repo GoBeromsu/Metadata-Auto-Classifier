@@ -16,7 +16,6 @@ export interface DropdownOption {
 export interface TextInputConfig {
 	placeholder?: string;
 	value?: string;
-	type?: 'text' | 'password' | 'url' | 'email';
 	onChange: (value: string) => void;
 }
 
@@ -119,10 +118,6 @@ export class CommonSetting {
 
 			if (textInput.value !== undefined) {
 				text.setValue(textInput.value);
-			}
-
-			if (textInput.type && textInput.type !== 'text') {
-				text.inputEl.type = textInput.type;
 			}
 
 			text.onChange(textInput.onChange);

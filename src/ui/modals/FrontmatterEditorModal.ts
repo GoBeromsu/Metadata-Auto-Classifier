@@ -1,8 +1,10 @@
 import AutoClassifierPlugin from 'main';
-import { Modal, TextAreaComponent, App, Setting } from 'obsidian';
-import { FrontmatterTemplate } from 'utils/interface';
+import { App, Modal, TextAreaComponent } from 'obsidian';
 import { SettingsComponentOptions } from 'ui/components/BaseSettings';
 import { WikiLinkSelector } from 'ui/components/WikiLinkSelector';
+import { CommonButton } from 'ui/components/common/CommonButton';
+import { CommonSetting } from 'ui/components/common/CommonSetting';
+import { FrontmatterTemplate } from 'utils/interface';
 
 export class ConfigurableSettingModal extends Modal {
 	readonly frontmatterSetting: FrontmatterTemplate;
@@ -29,17 +31,17 @@ export class ConfigurableSettingModal extends Modal {
 		this.setTitle(`Edit Setting: ${this.frontmatterSetting.name}`);
 
 		// Name setting (always shown)
-		new Setting(contentEl)
-			.setName('Name')
-			.setClass('setting-name')
-			.addText((text) => {
-				text
-					.setPlaceholder('Enter name')
-					.setValue(this.frontmatterSetting.name)
-					.onChange(async (value) => {
-						this.frontmatterSetting.name = value;
-					});
-			});
+		CommonSetting.create(contentEl, {
+			name: 'Name',
+			className: 'setting-name',
+			textInput: {
+				placeholder: 'Enter name',
+				value: this.frontmatterSetting.name,
+				onChange: async (value) => {
+					this.frontmatterSetting.name = value;
+				},
+			},
+		});
 
 		// Controls container
 		const controlsContainer = contentEl.createDiv({ cls: 'controls-container' });
@@ -68,68 +70,66 @@ export class ConfigurableSettingModal extends Modal {
 	}
 
 	private addLinkTypeSetting(containerEl: HTMLElement): void {
-		new Setting(containerEl)
-			.setName('Link Type')
-			.setClass('control-setting')
-			.addDropdown((dropdown) => {
-				dropdown
-					.addOption('WikiLink', 'WikiLink')
-					.addOption('Normal', 'Normal')
-					.setValue(this.frontmatterSetting.linkType || 'Normal')
-					.onChange(async (value) => {
-						this.frontmatterSetting.linkType = value as 'WikiLink' | 'Normal';
-					});
-			});
+		CommonSetting.create(containerEl, {
+			name: 'Link Type',
+			className: 'control-setting',
+			dropdown: {
+				options: [
+					{ value: 'WikiLink', display: 'WikiLink' },
+					{ value: 'Normal', display: 'Normal' },
+				],
+				value: this.frontmatterSetting.linkType || 'Normal',
+				onChange: async (value) => {
+					this.frontmatterSetting.linkType = value as 'WikiLink' | 'Normal';
+				},
+			},
+		});
 	}
 
 	private addOverwriteSetting(containerEl: HTMLElement): void {
-		new Setting(containerEl)
-			.setName('Overwrite')
-			.setClass('control-setting')
-			.addToggle((toggle) => {
-				toggle.setValue(this.frontmatterSetting.overwrite).onChange(async (value) => {
+		CommonSetting.create(containerEl, {
+			name: 'Overwrite',
+			className: 'control-setting',
+			toggle: {
+				value: this.frontmatterSetting.overwrite,
+				onChange: async (value) => {
 					this.frontmatterSetting.overwrite = value;
-				});
-			});
+				},
+			},
+		});
 	}
 
 	private addCountSetting(containerEl: HTMLElement): void {
-		new Setting(containerEl)
-			.setName('Count')
-			.setClass('control-setting')
-			.addText((text) => {
-				text
-					.setPlaceholder('Enter count')
-					.setValue(this.frontmatterSetting.count.toString())
-					.onChange(async (value) => {
-						const count = parseInt(value, 10);
-						if (!isNaN(count) && count > 0) {
-							this.frontmatterSetting.count = count;
-						}
-					});
-			});
+		CommonSetting.create(containerEl, {
+			name: 'Count',
+			className: 'control-setting',
+			textInput: {
+				placeholder: 'Enter count',
+				value: this.frontmatterSetting.count.toString(),
+				onChange: async (value) => {
+					const count = parseInt(value, 10);
+					if (!isNaN(count) && count > 0) {
+						this.frontmatterSetting.count = count;
+					}
+				},
+			},
+		});
 	}
 
 	private addOptionsSection(containerEl: HTMLElement): void {
 		// Only add options section if showOptions is enabled
 		if (!this.options.showOptions) return;
 
-		// Options section header
-		const optionsHeaderSetting = new Setting(containerEl)
-			.setName('Available Options')
-			.setHeading()
-			.setClass('options-header');
-
-		optionsHeaderSetting.setDesc(
-			'Enter values that the AI can use as suggestions, separated by commas.'
-		);
-
-		optionsHeaderSetting.addButton((button) => {
-			button
-				.setIcon('folder')
-				.setClass('browse-button')
-				.setButtonText('Browse Files')
-				.onClick(() => {
+		// Options section header with Browse Files button
+		CommonSetting.create(containerEl, {
+			name: 'Available Options',
+			desc: 'Enter values that the AI can use as suggestions, separated by commas.',
+			className: 'options-header',
+			heading: true,
+			button: {
+				icon: 'folder',
+				text: 'Browse Files',
+				onClick: () => {
 					const wikiLinkSelector = new WikiLinkSelector(this.plugin.app);
 					wikiLinkSelector.openFileSelector((selectedLink) => {
 						// Format the link based on current linkType
@@ -142,7 +142,8 @@ export class ConfigurableSettingModal extends Modal {
 						this.frontmatterSetting.refs = [...currentOptions, formattedLink];
 						this.updateOptionsTextarea();
 					});
-				});
+				},
+			},
 		});
 
 		// Only add text area if showTextArea is enabled
@@ -186,14 +187,12 @@ export class ConfigurableSettingModal extends Modal {
 
 	private addCustomQuerySection(containerEl: HTMLElement): void {
 		// Custom Query section header
-		const customQueryHeaderSetting = new Setting(containerEl)
-			.setName('Custom Classification Rules')
-			.setHeading()
-			.setClass('custom-query-header');
-
-		customQueryHeaderSetting.setDesc(
-			'Add custom instructions to provide more context for classification.'
-		);
+		CommonSetting.create(containerEl, {
+			name: 'Custom Classification Rules',
+			desc: 'Add custom instructions to provide more context for classification.',
+			className: 'custom-query-header',
+			heading: true,
+		});
 
 		// Create a container for the textarea
 		const textareaContainer = containerEl.createDiv({ cls: 'textarea-container' });
@@ -216,22 +215,26 @@ export class ConfigurableSettingModal extends Modal {
 
 	private addActionButtons(containerEl: HTMLElement): void {
 		const buttonContainer = containerEl.createDiv({ cls: 'modal-buttons' });
+		buttonContainer.style.display = 'flex';
+		buttonContainer.style.justifyContent = 'flex-end';
+		buttonContainer.style.gap = '8px';
+		buttonContainer.style.marginTop = '20px';
 
-		new Setting(buttonContainer)
-			.addButton((button) => {
-				button
-					.setButtonText('Save')
-					.setCta()
-					.onClick(async () => {
-						await this.plugin.saveSettings();
-						this.close();
-					});
-			})
-			.addButton((button) => {
-				button.setButtonText('Cancel').onClick(() => {
-					this.close();
-				});
-			});
+		new CommonButton(buttonContainer, {
+			text: 'Cancel',
+			onClick: () => {
+				this.close();
+			},
+		});
+
+		new CommonButton(buttonContainer, {
+			text: 'Save',
+			cta: true,
+			onClick: async () => {
+				await this.plugin.saveSettings();
+				this.close();
+			},
+		});
 	}
 
 	onClose() {

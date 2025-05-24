@@ -23,6 +23,7 @@ interface ModelConfig {
 export class AddModelModal extends Modal {
 	private plugin: AutoClassifierPlugin;
 	private onSave: (providerName: string, model: ModelConfig) => void;
+	private existingModel?: { model: string; displayName: string; provider: string };
 
 	// Form state
 	private selectedProvider: string = '';
@@ -31,15 +32,24 @@ export class AddModelModal extends Modal {
 
 	constructor(
 		plugin: AutoClassifierPlugin,
-		onSave: (providerName: string, model: ModelConfig) => void
+		onSave: (providerName: string, model: ModelConfig) => void,
+		existingModel?: { model: string; displayName: string; provider: string }
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.onSave = onSave;
+		this.existingModel = existingModel;
 
-		// Set default provider
-		if (this.plugin.settings.providers.length > 0) {
-			this.selectedProvider = this.plugin.settings.providers[0].name;
+		// Set initial values
+		if (existingModel) {
+			this.selectedProvider = existingModel.provider;
+			this.displayName = existingModel.displayName;
+			this.modelId = existingModel.model;
+		} else {
+			// Set default provider for new models
+			if (this.plugin.settings.providers.length > 0) {
+				this.selectedProvider = this.plugin.settings.providers[0].name;
+			}
 		}
 	}
 
@@ -48,13 +58,16 @@ export class AddModelModal extends Modal {
 		contentEl.empty();
 
 		// Modal title
-		contentEl.createEl('h2', { text: 'Add Model' });
+		const title = this.existingModel ? 'Edit Model' : 'Add Model';
+		contentEl.createEl('h2', { text: title });
 
 		// Provider selection
 		this.addProviderSetting(contentEl);
 
-		// Popular models section
-		this.addPopularModelsSection(contentEl);
+		// Popular models section (only show for new models)
+		if (!this.existingModel) {
+			this.addPopularModelsSection(contentEl);
+		}
 
 		// Model form
 		this.addModelForm(contentEl);

@@ -44,12 +44,10 @@ export class ProviderModal extends Modal {
 				name: '',
 				apiKey: '',
 				baseUrl: '',
-				endpoint: '',
 				models: [],
 				lastTested: null,
 				testResult: null,
 				temperature: 0.7,
-				selectedModel: '',
 				customPromptTemplate: undefined,
 			};
 		}
@@ -122,7 +120,6 @@ export class ProviderModal extends Modal {
 				value: this.providerConfig.baseUrl,
 				onChange: (value) => {
 					this.providerConfig.baseUrl = value;
-					this.providerConfig.endpoint = '';
 				},
 			},
 		});
@@ -179,12 +176,6 @@ export class ProviderModal extends Modal {
 		this.providerConfig.name = preset.name;
 		this.providerConfig.baseUrl = preset.baseUrl;
 		// Keep existing API key - don't overwrite user's key
-		this.providerConfig.endpoint = '';
-		this.providerConfig.models = preset.popularModels.map((model) => ({
-			name: model.id,
-			displayName: model.name,
-		}));
-		this.providerConfig.selectedModel = preset.popularModels[0]?.id || '';
 
 		// Update the form to reflect new data
 		this.updateForm();

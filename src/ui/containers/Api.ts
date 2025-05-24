@@ -1,268 +1,347 @@
-import { Setting, TextAreaComponent } from 'obsidian';
 import { ProviderConfig } from 'utils/interface';
 
-import { validateAPIKey } from 'api';
 import AutoClassifierPlugin from 'main';
-import { getDefaultEndpoint } from 'utils';
-import { DEFAULT_TASK_TEMPLATE } from 'utils/templates';
+import { CommonSetting } from 'ui/components/common/CommonSetting';
+import { AddModelModal } from 'ui/modals/ModelModal';
+import { ProviderModal } from 'ui/modals/ProviderModal';
+
+interface ModelConfig {
+	name: string;
+	displayName?: string;
+}
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;
+	private containerEl: HTMLElement | null = null;
+
 	constructor(plugin: AutoClassifierPlugin) {
 		this.plugin = plugin;
 	}
 
 	display(containerEl: HTMLElement): void {
+		this.containerEl = containerEl;
 		containerEl.empty();
-		// Add API section header with description
-		const apiHeader = containerEl.createEl('div', { cls: 'api-section-header' });
-		apiHeader.createEl('h2', { text: 'API Configuration' });
 
-		this.addAPIProviderSetting(containerEl);
-		this.addAPIKeySetting(containerEl);
-		const selectedProvider = this.getSelectedProvider();
-		this.addModelSetting(containerEl, selectedProvider);
+		// Add API section header
+		containerEl.createEl('h2', { text: 'API Configuration' });
 
-		if (selectedProvider.name === 'Custom') {
-			this.addBaseURLSetting(containerEl, selectedProvider);
-		}
-		this.addEndpointSetting(containerEl, selectedProvider);
-		this.addCustomPromptSetting(containerEl, selectedProvider);
+		// Provider section
+		this.addProviderSection(containerEl);
+
+		// Model section
+		this.addModelSection(containerEl);
 	}
 
-	private addAPIProviderSetting(containerEl: HTMLElement): void {
-		new Setting(containerEl)
-			.setName('API provider')
-			.setDesc('Select the API provider')
-			.addDropdown((dropdown) => {
-				this.plugin.settings.providers.forEach((provider) => {
-					dropdown.addOption(provider.name, provider.name);
-				});
-				dropdown.setValue(this.plugin.settings.selectedProvider).onChange(async (value) => {
-					// Store the current model selection for the previous provider
-					const previousProvider = this.getSelectedProvider();
-					previousProvider.selectedModel = this.plugin.settings.selectedModel;
+	private addProviderSection(containerEl: HTMLElement): void {
+		const providerSection = containerEl.createEl('div', { cls: 'provider-section' });
 
-					// Update the selected provider
-					this.plugin.settings.selectedProvider = value;
+		// Section header
+		providerSection.createEl('h3', { text: 'Providers' });
 
-					// Get the new provider
-					const newProvider = this.plugin.settings.providers.find((p) => p.name === value);
-					if (newProvider) {
-						// Use the stored model if available, otherwise use the first model
-						if (newProvider.selectedModel) {
-							this.plugin.settings.selectedModel = newProvider.selectedModel;
-						} else if (newProvider.models.length > 0) {
-							this.plugin.settings.selectedModel = newProvider.models[0].name;
-							newProvider.selectedModel = newProvider.models[0].name;
-						}
-					}
+		// Provider list
+		this.renderProviderList(providerSection);
 
-					await this.plugin.saveSettings();
-					this.display(containerEl);
-				});
-			});
-	}
-	private addEndpointSetting(containerEl: HTMLElement, selectedProvider: ProviderConfig): void {
-		const endpointSetting = new Setting(containerEl)
-			.setName('Endpoint')
-			.setDesc('Enter the endpoint for your API')
-			.addText((text) => {
-				const defaultEndpoint = getDefaultEndpoint(selectedProvider.name);
-				return text
-					.setPlaceholder(defaultEndpoint)
-					.setValue(selectedProvider?.endpoint || '')
-					.onChange(async (value) => {
-						selectedProvider.endpoint = value;
-						await this.plugin.saveSettings();
-					});
-			});
-
-		// Add example for custom provider
-		if (selectedProvider.name === 'Custom') {
-			const endpointInfo = endpointSetting.descEl.createEl('div', { cls: 'endpoint-info' });
-			endpointInfo.createEl('small', {
-				text: 'Example: /v1/chat/completions or /api/generate',
-				cls: 'endpoint-example',
-			});
-		}
-	}
-
-	private addAPIKeySetting(containerEl: HTMLElement): void {
-		const selectedProvider = this.getSelectedProvider();
-
-		const apiKeySetting = new Setting(containerEl)
-			.setName('API key')
-			.setDesc('Enter your API key')
-			.setClass('api-key-setting')
-			.addText((text) => {
-				const textComponent = text
-					.setPlaceholder('Enter API key')
-					.setValue(selectedProvider.apiKey)
-					.onChange(async (value) => {
-						selectedProvider.apiKey = value;
-						await this.plugin.saveSettings();
-					});
-
-				// Make it a password field
-				textComponent.inputEl.type = 'password';
-
-				// Add show/hide toggle
-				const toggleBtn = textComponent.inputEl.parentElement?.createEl('button', {
-					cls: 'show-hide-api-key',
-					text: 'Show',
-				});
-
-				if (toggleBtn) {
-					toggleBtn.addEventListener('click', (e) => {
-						e.preventDefault();
-						if (textComponent.inputEl.type === 'password') {
-							textComponent.inputEl.type = 'text';
-							toggleBtn.textContent = 'Hide';
-						} else {
-							textComponent.inputEl.type = 'password';
-							toggleBtn.textContent = 'Show';
-						}
-					});
-				}
-
-				return textComponent;
-			})
-			.addButton((button) =>
-				button.setButtonText('Test').onClick(async () => {
-					button.setButtonText('Testing...');
-					button.setDisabled(true);
-
-					const testResult = await validateAPIKey(selectedProvider);
-
-					apiKeySetting.setDesc(testResult.message);
-					apiKeySetting.descEl.classList.add(
-						testResult.success ? 'api-test-success' : 'api-test-error'
-					);
-
-					button.setButtonText('Test');
-					button.setDisabled(false);
-
-					await this.plugin.saveSettings();
-				})
-			);
-	}
-
-	private addModelSetting(containerEl: HTMLElement, selectedProvider: ProviderConfig): void {
-		const setting = new Setting(containerEl).setName('Model').setDesc('Select the model to use');
-
-		if (selectedProvider.name === 'Custom') {
-			setting.addText((text) => {
-				const currentModel = selectedProvider.models[0]?.name;
-				return text
-					.setPlaceholder('Enter model name')
-					.setValue(currentModel)
-					.onChange(async (value) => {
-						this.plugin.settings.selectedModel = value;
-						selectedProvider.selectedModel = value;
-
-						// Ensure there's at least one model in the array
-						if (selectedProvider.models.length === 0) {
-							selectedProvider.models.push({ name: value });
-						} else {
-							selectedProvider.models[0].name = value;
-						}
-
-						await this.plugin.saveSettings();
-					});
-			});
-
-			// Add model info for custom provider
-			const modelInfo = setting.descEl.createEl('div', { cls: 'model-info' });
-			modelInfo.createEl('small', {
-				text: 'Example: gpt-3.5-turbo, llama2, claude-3-opus-20240229',
-				cls: 'model-example',
-			});
-		} else {
-			setting.addDropdown((dropdown) => {
-				selectedProvider.models.forEach((model) => {
-					dropdown.addOption(model.name, model.name);
-				});
-				dropdown.setValue(this.plugin.settings.selectedModel).onChange(async (value) => {
-					this.plugin.settings.selectedModel = value;
-					selectedProvider.selectedModel = value;
-					await this.plugin.saveSettings();
-				});
-			});
-		}
-	}
-
-	private addBaseURLSetting(containerEl: HTMLElement, selectedProvider: ProviderConfig): void {
-		const baseUrlSetting = new Setting(containerEl)
-			.setName('Base URL')
-			.setDesc('Enter the base URL for your custom API endpoint')
-			.addText((text) =>
-				text
-					.setPlaceholder('https://api.example.com')
-					.setValue(selectedProvider.baseUrl || '')
-					.onChange(async (value) => {
-						selectedProvider.baseUrl = value;
-						await this.plugin.saveSettings();
-					})
-			);
-
-		// Add base URL info
-		const baseUrlInfo = baseUrlSetting.descEl.createEl('div', { cls: 'baseurl-info' });
-		baseUrlInfo.createEl('small', {
-			text: 'Examples: https://api.openai.com, http://localhost:1234, https://api.anthropic.com',
-			cls: 'baseurl-example',
+		// Add provider button
+		CommonSetting.create(providerSection, {
+			name: '',
+			button: {
+				text: '+ Add provider',
+				onClick: () => this.openAddProviderModal(),
+			},
 		});
 	}
 
-	private addCustomPromptSetting(containerEl: HTMLElement, selectedProvider: ProviderConfig): void {
-		const currentTemplate = selectedProvider.customPromptTemplate ?? DEFAULT_TASK_TEMPLATE;
+	private addModelSection(containerEl: HTMLElement): void {
+		const modelSection = containerEl.createEl('div', { cls: 'model-section' });
 
-		const customPromptSetting = new Setting(containerEl)
-			.setName('Classification Rules')
-			.setDesc('Customize the prompt template for classification requests')
-			.addExtraButton((button) =>
-				button
-					.setIcon('reset')
-					.setTooltip('Reset to default template')
-					.onClick(async () => {
-						// Use default template instead of undefined
-						selectedProvider.customPromptTemplate = DEFAULT_TASK_TEMPLATE;
-						await this.plugin.saveSettings();
+		// Section header
+		modelSection.createEl('h3', { text: 'Models' });
 
-						// Update the text area with the default template
-						if (textAreaComponent) {
-							textAreaComponent.setValue(DEFAULT_TASK_TEMPLATE);
-						} else {
-							this.display(containerEl);
-						}
-					})
-			);
+		// Model list
+		this.renderModelList(modelSection);
 
-		// Create a container for the textarea below the setting
-		const textAreaContainer = containerEl.createDiv({ cls: 'custom-prompt-container' });
-		textAreaContainer.style.width = '100%';
-		textAreaContainer.style.marginTop = '8px';
-		textAreaContainer.style.marginBottom = '16px';
-
-		// Create the TextAreaComponent in the dedicated container
-		const textAreaComponent = new TextAreaComponent(textAreaContainer)
-			.setPlaceholder(DEFAULT_TASK_TEMPLATE)
-			.setValue(currentTemplate)
-			.onChange(async (value) => {
-				selectedProvider.customPromptTemplate = value;
-				await this.plugin.saveSettings();
-			});
-
-		// Set the text area dimensions
-		textAreaComponent.inputEl.rows = 10;
-		textAreaComponent.inputEl.style.width = '100%';
+		// Add model button
+		CommonSetting.create(modelSection, {
+			name: '',
+			button: {
+				text: '+ Add model',
+				onClick: () => this.openAddModelModal(),
+			},
+		});
 	}
 
-	private getSelectedProvider(): ProviderConfig {
-		return (
-			this.plugin.settings.providers.find(
-				(provider) => provider.name === this.plugin.settings.selectedProvider
-			) || this.plugin.settings.providers[0]
+	private renderProviderList(containerEl: HTMLElement): void {
+		this.plugin.settings.providers.forEach((provider, index) => {
+			const buttons = [
+				{
+					icon: 'pencil',
+					tooltip: 'Edit',
+					onClick: () => this.openEditProviderModal(provider),
+				},
+			];
+
+			CommonSetting.create(containerEl, {
+				name: provider.name,
+				buttons: buttons,
+			});
+		});
+	}
+
+	private renderModelList(containerEl: HTMLElement): void {
+		const allModels: Array<{
+			model: string;
+			displayName: string;
+			provider: string;
+			isActive: boolean;
+		}> = [];
+
+		this.plugin.settings.providers.forEach((provider) => {
+			provider.models.forEach((model) => {
+				allModels.push({
+					model: model.name,
+					displayName: model.displayName || model.name,
+					provider: provider.name,
+					isActive: this.plugin.settings.selectedModel === model.name,
+				});
+			});
+		});
+
+		allModels.forEach((modelInfo, index) => {
+			CommonSetting.create(containerEl, {
+				name: modelInfo.displayName,
+				desc: modelInfo.provider,
+				toggle: {
+					value: modelInfo.isActive,
+					onChange: async (value) => {
+						if (value) {
+							// Set this model and provider as active
+							this.plugin.settings.selectedModel = modelInfo.model;
+							this.plugin.settings.selectedProvider = modelInfo.provider;
+
+							await this.plugin.saveSettings();
+
+							// Re-render to update all toggles
+							this.rerenderModelSection();
+						}
+					},
+				},
+				buttons: [
+					{
+						icon: 'pencil',
+						tooltip: 'Edit',
+						onClick: () => {
+							this.openEditModelModal(modelInfo);
+						},
+					},
+
+					{
+						icon: 'trash',
+						tooltip: 'Delete',
+						onClick: () => this.deleteModel(modelInfo.model, modelInfo.provider),
+					},
+				],
+			});
+		});
+	}
+
+	private rerenderModelSection(): void {
+		if (!this.containerEl) return;
+
+		const modelSection = this.containerEl.querySelector('.model-section');
+		if (modelSection) {
+			const modelSectionEl = modelSection as HTMLElement;
+			modelSectionEl.empty();
+
+			// Re-add section header
+			modelSectionEl.createEl('h3', { text: 'Models' });
+
+			// Re-render model list
+			this.renderModelList(modelSectionEl);
+
+			// Re-add add model button
+			CommonSetting.create(modelSectionEl, {
+				name: '',
+				button: {
+					text: '+ Add model',
+					onClick: () => this.openAddModelModal(),
+				},
+			});
+		}
+	}
+
+	private openAddProviderModal(): void {
+		const modal = new ProviderModal(this.plugin, (provider: ProviderConfig) => {
+			this.addProvider(provider);
+		});
+		modal.open();
+	}
+
+	private openEditProviderModal(provider: ProviderConfig): void {
+		const modal = new ProviderModal(
+			this.plugin,
+			(updatedProvider: ProviderConfig) => {
+				this.updateProvider(provider, updatedProvider);
+			},
+			provider
 		);
+		modal.open();
+	}
+
+	private openAddModelModal(): void {
+		const modal = new AddModelModal(this.plugin, (providerName: string, model: ModelConfig) => {
+			this.addModel(providerName, model);
+		});
+		modal.open();
+	}
+
+	private openEditModelModal(modelInfo: {
+		model: string;
+		displayName: string;
+		provider: string;
+	}): void {
+		const modal = new AddModelModal(
+			this.plugin,
+			(providerName: string, model: ModelConfig) => {
+				this.updateModel(modelInfo, providerName, model);
+			},
+			modelInfo
+		);
+		modal.open();
+	}
+
+	private async addProvider(provider: ProviderConfig): Promise<void> {
+		// Check for duplicate names
+		const existingProvider = this.plugin.settings.providers.find((p) => p.name === provider.name);
+		if (existingProvider) {
+			let counter = 1;
+			let newName = `${provider.name} (${counter})`;
+			while (this.plugin.settings.providers.find((p) => p.name === newName)) {
+				counter++;
+				newName = `${provider.name} (${counter})`;
+			}
+			provider.name = newName;
+		}
+
+		this.plugin.settings.providers.push(provider);
+		await this.plugin.saveSettings();
+
+		if (this.containerEl) {
+			this.display(this.containerEl);
+		}
+	}
+
+	private async updateProvider(
+		originalProvider: ProviderConfig,
+		updatedProvider: ProviderConfig
+	): Promise<void> {
+		const index = this.plugin.settings.providers.findIndex((p) => p === originalProvider);
+		if (index !== -1) {
+			this.plugin.settings.providers[index] = updatedProvider;
+			await this.plugin.saveSettings();
+
+			if (this.containerEl) {
+				this.display(this.containerEl);
+			}
+		}
+	}
+
+	private async deleteModel(modelName: string, providerName: string): Promise<void> {
+		const provider = this.plugin.settings.providers.find((p) => p.name === providerName);
+		if (!provider) return;
+
+		// Remove the model from the provider
+		provider.models = provider.models.filter((m) => m.name !== modelName);
+
+		// If this was the selected model, select another one
+		if (this.plugin.settings.selectedModel === modelName) {
+			// Find the first available model from any provider
+			let newSelectedModel = '';
+			let newSelectedProvider = '';
+			for (const p of this.plugin.settings.providers) {
+				if (p.models.length > 0) {
+					newSelectedModel = p.models[0].name;
+					newSelectedProvider = p.name;
+					break;
+				}
+			}
+			this.plugin.settings.selectedModel = newSelectedModel;
+			this.plugin.settings.selectedProvider = newSelectedProvider;
+		}
+
+		await this.plugin.saveSettings();
+		this.rerenderModelSection();
+	}
+
+	private async addModel(providerName: string, model: ModelConfig): Promise<void> {
+		const provider = this.plugin.settings.providers.find((p) => p.name === providerName);
+		if (!provider) return;
+
+		// Check for duplicate model names within the provider
+		const existingModel = provider.models.find((m) => m.name === model.name);
+		if (existingModel) {
+			let counter = 1;
+			let newName = `${model.name} (${counter})`;
+			while (provider.models.find((m) => m.name === newName)) {
+				counter++;
+				newName = `${model.name} (${counter})`;
+			}
+			model.name = newName;
+		}
+
+		// Add the model to the provider
+		provider.models.push(model);
+
+		await this.plugin.saveSettings();
+		this.rerenderModelSection();
+	}
+
+	private async updateModel(
+		originalModel: { model: string; displayName: string; provider: string },
+		providerName: string,
+		updatedModel: ModelConfig
+	): Promise<void> {
+		// Find the original provider and model
+		const originalProvider = this.plugin.settings.providers.find(
+			(p) => p.name === originalModel.provider
+		);
+		if (!originalProvider) return;
+
+		const modelIndex = originalProvider.models.findIndex((m) => m.name === originalModel.model);
+		if (modelIndex === -1) return;
+
+		// If provider changed, remove from old provider and add to new
+		if (originalModel.provider !== providerName) {
+			// Remove from original provider
+			originalProvider.models.splice(modelIndex, 1);
+
+			// Add to new provider
+			const newProvider = this.plugin.settings.providers.find((p) => p.name === providerName);
+			if (newProvider) {
+				// Check for duplicate model names in new provider
+				const existingModel = newProvider.models.find((m) => m.name === updatedModel.name);
+				if (existingModel) {
+					let counter = 1;
+					let newName = `${updatedModel.name} (${counter})`;
+					while (newProvider.models.find((m) => m.name === newName)) {
+						counter++;
+						newName = `${updatedModel.name} (${counter})`;
+					}
+					updatedModel.name = newName;
+				}
+				newProvider.models.push(updatedModel);
+			}
+		} else {
+			// Same provider, just update the model
+			originalProvider.models[modelIndex] = updatedModel;
+		}
+
+		// Update selected model if this was the selected one
+		if (this.plugin.settings.selectedModel === originalModel.model) {
+			this.plugin.settings.selectedModel = updatedModel.name;
+			this.plugin.settings.selectedProvider = providerName;
+		}
+
+		await this.plugin.saveSettings();
+		this.rerenderModelSection();
 	}
 }
