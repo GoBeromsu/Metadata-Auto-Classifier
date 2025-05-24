@@ -1,7 +1,7 @@
 import { getHeaders, getRequestParam } from 'api';
 import { ApiError } from 'error/ApiError';
 import { requestUrl, RequestUrlParam } from 'obsidian';
-import { LMSTUDIO_STRUCTURE_OUTPUT } from 'utils/constant';
+import { API_CONSTANTS, LMSTUDIO_STRUCTURE_OUTPUT } from 'utils/constant';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 
 export class Custom implements APIProvider {
@@ -37,25 +37,24 @@ export class Custom implements APIProvider {
 		headers: Record<string, string>,
 		data: object
 	): Promise<any> {
-		const url = `${provider.baseUrl}${provider.endpoint}`;
+		const url = provider.baseUrl;
 		const requestParam: RequestUrlParam = getRequestParam(url, headers, JSON.stringify(data));
-		console.log('Custom API Request:', JSON.stringify(data, null, 2));
 
 		try {
 			const response = await requestUrl(requestParam);
 			if (response.status !== 200) {
-				console.error('API Error Response:', response.text);
 				throw new ApiError(`API request failed with status ${response.status}: ${response.text}`);
 			}
 			return response.json;
 		} catch (error) {
-			console.error('API Request Error:', error);
-			throw error;
+			if (error instanceof ApiError) {
+				throw error;
+			}
+			throw new ApiError(`Failed to make request to Custom API: ${error.message}`);
 		}
 	}
 
 	private processApiResponse(responseData: any): StructuredOutput {
-		// Handle different response formats from various models
 		const messageContent = responseData.choices[0].message.content;
 
 		// Some models might return parsed JSON directly
@@ -70,8 +69,8 @@ export class Custom implements APIProvider {
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
 		await this.callAPI(
-			'You are a test system. You must respond with valid JSON.',
-			`Return a JSON object containing {"output": [], "reliability": 0}`,
+			API_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
+			API_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
 			provider,
 			provider.models[0]?.name
 		);

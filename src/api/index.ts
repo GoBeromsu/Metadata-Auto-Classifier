@@ -1,7 +1,7 @@
 import { ErrorHandler } from 'error/ErrorHandler';
 import { RequestUrlParam } from 'obsidian';
-import { AIProvider } from 'utils/constant';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
+import { Anthropic } from './Anthropic';
 import { Custom } from './Custom';
 import { OpenAI } from './OpenAI';
 import { OpenRouter } from './OpenRouter';
@@ -13,12 +13,14 @@ interface ApiTestResult {
 
 export const getProvider = (providerName: string): APIProvider => {
 	switch (providerName) {
-		case AIProvider.OpenAI:
+		case 'OpenAI':
 			return new OpenAI();
-		case AIProvider.Custom:
-			return new Custom();
-		case AIProvider.OpenRouter:
+		case 'Anthropic':
+			return new Anthropic();
+		case 'OpenRouter':
 			return new OpenRouter();
+		case 'Custom':
+			return new Custom();
 		default:
 			throw new Error(`Unknown AI provider: ${providerName}`);
 	}
@@ -86,8 +88,3 @@ export const getRequestParam = (
 		body,
 	};
 };
-
-interface Message {
-	role: 'system' | 'user' | 'assistant';
-	content: string;
-}

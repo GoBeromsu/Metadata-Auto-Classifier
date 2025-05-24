@@ -1,12 +1,11 @@
+import { processAPIRequest } from 'api';
 import { Notice, Plugin, TFile } from 'obsidian';
-import { DEFAULT_SETTINGS } from 'utils/constant';
+import { DEFAULT_TAG_SETTING, getDefaultProviders } from 'utils/constant';
 import { FrontmatterTemplate, ProviderConfig } from 'utils/interface';
 import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
-
-import { processAPIRequest } from 'api';
-import { AutoClassifierSettings, AutoClassifierSettingTab, SelectFrontmatterModal } from './ui';
+import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
+import { SelectFrontmatterModal } from './ui/modals/FrontmatterSelectorModal';
 import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from './utils/templates';
-import { mergeDefaults } from 'utils';
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
@@ -139,13 +138,11 @@ export default class AutoClassifierPlugin extends Plugin {
 			selectedProvider.customPromptTemplate
 		);
 
-		const selectedModel = selectedProvider.selectedModel || this.settings.selectedModel;
-
 		const apiResponse = await processAPIRequest(
 			DEFAULT_SYSTEM_ROLE,
 			promptTemplate,
 			selectedProvider,
-			selectedModel
+			this.settings.selectedModel
 		);
 
 		if (apiResponse && apiResponse.reliability > 0.2) {
@@ -177,14 +174,15 @@ export default class AutoClassifierPlugin extends Plugin {
 	};
 
 	async loadSettings() {
-		this.settings = (await this.loadData()) || {};
+		const loadedData = (await this.loadData()) || {};
 
-		// Ensure each provider has a selectedModel property
-		this.settings.providers.forEach((provider) => {
-			if (!provider.selectedModel && provider.models.length > 0) {
-				provider.selectedModel = provider.models[0].name;
-			}
-		});
+		// Use simple assignment instead of mergeDefaults to preserve user data
+		this.settings = {
+			providers: loadedData.providers || getDefaultProviders(),
+			selectedProvider: loadedData.selectedProvider || '',
+			selectedModel: loadedData.selectedModel || '',
+			frontmatter: loadedData.frontmatter || [DEFAULT_TAG_SETTING],
+		};
 
 		await this.saveSettings();
 	}
@@ -193,17 +191,15 @@ export default class AutoClassifierPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	// erase key validation
+	// Get selected provider based on selectedProvider setting
 	private getSelectedProvider(): ProviderConfig | undefined {
-		const provider = this.settings.providers.find((p) => p.name === this.settings.selectedProvider);
-
-		// If the provider exists but doesn't have a selectedModel, set it
-		if (provider && !provider.selectedModel && provider.models.length > 0) {
-			provider.selectedModel = provider.models[0].name;
-			this.saveSettings();
+		if (!this.settings.selectedProvider) {
+			return undefined;
 		}
 
-		return provider;
+		return this.settings.providers.find(
+			(provider) => provider.name === this.settings.selectedProvider
+		);
 	}
 
 	private getFrontmatterById(id: number) {

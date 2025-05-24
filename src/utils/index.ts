@@ -1,19 +1,7 @@
-import { AIProvider, CUSTOM_PROVIDER, OPENAI_PROVIDER } from './constant';
 import { ProviderConfig } from './interface';
 
 export const generateId = (): number => {
 	return Date.now();
-};
-
-export const getDefaultEndpoint = (providerName: string): string => {
-	switch (providerName) {
-		case AIProvider.OpenAI:
-			return OPENAI_PROVIDER.endpoint;
-		case AIProvider.Custom:
-			return CUSTOM_PROVIDER.endpoint;
-		default:
-			return CUSTOM_PROVIDER.endpoint;
-	}
 };
 
 // Define list of special fields that need custom handling
@@ -34,19 +22,14 @@ const mergeProvider = (
 	// Preserve user API key
 	const apiKey = userProvider.apiKey || '';
 
-	// For Custom provider, preserve user-defined URL and endpoint
 	const baseUrl =
-		defaultProvider.name === AIProvider.Custom ? userProvider.baseUrl : defaultProvider.baseUrl;
-
-	const endpoint =
-		defaultProvider.name === AIProvider.Custom ? userProvider.endpoint : defaultProvider.endpoint;
+		defaultProvider.name === 'Custom' ? userProvider.baseUrl : defaultProvider.baseUrl;
 
 	// Update with default values while maintaining user data
 	return {
 		...defaultProvider,
 		apiKey,
 		baseUrl,
-		endpoint,
 	};
 };
 

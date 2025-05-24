@@ -13,17 +13,16 @@ export interface ProviderConfig {
 	name: string;
 	apiKey: string;
 	baseUrl: string;
-	endpoint: string;
 	models: Model[];
 	lastTested: Date | null;
 	testResult: boolean | null;
 	temperature?: number;
-	selectedModel?: string;
 	customPromptTemplate?: string;
 }
 
 interface Model {
 	name: string;
+	displayName?: string;
 }
 export interface FrontMatter {
 	[key: string]: string[];
@@ -55,4 +54,9 @@ export interface APIProvider {
 	): Promise<StructuredOutput>;
 
 	verifyConnection(provider: ProviderConfig): Promise<boolean>;
+}
+
+export interface ModelInfo {
+	name: string;
+	displayName?: string;
 }
