@@ -177,8 +177,7 @@ export default class AutoClassifierPlugin extends Plugin {
 	};
 
 	async loadSettings() {
-		const loadedData = (await this.loadData()) || {};
-		this.settings = mergeDefaults(DEFAULT_SETTINGS, loadedData);
+		this.settings = (await this.loadData()) || {};
 
 		// Ensure each provider has a selectedModel property
 		this.settings.providers.forEach((provider) => {
