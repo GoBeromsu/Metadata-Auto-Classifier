@@ -33,7 +33,7 @@ export class OpenAI implements APIProvider {
 		return this.processApiResponse(response);
 	}
 
-	private async makeApiRequest(
+	async makeApiRequest(
 		provider: ProviderConfig,
 		headers: Record<string, string>,
 		data: object
@@ -55,7 +55,7 @@ export class OpenAI implements APIProvider {
 		}
 	}
 
-	private processApiResponse(responseData: any): StructuredOutput {
+	processApiResponse(responseData: any): StructuredOutput {
 		try {
 			// Handle different response formats from various models
 			const messageContent = responseData.choices[0].message.content;

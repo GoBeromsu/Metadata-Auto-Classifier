@@ -35,7 +35,7 @@ export class OpenRouter implements APIProvider {
 		return this.processApiResponse(response);
 	}
 
-	private async makeApiRequest(
+	async makeApiRequest(
 		provider: ProviderConfig,
 		headers: Record<string, string>,
 		data: object
@@ -57,7 +57,7 @@ export class OpenRouter implements APIProvider {
 		}
 	}
 
-	private processApiResponse(responseData: any): StructuredOutput {
+	processApiResponse(responseData: any): StructuredOutput {
 		try {
 			// Handle OpenRouter's response format
 			if (responseData.choices && responseData.choices.length > 0) {

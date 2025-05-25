@@ -32,7 +32,7 @@ export class Gemini implements APIProvider {
 		return this.processApiResponse(response);
 	}
 
-	private async makeApiRequest(
+	async makeApiRequest(
 		provider: ProviderConfig,
 		headers: Record<string, string>,
 		data: object
@@ -54,7 +54,7 @@ export class Gemini implements APIProvider {
 		}
 	}
 
-	private processApiResponse(responseData: any): StructuredOutput {
+	processApiResponse(responseData: any): StructuredOutput {
 		try {
 			// Handle Gemini's structured output response format
 			if (responseData.output && typeof responseData.reliability === 'number') {

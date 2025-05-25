@@ -52,6 +52,12 @@ export interface APIProvider {
 	): Promise<StructuredOutput>;
 
 	verifyConnection(provider: ProviderConfig): Promise<boolean>;
+	makeApiRequest(
+		provider: ProviderConfig,
+		headers: Record<string, string>,
+		data: object
+	): Promise<any>;
+	processApiResponse(responseData: any): StructuredOutput;
 }
 
 export interface ModelInfo {

@@ -37,7 +37,7 @@ export class Anthropic implements APIProvider {
 		return this.processApiResponse(response);
 	}
 
-	private async makeApiRequest(
+	async makeApiRequest(
 		provider: ProviderConfig,
 		headers: Record<string, string>,
 		data: object
@@ -61,7 +61,7 @@ export class Anthropic implements APIProvider {
 		}
 	}
 
-	private processApiResponse(responseData: any): StructuredOutput {
+	processApiResponse(responseData: any): StructuredOutput {
 		try {
 			// Handle Anthropic's tool calling response format
 			if (responseData.content && Array.isArray(responseData.content)) {
