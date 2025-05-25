@@ -54,42 +54,35 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 			}
 		});
 
-		// Add Frontmatter button
-		CommonSetting.create(frontmattersContainer, {
+		const addButtonContainer = containerEl.createDiv({ cls: 'add-button-container' });
+		CommonSetting.create(addButtonContainer, {
 			name: '',
 			button: {
-				icon: 'plus',
-				text: 'Add frontmatter',
+				text: '+ Add frontmatter',
 				onClick: () => {
-					this.addNewFrontmatter(containerEl);
+					this.addNewFrontmatter(frontmattersContainer);
 				},
 			},
 		});
 	}
 
-	private addNewFrontmatter(containerEl: HTMLElement, linkType?: 'Normal' | 'WikiLink'): void {
+	private addNewFrontmatter(
+		frontmattersContainer: HTMLElement,
+		linkType?: 'Normal' | 'WikiLink'
+	): void {
 		const newFrontmatter = addFrontmatterSetting(linkType);
 		this.plugin.settings.frontmatter.push(newFrontmatter);
 		this.plugin.saveSettings();
 
-		// Find the frontmatters container to add the new frontmatter to
-		const frontmattersContainer = containerEl.querySelector('.frontmatters-container');
-		if (!frontmattersContainer) return;
-
 		const newFrontmatterContainer = frontmattersContainer.createDiv({
 			cls: 'frontmatter-item-container',
 		});
-
 		newFrontmatterContainer.setAttribute('data-frontmatter-id', newFrontmatter.id.toString());
 		this.frontmatterSetting.display(newFrontmatterContainer, newFrontmatter.id);
-
-		newFrontmatterContainer.scrollIntoView({ block: 'center' });
-
-		newFrontmatterContainer.addClass('newly-added');
-		setTimeout(() => newFrontmatterContainer.removeClass('newly-added'), 2000);
 	}
 }
 
 export * from './components/WikiLinkSelector';
 export * from './modals/FrontmatterEditorModal';
 export * from './modals/FrontmatterSelectorModal';
+
