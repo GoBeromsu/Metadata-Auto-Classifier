@@ -93,4 +93,3 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 export * from './components/WikiLinkSelector';
 export * from './modals/FrontmatterEditorModal';
 export * from './modals/FrontmatterSelectorModal';
-

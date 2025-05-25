@@ -231,6 +231,11 @@ export class ConfigurableSettingModal extends Modal {
 			text: 'Save',
 			cta: true,
 			onClick: async () => {
+				this.plugin.registerCommand(
+					this.frontmatterSetting.name,
+					async () => await this.plugin.processFrontmatter(this.frontmatterSetting.id)
+				);
+
 				await this.plugin.saveSettings();
 				this.close();
 			},
