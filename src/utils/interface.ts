@@ -20,7 +20,7 @@ export interface ProviderConfig {
 
 interface Model {
 	name: string;
-	displayName?: string;
+	displayName: string;
 }
 export interface FrontMatter {
 	[key: string]: string[];

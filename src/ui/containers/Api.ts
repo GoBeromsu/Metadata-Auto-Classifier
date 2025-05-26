@@ -57,28 +57,13 @@ export class Api {
 	private addCustomPromptSetting(containerEl: HTMLElement): void {
 		const currentTemplate = this.plugin.settings.classificationRule;
 
-		new Setting(containerEl)
-			.setName('Classification Rules')
-			.setDesc('Customize the prompt template for classification requests')
-			.addExtraButton((button) =>
-				button
-					.setIcon('reset')
-					.setTooltip('Reset to default template')
-					.onClick(async () => {
-						this.plugin.settings.classificationRule = DEFAULT_TASK_TEMPLATE;
-						textAreaComponent.setValue(DEFAULT_TASK_TEMPLATE);
-						await this.plugin.saveSettings();
-						this.display(containerEl);
-					})
-			);
-
-		// Create a container for the textarea below the setting
+		// Create a container for the textarea
 		const textAreaContainer = containerEl.createDiv({ cls: 'custom-prompt-container' });
 		textAreaContainer.style.width = '100%';
 		textAreaContainer.style.marginTop = '8px';
 		textAreaContainer.style.marginBottom = '16px';
 
-		// Create the TextAreaComponent in the dedicated container
+		// Create the TextAreaComponent first
 		const textAreaComponent = new TextAreaComponent(textAreaContainer)
 			.setPlaceholder(DEFAULT_TASK_TEMPLATE)
 			.setValue(currentTemplate)
@@ -90,6 +75,23 @@ export class Api {
 		// Set the text area dimensions
 		textAreaComponent.inputEl.rows = 10;
 		textAreaComponent.inputEl.style.width = '100%';
+
+		// Create the setting with reset button after textAreaComponent is declared
+		new Setting(containerEl)
+			.setName('Classification Rules')
+			.setDesc('Customize the prompt template for classification requests')
+			.addExtraButton((button) =>
+				button
+					.setIcon('reset')
+					.setTooltip('Reset to default template')
+					.onClick(async () => {
+						this.plugin.settings.classificationRule = DEFAULT_TASK_TEMPLATE;
+						textAreaComponent.setValue(DEFAULT_TASK_TEMPLATE);
+						await this.plugin.saveSettings();
+					})
+			);
+
+		containerEl.appendChild(textAreaContainer);
 	}
 
 	private addModelSection(containerEl: HTMLElement): void {
