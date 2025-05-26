@@ -151,7 +151,12 @@ export default class AutoClassifierPlugin extends Plugin {
 	}
 
 	public getSelectedProvider(): ProviderConfig {
-		return this.settings.providers.find((provider) => provider.name === this.settings.selectedProvider)!;
+		const provider = this.settings.providers.find(
+			(provider) => provider.name === this.settings.selectedProvider
+		);
+		if (!provider) throw new Error('Selected provider not found');
+
+		return provider;
 	}
 
 	private getFrontmatterById(id: number) {

@@ -32,7 +32,7 @@ export class AddModelModal extends Modal {
 
 	constructor(
 		plugin: AutoClassifierPlugin,
-		onSave: (providerName: string, model: ModelConfig) => void,
+		onSave: (model: ModelConfig) => void,
 		existingModel?: { model: string; displayName: string; provider: string }
 	) {
 		super(plugin.app);

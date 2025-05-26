@@ -216,7 +216,8 @@ export class Api {
 		const modal = new ProviderModal(
 			this.plugin,
 			(updatedProvider: ProviderConfig) => {
-				this.updateProvider(provider, updatedProvider);
+				this.plugin.settings.selectedProvider = updatedProvider.name;
+				this.plugin.saveSettings();
 			},
 			provider
 		);
@@ -224,8 +225,8 @@ export class Api {
 	}
 
 	private openAddModelModal(): void {
-		const modal = new AddModelModal(this.plugin, (providerName: string, model: ModelConfig) => {
-			this.addModel(providerName, model);
+		const modal = new AddModelModal(this.plugin, (model: ModelConfig) => {
+			this.addModel(model);
 		});
 		modal.open();
 	}
@@ -237,9 +238,7 @@ export class Api {
 	}): void {
 		const modal = new AddModelModal(
 			this.plugin,
-			(providerName: string, model: ModelConfig) => {
-				this.updateModel(modelInfo, providerName, model);
-			},
+			(model: ModelConfig) => this.updateModel(modelInfo, model),
 			modelInfo
 		);
 		modal.open();
@@ -268,70 +267,38 @@ export class Api {
 		}
 	}
 
-	private async updateProvider(
-		originalProvider: ProviderConfig,
-		updatedProvider: ProviderConfig
-	): Promise<void> {
-		const index = this.plugin.settings.providers.findIndex((p) => p === originalProvider);
-		if (index !== -1) {
-			this.plugin.settings.providers[index] = updatedProvider;
-			await this.plugin.saveSettings();
-			if (this.containerEl) {
-				this.display(this.containerEl);
-			}
-		}
-	}
+	private async deleteModel(modelName: string): Promise<void> {
+		const selectedProvider = this.plugin.getSelectedProvider();
 
-	private async deleteModel(modelName: string, providerName: string): Promise<void> {
-		const provider = this.plugin.settings.providers.find((p) => p.name === providerName);
-		if (!provider) return;
-
-		provider.models = provider.models.filter((m) => m.name !== modelName);
+		selectedProvider.models = selectedProvider.models.filter((m) => m.name !== modelName);
 
 		// Clear selection if deleted model was selected
 		if (this.plugin.settings.selectedModel === modelName) {
 			this.plugin.settings.selectedModel = '';
-			this.plugin.settings.selectedProvider = '';
 		}
 
 		await this.plugin.saveSettings();
 		this.rerenderModelSection();
 	}
 
-	private async addModel(providerName: string, model: ModelConfig): Promise<void> {
-		const provider = this.plugin.settings.providers.find((p) => p.name === providerName);
-		if (!provider) return;
-
-		provider.models.push(model);
+	private async addModel(model: ModelConfig): Promise<void> {
+		const selectedProvider = this.plugin.getSelectedProvider();
+		if (selectedProvider) {
+			selectedProvider.models.push(model);
+		}
 		await this.plugin.saveSettings();
 		this.rerenderModelSection();
 	}
 
 	private async updateModel(
 		originalModel: { model: string; displayName: string; provider: string },
-		providerName: string,
 		updatedModel: ModelConfig
 	): Promise<void> {
-		// Remove from original provider
-		const originalProvider = this.plugin.settings.providers.find(
-			(p) => p.name === originalModel.provider
-		);
-		if (originalProvider) {
-			originalProvider.models = originalProvider.models.filter(
-				(m) => m.name !== originalModel.model
-			);
-		}
+		const selectedProvider = this.plugin.getSelectedProvider();
+		selectedProvider.models.push(updatedModel);
 
-		// Add to new provider
-		const newProvider = this.plugin.settings.providers.find((p) => p.name === providerName);
-		if (newProvider) {
-			newProvider.models.push(updatedModel);
-		}
-
-		// Update selection if this was the selected model
 		if (this.plugin.settings.selectedModel === originalModel.model) {
 			this.plugin.settings.selectedModel = updatedModel.name;
-			this.plugin.settings.selectedProvider = providerName;
 		}
 
 		await this.plugin.saveSettings();
