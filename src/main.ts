@@ -4,7 +4,7 @@ import { DEFAULT_TAG_SETTING, getDefaultProviders } from 'utils/constants';
 import { FrontmatterTemplate, ProviderConfig } from 'utils/interface';
 import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
-import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from './utils/templates';
+import { DEFAULT_SYSTEM_ROLE, DEFAULT_TASK_TEMPLATE, getPromptTemplate } from './utils/templates';
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
@@ -133,17 +133,17 @@ export default class AutoClassifierPlugin extends Plugin {
 	};
 
 	async loadSettings() {
-		const loadedData = (await this.loadData()) || {};
-
-		// Use simple assignment instead of mergeDefaults to preserve user data
-		this.settings = {
-			providers: loadedData.providers || getDefaultProviders(),
-			selectedProvider: loadedData.selectedProvider || '',
-			selectedModel: loadedData.selectedModel || '',
-			frontmatter: loadedData.frontmatter || [DEFAULT_TAG_SETTING],
-		};
-
-		await this.saveSettings();
+		this.settings = Object.assign(
+			{},
+			{
+				providers: getDefaultProviders(),
+				selectedProvider: '',
+				selectedModel: '',
+				frontmatter: [DEFAULT_TAG_SETTING],
+				classificationRule: DEFAULT_TASK_TEMPLATE,
+			},
+			await this.loadData()
+		);
 	}
 
 	async saveSettings() {
