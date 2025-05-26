@@ -44,7 +44,12 @@ export class Api {
 			name: '',
 			button: {
 				text: '+ Add provider',
-				onClick: () => this.openAddProviderModal(),
+				onClick: () => {
+					const modal = new ProviderModal(this.plugin, (provider: ProviderConfig) => {
+						this.addProvider(provider);
+					});
+					modal.open();
+				},
 			},
 		});
 	}
@@ -130,21 +135,21 @@ export class Api {
 
 	private renderModelList(containerEl: HTMLElement): void {
 		this.plugin.settings.providers.forEach((provider) => {
-			provider.models.forEach((model: ModelInfo) => {
-				const isActive = this.plugin.settings.selectedModel === model.name;
-				const modelInfo = {
-					model: model.name,
-					displayName: model.displayName,
+			provider.models.forEach((config: ModelInfo) => {
+				const isActive = this.plugin.settings.selectedModel === config.name;
+				const editTarget = {
+					model: config.name,
+					displayName: config.displayName,
 					provider: provider.name,
 				};
 				CommonSetting.create(containerEl, {
-					name: model.displayName,
+					name: config.displayName,
 					desc: provider.name,
 					toggle: {
 						value: isActive,
 						onChange: async (value) => {
 							if (value) {
-								this.plugin.settings.selectedModel = model.name;
+								this.plugin.settings.selectedModel = config.name;
 								this.plugin.settings.selectedProvider = provider.name;
 
 								await this.plugin.saveSettings();
@@ -159,13 +164,18 @@ export class Api {
 							icon: 'pencil',
 							tooltip: 'Edit',
 							onClick: () => {
-								this.openEditModelModal(modelInfo);
+								const modal = new ModelModal(
+									this.plugin,
+									() => this.rerenderModelSection(),
+									editTarget
+								);
+								modal.open();
 							},
 						},
 						{
 							icon: 'trash',
 							tooltip: 'Delete',
-							onClick: () => this.deleteModel(model.name),
+							onClick: () => this.deleteModel(config.name),
 						},
 					],
 				});
@@ -198,13 +208,6 @@ export class Api {
 		}
 	}
 
-	private openAddProviderModal(): void {
-		const modal = new ProviderModal(this.plugin, (provider: ProviderConfig) => {
-			this.addProvider(provider);
-		});
-		modal.open();
-	}
-
 	private openEditProviderModal(provider: ProviderConfig): void {
 		const modal = new ProviderModal(
 			this.plugin,
@@ -221,15 +224,6 @@ export class Api {
 		const modal = new ModelModal(this.plugin, () => {
 			this.rerenderModelSection();
 		});
-		modal.open();
-	}
-
-	private openEditModelModal(modelInfo: {
-		model: string;
-		displayName: string;
-		provider: string;
-	}): void {
-		const modal = new ModelModal(this.plugin, () => this.rerenderModelSection(), modelInfo);
 		modal.open();
 	}
 
