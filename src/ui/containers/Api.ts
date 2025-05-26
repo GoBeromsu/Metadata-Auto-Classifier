@@ -4,6 +4,7 @@ import AutoClassifierPlugin from 'main';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
 import { AddModelModal } from 'ui/modals/ModelModal';
 import { ProviderModal } from 'ui/modals/ProviderModal';
+import { DEFAULT_TASK_TEMPLATE } from 'utils/templates';
 
 interface ModelConfig {
 	name: string;
@@ -24,6 +25,7 @@ export class Api {
 
 		// Add API section header
 		containerEl.createEl('h2', { text: 'API Configuration' });
+		this.addCustomPromptSetting(containerEl);
 
 		// Provider section
 		this.addProviderSection(containerEl);
@@ -47,6 +49,35 @@ export class Api {
 			button: {
 				text: '+ Add provider',
 				onClick: () => this.openAddProviderModal(),
+			},
+		});
+	}
+
+	private addCustomPromptSetting(containerEl: HTMLElement): void {
+		const currentTemplate = this.plugin.settings.classificationRule ?? DEFAULT_TASK_TEMPLATE;
+
+		CommonSetting.create(containerEl, {
+			name: 'Classification Rules',
+			desc: 'Customize the prompt template for classification requests',
+			textArea: {
+				placeholder: DEFAULT_TASK_TEMPLATE,
+				value: currentTemplate,
+				rows: 10,
+				onChange: async (value) => {
+					this.plugin.settings.classificationRule = value;
+					await this.plugin.saveSettings();
+				},
+			},
+			extraButton: {
+				icon: 'reset',
+				tooltip: 'Reset to default template',
+				onClick: async () => {
+					this.plugin.settings.classificationRule = DEFAULT_TASK_TEMPLATE;
+					await this.plugin.saveSettings();
+					if (this.containerEl) {
+						this.display(this.containerEl);
+					}
+				},
 			},
 		});
 	}

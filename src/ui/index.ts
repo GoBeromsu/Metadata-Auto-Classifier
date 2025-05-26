@@ -14,6 +14,7 @@ export interface AutoClassifierSettings {
 	selectedProvider: string;
 	selectedModel: string;
 	frontmatter: FrontmatterTemplate[];
+	classificationRule: string;
 }
 
 export class AutoClassifierSettingTab extends PluginSettingTab {

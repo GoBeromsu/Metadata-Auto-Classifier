@@ -150,15 +150,8 @@ export default class AutoClassifierPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	// Get selected provider based on selectedProvider setting
-	private getSelectedProvider(): ProviderConfig | undefined {
-		if (!this.settings.selectedProvider) {
-			return undefined;
-		}
-
-		return this.settings.providers.find(
-			(provider) => provider.name === this.settings.selectedProvider
-		);
+	public getSelectedProvider(): ProviderConfig {
+		return this.settings.providers.find((provider) => provider.name === this.settings.selectedProvider)!;
 	}
 
 	private getFrontmatterById(id: number) {
