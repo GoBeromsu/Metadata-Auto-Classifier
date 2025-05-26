@@ -1,16 +1,11 @@
-import { ProviderConfig } from 'utils/interface';
+import { ModelInfo, ProviderConfig } from 'utils/interface';
 
 import AutoClassifierPlugin from 'main';
+import { Setting, TextAreaComponent } from 'obsidian';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
 import { ModelModal } from 'ui/modals/ModelModal';
 import { ProviderModal } from 'ui/modals/ProviderModal';
 import { DEFAULT_TASK_TEMPLATE } from 'utils/templates';
-import { Setting, TextAreaComponent } from 'obsidian';
-
-interface ModelConfig {
-	name: string;
-	displayName?: string;
-}
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;
@@ -134,58 +129,46 @@ export class Api {
 	}
 
 	private renderModelList(containerEl: HTMLElement): void {
-		const allModels: Array<{
-			model: string;
-			displayName: string;
-			provider: string;
-			isActive: boolean;
-		}> = [];
-
 		this.plugin.settings.providers.forEach((provider) => {
-			provider.models.forEach((model) => {
-				allModels.push({
+			provider.models.forEach((model: ModelInfo) => {
+				const isActive = this.plugin.settings.selectedModel === model.name;
+				const modelInfo = {
 					model: model.name,
-					displayName: model.displayName || model.name,
+					displayName: model.displayName,
 					provider: provider.name,
-					isActive: this.plugin.settings.selectedModel === model.name,
-				});
-			});
-		});
+				};
+				CommonSetting.create(containerEl, {
+					name: model.displayName,
+					desc: provider.name,
+					toggle: {
+						value: isActive,
+						onChange: async (value) => {
+							if (value) {
+								this.plugin.settings.selectedModel = model.name;
+								this.plugin.settings.selectedProvider = provider.name;
 
-		allModels.forEach((modelInfo, index) => {
-			CommonSetting.create(containerEl, {
-				name: modelInfo.displayName,
-				desc: modelInfo.provider,
-				toggle: {
-					value: modelInfo.isActive,
-					onChange: async (value) => {
-						if (value) {
-							// Set this model and provider as active
-							this.plugin.settings.selectedModel = modelInfo.model;
-							this.plugin.settings.selectedProvider = modelInfo.provider;
+								await this.plugin.saveSettings();
 
-							await this.plugin.saveSettings();
-
-							// Re-render to update all toggles
-							this.rerenderModelSection();
-						}
-					},
-				},
-				buttons: [
-					{
-						icon: 'pencil',
-						tooltip: 'Edit',
-						onClick: () => {
-							this.openEditModelModal(modelInfo);
+								// Re-render to update all toggles
+								this.rerenderModelSection();
+							}
 						},
 					},
-
-					{
-						icon: 'trash',
-						tooltip: 'Delete',
-						onClick: () => this.deleteModel(modelInfo.model),
-					},
-				],
+					buttons: [
+						{
+							icon: 'pencil',
+							tooltip: 'Edit',
+							onClick: () => {
+								this.openEditModelModal(modelInfo);
+							},
+						},
+						{
+							icon: 'trash',
+							tooltip: 'Delete',
+							onClick: () => this.deleteModel(model.name),
+						},
+					],
+				});
 			});
 		});
 	}

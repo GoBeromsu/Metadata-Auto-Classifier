@@ -62,5 +62,5 @@ export interface APIProvider {
 
 export interface ModelInfo {
 	name: string;
-	displayName?: string;
+	displayName: string;
 }
