@@ -2,9 +2,10 @@ import { ProviderConfig } from 'utils/interface';
 
 import AutoClassifierPlugin from 'main';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
-import { AddModelModal } from 'ui/modals/ModelModal';
+import { ModelModal } from 'ui/modals/ModelModal';
 import { ProviderModal } from 'ui/modals/ProviderModal';
 import { DEFAULT_TASK_TEMPLATE } from 'utils/templates';
+import { Setting, TextAreaComponent } from 'obsidian';
 
 interface ModelConfig {
 	name: string;
@@ -54,32 +55,41 @@ export class Api {
 	}
 
 	private addCustomPromptSetting(containerEl: HTMLElement): void {
-		const currentTemplate = this.plugin.settings.classificationRule ?? DEFAULT_TASK_TEMPLATE;
+		const currentTemplate = this.plugin.settings.classificationRule;
 
-		CommonSetting.create(containerEl, {
-			name: 'Classification Rules',
-			desc: 'Customize the prompt template for classification requests',
-			textArea: {
-				placeholder: DEFAULT_TASK_TEMPLATE,
-				value: currentTemplate,
-				rows: 10,
-				onChange: async (value) => {
-					this.plugin.settings.classificationRule = value;
-					await this.plugin.saveSettings();
-				},
-			},
-			extraButton: {
-				icon: 'reset',
-				tooltip: 'Reset to default template',
-				onClick: async () => {
-					this.plugin.settings.classificationRule = DEFAULT_TASK_TEMPLATE;
-					await this.plugin.saveSettings();
-					if (this.containerEl) {
-						this.display(this.containerEl);
-					}
-				},
-			},
-		});
+		new Setting(containerEl)
+			.setName('Classification Rules')
+			.setDesc('Customize the prompt template for classification requests')
+			.addExtraButton((button) =>
+				button
+					.setIcon('reset')
+					.setTooltip('Reset to default template')
+					.onClick(async () => {
+						this.plugin.settings.classificationRule = DEFAULT_TASK_TEMPLATE;
+						textAreaComponent.setValue(DEFAULT_TASK_TEMPLATE);
+						await this.plugin.saveSettings();
+						this.display(containerEl);
+					})
+			);
+
+		// Create a container for the textarea below the setting
+		const textAreaContainer = containerEl.createDiv({ cls: 'custom-prompt-container' });
+		textAreaContainer.style.width = '100%';
+		textAreaContainer.style.marginTop = '8px';
+		textAreaContainer.style.marginBottom = '16px';
+
+		// Create the TextAreaComponent in the dedicated container
+		const textAreaComponent = new TextAreaComponent(textAreaContainer)
+			.setPlaceholder(DEFAULT_TASK_TEMPLATE)
+			.setValue(currentTemplate)
+			.onChange(async (value) => {
+				this.plugin.settings.classificationRule = value;
+				await this.plugin.saveSettings();
+			});
+
+		// Set the text area dimensions
+		textAreaComponent.inputEl.rows = 10;
+		textAreaComponent.inputEl.style.width = '100%';
 	}
 
 	private addModelSection(containerEl: HTMLElement): void {
@@ -173,7 +183,7 @@ export class Api {
 					{
 						icon: 'trash',
 						tooltip: 'Delete',
-						onClick: () => this.deleteModel(modelInfo.model, modelInfo.provider),
+						onClick: () => this.deleteModel(modelInfo.model),
 					},
 				],
 			});
@@ -225,8 +235,8 @@ export class Api {
 	}
 
 	private openAddModelModal(): void {
-		const modal = new AddModelModal(this.plugin, (model: ModelConfig) => {
-			this.addModel(model);
+		const modal = new ModelModal(this.plugin, () => {
+			this.rerenderModelSection();
 		});
 		modal.open();
 	}
@@ -236,11 +246,7 @@ export class Api {
 		displayName: string;
 		provider: string;
 	}): void {
-		const modal = new AddModelModal(
-			this.plugin,
-			(model: ModelConfig) => this.updateModel(modelInfo, model),
-			modelInfo
-		);
+		const modal = new ModelModal(this.plugin, () => this.rerenderModelSection(), modelInfo);
 		modal.open();
 	}
 
@@ -275,30 +281,6 @@ export class Api {
 		// Clear selection if deleted model was selected
 		if (this.plugin.settings.selectedModel === modelName) {
 			this.plugin.settings.selectedModel = '';
-		}
-
-		await this.plugin.saveSettings();
-		this.rerenderModelSection();
-	}
-
-	private async addModel(model: ModelConfig): Promise<void> {
-		const selectedProvider = this.plugin.getSelectedProvider();
-		if (selectedProvider) {
-			selectedProvider.models.push(model);
-		}
-		await this.plugin.saveSettings();
-		this.rerenderModelSection();
-	}
-
-	private async updateModel(
-		originalModel: { model: string; displayName: string; provider: string },
-		updatedModel: ModelConfig
-	): Promise<void> {
-		const selectedProvider = this.plugin.getSelectedProvider();
-		selectedProvider.models.push(updatedModel);
-
-		if (this.plugin.settings.selectedModel === originalModel.model) {
-			this.plugin.settings.selectedModel = updatedModel.name;
 		}
 
 		await this.plugin.saveSettings();

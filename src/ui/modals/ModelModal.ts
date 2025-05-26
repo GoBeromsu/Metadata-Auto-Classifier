@@ -20,9 +20,9 @@ interface ModelConfig {
 	displayName?: string;
 }
 
-export class AddModelModal extends Modal {
+export class ModelModal extends Modal {
 	private plugin: AutoClassifierPlugin;
-	private onSave: (providerName: string, model: ModelConfig) => void;
+	private onSave: () => void;
 	private existingModel?: { model: string; displayName: string; provider: string };
 
 	// Form state
@@ -32,7 +32,7 @@ export class AddModelModal extends Modal {
 
 	constructor(
 		plugin: AutoClassifierPlugin,
-		onSave: (model: ModelConfig) => void,
+		onSave: () => void,
 		existingModel?: { model: string; displayName: string; provider: string }
 	) {
 		super(plugin.app);
@@ -278,13 +278,42 @@ export class AddModelModal extends Modal {
 		new CommonButton(buttonContainer, {
 			text: 'Save',
 			cta: true,
-			onClick: () => {
+			onClick: async () => {
 				if (this.validateForm()) {
 					const model: ModelConfig = {
 						name: this.modelId,
 						displayName: this.displayName,
 					};
-					this.onSave(this.selectedProvider, model);
+
+					// Find the provider and add/update the model
+					const newProvider = this.plugin.settings.providers.find(
+						(p) => p.name === this.selectedProvider
+					);
+					if (newProvider) {
+						if (this.existingModel) {
+							// Edit mode: remove old model from its original provider and add updated one to selected provider
+							const originalProvider = this.plugin.settings.providers.find(
+								(p) => p.name === this.existingModel!.provider
+							);
+							if (originalProvider) {
+								originalProvider.models = originalProvider.models.filter(
+									(m) => m.name !== this.existingModel!.model
+								);
+							}
+							newProvider.models.push(model);
+
+							// Update selected model if it was the one being edited
+							if (this.plugin.settings.selectedModel === this.existingModel.model) {
+								this.plugin.settings.selectedModel = model.name;
+							}
+						} else {
+							// Add mode: just add the new model
+							newProvider.models.push(model);
+						}
+					}
+
+					await this.plugin.saveSettings();
+					this.onSave();
 					this.close();
 				}
 			},
