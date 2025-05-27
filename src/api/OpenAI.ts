@@ -1,4 +1,4 @@
-import { getHeaders, getRequestParam } from 'api';
+import { getRequestParam } from 'api';
 import { requestUrl, RequestUrlParam } from 'obsidian';
 import { APIProvider, StructuredOutput } from 'utils/interface';
 import { API_CONSTANTS, OPENAI_STRUCTURE_OUTPUT } from '../utils/constants';
@@ -6,6 +6,14 @@ import { ProviderConfig } from '../utils/interface';
 import { ApiError } from './ApiError';
 
 export class OpenAI implements APIProvider {
+	buildHeaders(apiKey: string): Record<string, string> {
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${apiKey}`,
+		};
+		return headers;
+	}
+
 	async callAPI(
 		systemRole: string,
 		user_prompt: string,
@@ -13,7 +21,7 @@ export class OpenAI implements APIProvider {
 		selectedModel: string,
 		temperature?: number
 	): Promise<StructuredOutput> {
-		const headers: Record<string, string> = getHeaders(provider.apiKey);
+		const headers: Record<string, string> = this.buildHeaders(provider.apiKey);
 
 		// Create messages array for the OpenAI API
 		const messages = [

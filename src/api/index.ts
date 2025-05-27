@@ -33,34 +33,14 @@ export const processAPIRequest = async (
 	selectedProvider: ProviderConfig,
 	selectedModel: string
 ): Promise<StructuredOutput> => {
-	try {
-		const providerInstance = getProvider(selectedProvider.name);
-		const response = await providerInstance.callAPI(
-			systemRole,
-			promptTemplate,
-			selectedProvider,
-			selectedModel
-		);
-		return response;
-	} catch (error) {
-		CommonNotice.showError(error as Error, 'API Request');
-		return {
-			output: [],
-			reliability: 0,
-		};
-	}
-};
-
-export const getHeaders = (apiKey?: string): Record<string, string> => {
-	const headers: Record<string, string> = {
-		'Content-Type': 'application/json',
-	};
-
-	if (apiKey) {
-		headers.Authorization = `Bearer ${apiKey}`;
-	}
-
-	return headers;
+	const providerInstance = getProvider(selectedProvider.name);
+	const response = await providerInstance.callAPI(
+		systemRole,
+		promptTemplate,
+		selectedProvider,
+		selectedModel
+	);
+	return response;
 };
 
 export const getRequestParam = (
