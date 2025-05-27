@@ -33,7 +33,7 @@ describe('API callAPI Tests', () => {
 			choices: [
 				{
 					message: {
-						content: JSON.stringify({ output, reliability }),
+						content: { output, reliability },
 					},
 				},
 			],
@@ -70,18 +70,13 @@ describe('API callAPI Tests', () => {
 		},
 	});
 
-	const createDeepSeekResponse = (categories: string[], reliability: number) => ({
+	const createDeepSeekResponse = (output: string[], reliability: number) => ({
 		status: 200,
 		json: {
 			choices: [
 				{
 					message: {
-						content: JSON.stringify({
-							classifications: categories.map((category) => ({
-								category,
-								reliability,
-							})),
-						}),
+						content: { output, reliability },
 					},
 				},
 			],
