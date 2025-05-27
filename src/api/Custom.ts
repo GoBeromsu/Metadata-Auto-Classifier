@@ -1,8 +1,6 @@
-import { getRequestParam } from 'api';
-import { requestUrl, RequestUrlParam } from 'obsidian';
+import { sendRequest } from 'api';
 import { API_CONSTANTS, LMSTUDIO_STRUCTURE_OUTPUT } from 'utils/constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
-import { ApiError } from './ApiError';
 
 export class Custom implements APIProvider {
 	buildHeaders(apiKey: string): Record<string, string> {
@@ -38,25 +36,8 @@ export class Custom implements APIProvider {
 			response_format: LMSTUDIO_STRUCTURE_OUTPUT,
 		};
 
-		const response = await this.sendRequest(provider.baseUrl, headers, data);
+		const response = await sendRequest(provider.baseUrl, headers, data);
 		return this.processApiResponse(response);
-	}
-
-	async sendRequest(baseUrl: string, headers: Record<string, string>, data: object): Promise<any> {
-		const requestParam: RequestUrlParam = getRequestParam(baseUrl, headers, data);
-
-		try {
-			const response = await requestUrl(requestParam);
-			if (response.status !== 200) {
-				throw new ApiError(`API request failed with status ${response.status}: ${response.text}`);
-			}
-			return response.json;
-		} catch (error) {
-			if (error instanceof ApiError) {
-				throw error;
-			}
-			throw new ApiError(`Failed to make request to Custom API: ${error.message}`);
-		}
 	}
 
 	processApiResponse(responseData: any): StructuredOutput {

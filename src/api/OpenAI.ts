@@ -1,9 +1,8 @@
-import { getRequestParam } from 'api';
-import { requestUrl, RequestUrlParam } from 'obsidian';
 import { APIProvider, StructuredOutput } from 'utils/interface';
 import { API_CONSTANTS, OPENAI_STRUCTURE_OUTPUT } from '../utils/constants';
 import { ProviderConfig } from '../utils/interface';
 import { ApiError } from './ApiError';
+import { sendRequest } from 'api';
 
 export class OpenAI implements APIProvider {
 	buildHeaders(apiKey: string): Record<string, string> {
@@ -37,29 +36,8 @@ export class OpenAI implements APIProvider {
 			response_format: OPENAI_STRUCTURE_OUTPUT,
 		};
 
-		const response = await this.sendRequest(provider.baseUrl, headers, data);
+		const response = await sendRequest(provider.baseUrl, headers, data);
 		return this.processApiResponse(response);
-	}
-
-	async sendRequest(
-		baseUrl: string,
-		headers: Record<string, string>,
-		data: object
-	): Promise<any> {
-		const requestParam: RequestUrlParam = getRequestParam(baseUrl, headers, data);
-
-		try {
-			const response = await requestUrl(requestParam);
-			if (response.status !== 200) {
-				throw new ApiError(`API request failed with status ${response.status}: ${response.text}`);
-			}
-			return response.json;
-		} catch (error) {
-			if (error instanceof ApiError) {
-				throw error;
-			}
-			throw new ApiError(`Failed to make request to OpenAI API: ${error.message}`);
-		}
 	}
 
 	processApiResponse(responseData: any): StructuredOutput {
