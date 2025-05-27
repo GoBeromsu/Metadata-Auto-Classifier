@@ -67,10 +67,11 @@ export const sendRequest = async (
 ): Promise<any> => {
 	const requestParam: RequestUrlParam = getRequestParam(baseUrl, headers, data);
 	let response: any;
+
 	try {
 		response = await requestUrl(requestParam);
 	} catch (error) {
-		throw new ApiError(`Failed to make request to ${baseUrl}: ${error.message}`);
+		throw new ApiError(`${error}`);
 	}
 
 	if (response.status >= 500) {

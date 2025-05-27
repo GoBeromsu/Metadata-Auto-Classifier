@@ -166,11 +166,6 @@ export const GEMINI_STRUCTURE_OUTPUT = {
 	},
 };
 
-// DeepSeek Structured Output Configuration
-export const DEEPSEEK_STRUCTURE_OUTPUT = {
-	type: 'json_object',
-};
-
 // API Common Constants
 export const API_CONSTANTS = {
 	DEFAULT_MAX_TOKENS: 32000,

@@ -35,7 +35,7 @@ export class OpenAI implements APIProvider {
 			temperature: temperature || provider.temperature,
 			response_format: OPENAI_STRUCTURE_OUTPUT,
 		};
-
+		console.log(data);
 		const response = await sendRequest(provider.baseUrl, headers, data);
 		return this.processApiResponse(response);
 	}
