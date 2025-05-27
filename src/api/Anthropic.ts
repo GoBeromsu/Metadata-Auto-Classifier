@@ -36,17 +36,12 @@ export class Anthropic implements APIProvider {
 			tool_choice: { type: 'tool', name: API_CONSTANTS.ANTHROPIC_TOOL_NAME },
 		};
 
-		const response = await this.sendRequest(provider, headers, data);
+		const response = await this.sendRequest(provider.baseUrl, headers, data);
 		return this.processApiResponse(response);
 	}
 
-	async sendRequest(
-		provider: ProviderConfig,
-		headers: Record<string, string>,
-		data: object
-	): Promise<any> {
-		const url = provider.baseUrl;
-		const requestParam: RequestUrlParam = getRequestParam(url, headers, data);
+	async sendRequest(baseUrl: string, headers: Record<string, string>, data: object): Promise<any> {
+		const requestParam: RequestUrlParam = getRequestParam(baseUrl, headers, data);
 
 		try {
 			const response = await requestUrl(requestParam);
