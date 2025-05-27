@@ -30,7 +30,7 @@ export class Anthropic implements APIProvider {
 			max_tokens: API_CONSTANTS.DEFAULT_MAX_TOKENS,
 			system: systemRole,
 			messages: messages,
-			temperature: temperature || provider.temperature,
+			temperature: temperature,
 			tools: [ANTHROPIC_TOOL_CONFIG],
 			tool_choice: { type: 'tool', name: API_CONSTANTS.ANTHROPIC_TOOL_NAME },
 		};
@@ -39,36 +39,18 @@ export class Anthropic implements APIProvider {
 		return this.processApiResponse(response);
 	}
 
+	// https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview
 	processApiResponse(responseData: any): StructuredOutput {
-		try {
-			// Handle Anthropic's tool calling response format
-			if (responseData.content && Array.isArray(responseData.content)) {
-				// Look for tool_use content
-				const toolUseContent = responseData.content.find(
-					(content: any) =>
-						content.type === 'tool_use' && content.name === API_CONSTANTS.ANTHROPIC_TOOL_NAME
-				);
-
-				if (toolUseContent && toolUseContent.input) {
-					const input = toolUseContent.input;
-
-					// Validate the structure
-					if (input.output && typeof input.reliability === 'number') {
-						return {
-							output: Array.isArray(input.output) ? input.output : [input.output],
-							reliability: Math.min(
-								Math.max(input.reliability, API_CONSTANTS.DEFAULT_RELIABILITY_MIN),
-								API_CONSTANTS.DEFAULT_RELIABILITY_MAX
-							),
-						};
-					}
-				}
-			}
-
-			throw new ApiError('Invalid response format from Anthropic API - no valid tool use found');
-		} catch (error) {
-			throw error;
-		}
+		const result = responseData?.content?.[0] as {
+			id: string;
+			input: StructuredOutput;
+			name: string;
+			type: string;
+		};
+		return {
+			output: result.input.output,
+			reliability: result.input.reliability,
+		};
 	}
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {

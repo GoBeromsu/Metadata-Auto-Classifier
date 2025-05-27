@@ -41,21 +41,11 @@ export class OpenAI implements APIProvider {
 	}
 
 	processApiResponse(responseData: any): StructuredOutput {
-		try {
-			// Handle different response formats from various models
-			const messageContent = responseData.choices[0].message.content;
-
-			// Some newer models might return parsed JSON directly
-			if (typeof messageContent === 'object' && messageContent !== null) {
-				return messageContent as StructuredOutput;
-			}
-
-			// Otherwise parse the content as JSON
-			const content = messageContent.trim();
-			return JSON.parse(content) as StructuredOutput;
-		} catch (error) {
-			throw new ApiError('Failed to parse response from OpenAI API');
-		}
+		const result = responseData?.choices[0]?.message?.content as StructuredOutput;
+		return {
+			output: result.output,
+			reliability: result.reliability,
+		};
 	}
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
