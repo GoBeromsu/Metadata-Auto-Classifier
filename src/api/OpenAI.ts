@@ -1,8 +1,7 @@
+import { sendRequest } from 'api';
 import { APIProvider, StructuredOutput } from 'utils/interface';
 import { API_CONSTANTS, OPENAI_STRUCTURE_OUTPUT } from '../utils/constants';
 import { ProviderConfig } from '../utils/interface';
-import { ApiError } from './ApiError';
-import { sendRequest } from 'api';
 
 export class OpenAI implements APIProvider {
 	buildHeaders(apiKey: string): Record<string, string> {
@@ -35,13 +34,13 @@ export class OpenAI implements APIProvider {
 			temperature: temperature || provider.temperature,
 			response_format: OPENAI_STRUCTURE_OUTPUT,
 		};
-		console.log(data);
 		const response = await sendRequest(provider.baseUrl, headers, data);
 		return this.processApiResponse(response);
 	}
 
 	processApiResponse(responseData: any): StructuredOutput {
-		const result = responseData?.choices[0]?.message?.content as StructuredOutput;
+		const content = responseData?.choices[0]?.message?.content;
+		const result = JSON.parse(content) as StructuredOutput;
 		return {
 			output: result.output,
 			reliability: result.reliability,

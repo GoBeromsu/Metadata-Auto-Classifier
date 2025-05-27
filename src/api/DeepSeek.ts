@@ -40,7 +40,8 @@ export class DeepSeek implements APIProvider {
 	}
 
 	processApiResponse(responseData: any): StructuredOutput {
-		const result = responseData.choices[0].message.content as StructuredOutput;
+		const content = responseData?.choices[0]?.message?.content;
+		const result = JSON.parse(content) as StructuredOutput;
 		return {
 			output: result.output,
 			reliability: result.reliability,

@@ -33,7 +33,7 @@ describe('API callAPI Tests', () => {
 			choices: [
 				{
 					message: {
-						content: { output, reliability },
+						content: JSON.stringify({ output, reliability }),
 					},
 				},
 			],
@@ -76,7 +76,7 @@ describe('API callAPI Tests', () => {
 			choices: [
 				{
 					message: {
-						content: { output, reliability },
+						content: JSON.stringify({ output, reliability }),
 					},
 				},
 			],
