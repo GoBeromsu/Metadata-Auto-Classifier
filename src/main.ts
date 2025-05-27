@@ -53,7 +53,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			return;
 		}
 
-		const frontmatter = this.getFrontmatterById(frontmatterId);
+		const frontmatter = this.settings.frontmatter.find((fm) => fm.id === frontmatterId);
 		if (!frontmatter) {
 			new Notice(`No setting found for frontmatter ID ${frontmatterId}.`);
 			return;
@@ -144,6 +144,8 @@ export default class AutoClassifierPlugin extends Plugin {
 			},
 			await this.loadData()
 		);
+
+		await this.saveSettings();
 	}
 
 	async saveSettings() {
@@ -157,9 +159,5 @@ export default class AutoClassifierPlugin extends Plugin {
 		if (!provider) throw new Error('Selected provider not found');
 
 		return provider;
-	}
-
-	private getFrontmatterById(id: number) {
-		return this.settings.frontmatter.find((fm) => fm.id === id);
 	}
 }
