@@ -35,11 +35,11 @@ export class OpenRouter implements APIProvider {
 			response_format: OPENROUTER_STRUCTURE_OUTPUT,
 		};
 
-		const response = await this.makeApiRequest(provider, headers, data);
+		const response = await this.sendRequest(provider, headers, data);
 		return this.processApiResponse(response);
 	}
 
-	async makeApiRequest(
+	async sendRequest(
 		provider: ProviderConfig,
 		headers: Record<string, string>,
 		data: object

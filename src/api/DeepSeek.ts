@@ -36,11 +36,11 @@ export class DeepSeek implements APIProvider {
 			max_tokens: API_CONSTANTS.DEFAULT_MAX_TOKENS, // Ensure JSON string is not truncated
 		};
 
-		const response = await this.makeApiRequest(provider, headers, data);
+		const response = await this.sendRequest(provider, headers, data);
 		return this.processApiResponse(response);
 	}
 
-	async makeApiRequest(
+	async sendRequest(
 		provider: ProviderConfig,
 		headers: Record<string, string>,
 		data: object

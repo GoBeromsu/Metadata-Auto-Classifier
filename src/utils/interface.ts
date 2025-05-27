@@ -52,7 +52,7 @@ export interface APIProvider {
 
 	verifyConnection(provider: ProviderConfig): Promise<boolean>;
 	buildHeaders(apiKey: string): Record<string, string>;
-	makeApiRequest(
+	sendRequest(
 		provider: ProviderConfig,
 		headers: Record<string, string>,
 		data: object
