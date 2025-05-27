@@ -2,6 +2,7 @@ import AutoClassifierPlugin from 'main';
 import { Modal, Notice } from 'obsidian';
 import { CommonButton } from 'ui/components/common/CommonButton';
 import { CommonSetting, DropdownOption } from 'ui/components/common/CommonSetting';
+import { Model } from 'utils/interface';
 
 const providersData = require('../../data/providers.json');
 
@@ -13,11 +14,6 @@ interface ProviderPreset {
 	modelsList: string;
 	baseUrl: string;
 	popularModels: Array<{ id: string; name: string }>;
-}
-
-interface ModelConfig {
-	name: string;
-	displayName?: string;
 }
 
 export class ModelModal extends Modal {
@@ -280,7 +276,7 @@ export class ModelModal extends Modal {
 			cta: true,
 			onClick: async () => {
 				if (this.validateForm()) {
-					const model: ModelConfig = {
+					const model: Model = {
 						name: this.modelId,
 						displayName: this.displayName,
 					};

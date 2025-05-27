@@ -17,7 +17,7 @@ export interface ProviderConfig {
 	temperature?: number;
 }
 
-interface Model {
+export interface Model {
 	name: string;
 	displayName: string;
 }
@@ -58,9 +58,4 @@ export interface APIProvider {
 		data: object
 	): Promise<any>;
 	processApiResponse(responseData: any): StructuredOutput;
-}
-
-export interface ModelInfo {
-	name: string;
-	displayName: string;
 }
