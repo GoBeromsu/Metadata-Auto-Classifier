@@ -7,6 +7,11 @@
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"ci": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production --if-present",
+		"test": "jest",
+		"test:watch": "jest --watch",
+		"test:coverage": "jest --coverage",
+		"lint": "eslint src/ __tests__/ --ext .ts,.js",
+		"lint:fix": "eslint src/ __tests__/ --ext .ts,.js --fix",
 		"version": "1.5.1"
 	},
 	"keywords": [
@@ -21,6 +26,7 @@
 	"devDependencies": {
 		"@codemirror/state": "^6.0.0",
 		"@codemirror/view": "^6.0.0",
+		"@types/jest": "^29.5.14",
 		"@types/node": "^16.11.6",
 		"@typescript-eslint/eslint-plugin": "5.29.0",
 		"@typescript-eslint/parser": "5.29.0",
