@@ -1,10 +1,18 @@
-import { getHeaders, getRequestParam } from 'api';
+import { getRequestParam } from 'api';
 import { requestUrl, RequestUrlParam } from 'obsidian';
 import { API_CONSTANTS, DEEPSEEK_STRUCTURE_OUTPUT } from 'utils/constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 import { ApiError } from './ApiError';
 
 export class DeepSeek implements APIProvider {
+	buildHeaders(apiKey: string): Record<string, string> {
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${apiKey}`,
+		};
+		return headers;
+	}
+
 	async callAPI(
 		systemRole: string,
 		user_prompt: string,
@@ -12,7 +20,7 @@ export class DeepSeek implements APIProvider {
 		selectedModel: string,
 		temperature?: number
 	): Promise<StructuredOutput> {
-		const headers: Record<string, string> = getHeaders(provider.apiKey);
+		const headers: Record<string, string> = this.buildHeaders(provider.apiKey);
 
 		// Create messages array for the DeepSeek API
 		const messages = [

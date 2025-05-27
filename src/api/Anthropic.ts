@@ -1,10 +1,18 @@
 import { getRequestParam } from 'api';
-import { ApiError } from './ApiError';
 import { requestUrl, RequestUrlParam } from 'obsidian';
-import { API_CONSTANTS, ANTHROPIC_TOOL_CONFIG } from 'utils/constants';
+import { ANTHROPIC_TOOL_CONFIG, API_CONSTANTS } from 'utils/constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
+import { ApiError } from './ApiError';
 
 export class Anthropic implements APIProvider {
+	buildHeaders(apiKey: string): Record<string, string> {
+		return {
+			'Content-Type': 'application/json',
+			'x-api-key': apiKey,
+			'anthropic-version': API_CONSTANTS.ANTHROPIC_VERSION,
+		};
+	}
+
 	async callAPI(
 		systemRole: string,
 		user_prompt: string,
@@ -12,12 +20,7 @@ export class Anthropic implements APIProvider {
 		selectedModel: string,
 		temperature?: number
 	): Promise<StructuredOutput> {
-		// Create headers specific for Anthropic API
-		const headers: Record<string, string> = {
-			'Content-Type': 'application/json',
-			'x-api-key': provider.apiKey,
-			'anthropic-version': API_CONSTANTS.ANTHROPIC_VERSION,
-		};
+		const headers: Record<string, string> = this.buildHeaders(provider.apiKey);
 
 		// Create messages array for the Anthropic API
 		const messages = [{ role: 'user', content: user_prompt }];
