@@ -4,7 +4,7 @@ import { DEFAULT_TAG_SETTING, getDefaultProviders } from 'utils/constants';
 import { FrontmatterTemplate, ProviderConfig } from 'utils/interface';
 import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
-import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from './utils/templates';
+import { DEFAULT_SYSTEM_ROLE, DEFAULT_TASK_TEMPLATE, getPromptTemplate } from './utils/templates';
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
@@ -53,7 +53,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			return;
 		}
 
-		const frontmatter = this.getFrontmatterById(frontmatterId);
+		const frontmatter = this.settings.frontmatter.find((fm) => fm.id === frontmatterId);
 		if (!frontmatter) {
 			new Notice(`No setting found for frontmatter ID ${frontmatterId}.`);
 			return;
@@ -88,13 +88,13 @@ export default class AutoClassifierPlugin extends Plugin {
 		}
 		const currentContent = await this.app.vault.read(currentFile);
 		const content = getContentWithoutFrontmatter(currentContent);
-
+		const classificationRule = this.settings.classificationRule;
 		const promptTemplate = getPromptTemplate(
 			frontmatter.count,
 			content,
 			processedValues,
 			frontmatter.customQuery,
-			selectedProvider.customPromptTemplate
+			classificationRule
 		);
 
 		const apiResponse = await processAPIRequest(
@@ -133,15 +133,17 @@ export default class AutoClassifierPlugin extends Plugin {
 	};
 
 	async loadSettings() {
-		const loadedData = (await this.loadData()) || {};
-
-		// Use simple assignment instead of mergeDefaults to preserve user data
-		this.settings = {
-			providers: loadedData.providers || getDefaultProviders(),
-			selectedProvider: loadedData.selectedProvider || '',
-			selectedModel: loadedData.selectedModel || '',
-			frontmatter: loadedData.frontmatter || [DEFAULT_TAG_SETTING],
-		};
+		this.settings = Object.assign(
+			{},
+			{
+				providers: getDefaultProviders(),
+				selectedProvider: '',
+				selectedModel: '',
+				frontmatter: [DEFAULT_TAG_SETTING],
+				classificationRule: DEFAULT_TASK_TEMPLATE,
+			},
+			await this.loadData()
+		);
 
 		await this.saveSettings();
 	}
@@ -157,9 +159,5 @@ export default class AutoClassifierPlugin extends Plugin {
 		if (!provider) throw new Error('Selected provider not found');
 
 		return provider;
-	}
-
-	private getFrontmatterById(id: number) {
-		return this.settings.frontmatter.find((fm) => fm.id === id);
 	}
 }

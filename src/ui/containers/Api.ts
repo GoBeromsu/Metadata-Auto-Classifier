@@ -1,15 +1,11 @@
-import { ProviderConfig } from 'utils/interface';
+import { Model, ProviderConfig } from 'utils/interface';
 
 import AutoClassifierPlugin from 'main';
+import { Setting, TextAreaComponent } from 'obsidian';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
-import { AddModelModal } from 'ui/modals/ModelModal';
+import { ModelModal } from 'ui/modals/ModelModal';
 import { ProviderModal } from 'ui/modals/ProviderModal';
 import { DEFAULT_TASK_TEMPLATE } from 'utils/templates';
-
-interface ModelConfig {
-	name: string;
-	displayName?: string;
-}
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;
@@ -48,38 +44,54 @@ export class Api {
 			name: '',
 			button: {
 				text: '+ Add provider',
-				onClick: () => this.openAddProviderModal(),
+				onClick: () => {
+					const modal = new ProviderModal(this.plugin, (provider: ProviderConfig) => {
+						this.addProvider(provider);
+					});
+					modal.open();
+				},
 			},
 		});
 	}
 
 	private addCustomPromptSetting(containerEl: HTMLElement): void {
-		const currentTemplate = this.plugin.settings.classificationRule ?? DEFAULT_TASK_TEMPLATE;
+		const currentTemplate = this.plugin.settings.classificationRule;
 
-		CommonSetting.create(containerEl, {
-			name: 'Classification Rules',
-			desc: 'Customize the prompt template for classification requests',
-			textArea: {
-				placeholder: DEFAULT_TASK_TEMPLATE,
-				value: currentTemplate,
-				rows: 10,
-				onChange: async (value) => {
-					this.plugin.settings.classificationRule = value;
-					await this.plugin.saveSettings();
-				},
-			},
-			extraButton: {
-				icon: 'reset',
-				tooltip: 'Reset to default template',
-				onClick: async () => {
-					this.plugin.settings.classificationRule = DEFAULT_TASK_TEMPLATE;
-					await this.plugin.saveSettings();
-					if (this.containerEl) {
-						this.display(this.containerEl);
-					}
-				},
-			},
-		});
+		// Create a container for the textarea
+		const textAreaContainer = containerEl.createDiv({ cls: 'custom-prompt-container' });
+		textAreaContainer.style.width = '100%';
+		textAreaContainer.style.marginTop = '8px';
+		textAreaContainer.style.marginBottom = '16px';
+
+		// Create the TextAreaComponent first
+		const textAreaComponent = new TextAreaComponent(textAreaContainer)
+			.setPlaceholder(DEFAULT_TASK_TEMPLATE)
+			.setValue(currentTemplate)
+			.onChange(async (value) => {
+				this.plugin.settings.classificationRule = value;
+				await this.plugin.saveSettings();
+			});
+
+		// Set the text area dimensions
+		textAreaComponent.inputEl.rows = 10;
+		textAreaComponent.inputEl.style.width = '100%';
+
+		// Create the setting with reset button after textAreaComponent is declared
+		new Setting(containerEl)
+			.setName('Classification Rules')
+			.setDesc('Customize the prompt template for classification requests')
+			.addExtraButton((button) =>
+				button
+					.setIcon('reset')
+					.setTooltip('Reset to default template')
+					.onClick(async () => {
+						this.plugin.settings.classificationRule = DEFAULT_TASK_TEMPLATE;
+						textAreaComponent.setValue(DEFAULT_TASK_TEMPLATE);
+						await this.plugin.saveSettings();
+					})
+			);
+
+		containerEl.appendChild(textAreaContainer);
 	}
 
 	private addModelSection(containerEl: HTMLElement): void {
@@ -124,58 +136,51 @@ export class Api {
 	}
 
 	private renderModelList(containerEl: HTMLElement): void {
-		const allModels: Array<{
-			model: string;
-			displayName: string;
-			provider: string;
-			isActive: boolean;
-		}> = [];
-
 		this.plugin.settings.providers.forEach((provider) => {
-			provider.models.forEach((model) => {
-				allModels.push({
-					model: model.name,
-					displayName: model.displayName || model.name,
+			provider.models.forEach((config: Model) => {
+				const isActive = this.plugin.settings.selectedModel === config.name;
+				const editTarget = {
+					model: config.name,
+					displayName: config.displayName,
 					provider: provider.name,
-					isActive: this.plugin.settings.selectedModel === model.name,
-				});
-			});
-		});
+				};
+				CommonSetting.create(containerEl, {
+					name: config.displayName,
+					desc: provider.name,
+					toggle: {
+						value: isActive,
+						onChange: async (value) => {
+							if (value) {
+								this.plugin.settings.selectedModel = config.name;
+								this.plugin.settings.selectedProvider = provider.name;
 
-		allModels.forEach((modelInfo, index) => {
-			CommonSetting.create(containerEl, {
-				name: modelInfo.displayName,
-				desc: modelInfo.provider,
-				toggle: {
-					value: modelInfo.isActive,
-					onChange: async (value) => {
-						if (value) {
-							// Set this model and provider as active
-							this.plugin.settings.selectedModel = modelInfo.model;
-							this.plugin.settings.selectedProvider = modelInfo.provider;
+								await this.plugin.saveSettings();
 
-							await this.plugin.saveSettings();
-
-							// Re-render to update all toggles
-							this.rerenderModelSection();
-						}
-					},
-				},
-				buttons: [
-					{
-						icon: 'pencil',
-						tooltip: 'Edit',
-						onClick: () => {
-							this.openEditModelModal(modelInfo);
+								// Re-render to update all toggles
+								this.rerenderModelSection();
+							}
 						},
 					},
-
-					{
-						icon: 'trash',
-						tooltip: 'Delete',
-						onClick: () => this.deleteModel(modelInfo.model, modelInfo.provider),
-					},
-				],
+					buttons: [
+						{
+							icon: 'pencil',
+							tooltip: 'Edit',
+							onClick: () => {
+								const modal = new ModelModal(
+									this.plugin,
+									() => this.rerenderModelSection(),
+									editTarget
+								);
+								modal.open();
+							},
+						},
+						{
+							icon: 'trash',
+							tooltip: 'Delete',
+							onClick: () => this.deleteModel(config.name),
+						},
+					],
+				});
 			});
 		});
 	}
@@ -205,13 +210,6 @@ export class Api {
 		}
 	}
 
-	private openAddProviderModal(): void {
-		const modal = new ProviderModal(this.plugin, (provider: ProviderConfig) => {
-			this.addProvider(provider);
-		});
-		modal.open();
-	}
-
 	private openEditProviderModal(provider: ProviderConfig): void {
 		const modal = new ProviderModal(
 			this.plugin,
@@ -225,22 +223,9 @@ export class Api {
 	}
 
 	private openAddModelModal(): void {
-		const modal = new AddModelModal(this.plugin, (model: ModelConfig) => {
-			this.addModel(model);
+		const modal = new ModelModal(this.plugin, () => {
+			this.rerenderModelSection();
 		});
-		modal.open();
-	}
-
-	private openEditModelModal(modelInfo: {
-		model: string;
-		displayName: string;
-		provider: string;
-	}): void {
-		const modal = new AddModelModal(
-			this.plugin,
-			(model: ModelConfig) => this.updateModel(modelInfo, model),
-			modelInfo
-		);
 		modal.open();
 	}
 
@@ -275,30 +260,6 @@ export class Api {
 		// Clear selection if deleted model was selected
 		if (this.plugin.settings.selectedModel === modelName) {
 			this.plugin.settings.selectedModel = '';
-		}
-
-		await this.plugin.saveSettings();
-		this.rerenderModelSection();
-	}
-
-	private async addModel(model: ModelConfig): Promise<void> {
-		const selectedProvider = this.plugin.getSelectedProvider();
-		if (selectedProvider) {
-			selectedProvider.models.push(model);
-		}
-		await this.plugin.saveSettings();
-		this.rerenderModelSection();
-	}
-
-	private async updateModel(
-		originalModel: { model: string; displayName: string; provider: string },
-		updatedModel: ModelConfig
-	): Promise<void> {
-		const selectedProvider = this.plugin.getSelectedProvider();
-		selectedProvider.models.push(updatedModel);
-
-		if (this.plugin.settings.selectedModel === originalModel.model) {
-			this.plugin.settings.selectedModel = updatedModel.name;
 		}
 
 		await this.plugin.saveSettings();

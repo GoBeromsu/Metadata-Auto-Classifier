@@ -15,12 +15,11 @@ export interface ProviderConfig {
 	baseUrl: string;
 	models: Model[];
 	temperature?: number;
-	customPromptTemplate?: string;
 }
 
-interface Model {
+export interface Model {
 	name: string;
-	displayName?: string;
+	displayName: string;
 }
 export interface FrontMatter {
 	[key: string]: string[];
@@ -52,15 +51,6 @@ export interface APIProvider {
 	): Promise<StructuredOutput>;
 
 	verifyConnection(provider: ProviderConfig): Promise<boolean>;
-	makeApiRequest(
-		provider: ProviderConfig,
-		headers: Record<string, string>,
-		data: object
-	): Promise<any>;
+	buildHeaders(apiKey: string): Record<string, string>;
 	processApiResponse(responseData: any): StructuredOutput;
-}
-
-export interface ModelInfo {
-	name: string;
-	displayName?: string;
 }

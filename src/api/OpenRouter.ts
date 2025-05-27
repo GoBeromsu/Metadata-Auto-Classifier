@@ -1,10 +1,16 @@
-import { getHeaders, getRequestParam } from 'api';
-import { requestUrl, RequestUrlParam } from 'obsidian';
+import { sendRequest } from 'api';
 import { API_CONSTANTS, OPENROUTER_STRUCTURE_OUTPUT } from 'utils/constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 import { ApiError } from './ApiError';
 
 export class OpenRouter implements APIProvider {
+	buildHeaders(apiKey: string): Record<string, string> {
+		return {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${apiKey}`,
+			'X-Title': API_CONSTANTS.OPENROUTER_TITLE,
+		};
+	}
 	async callAPI(
 		systemRole: string,
 		user_prompt: string,
@@ -12,10 +18,7 @@ export class OpenRouter implements APIProvider {
 		selectedModel: string,
 		temperature?: number
 	): Promise<StructuredOutput> {
-		const headers: Record<string, string> = {
-			...getHeaders(provider.apiKey),
-			'X-Title': API_CONSTANTS.OPENROUTER_TITLE,
-		};
+		const headers: Record<string, string> = this.buildHeaders(provider.apiKey);
 
 		// Create messages array for the API
 		const messages = [
@@ -31,30 +34,8 @@ export class OpenRouter implements APIProvider {
 			response_format: OPENROUTER_STRUCTURE_OUTPUT,
 		};
 
-		const response = await this.makeApiRequest(provider, headers, data);
+		const response = await sendRequest(provider.baseUrl, headers, data);
 		return this.processApiResponse(response);
-	}
-
-	async makeApiRequest(
-		provider: ProviderConfig,
-		headers: Record<string, string>,
-		data: object
-	): Promise<any> {
-		const url = provider.baseUrl;
-		const requestParam: RequestUrlParam = getRequestParam(url, headers, JSON.stringify(data));
-
-		try {
-			const response = await requestUrl(requestParam);
-			if (response.status !== 200) {
-				throw new ApiError(`API request failed with status ${response.status}: ${response.text}`);
-			}
-			return response.json;
-		} catch (error) {
-			if (error instanceof ApiError) {
-				throw error;
-			}
-			throw new ApiError(`Failed to make request to OpenRouter API: ${error.message}`);
-		}
 	}
 
 	processApiResponse(responseData: any): StructuredOutput {

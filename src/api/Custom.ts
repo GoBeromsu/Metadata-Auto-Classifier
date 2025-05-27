@@ -1,10 +1,18 @@
-import { getHeaders, getRequestParam } from 'api';
-import { ApiError } from './ApiError';
-import { requestUrl, RequestUrlParam } from 'obsidian';
+import { sendRequest } from 'api';
 import { API_CONSTANTS, LMSTUDIO_STRUCTURE_OUTPUT } from 'utils/constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 
 export class Custom implements APIProvider {
+	buildHeaders(apiKey: string): Record<string, string> {
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json',
+		};
+		if (apiKey) {
+			headers.Authorization = `Bearer ${apiKey}`;
+		}
+		return headers;
+	}
+
 	async callAPI(
 		systemRole: string,
 		user_prompt: string,
@@ -12,7 +20,7 @@ export class Custom implements APIProvider {
 		selectedModel: string,
 		temperature?: number
 	): Promise<StructuredOutput> {
-		const headers: Record<string, string> = getHeaders(provider.apiKey);
+		const headers: Record<string, string> = this.buildHeaders(provider.apiKey);
 
 		// Create messages array for the API
 		const messages = [
@@ -28,30 +36,8 @@ export class Custom implements APIProvider {
 			response_format: LMSTUDIO_STRUCTURE_OUTPUT,
 		};
 
-		const response = await this.makeApiRequest(provider, headers, data);
+		const response = await sendRequest(provider.baseUrl, headers, data);
 		return this.processApiResponse(response);
-	}
-
-	async makeApiRequest(
-		provider: ProviderConfig,
-		headers: Record<string, string>,
-		data: object
-	): Promise<any> {
-		const url = provider.baseUrl;
-		const requestParam: RequestUrlParam = getRequestParam(url, headers, JSON.stringify(data));
-
-		try {
-			const response = await requestUrl(requestParam);
-			if (response.status !== 200) {
-				throw new ApiError(`API request failed with status ${response.status}: ${response.text}`);
-			}
-			return response.json;
-		} catch (error) {
-			if (error instanceof ApiError) {
-				throw error;
-			}
-			throw new ApiError(`Failed to make request to Custom API: ${error.message}`);
-		}
 	}
 
 	processApiResponse(responseData: any): StructuredOutput {

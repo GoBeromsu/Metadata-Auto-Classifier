@@ -1,10 +1,16 @@
-import { getHeaders, getRequestParam } from 'api';
-import { requestUrl, RequestUrlParam } from 'obsidian';
-import { API_CONSTANTS, DEEPSEEK_STRUCTURE_OUTPUT } from 'utils/constants';
+import { sendRequest } from 'api';
+import { API_CONSTANTS } from 'utils/constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
-import { ApiError } from './ApiError';
 
 export class DeepSeek implements APIProvider {
+	buildHeaders(apiKey: string): Record<string, string> {
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${apiKey}`,
+		};
+		return headers;
+	}
+
 	async callAPI(
 		systemRole: string,
 		user_prompt: string,
@@ -12,7 +18,7 @@ export class DeepSeek implements APIProvider {
 		selectedModel: string,
 		temperature?: number
 	): Promise<StructuredOutput> {
-		const headers: Record<string, string> = getHeaders(provider.apiKey);
+		const headers: Record<string, string> = this.buildHeaders(provider.apiKey);
 
 		// Create messages array for the DeepSeek API
 		const messages = [
@@ -23,62 +29,21 @@ export class DeepSeek implements APIProvider {
 		const data = {
 			model: selectedModel,
 			messages: messages,
-			temperature: temperature || provider.temperature,
-			response_format: DEEPSEEK_STRUCTURE_OUTPUT,
-			max_tokens: API_CONSTANTS.DEFAULT_MAX_TOKENS, // Ensure JSON string is not truncated
+			temperature: temperature,
+			response_format: { type: 'json_object' },
+			max_tokens: 8192, // max token : https://api-docs.deepseek.com/quick_start/pricing
 		};
 
-		const response = await this.makeApiRequest(provider, headers, data);
+		const response = await sendRequest(provider.baseUrl, headers, data);
+
 		return this.processApiResponse(response);
 	}
 
-	async makeApiRequest(
-		provider: ProviderConfig,
-		headers: Record<string, string>,
-		data: object
-	): Promise<any> {
-		const url = provider.baseUrl;
-		const requestParam: RequestUrlParam = getRequestParam(url, headers, JSON.stringify(data));
-
-		try {
-			const response = await requestUrl(requestParam);
-			if (response.status !== 200) {
-				throw new ApiError(`API request failed with status ${response.status}: ${response.text}`);
-			}
-			return response.json;
-		} catch (error) {
-			if (error instanceof ApiError) {
-				throw error;
-			}
-			throw new ApiError(`Failed to make request to DeepSeek API: ${error.message}`);
-		}
-	}
-
 	processApiResponse(responseData: any): StructuredOutput {
-		// Handle DeepSeek's response format - expect JSON object with classifications array
-		const messageContent = responseData.choices[0].message.content;
-		const parsedContent =
-			typeof messageContent === 'string' ? JSON.parse(messageContent) : messageContent;
-
-		// Process classifications array from templates.ts format
-		if (parsedContent.classifications && Array.isArray(parsedContent.classifications)) {
-			const output = parsedContent.classifications.map((item: any) => item.category);
-			const avgReliability =
-				parsedContent.classifications.reduce(
-					(sum: number, item: any) => sum + item.reliability,
-					0
-				) / parsedContent.classifications.length;
-
-			return {
-				output: output,
-				reliability: Math.min(Math.max(avgReliability, 0), 1),
-			};
-		}
-
-		// Fallback for direct output/reliability format
+		const result = responseData.choices[0].message.content as StructuredOutput;
 		return {
-			output: Array.isArray(parsedContent.output) ? parsedContent.output : [parsedContent.output],
-			reliability: Math.min(Math.max(parsedContent.reliability || 0, 0), 1),
+			output: result.output,
+			reliability: result.reliability,
 		};
 	}
 

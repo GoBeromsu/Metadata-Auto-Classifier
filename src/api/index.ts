@@ -1,12 +1,12 @@
-import { CommonNotice } from 'ui/components/common/CommonNotice';
-import { RequestUrlParam } from 'obsidian';
+import { requestUrl, RequestUrlParam } from 'obsidian';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 import { Anthropic } from './Anthropic';
 import { Custom } from './Custom';
+import { DeepSeek } from './DeepSeek';
+import { Gemini } from './Gemini';
 import { OpenAI } from './OpenAI';
 import { OpenRouter } from './OpenRouter';
-import { Gemini } from './Gemini';
-import { DeepSeek } from './DeepSeek';
+import { ApiError } from './ApiError';
 
 export const getProvider = (providerName: string): APIProvider => {
 	switch (providerName) {
@@ -33,45 +33,54 @@ export const processAPIRequest = async (
 	selectedProvider: ProviderConfig,
 	selectedModel: string
 ): Promise<StructuredOutput> => {
-	try {
-		const providerInstance = getProvider(selectedProvider.name);
-		const response = await providerInstance.callAPI(
-			systemRole,
-			promptTemplate,
-			selectedProvider,
-			selectedModel
-		);
-		return response;
-	} catch (error) {
-		CommonNotice.showError(error as Error, 'API Request');
-		return {
-			output: [],
-			reliability: 0,
-		};
-	}
+	const providerInstance = getProvider(selectedProvider.name);
+	const response = await providerInstance.callAPI(
+		systemRole,
+		promptTemplate,
+		selectedProvider,
+		selectedModel
+	);
+	return response;
 };
 
-export const getHeaders = (apiKey?: string): Record<string, string> => {
-	const headers: Record<string, string> = {
-		'Content-Type': 'application/json',
-	};
-
-	if (apiKey) {
-		headers.Authorization = `Bearer ${apiKey}`;
-	}
-
-	return headers;
-};
-
-export const getRequestParam = (
+/**
+ * Creates standardized RequestUrlParam objects with enforced POST method
+ * Implements convention-over-configuration to ensure API call consistency
+ */
+const getRequestParam = (
 	url: string,
 	headers: Record<string, string>,
-	body?: string | ArrayBuffer
+	body: object
 ): RequestUrlParam => {
 	return {
 		url,
 		method: 'POST',
 		headers,
-		body,
+		body: JSON.stringify(body),
 	};
+};
+
+export const sendRequest = async (
+	baseUrl: string,
+	headers: Record<string, string>,
+	data: object
+): Promise<any> => {
+	const requestParam: RequestUrlParam = getRequestParam(baseUrl, headers, data);
+	let response: any;
+
+	try {
+		response = await requestUrl(requestParam);
+	} catch (error) {
+		throw new ApiError(`${error}`);
+	}
+
+	if (response.status >= 500) {
+		throw new ApiError(`Server error (HTTP ${response.status}) from ${baseUrl}: ${response.text}`);
+	}
+
+	if (response.status >= 400) {
+		throw new ApiError(`Client error (HTTP ${response.status}) from ${baseUrl}: ${response.text}`);
+	}
+
+	return response.json;
 };
