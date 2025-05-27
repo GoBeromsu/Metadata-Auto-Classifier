@@ -47,7 +47,7 @@ export class Gemini implements APIProvider {
 		data: object
 	): Promise<any> {
 		const url = provider.baseUrl;
-		const requestParam: RequestUrlParam = getRequestParam(url, headers, JSON.stringify(data));
+		const requestParam: RequestUrlParam = getRequestParam(url, headers, data);
 
 		try {
 			const response = await requestUrl(requestParam);

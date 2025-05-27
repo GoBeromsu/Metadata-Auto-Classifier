@@ -1,12 +1,11 @@
-import { CommonNotice } from 'ui/components/common/CommonNotice';
 import { RequestUrlParam } from 'obsidian';
 import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
 import { Anthropic } from './Anthropic';
 import { Custom } from './Custom';
+import { DeepSeek } from './DeepSeek';
+import { Gemini } from './Gemini';
 import { OpenAI } from './OpenAI';
 import { OpenRouter } from './OpenRouter';
-import { Gemini } from './Gemini';
-import { DeepSeek } from './DeepSeek';
 
 export const getProvider = (providerName: string): APIProvider => {
 	switch (providerName) {
@@ -43,15 +42,19 @@ export const processAPIRequest = async (
 	return response;
 };
 
+/**
+ * Creates standardized RequestUrlParam objects with enforced POST method
+ * Implements convention-over-configuration to ensure API call consistency
+ */
 export const getRequestParam = (
 	url: string,
 	headers: Record<string, string>,
-	body?: string | ArrayBuffer
+	body: object
 ): RequestUrlParam => {
 	return {
 		url,
 		method: 'POST',
 		headers,
-		body,
+		body: JSON.stringify(body),
 	};
 };
