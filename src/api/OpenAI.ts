@@ -1,9 +1,8 @@
-import { getRequestParam } from 'api';
-import { requestUrl, RequestUrlParam } from 'obsidian';
 import { APIProvider, StructuredOutput } from 'utils/interface';
 import { API_CONSTANTS, OPENAI_STRUCTURE_OUTPUT } from '../utils/constants';
 import { ProviderConfig } from '../utils/interface';
 import { ApiError } from './ApiError';
+import { sendRequest } from 'api';
 
 export class OpenAI implements APIProvider {
 	buildHeaders(apiKey: string): Record<string, string> {
@@ -36,49 +35,17 @@ export class OpenAI implements APIProvider {
 			temperature: temperature || provider.temperature,
 			response_format: OPENAI_STRUCTURE_OUTPUT,
 		};
-
-		const response = await this.makeApiRequest(provider, headers, data);
+		console.log(data);
+		const response = await sendRequest(provider.baseUrl, headers, data);
 		return this.processApiResponse(response);
 	}
 
-	async makeApiRequest(
-		provider: ProviderConfig,
-		headers: Record<string, string>,
-		data: object
-	): Promise<any> {
-		const url = provider.baseUrl;
-		const requestParam: RequestUrlParam = getRequestParam(url, headers, JSON.stringify(data));
-
-		try {
-			const response = await requestUrl(requestParam);
-			if (response.status !== 200) {
-				throw new ApiError(`API request failed with status ${response.status}: ${response.text}`);
-			}
-			return response.json;
-		} catch (error) {
-			if (error instanceof ApiError) {
-				throw error;
-			}
-			throw new ApiError(`Failed to make request to OpenAI API: ${error.message}`);
-		}
-	}
-
 	processApiResponse(responseData: any): StructuredOutput {
-		try {
-			// Handle different response formats from various models
-			const messageContent = responseData.choices[0].message.content;
-
-			// Some newer models might return parsed JSON directly
-			if (typeof messageContent === 'object' && messageContent !== null) {
-				return messageContent as StructuredOutput;
-			}
-
-			// Otherwise parse the content as JSON
-			const content = messageContent.trim();
-			return JSON.parse(content) as StructuredOutput;
-		} catch (error) {
-			throw new ApiError('Failed to parse response from OpenAI API');
-		}
+		const result = responseData?.choices[0]?.message?.content as StructuredOutput;
+		return {
+			output: result.output,
+			reliability: result.reliability,
+		};
 	}
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {

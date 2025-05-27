@@ -52,10 +52,5 @@ export interface APIProvider {
 
 	verifyConnection(provider: ProviderConfig): Promise<boolean>;
 	buildHeaders(apiKey: string): Record<string, string>;
-	makeApiRequest(
-		provider: ProviderConfig,
-		headers: Record<string, string>,
-		data: object
-	): Promise<any>;
 	processApiResponse(responseData: any): StructuredOutput;
 }

@@ -1,4 +1,4 @@
-import { ModelInfo, ProviderConfig } from 'utils/interface';
+import { Model, ProviderConfig } from 'utils/interface';
 
 import AutoClassifierPlugin from 'main';
 import { Setting, TextAreaComponent } from 'obsidian';
@@ -137,7 +137,7 @@ export class Api {
 
 	private renderModelList(containerEl: HTMLElement): void {
 		this.plugin.settings.providers.forEach((provider) => {
-			provider.models.forEach((config: ModelInfo) => {
+			provider.models.forEach((config: Model) => {
 				const isActive = this.plugin.settings.selectedModel === config.name;
 				const editTarget = {
 					model: config.name,

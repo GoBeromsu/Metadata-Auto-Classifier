@@ -1,12 +1,12 @@
 import { requestUrl } from 'obsidian';
-import { OpenAI } from '../src/api/OpenAI';
-import { Anthropic } from '../src/api/Anthropic';
-import { Custom } from '../src/api/Custom';
-import { OpenRouter } from '../src/api/OpenRouter';
-import { Gemini } from '../src/api/Gemini';
-import { DeepSeek } from '../src/api/DeepSeek';
-import { ProviderConfig, StructuredOutput } from '../src/utils/interface';
-import { API_CONSTANTS } from '../src/utils/constants';
+import { OpenAI } from '../../src/api/OpenAI';
+import { Anthropic } from '../../src/api/Anthropic';
+import { Custom } from '../../src/api/Custom';
+import { OpenRouter } from '../../src/api/OpenRouter';
+import { Gemini } from '../../src/api/Gemini';
+import { DeepSeek } from '../../src/api/DeepSeek';
+import { ProviderConfig, StructuredOutput } from '../../src/utils/interface';
+import { API_CONSTANTS } from '../../src/utils/constants';
 
 describe('API callAPI Tests', () => {
 	const createMockProvider = (name: string, baseUrl: string): ProviderConfig => ({
@@ -33,7 +33,7 @@ describe('API callAPI Tests', () => {
 			choices: [
 				{
 					message: {
-						content: JSON.stringify({ output, reliability }),
+						content: { output, reliability },
 					},
 				},
 			],
@@ -70,18 +70,13 @@ describe('API callAPI Tests', () => {
 		},
 	});
 
-	const createDeepSeekResponse = (categories: string[], reliability: number) => ({
+	const createDeepSeekResponse = (output: string[], reliability: number) => ({
 		status: 200,
 		json: {
 			choices: [
 				{
 					message: {
-						content: JSON.stringify({
-							classifications: categories.map((category) => ({
-								category,
-								reliability,
-							})),
-						}),
+						content: { output, reliability },
 					},
 				},
 			],
