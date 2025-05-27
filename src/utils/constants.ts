@@ -1,5 +1,6 @@
 import { AutoClassifierSettings } from 'ui';
 import { FrontmatterTemplate, ProviderConfig } from './interface';
+import { DEFAULT_TASK_TEMPLATE } from './templates';
 
 const providersData = require('../data/providers.json');
 
@@ -38,7 +39,6 @@ export const createProviderFromPreset = (presetId: string): ProviderConfig => {
 		baseUrl: preset.baseUrl,
 		models: [], // Start with empty models - user should add manually
 		temperature: DEFAULT_TEMPERATURE,
-		customPromptTemplate: '',
 	};
 };
 
@@ -73,6 +73,7 @@ export const DEFAULT_SETTINGS: AutoClassifierSettings = {
 	selectedProvider: '',
 	selectedModel: '',
 	frontmatter: [DEFAULT_TAG_SETTING],
+	classificationRule: DEFAULT_TASK_TEMPLATE,
 };
 
 export const LMSTUDIO_STRUCTURE_OUTPUT = {

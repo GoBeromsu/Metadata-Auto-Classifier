@@ -46,7 +46,6 @@ export class ProviderModal extends Modal {
 				baseUrl: '',
 				models: [],
 				temperature: 0.7,
-				customPromptTemplate: undefined,
 			};
 		}
 	}

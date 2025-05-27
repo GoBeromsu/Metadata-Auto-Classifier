@@ -88,13 +88,13 @@ export default class AutoClassifierPlugin extends Plugin {
 		}
 		const currentContent = await this.app.vault.read(currentFile);
 		const content = getContentWithoutFrontmatter(currentContent);
-
+		const classificationRule = this.settings.classificationRule;
 		const promptTemplate = getPromptTemplate(
 			frontmatter.count,
 			content,
 			processedValues,
 			frontmatter.customQuery,
-			selectedProvider.customPromptTemplate
+			classificationRule
 		);
 
 		const apiResponse = await processAPIRequest(

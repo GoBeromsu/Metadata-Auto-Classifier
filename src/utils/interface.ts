@@ -15,7 +15,6 @@ export interface ProviderConfig {
 	baseUrl: string;
 	models: Model[];
 	temperature?: number;
-	customPromptTemplate?: string;
 }
 
 interface Model {
