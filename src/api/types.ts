@@ -1,17 +1,3 @@
-import { TFile } from 'obsidian';
-
-export interface FrontmatterTemplate {
-	id: number;
-	name: string;
-	count: {
-		min: number;
-		max: number;
-	};
-	refs: string[];
-	overwrite: boolean;
-	linkType: 'WikiLink' | 'Normal';
-	customQuery: string;
-}
 export interface ProviderConfig {
 	name: string;
 	apiKey: string;
@@ -23,21 +9,6 @@ export interface ProviderConfig {
 export interface Model {
 	name: string;
 	displayName: string;
-}
-export interface FrontMatter {
-	[key: string]: string[];
-}
-export type ProcessFrontMatterFn = (
-	file: TFile,
-	fn: (frontmatter: FrontMatter) => void
-) => Promise<void>;
-
-export interface InsertFrontMatterParams {
-	file: TFile;
-	key: string;
-	value: string[];
-	overwrite: boolean;
-	linkType?: 'Normal' | 'WikiLink';
 }
 export interface StructuredOutput {
 	output: string[];

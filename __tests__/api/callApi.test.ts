@@ -1,12 +1,12 @@
 import { requestUrl } from 'obsidian';
-import { OpenAI } from '../../src/api/OpenAI';
-import { Anthropic } from '../../src/api/Anthropic';
-import { Custom } from '../../src/api/Custom';
-import { OpenRouter } from '../../src/api/OpenRouter';
-import { Gemini } from '../../src/api/Gemini';
-import { DeepSeek } from '../../src/api/DeepSeek';
-import { ProviderConfig, StructuredOutput } from '../../src/utils/interface';
+import { Anthropic } from '../../src/api/providers/Anthropic';
+import { Custom } from '../../src/api/providers/Custom';
+import { DeepSeek } from '../../src/api/providers/DeepSeek';
+import { Gemini } from '../../src/api/providers/Gemini';
+import { OpenAI } from '../../src/api/providers/OpenAI';
+import { OpenRouter } from '../../src/api/providers/OpenRouter';
 import { API_CONSTANTS } from '../../src/utils/constants';
+import { ProviderConfig, StructuredOutput } from '../../src/api/types';
 
 describe('API callAPI Tests', () => {
 	const createMockProvider = (name: string, baseUrl: string): ProviderConfig => ({

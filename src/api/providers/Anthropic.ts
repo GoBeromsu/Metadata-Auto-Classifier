@@ -1,7 +1,6 @@
 import { sendRequest } from 'api';
 import { ANTHROPIC_TOOL_CONFIG, API_CONSTANTS } from 'utils/constants';
-import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
-import { ApiError } from './ApiError';
+import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class Anthropic implements APIProvider {
 	buildHeaders(apiKey: string): Record<string, string> {

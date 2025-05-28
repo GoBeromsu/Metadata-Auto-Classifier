@@ -7,7 +7,7 @@ import {
 	FrontmatterTemplate,
 	InsertFrontMatterParams,
 	ProcessFrontMatterFn,
-} from 'utils/interface';
+} from './types';
 
 /**
  * Extracts the content of a markdown file excluding frontmatter

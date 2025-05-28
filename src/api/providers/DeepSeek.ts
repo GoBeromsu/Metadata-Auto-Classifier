@@ -1,9 +1,8 @@
 import { sendRequest } from 'api';
-import { APIProvider, StructuredOutput } from 'utils/interface';
-import { API_CONSTANTS, OPENAI_STRUCTURE_OUTPUT } from '../utils/constants';
-import { ProviderConfig } from '../utils/interface';
+import { API_CONSTANTS } from 'utils/constants';
+import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
-export class OpenAI implements APIProvider {
+export class DeepSeek implements APIProvider {
 	buildHeaders(apiKey: string): Record<string, string> {
 		const headers: Record<string, string> = {
 			'Content-Type': 'application/json',
@@ -21,20 +20,22 @@ export class OpenAI implements APIProvider {
 	): Promise<StructuredOutput> {
 		const headers: Record<string, string> = this.buildHeaders(provider.apiKey);
 
-		// Create messages array for the OpenAI API
+		// Create messages array for the DeepSeek API
 		const messages = [
 			{ role: 'system', content: systemRole },
 			{ role: 'user', content: user_prompt },
 		];
 
-		// Create the request data
 		const data = {
 			model: selectedModel,
 			messages: messages,
-			temperature: temperature || provider.temperature,
-			response_format: OPENAI_STRUCTURE_OUTPUT,
+			temperature: temperature,
+			response_format: { type: 'json_object' },
+			max_tokens: 8192, // max token : https://api-docs.deepseek.com/quick_start/pricing
 		};
+
 		const response = await sendRequest(provider.baseUrl, headers, data);
+
 		return this.processApiResponse(response);
 	}
 

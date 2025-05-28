@@ -1,12 +1,12 @@
 import { requestUrl, RequestUrlParam } from 'obsidian';
-import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
-import { Anthropic } from './Anthropic';
-import { Custom } from './Custom';
-import { DeepSeek } from './DeepSeek';
-import { Gemini } from './Gemini';
-import { OpenAI } from './OpenAI';
-import { OpenRouter } from './OpenRouter';
 import { ApiError } from './ApiError';
+import { Anthropic } from './providers/Anthropic';
+import { Custom } from './providers/Custom';
+import { DeepSeek } from './providers/DeepSeek';
+import { Gemini } from './providers/Gemini';
+import { OpenAI } from './providers/OpenAI';
+import { OpenRouter } from './providers/OpenRouter';
+import { APIProvider, ProviderConfig, StructuredOutput } from './types';
 
 export const getProvider = (providerName: string): APIProvider => {
 	switch (providerName) {

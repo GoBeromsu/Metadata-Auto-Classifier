@@ -1,6 +1,6 @@
 import { AutoClassifierSettings } from 'ui';
 import { FrontmatterTemplate, ProviderConfig } from './interface';
-import { DEFAULT_TASK_TEMPLATE } from './templates';
+import { DEFAULT_TASK_TEMPLATE } from '../api/prompt';
 
 const providersData = require('../data/providers.json');
 

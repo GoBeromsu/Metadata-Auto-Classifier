@@ -5,7 +5,7 @@ import { Setting, TextAreaComponent } from 'obsidian';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
 import { ModelModal } from 'ui/modals/ModelModal';
 import { ProviderModal } from 'ui/modals/ProviderModal';
-import { DEFAULT_TASK_TEMPLATE } from 'utils/templates';
+import { DEFAULT_TASK_TEMPLATE } from 'api/prompt';
 
 export class Api {
 	protected plugin: AutoClassifierPlugin;

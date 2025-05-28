@@ -1,15 +1,13 @@
 import { sendRequest } from 'api';
-import { API_CONSTANTS, LMSTUDIO_STRUCTURE_OUTPUT } from 'utils/constants';
-import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
+import { API_CONSTANTS, OPENAI_STRUCTURE_OUTPUT } from '../../utils/constants';
+import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
-export class Custom implements APIProvider {
+export class OpenAI implements APIProvider {
 	buildHeaders(apiKey: string): Record<string, string> {
 		const headers: Record<string, string> = {
 			'Content-Type': 'application/json',
+			Authorization: `Bearer ${apiKey}`,
 		};
-		if (apiKey) {
-			headers.Authorization = `Bearer ${apiKey}`;
-		}
 		return headers;
 	}
 
@@ -22,7 +20,7 @@ export class Custom implements APIProvider {
 	): Promise<StructuredOutput> {
 		const headers: Record<string, string> = this.buildHeaders(provider.apiKey);
 
-		// Create messages array for the API
+		// Create messages array for the OpenAI API
 		const messages = [
 			{ role: 'system', content: systemRole },
 			{ role: 'user', content: user_prompt },
@@ -33,24 +31,19 @@ export class Custom implements APIProvider {
 			model: selectedModel,
 			messages: messages,
 			temperature: temperature || provider.temperature,
-			response_format: LMSTUDIO_STRUCTURE_OUTPUT,
+			response_format: OPENAI_STRUCTURE_OUTPUT,
 		};
-
 		const response = await sendRequest(provider.baseUrl, headers, data);
 		return this.processApiResponse(response);
 	}
 
 	processApiResponse(responseData: any): StructuredOutput {
-		const messageContent = responseData.choices[0].message.content;
-
-		// Some models might return parsed JSON directly
-		if (typeof messageContent === 'object' && messageContent !== null) {
-			return messageContent as StructuredOutput;
-		}
-
-		// Otherwise parse the content as JSON
-		const content = messageContent.trim();
-		return JSON.parse(content) as StructuredOutput;
+		const content = responseData?.choices[0]?.message?.content;
+		const result = JSON.parse(content) as StructuredOutput;
+		return {
+			output: result.output,
+			reliability: result.reliability,
+		};
 	}
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {

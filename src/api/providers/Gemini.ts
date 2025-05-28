@@ -1,6 +1,6 @@
 import { API_CONSTANTS, GEMINI_STRUCTURE_OUTPUT } from 'utils/constants';
-import { APIProvider, ProviderConfig, StructuredOutput } from 'utils/interface';
-import { ApiError } from './ApiError';
+import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
+import { ApiError } from '../ApiError';
 import { sendRequest } from 'api';
 
 export class Gemini implements APIProvider {
