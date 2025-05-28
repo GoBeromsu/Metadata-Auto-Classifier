@@ -1,4 +1,4 @@
-import { ProviderConfig } from './types';
+import type { ProviderConfig } from './types';
 
 // Common Constants (reused multiple times)
 export const COMMON_CONSTANTS = {

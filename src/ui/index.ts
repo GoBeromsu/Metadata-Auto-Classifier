@@ -1,8 +1,8 @@
-import AutoClassifierPlugin from 'main';
+import type AutoClassifierPlugin from 'main';
 import { PluginSettingTab } from 'obsidian';
 
-import { ProviderConfig } from 'api/types';
-import { FrontmatterTemplate } from 'frontmatter/types';
+import type { ProviderConfig } from 'api/types';
+import type { FrontmatterTemplate } from 'frontmatter/types';
 import { generateId } from 'utils';
 import { DEFAULT_FRONTMATTER_SETTING } from 'utils/constants';
 import { CommonSetting } from './components/common/CommonSetting';

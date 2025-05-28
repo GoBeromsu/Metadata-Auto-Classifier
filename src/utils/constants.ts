@@ -1,7 +1,7 @@
 import { DEFAULT_TASK_TEMPLATE } from 'api/prompt';
 import { DEFAULT_PROVIDER } from '../api/constants';
-import { FrontmatterTemplate, LinkType } from '../frontmatter/types';
-import { AutoClassifierSettings } from '../ui';
+import type { FrontmatterTemplate, LinkType } from '../frontmatter/types';
+import type { AutoClassifierSettings } from '../ui';
 
 export const DEFAULT_FRONTMATTER_SETTING = {
 	name: '',	

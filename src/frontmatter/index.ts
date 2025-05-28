@@ -1,6 +1,7 @@
-import { getAllTags, getFrontMatterInfo, MetadataCache, TFile } from 'obsidian';
+import type { MetadataCache, TFile } from 'obsidian';
+import { getAllTags, getFrontMatterInfo } from 'obsidian';
 
-import {
+import type {
 	FrontMatter,
 	FrontmatterTemplate,
 	InsertFrontMatterParams,

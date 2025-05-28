@@ -1,7 +1,8 @@
-import { FrontmatterTemplate, LinkType } from 'frontmatter/types';
-import AutoClassifierPlugin from 'main';
-import { App, Modal, TextAreaComponent } from 'obsidian';
-import { SettingsComponentOptions } from 'ui/components/BaseSettings';
+import type { FrontmatterTemplate, LinkType } from 'frontmatter/types';
+import type AutoClassifierPlugin from 'main';
+import type { App} from 'obsidian';
+import { Modal, TextAreaComponent } from 'obsidian';
+import type { SettingsComponentOptions } from 'ui/components/BaseSettings';
 import { WikiLinkSelector } from 'ui/components/WikiLinkSelector';
 import { CommonButton } from 'ui/components/common/CommonButton';
 import { CommonSetting } from 'ui/components/common/CommonSetting';

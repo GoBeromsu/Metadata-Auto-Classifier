@@ -1,6 +1,6 @@
 import { sendRequest } from '../index';
 import { COMMON_CONSTANTS, LMSTUDIO_STRUCTURE_OUTPUT } from '../constants';
-import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
+import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class Custom implements APIProvider {
 	buildHeaders(apiKey: string): Record<string, string> {

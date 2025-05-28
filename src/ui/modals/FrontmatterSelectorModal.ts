@@ -1,4 +1,5 @@
-import { App, FuzzySuggestModal } from 'obsidian';
+import type { App} from 'obsidian';
+import { FuzzySuggestModal } from 'obsidian';
 
 interface FrontmatterOption {
 	id: number;

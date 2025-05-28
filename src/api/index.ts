@@ -1,4 +1,5 @@
-import { requestUrl, RequestUrlParam } from 'obsidian';
+import type { RequestUrlParam } from 'obsidian';
+import { requestUrl } from 'obsidian';
 import { ApiError } from './ApiError';
 import { Anthropic } from './providers/Anthropic';
 import { Custom } from './providers/Custom';
@@ -6,7 +7,7 @@ import { DeepSeek } from './providers/DeepSeek';
 import { Gemini } from './providers/Gemini';
 import { OpenAI } from './providers/OpenAI';
 import { OpenRouter } from './providers/OpenRouter';
-import { APIProvider, ProviderConfig, StructuredOutput } from './types';
+import type { APIProvider, ProviderConfig, StructuredOutput } from './types';
 
 export const getProvider = (providerName: string): APIProvider => {
 	switch (providerName) {

@@ -1,6 +1,6 @@
 import { COMMON_CONSTANTS } from '../constants';
 import { sendRequest } from '../index';
-import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
+import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class DeepSeek implements APIProvider {
 	buildHeaders(apiKey: string): Record<string, string> {

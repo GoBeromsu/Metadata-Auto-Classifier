@@ -1,6 +1,6 @@
 import { COMMON_CONSTANTS, OPENAI_STRUCTURE_OUTPUT } from '../constants';
 import { sendRequest } from '../index';
-import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
+import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class OpenAI implements APIProvider {
 	buildHeaders(apiKey: string): Record<string, string> {

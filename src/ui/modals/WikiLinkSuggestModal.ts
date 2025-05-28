@@ -1,4 +1,5 @@
-import { FuzzySuggestModal, TFile, App, FuzzyMatch } from 'obsidian';
+import type { TFile, App, FuzzyMatch } from 'obsidian';
+import { FuzzySuggestModal } from 'obsidian';
 
 /**
  * Modal for searching and selecting wiki links from existing files in the vault

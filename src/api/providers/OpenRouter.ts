@@ -1,7 +1,7 @@
 import { sendRequest } from '../index';
 import { ApiError } from '../ApiError';
 import { COMMON_CONSTANTS, OPENROUTER_STRUCTURE_OUTPUT } from '../constants';
-import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
+import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class OpenRouter implements APIProvider {
 	buildHeaders(apiKey: string): Record<string, string> {

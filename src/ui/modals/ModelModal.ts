@@ -1,8 +1,9 @@
-import { Model, ProviderPreset } from 'api/types';
-import AutoClassifierPlugin from 'main';
+import type { Model, ProviderPreset } from 'api/types';
+import type AutoClassifierPlugin from 'main';
 import { Modal, Notice } from 'obsidian';
 import { CommonButton } from 'ui/components/common/CommonButton';
-import { CommonSetting, DropdownOption } from 'ui/components/common/CommonSetting';
+import type { DropdownOption } from 'ui/components/common/CommonSetting';
+import { CommonSetting } from 'ui/components/common/CommonSetting';
 const providersData = require('../../api/providerPreset.json');
 
 export class ModelModal extends Modal {

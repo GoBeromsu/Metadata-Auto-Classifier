@@ -1,12 +1,13 @@
-import {
+import type {
 	ButtonComponent,
 	DropdownComponent,
+	ToggleComponent} from 'obsidian';
+import {
 	Setting,
 	TextAreaComponent,
-	TextComponent,
-	ToggleComponent,
+	TextComponent
 } from 'obsidian';
-import { CommonButtonProps } from './CommonButton';
+import type { CommonButtonProps } from './CommonButton';
 
 export interface DropdownOption {
 	value: string;

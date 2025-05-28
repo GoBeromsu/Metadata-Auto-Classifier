@@ -1,5 +1,5 @@
 import { getFrontmatterSetting } from 'frontmatter';
-import AutoClassifierPlugin from 'main';
+import type AutoClassifierPlugin from 'main';
 import { BaseSettingsComponent } from 'ui/components/BaseSettings';
 
 export class Frontmatter extends BaseSettingsComponent {
