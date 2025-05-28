@@ -1,6 +1,6 @@
-import { sendRequest } from 'api';
+import { sendRequest } from '../index';
 import { ApiError } from '../ApiError';
-import { API_CONSTANTS, OPENROUTER_STRUCTURE_OUTPUT } from '../constants';
+import { COMMON_CONSTANTS, OPENROUTER_STRUCTURE_OUTPUT } from '../constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class OpenRouter implements APIProvider {
@@ -8,7 +8,7 @@ export class OpenRouter implements APIProvider {
 		return {
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${apiKey}`,
-			'X-Title': API_CONSTANTS.OPENROUTER_TITLE,
+			'X-Title': 'Metadata Auto Classifier',
 		};
 	}
 	async callAPI(
@@ -67,8 +67,8 @@ export class OpenRouter implements APIProvider {
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
 		await this.callAPI(
-			API_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
-			API_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
+			COMMON_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
+			COMMON_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
 			provider,
 			provider.models[0]?.name
 		);

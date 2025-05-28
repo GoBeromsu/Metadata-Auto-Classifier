@@ -1,5 +1,5 @@
-import { sendRequest } from 'api';
-import { API_CONSTANTS, LMSTUDIO_STRUCTURE_OUTPUT } from '../constants';
+import { sendRequest } from '../index';
+import { COMMON_CONSTANTS, LMSTUDIO_STRUCTURE_OUTPUT } from '../constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class Custom implements APIProvider {
@@ -55,8 +55,8 @@ export class Custom implements APIProvider {
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
 		await this.callAPI(
-			API_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
-			API_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
+			COMMON_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
+			COMMON_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
 			provider,
 			provider.models[0]?.name
 		);

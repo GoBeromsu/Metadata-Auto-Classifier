@@ -1,5 +1,4 @@
 import { requestUrl } from 'obsidian';
-import { API_CONSTANTS } from '../../src/api/constants';
 import { Anthropic } from '../../src/api/providers/Anthropic';
 import { Custom } from '../../src/api/providers/Custom';
 import { DeepSeek } from '../../src/api/providers/DeepSeek';
@@ -46,7 +45,7 @@ describe('API callAPI Tests', () => {
 			content: [
 				{
 					type: 'tool_use',
-					name: API_CONSTANTS.ANTHROPIC_TOOL_NAME,
+					name: 'classify_content',
 					input: { output, reliability },
 				},
 			],

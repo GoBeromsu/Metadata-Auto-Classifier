@@ -1,5 +1,5 @@
-import { sendRequest } from 'api';
-import { API_CONSTANTS } from '../constants';
+import { sendRequest } from '../index';
+import { COMMON_CONSTANTS } from '../constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class DeepSeek implements APIProvider {
@@ -50,8 +50,8 @@ export class DeepSeek implements APIProvider {
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
 		await this.callAPI(
-			API_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
-			API_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
+			COMMON_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
+			COMMON_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
 			provider,
 			provider.models[0]?.name
 		);

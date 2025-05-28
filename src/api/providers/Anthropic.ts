@@ -1,5 +1,5 @@
-import { sendRequest } from 'api';
-import { ANTHROPIC_TOOL_CONFIG, API_CONSTANTS } from '../constants';
+import { sendRequest } from '../index';
+import { ANTHROPIC_TOOL_CONFIG, COMMON_CONSTANTS } from '../constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class Anthropic implements APIProvider {
@@ -7,7 +7,7 @@ export class Anthropic implements APIProvider {
 		return {
 			'Content-Type': 'application/json',
 			'x-api-key': apiKey,
-			'anthropic-version': API_CONSTANTS.ANTHROPIC_VERSION,
+			'anthropic-version': '2023-06-01',
 		};
 	}
 
@@ -26,12 +26,12 @@ export class Anthropic implements APIProvider {
 		// Use tool calling for structured output
 		const data = {
 			model: selectedModel,
-			max_tokens: API_CONSTANTS.DEFAULT_MAX_TOKENS,
+			max_tokens: COMMON_CONSTANTS.DEFAULT_MAX_TOKENS,
 			system: systemRole,
 			messages: messages,
 			temperature: temperature,
 			tools: [ANTHROPIC_TOOL_CONFIG],
-			tool_choice: { type: 'tool', name: API_CONSTANTS.ANTHROPIC_TOOL_NAME },
+			tool_choice: { type: 'tool', name: 'classify_content' },
 		};
 
 		const response = await sendRequest(provider.baseUrl, headers, data);
@@ -54,8 +54,8 @@ export class Anthropic implements APIProvider {
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
 		await this.callAPI(
-			API_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
-			API_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
+			COMMON_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
+			COMMON_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
 			provider,
 			provider.models[0]?.name
 		);

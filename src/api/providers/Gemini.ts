@@ -1,6 +1,6 @@
-import { sendRequest } from 'api';
+import { sendRequest } from '../index';
 import { ApiError } from '../ApiError';
-import { API_CONSTANTS, GEMINI_STRUCTURE_OUTPUT } from '../constants';
+import { COMMON_CONSTANTS, GEMINI_STRUCTURE_OUTPUT } from '../constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class Gemini implements APIProvider {
@@ -47,8 +47,8 @@ export class Gemini implements APIProvider {
 				return {
 					output: Array.isArray(responseData.output) ? responseData.output : [responseData.output],
 					reliability: Math.min(
-						Math.max(responseData.reliability, API_CONSTANTS.DEFAULT_RELIABILITY_MIN),
-						API_CONSTANTS.DEFAULT_RELIABILITY_MAX
+						Math.max(responseData.reliability, COMMON_CONSTANTS.DEFAULT_RELIABILITY_MIN),
+						COMMON_CONSTANTS.DEFAULT_RELIABILITY_MAX
 					),
 				};
 			}
@@ -63,8 +63,8 @@ export class Gemini implements APIProvider {
 						return {
 							output: Array.isArray(parsed.output) ? parsed.output : [parsed.output],
 							reliability: Math.min(
-								Math.max(parsed.reliability || 0, API_CONSTANTS.DEFAULT_RELIABILITY_MIN),
-								API_CONSTANTS.DEFAULT_RELIABILITY_MAX
+								Math.max(parsed.reliability || 0, COMMON_CONSTANTS.DEFAULT_RELIABILITY_MIN),
+								COMMON_CONSTANTS.DEFAULT_RELIABILITY_MAX
 							),
 						};
 					}
@@ -82,8 +82,8 @@ export class Gemini implements APIProvider {
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
 		await this.callAPI(
-			API_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
-			API_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
+			COMMON_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
+			COMMON_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
 			provider,
 			provider.models[0]?.name
 		);

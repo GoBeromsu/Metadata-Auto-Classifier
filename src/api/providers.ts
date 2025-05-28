@@ -1,5 +1,5 @@
+import { COMMON_CONSTANTS } from './constants';
 import { ProviderConfig, ProviderPreset } from './types';
-import { DEFAULT_TEMPERATURE } from './constants';
 
 const providersData = require('./providerPreset.json');
 
@@ -15,7 +15,7 @@ export const createProviderFromPreset = (presetId: string): ProviderConfig => {
 		apiKey: '',
 		baseUrl: preset.baseUrl,
 		models: [], // Start with empty models - user should add manually
-		temperature: DEFAULT_TEMPERATURE,
+		temperature: COMMON_CONSTANTS.DEFAULT_TEMPERATURE,
 	};
 };
 
