@@ -1,17 +1,19 @@
-import type { Model, ProviderConfig } from 'api/types';
-import type AutoClassifierPlugin from 'main';
+import { DEFAULT_TASK_TEMPLATE } from 'api/prompt';
+import type { Model } from 'api/types';
 import { Setting, TextAreaComponent } from 'obsidian';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
-import { ModelModal } from 'ui/modals/ModelModal';
-import { ProviderModal } from 'ui/modals/ProviderModal';
-import { DEFAULT_TASK_TEMPLATE } from 'api/prompt';
+import { ApiProps, UIComponent } from 'ui/types';
 
-export class Api {
-	protected plugin: AutoClassifierPlugin;
+export class ApiComponent implements UIComponent {
 	private containerEl: HTMLElement | null = null;
+	private props: ApiProps;
 
-	constructor(plugin: AutoClassifierPlugin) {
-		this.plugin = plugin;
+	constructor(props: ApiProps) {
+		this.props = props;
+	}
+
+	updateProps(newProps: ApiProps): void {
+		this.props = newProps;
 	}
 
 	display(containerEl: HTMLElement): void {
@@ -44,17 +46,14 @@ export class Api {
 			button: {
 				text: '+ Add provider',
 				onClick: () => {
-					const modal = new ProviderModal(this.plugin, (provider: ProviderConfig) => {
-						this.addProvider(provider);
-					});
-					modal.open();
+					this.props.onOpenProviderModal('add');
 				},
 			},
 		});
 	}
 
 	private addCustomPromptSetting(containerEl: HTMLElement): void {
-		const currentTemplate = this.plugin.settings.classificationRule;
+		const currentTemplate = this.props.classificationRule;
 
 		// Create a container for the textarea
 		const textAreaContainer = containerEl.createDiv({ cls: 'custom-prompt-container' });
@@ -67,8 +66,7 @@ export class Api {
 			.setPlaceholder(DEFAULT_TASK_TEMPLATE)
 			.setValue(currentTemplate)
 			.onChange(async (value) => {
-				this.plugin.settings.classificationRule = value;
-				await this.plugin.saveSettings();
+				await this.props.onClassificationRuleChange(value);
 			});
 
 		// Set the text area dimensions
@@ -84,9 +82,8 @@ export class Api {
 					.setIcon('reset')
 					.setTooltip('Reset to default template')
 					.onClick(async () => {
-						this.plugin.settings.classificationRule = DEFAULT_TASK_TEMPLATE;
 						textAreaComponent.setValue(DEFAULT_TASK_TEMPLATE);
-						await this.plugin.saveSettings();
+						await this.props.onClassificationRuleChange(DEFAULT_TASK_TEMPLATE);
 					})
 			);
 
@@ -107,23 +104,30 @@ export class Api {
 			name: '',
 			button: {
 				text: '+ Add model',
-				onClick: () => this.openAddModelModal(),
+				onClick: () => {
+					this.props.onOpenModelModal('add', undefined);
+				},
 			},
 		});
 	}
 
 	private renderProviderList(containerEl: HTMLElement): void {
-		this.plugin.settings.providers.forEach((provider, index) => {
+		this.props.providers.forEach((provider) => {
 			const buttons = [
 				{
 					icon: 'pencil',
 					tooltip: 'Edit',
-					onClick: () => this.openEditProviderModal(provider),
+					onClick: () => {
+						this.props.onOpenProviderModal('edit', provider);
+					},
 				},
 				{
 					icon: 'trash',
 					tooltip: 'Delete',
-					onClick: () => this.deleteProvider(provider),
+					onClick: async () => {
+						await this.props.onProviderDelete(provider.name);
+						this.props.onRefresh?.();
+					},
 				},
 			];
 
@@ -135,9 +139,9 @@ export class Api {
 	}
 
 	private renderModelList(containerEl: HTMLElement): void {
-		this.plugin.settings.providers.forEach((provider) => {
+		this.props.providers.forEach((provider) => {
 			provider.models.forEach((config: Model) => {
-				const isActive = this.plugin.settings.selectedModel === config.name;
+				const isActive = this.props.selectedModel === config.name;
 				const editTarget = {
 					model: config.name,
 					displayName: config.displayName,
@@ -150,13 +154,8 @@ export class Api {
 						value: isActive,
 						onChange: async (value) => {
 							if (value) {
-								this.plugin.settings.selectedModel = config.name;
-								this.plugin.settings.selectedProvider = provider.name;
-
-								await this.plugin.saveSettings();
-
-								// Re-render to update all toggles
-								this.rerenderModelSection();
+								await this.props.onModelSelect(provider.name, config.name);
+								this.refreshModelSection();
 							}
 						},
 					},
@@ -165,18 +164,16 @@ export class Api {
 							icon: 'pencil',
 							tooltip: 'Edit',
 							onClick: () => {
-								const modal = new ModelModal(
-									this.plugin,
-									() => this.rerenderModelSection(),
-									editTarget
-								);
-								modal.open();
+								this.props.onOpenModelModal('edit', editTarget);
 							},
 						},
 						{
 							icon: 'trash',
 							tooltip: 'Delete',
-							onClick: () => this.deleteModel(config.name),
+							onClick: async () => {
+								await this.props.onModelDelete(config.name);
+								this.refreshModelSection();
+							},
 						},
 					],
 				});
@@ -184,7 +181,7 @@ export class Api {
 		});
 	}
 
-	private rerenderModelSection(): void {
+	private refreshModelSection(): void {
 		if (!this.containerEl) return;
 
 		const modelSection = this.containerEl.querySelector('.model-section');
@@ -203,65 +200,11 @@ export class Api {
 				name: '',
 				button: {
 					text: '+ Add model',
-					onClick: () => this.openAddModelModal(),
+					onClick: () => {
+						this.props.onOpenModelModal('add');
+					},
 				},
 			});
 		}
-	}
-
-	private openEditProviderModal(provider: ProviderConfig): void {
-		const modal = new ProviderModal(
-			this.plugin,
-			(updatedProvider: ProviderConfig) => {
-				this.plugin.settings.selectedProvider = updatedProvider.name;
-				this.plugin.saveSettings();
-			},
-			provider
-		);
-		modal.open();
-	}
-
-	private openAddModelModal(): void {
-		const modal = new ModelModal(this.plugin, () => {
-			this.rerenderModelSection();
-		});
-		modal.open();
-	}
-
-	private async addProvider(provider: ProviderConfig): Promise<void> {
-		this.plugin.settings.providers.push(provider);
-		await this.plugin.saveSettings();
-		if (this.containerEl) {
-			this.display(this.containerEl);
-		}
-	}
-
-	private async deleteProvider(provider: ProviderConfig): Promise<void> {
-		this.plugin.settings.providers = this.plugin.settings.providers.filter((p) => p !== provider);
-
-		// Clear selection if deleted provider was selected
-		if (this.plugin.settings.selectedProvider === provider.name) {
-			this.plugin.settings.selectedProvider = '';
-			this.plugin.settings.selectedModel = '';
-		}
-
-		await this.plugin.saveSettings();
-		if (this.containerEl) {
-			this.display(this.containerEl);
-		}
-	}
-
-	private async deleteModel(modelName: string): Promise<void> {
-		const selectedProvider = this.plugin.getSelectedProvider();
-
-		selectedProvider.models = selectedProvider.models.filter((m) => m.name !== modelName);
-
-		// Clear selection if deleted model was selected
-		if (this.plugin.settings.selectedModel === modelName) {
-			this.plugin.settings.selectedModel = '';
-		}
-
-		await this.plugin.saveSettings();
-		this.rerenderModelSection();
 	}
 }
