@@ -101,7 +101,6 @@ export default [
 			'no-fallthrough': 'error',
 			'@typescript-eslint/no-floating-promises': 'warn',
 			'@typescript-eslint/explicit-function-return-type': 'warn',
-			'@typescript-eslint/consistent-type-imports': 'error',
 			'sonarjs/no-duplicate-string': 'warn',
 			'import/no-cycle': 'error',
 			'boundaries/element-types': 'warn',
