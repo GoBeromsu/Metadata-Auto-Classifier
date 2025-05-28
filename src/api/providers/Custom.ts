@@ -1,5 +1,5 @@
 import { sendRequest } from 'api';
-import { API_CONSTANTS, LMSTUDIO_STRUCTURE_OUTPUT } from 'utils/constants';
+import { API_CONSTANTS, LMSTUDIO_STRUCTURE_OUTPUT } from '../constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class Custom implements APIProvider {

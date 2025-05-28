@@ -84,3 +84,6 @@ export const sendRequest = async (
 
 	return response.json;
 };
+
+// Re-export provider utilities
+export { createProviderFromPreset, getDefaultProviders } from './providers';

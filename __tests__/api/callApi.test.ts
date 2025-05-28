@@ -1,11 +1,11 @@
 import { requestUrl } from 'obsidian';
+import { API_CONSTANTS } from '../../src/api/constants';
 import { Anthropic } from '../../src/api/providers/Anthropic';
 import { Custom } from '../../src/api/providers/Custom';
 import { DeepSeek } from '../../src/api/providers/DeepSeek';
 import { Gemini } from '../../src/api/providers/Gemini';
 import { OpenAI } from '../../src/api/providers/OpenAI';
 import { OpenRouter } from '../../src/api/providers/OpenRouter';
-import { API_CONSTANTS } from '../../src/utils/constants';
 import { ProviderConfig, StructuredOutput } from '../../src/api/types';
 
 describe('API callAPI Tests', () => {

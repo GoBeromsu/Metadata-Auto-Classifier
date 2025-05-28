@@ -1,10 +1,10 @@
+import { FrontmatterTemplate } from 'frontmatter/types';
 import AutoClassifierPlugin from 'main';
 import { App, Modal, TextAreaComponent } from 'obsidian';
 import { SettingsComponentOptions } from 'ui/components/BaseSettings';
 import { WikiLinkSelector } from 'ui/components/WikiLinkSelector';
 import { CommonButton } from 'ui/components/common/CommonButton';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
-import { FrontmatterTemplate } from 'utils/interface';
 
 export class ConfigurableSettingModal extends Modal {
 	readonly frontmatterSetting: FrontmatterTemplate;

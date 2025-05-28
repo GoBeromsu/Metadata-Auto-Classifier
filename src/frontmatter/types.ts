@@ -16,6 +16,7 @@ export interface FrontmatterTemplate {
 export interface FrontMatter {
 	[key: string]: string[];
 }
+
 export type ProcessFrontMatterFn = (
 	file: TFile,
 	fn: (frontmatter: FrontMatter) => void

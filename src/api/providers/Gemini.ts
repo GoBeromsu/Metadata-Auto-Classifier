@@ -1,7 +1,7 @@
-import { API_CONSTANTS, GEMINI_STRUCTURE_OUTPUT } from 'utils/constants';
-import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
-import { ApiError } from '../ApiError';
 import { sendRequest } from 'api';
+import { ApiError } from '../ApiError';
+import { API_CONSTANTS, GEMINI_STRUCTURE_OUTPUT } from '../constants';
+import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class Gemini implements APIProvider {
 	buildHeaders(apiKey: string): Record<string, string> {

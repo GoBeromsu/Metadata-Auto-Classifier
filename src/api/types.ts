@@ -15,6 +15,17 @@ export interface StructuredOutput {
 	reliability: number;
 }
 
+// Provider preset interface
+export interface ProviderPreset {
+	id: string;
+	name: string;
+	apiKeyUrl: string;
+	apiKeyRequired: boolean;
+	modelsList: string;
+	baseUrl: string;
+	popularModels: Array<{ id: string; name: string }>;
+}
+
 export interface APIProvider {
 	callAPI(
 		systemRole: string,

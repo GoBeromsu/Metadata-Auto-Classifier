@@ -1,5 +1,4 @@
-import { Model, ProviderConfig } from 'utils/interface';
-
+import { Model, ProviderConfig } from 'api/types';
 import AutoClassifierPlugin from 'main';
 import { Setting, TextAreaComponent } from 'obsidian';
 import { CommonSetting } from 'ui/components/common/CommonSetting';

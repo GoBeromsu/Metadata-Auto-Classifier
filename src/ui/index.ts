@@ -3,7 +3,8 @@ import { PluginSettingTab } from 'obsidian';
 
 import { addFrontmatterSetting } from 'frontmatter';
 
-import { FrontmatterTemplate, ProviderConfig } from 'utils/interface';
+import { ProviderConfig } from 'api/types';
+import { FrontmatterTemplate } from 'frontmatter/types';
 import { CommonSetting } from './components/common/CommonSetting';
 import { Api } from './containers/Api';
 import { Frontmatter } from './containers/Frontmatter';

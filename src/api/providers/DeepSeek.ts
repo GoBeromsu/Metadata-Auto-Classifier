@@ -1,5 +1,5 @@
 import { sendRequest } from 'api';
-import { API_CONSTANTS } from 'utils/constants';
+import { API_CONSTANTS } from '../constants';
 import { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class DeepSeek implements APIProvider {

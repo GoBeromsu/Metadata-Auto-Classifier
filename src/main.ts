@@ -1,11 +1,11 @@
-import { processAPIRequest } from 'api';
+import { getDefaultProviders, processAPIRequest } from 'api';
 import { Notice, Plugin, TFile } from 'obsidian';
-import { DEFAULT_TAG_SETTING, getDefaultProviders } from 'utils/constants';
+import { DEFAULT_SYSTEM_ROLE, DEFAULT_TASK_TEMPLATE, getPromptTemplate } from './api/prompt';
 import { ProviderConfig } from './api/types';
 import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
 import { FrontmatterTemplate } from './frontmatter/types';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
-import { DEFAULT_SYSTEM_ROLE, DEFAULT_TASK_TEMPLATE, getPromptTemplate } from './api/prompt';
+import { DEFAULT_TAG_SETTING } from './utils/constants';
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;

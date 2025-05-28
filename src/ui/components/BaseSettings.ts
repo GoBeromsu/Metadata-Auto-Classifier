@@ -1,8 +1,7 @@
+import { FrontmatterTemplate } from 'frontmatter/types';
 import AutoClassifierPlugin from 'main';
 import { ConfigurableSettingModal } from 'ui/modals/FrontmatterEditorModal';
 import { CommonSetting } from './common/CommonSetting';
-
-import { FrontmatterTemplate } from 'utils/interface';
 
 export interface SettingsComponentOptions {
 	showLinkType?: boolean;
