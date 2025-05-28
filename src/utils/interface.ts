@@ -3,7 +3,10 @@ import { TFile } from 'obsidian';
 export interface FrontmatterTemplate {
 	id: number;
 	name: string;
-	count: number;
+	count: {
+		min: number;
+		max: number;
+	};
 	refs: string[];
 	overwrite: boolean;
 	linkType: 'WikiLink' | 'Normal';

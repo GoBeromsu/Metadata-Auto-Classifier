@@ -6,7 +6,7 @@ const providersData = require('../data/providers.json');
 
 export const DEFAULT_FRONTMATTER_SETTING = {
 	name: '',
-	count: 1,
+	count: { min: 1, max: 1 },
 	refs: [],
 	overwrite: false,
 	linkType: 'WikiLink' as const,
@@ -61,7 +61,7 @@ export const DEFAULT_TAG_SETTING: FrontmatterTemplate = {
 	id: 0,
 	name: 'tags',
 	refs: [],
-	count: 5,
+	count: { min: 1, max: 5 },
 	overwrite: false,
 	linkType: 'Normal',
 	customQuery: '',

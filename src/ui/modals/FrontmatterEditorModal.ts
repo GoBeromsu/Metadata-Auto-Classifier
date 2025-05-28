@@ -101,16 +101,17 @@ export class ConfigurableSettingModal extends Modal {
 
 	private addCountSetting(containerEl: HTMLElement): void {
 		CommonSetting.create(containerEl, {
-			name: 'Count',
+			name: 'Count Range',
+			desc: 'Set the minimum and maximum number of items to classify',
 			className: 'control-setting',
-			textInput: {
-				placeholder: 'Enter count',
-				value: this.frontmatterSetting.count.toString(),
-				onChange: async (value) => {
-					const count = parseInt(value, 10);
-					if (!isNaN(count) && count > 0) {
-						this.frontmatterSetting.count = count;
-					}
+			rangeInput: {
+				minPlaceholder: 'Min',
+				maxPlaceholder: 'Max',
+				minValue: this.frontmatterSetting.count.min,
+				maxValue: this.frontmatterSetting.count.max,
+				onChange: (min: number, max: number) => {
+					this.frontmatterSetting.count.min = min;
+					this.frontmatterSetting.count.max = max;
 				},
 			},
 		});

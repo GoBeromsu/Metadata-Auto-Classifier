@@ -19,6 +19,14 @@ export interface TextInputConfig {
 	onChange: (value: string) => void;
 }
 
+export interface RangeInputConfig {
+	minPlaceholder?: string;
+	maxPlaceholder?: string;
+	minValue?: number;
+	maxValue?: number;
+	onChange: (min: number, max: number) => void;
+}
+
 export interface DropdownConfig {
 	options: DropdownOption[];
 	value?: string;
@@ -45,6 +53,7 @@ export interface CommonSettingProps {
 
 	// Input components
 	textInput?: TextInputConfig;
+	rangeInput?: RangeInputConfig;
 	dropdown?: DropdownConfig;
 	toggle?: ToggleConfig;
 	textArea?: TextAreaConfig;
@@ -61,6 +70,8 @@ export class CommonSetting {
 
 	// Store component references for potential updates
 	private textComponent?: TextComponent;
+	private rangeMinComponent?: TextComponent;
+	private rangeMaxComponent?: TextComponent;
 	private dropdownComponent?: DropdownComponent;
 	private toggleComponent?: ToggleComponent;
 	private textAreaComponent?: TextAreaComponent;
@@ -99,6 +110,7 @@ export class CommonSetting {
 
 		// Initialize components based on configuration
 		this.initializeTextInput();
+		this.initializeRangeInput();
 		this.initializeDropdown();
 		this.initializeToggle();
 		this.initializeTextArea();
@@ -122,6 +134,94 @@ export class CommonSetting {
 
 			text.onChange(textInput.onChange);
 		});
+	}
+
+	private initializeRangeInput(): void {
+		const { rangeInput } = this.props;
+		if (!rangeInput) return;
+
+		// Create a container for the range inputs
+		const rangeContainer = this.setting.controlEl.createDiv({ cls: 'range-input-container' });
+		rangeContainer.style.display = 'flex';
+		rangeContainer.style.gap = '8px';
+		rangeContainer.style.alignItems = 'center';
+
+		// Min input
+		const minContainer = rangeContainer.createDiv({ cls: 'range-min-container' });
+		minContainer.style.display = 'flex';
+		minContainer.style.flexDirection = 'column';
+		minContainer.style.flex = '1';
+
+		const minLabel = minContainer.createEl('label', { text: 'Min', cls: 'range-label' });
+		minLabel.style.fontSize = '12px';
+		minLabel.style.marginBottom = '4px';
+		minLabel.style.color = 'var(--text-muted)';
+
+		this.rangeMinComponent = new TextComponent(minContainer);
+		this.rangeMinComponent.inputEl.type = 'number';
+		this.rangeMinComponent.inputEl.style.width = '100%';
+
+		if (rangeInput.minPlaceholder) {
+			this.rangeMinComponent.setPlaceholder(rangeInput.minPlaceholder);
+		}
+
+		if (rangeInput.minValue !== undefined) {
+			this.rangeMinComponent.setValue(rangeInput.minValue.toString());
+		}
+
+		// Separator
+		const separator = rangeContainer.createEl('span', { text: '~', cls: 'range-separator' });
+		separator.style.margin = '0 4px';
+		separator.style.alignSelf = 'flex-end';
+		separator.style.marginBottom = '4px';
+
+		// Max input
+		const maxContainer = rangeContainer.createDiv({ cls: 'range-max-container' });
+		maxContainer.style.display = 'flex';
+		maxContainer.style.flexDirection = 'column';
+		maxContainer.style.flex = '1';
+
+		const maxLabel = maxContainer.createEl('label', { text: 'Max', cls: 'range-label' });
+		maxLabel.style.fontSize = '12px';
+		maxLabel.style.marginBottom = '4px';
+		maxLabel.style.color = 'var(--text-muted)';
+
+		this.rangeMaxComponent = new TextComponent(maxContainer);
+		this.rangeMaxComponent.inputEl.type = 'number';
+		this.rangeMaxComponent.inputEl.style.width = '100%';
+
+		if (rangeInput.maxPlaceholder) {
+			this.rangeMaxComponent.setPlaceholder(rangeInput.maxPlaceholder);
+		}
+
+		if (rangeInput.maxValue !== undefined) {
+			this.rangeMaxComponent.setValue(rangeInput.maxValue.toString());
+		}
+
+		// Handle changes
+		const handleRangeChange = () => {
+			const minValue = parseInt(this.rangeMinComponent?.getValue() || '0', 10);
+			const maxValue = parseInt(this.rangeMaxComponent?.getValue() || '0', 10);
+
+			if (!isNaN(minValue) && !isNaN(maxValue) && minValue > 0 && maxValue > 0) {
+				// Ensure min <= max
+				const adjustedMin = Math.min(minValue, maxValue);
+				const adjustedMax = Math.max(minValue, maxValue);
+
+				// Update the inputs if they were adjusted
+				if (adjustedMin !== minValue) {
+					this.rangeMinComponent?.setValue(adjustedMin.toString());
+				}
+				if (adjustedMax !== maxValue) {
+					this.rangeMaxComponent?.setValue(adjustedMax.toString());
+				}
+
+				rangeInput.onChange(adjustedMin, adjustedMax);
+			}
+		};
+
+		this.rangeMinComponent.onChange(handleRangeChange);
+		this.rangeMaxComponent.onChange(handleRangeChange);
 	}
 
 	private initializeDropdown(): void {
@@ -258,6 +358,14 @@ export class CommonSetting {
 	// Getters for component references if needed
 	public getTextComponent(): TextComponent | undefined {
 		return this.textComponent;
+	}
+
+	public getRangeMinComponent(): TextComponent | undefined {
+		return this.rangeMinComponent;
+	}
+
+	public getRangeMaxComponent(): TextComponent | undefined {
+		return this.rangeMaxComponent;
 	}
 
 	public getDropdownComponent(): DropdownComponent | undefined {

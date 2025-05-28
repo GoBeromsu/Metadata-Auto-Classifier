@@ -35,7 +35,7 @@ export abstract class BaseSettingsComponent implements SettingsComponent {
 	): void {
 		CommonSetting.create(containerEl, {
 			name: frontmatterSetting.name || 'Please enter name',
-			desc: `Type: ${frontmatterSetting.linkType}, Count: ${frontmatterSetting.count}`,
+			desc: `Type: ${frontmatterSetting.linkType}, Count: ${frontmatterSetting.count.min}-${frontmatterSetting.count.max}`,
 			extraButton: {
 				icon: 'pencil',
 				tooltip: 'Edit Frontmatter',

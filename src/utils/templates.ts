@@ -14,16 +14,16 @@ Classify the following content using the provided reference categories.
 `;
 
 export function getPromptTemplate(
-	tagCount: number,
+	count: { min: number; max: number },
 	input: string,
 	reference: readonly string[],
 	customQuery: string,
 	customTemplate: string = DEFAULT_TASK_TEMPLATE
 ): string {
 	const outputStructureTemplate = `
-	<tag_count instruction>
-	Limit your selection to a maximum of {tagCount} categories, choosing fewer if appropriate.
-	</tag_count_instruction>
+	<count instruction>
+    Limit your selection between {minCount} and {maxCount} categories, choosing fewer if appropriate.
+	</count_instruction>
 
 	<output_format>
 	{
@@ -52,7 +52,8 @@ export function getPromptTemplate(
 	const completePrompt =
 		customTemplate +
 		outputStructureTemplate
-			.replace('{tagCount}', String(tagCount))
+			.replace('{minCount}', String(count.min))
+			.replace('{maxCount}', String(count.max))
 			.replace('{reference}', reference.join(', '))
 			.replace('{input}', input)
 			.replace('{customQuery}', customQuery);
