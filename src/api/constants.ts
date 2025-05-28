@@ -1,3 +1,5 @@
+import { ProviderConfig } from './types';
+
 // Common Constants (reused multiple times)
 export const COMMON_CONSTANTS = {
 	DEFAULT_MAX_TOKENS: 32000,
@@ -6,6 +8,19 @@ export const COMMON_CONSTANTS = {
 	DEFAULT_TEMPERATURE: 0.7,
 	VERIFY_CONNECTION_SYSTEM_PROMPT: 'You are a test system. You must respond with valid JSON.',
 	VERIFY_CONNECTION_USER_PROMPT: 'Return a JSON object containing {"output": [], "reliability": 0}',
+};
+
+export const DEFAULT_PROVIDER: ProviderConfig = {
+	name: 'OpenAI',
+	apiKey: '',
+	baseUrl: 'https://api.openai.com/v1/chat/completions',
+	models: [
+		{
+			name: 'gpt-4.1-mini',
+			displayName: 'GPT-4.1 Mini',
+		},
+	],
+	temperature: COMMON_CONSTANTS.DEFAULT_TEMPERATURE,
 };
 
 // Common Schema Base (reused by OpenAI, OpenRouter, Gemini)

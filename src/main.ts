@@ -1,11 +1,11 @@
-import { getDefaultProviders, processAPIRequest } from 'api';
+import { processAPIRequest } from 'api';
 import { Notice, Plugin, TFile } from 'obsidian';
-import { DEFAULT_SYSTEM_ROLE, DEFAULT_TASK_TEMPLATE, getPromptTemplate } from './api/prompt';
+import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from './api/prompt';
 import { ProviderConfig } from './api/types';
 import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
 import { FrontmatterTemplate } from './frontmatter/types';
 import { AutoClassifierSettings, AutoClassifierSettingTab } from './ui';
-import { DEFAULT_TAG_SETTING } from './utils/constants';
+import { DEFAULT_SETTINGS } from './utils/constants';
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
@@ -134,17 +134,7 @@ export default class AutoClassifierPlugin extends Plugin {
 	};
 
 	async loadSettings() {
-		this.settings = Object.assign(
-			{},
-			{
-				providers: getDefaultProviders(),
-				selectedProvider: '',
-				selectedModel: '',
-				frontmatter: [DEFAULT_TAG_SETTING],
-				classificationRule: DEFAULT_TASK_TEMPLATE,
-			},
-			await this.loadData()
-		);
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 
 		await this.saveSettings();
 	}
