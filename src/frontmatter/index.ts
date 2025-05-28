@@ -1,12 +1,10 @@
 import { getAllTags, getFrontMatterInfo, MetadataCache, TFile } from 'obsidian';
 
-import { generateId } from '../utils';
-import { DEFAULT_FRONTMATTER_SETTING } from '../utils/constants';
 import {
 	FrontMatter,
 	FrontmatterTemplate,
 	InsertFrontMatterParams,
-	ProcessFrontMatterFn,
+	ProcessFrontMatterFn
 } from './types';
 
 /**
@@ -49,14 +47,6 @@ export const getFrontmatterSetting = (
 		throw new Error('Setting not found');
 	}
 	return setting;
-};
-
-export const addFrontmatterSetting = (linkType?: 'Normal' | 'WikiLink'): FrontmatterTemplate => {
-	return {
-		...DEFAULT_FRONTMATTER_SETTING,
-		id: generateId(),
-		...(linkType ? { linkType } : {}),
-	};
 };
 
 export const insertToFrontMatter = async (

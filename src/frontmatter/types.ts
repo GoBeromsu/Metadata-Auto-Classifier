@@ -1,5 +1,7 @@
 import { TFile } from 'obsidian';
 
+export type LinkType = 'WikiLink' | 'Normal';
+
 export interface FrontmatterTemplate {
 	id: number;
 	name: string;
@@ -9,7 +11,7 @@ export interface FrontmatterTemplate {
 	};
 	refs: string[];
 	overwrite: boolean;
-	linkType: 'WikiLink' | 'Normal';
+	linkType: LinkType;
 	customQuery: string;
 }
 
@@ -27,5 +29,5 @@ export interface InsertFrontMatterParams {
 	key: string;
 	value: string[];
 	overwrite: boolean;
-	linkType?: 'Normal' | 'WikiLink';
+	linkType?: LinkType;
 }

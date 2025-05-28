@@ -1,10 +1,10 @@
 import AutoClassifierPlugin from 'main';
 import { PluginSettingTab } from 'obsidian';
 
-import { addFrontmatterSetting } from 'frontmatter';
-
 import { ProviderConfig } from 'api/types';
 import { FrontmatterTemplate } from 'frontmatter/types';
+import { generateId } from 'utils';
+import { DEFAULT_FRONTMATTER_SETTING } from 'utils/constants';
 import { CommonSetting } from './components/common/CommonSetting';
 import { Api } from './containers/Api';
 import { Frontmatter } from './containers/Frontmatter';
@@ -68,11 +68,12 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		});
 	}
 
-	private addNewFrontmatter(
-		frontmattersContainer: HTMLElement,
-		linkType?: 'Normal' | 'WikiLink'
-	): void {
-		const newFrontmatter = addFrontmatterSetting(linkType);
+	private addNewFrontmatter(frontmattersContainer: HTMLElement): void {
+		const newFrontmatter: FrontmatterTemplate = {
+			id: generateId(),
+			...DEFAULT_FRONTMATTER_SETTING,
+		};
+
 		this.plugin.settings.frontmatter.push(newFrontmatter);
 		this.plugin.saveSettings();
 

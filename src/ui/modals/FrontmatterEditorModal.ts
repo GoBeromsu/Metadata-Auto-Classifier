@@ -1,4 +1,4 @@
-import { FrontmatterTemplate } from 'frontmatter/types';
+import { FrontmatterTemplate, LinkType } from 'frontmatter/types';
 import AutoClassifierPlugin from 'main';
 import { App, Modal, TextAreaComponent } from 'obsidian';
 import { SettingsComponentOptions } from 'ui/components/BaseSettings';
@@ -80,7 +80,7 @@ export class ConfigurableSettingModal extends Modal {
 				],
 				value: this.frontmatterSetting.linkType || 'Normal',
 				onChange: async (value) => {
-					this.frontmatterSetting.linkType = value as 'WikiLink' | 'Normal';
+					this.frontmatterSetting.linkType = value as LinkType;
 				},
 			},
 		});
