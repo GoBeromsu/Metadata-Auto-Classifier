@@ -155,7 +155,7 @@ export class ApiComponent implements UIComponent {
 						onChange: async (value) => {
 							if (value) {
 								await this.props.onModelSelect(provider.name, config.name);
-								this.refreshModelSection();
+								this.props.onRefresh?.();
 							}
 						},
 					},
@@ -172,39 +172,12 @@ export class ApiComponent implements UIComponent {
 							tooltip: 'Delete',
 							onClick: async () => {
 								await this.props.onModelDelete(config.name);
-								this.refreshModelSection();
+								this.props.onRefresh?.();
 							},
 						},
 					],
 				});
 			});
 		});
-	}
-
-	private refreshModelSection(): void {
-		if (!this.containerEl) return;
-
-		const modelSection = this.containerEl.querySelector('.model-section');
-		if (modelSection) {
-			const modelSectionEl = modelSection as HTMLElement;
-			modelSectionEl.empty();
-
-			// Re-add section header
-			modelSectionEl.createEl('h3', { text: 'Models' });
-
-			// Re-render model list
-			this.renderModelList(modelSectionEl);
-
-			// Re-add add model button
-			CommonSetting.create(modelSectionEl, {
-				name: '',
-				button: {
-					text: '+ Add model',
-					onClick: () => {
-						this.props.onOpenModelModal('add');
-					},
-				},
-			});
-		}
 	}
 }

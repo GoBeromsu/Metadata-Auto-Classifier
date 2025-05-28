@@ -1,5 +1,5 @@
 import type { ProviderConfig, ProviderPreset } from 'api/types';
-import type AutoClassifierPlugin from 'main';
+import type { App } from 'obsidian';
 import { Modal, Notice } from 'obsidian';
 import { CommonButton } from 'ui/components/common/CommonButton';
 import type { DropdownOption } from 'ui/components/common/CommonSetting';
@@ -9,18 +9,16 @@ import { CommonSetting } from 'ui/components/common/CommonSetting';
 const providersData = require('../../api/providerPreset.json');
 
 export class ProviderModal extends Modal {
-	private plugin: AutoClassifierPlugin;
 	private providerConfig: ProviderConfig;
 	private onSave: (provider: ProviderConfig) => void;
 	private selectedPreset: string = 'custom';
 
 	constructor(
-		plugin: AutoClassifierPlugin,
+		app: App,
 		onSave: (provider: ProviderConfig) => void,
 		existingProvider?: ProviderConfig
 	) {
-		super(plugin.app);
-		this.plugin = plugin;
+		super(app);
 		this.onSave = onSave;
 
 		// Initialize provider config - unified approach

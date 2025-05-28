@@ -9,7 +9,7 @@ import { CommonSetting } from './components/common/CommonSetting';
 import { ApiComponent } from './containers/Api';
 import { Frontmatter } from './containers/Frontmatter';
 import { Tag } from './containers/Tag';
-import { ModelModal } from './modals/ModelModal';
+import { ModelModal, type ModelModalProps } from './modals/ModelModal';
 import { ProviderModal } from './modals/ProviderModal';
 import type { ApiProps } from './types';
 
@@ -158,7 +158,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 			// Modal event handlers (clean event-based pattern)
 			onOpenProviderModal: (type: 'add' | 'edit', provider?: ProviderConfig) => {
 				const modal = new ProviderModal(
-					this.plugin,
+					this.plugin.app,
 					async (savedProvider: ProviderConfig) => {
 						if (type === 'add') {
 							this.plugin.settings.providers.push(savedProvider);
@@ -185,13 +185,41 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 				type: 'add' | 'edit',
 				editTarget?: { model: string; displayName: string; provider: string }
 			) => {
-				const modal = new ModelModal(
-					this.plugin,
-					() => {
+				const modalProps: ModelModalProps = {
+					providers: this.plugin.settings.providers,
+					onSave: async (result) => {
+						if (result.isEdit && result.oldModel) {
+							// Edit mode: remove old model from its original provider
+							const originalProvider = this.plugin.settings.providers.find(
+								(p) => p.name === result.oldModel!.provider
+							);
+							if (originalProvider) {
+								originalProvider.models = originalProvider.models.filter(
+									(m) => m.name !== result.oldModel!.model
+								);
+							}
+
+							// Update selected model if it was the one being edited
+							if (this.plugin.settings.selectedModel === result.oldModel.model) {
+								this.plugin.settings.selectedModel = result.model.name;
+							}
+						}
+
+						// Add model to selected provider
+						const targetProvider = this.plugin.settings.providers.find(
+							(p) => p.name === result.provider
+						);
+						if (targetProvider) {
+							targetProvider.models.push(result.model);
+						}
+
+						await this.plugin.saveSettings();
 						this.display();
 					},
-					editTarget
-				);
+					editTarget: editTarget,
+				};
+
+				const modal = new ModelModal(this.plugin.app, modalProps);
 				modal.open();
 			},
 
@@ -206,4 +234,3 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 export * from './components/WikiLinkSelector';
 export * from './modals/FrontmatterEditorModal';
 export * from './modals/FrontmatterSelectorModal';
-

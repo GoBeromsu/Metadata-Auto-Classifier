@@ -1,35 +1,30 @@
 import type { FrontmatterTemplate, LinkType } from 'frontmatter/types';
-import type AutoClassifierPlugin from 'main';
-import type { App} from 'obsidian';
+import type { App } from 'obsidian';
 import { Modal, TextAreaComponent } from 'obsidian';
 import type { SettingsComponentOptions } from 'ui/components/BaseSettings';
 import { WikiLinkSelector } from 'ui/components/WikiLinkSelector';
 import { CommonButton } from 'ui/components/common/CommonButton';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
 
-export class ConfigurableSettingModal extends Modal {
-	readonly frontmatterSetting: FrontmatterTemplate;
-	readonly plugin: AutoClassifierPlugin;
-	readonly options: SettingsComponentOptions;
+export interface FrontmatterEditorModalProps {
+	frontmatterSetting: FrontmatterTemplate;
+	options: SettingsComponentOptions;
+	onSave: (frontmatter: FrontmatterTemplate) => Promise<void>;
+}
 
+export class ConfigurableSettingModal extends Modal {
+	private props: FrontmatterEditorModalProps;
 	private textAreaComponent: TextAreaComponent;
 
-	constructor(
-		app: App,
-		plugin: AutoClassifierPlugin,
-		frontmatterSetting: FrontmatterTemplate,
-		options: SettingsComponentOptions
-	) {
+	constructor(app: App, props: FrontmatterEditorModalProps) {
 		super(app);
-		this.plugin = plugin;
-		this.frontmatterSetting = frontmatterSetting;
-		this.options = options;
+		this.props = props;
 	}
 
 	onOpen() {
 		const { contentEl } = this;
 
-		this.setTitle(`Edit Setting: ${this.frontmatterSetting.name}`);
+		this.setTitle(`Edit Setting: ${this.props.frontmatterSetting.name}`);
 
 		// Name setting (always shown)
 		CommonSetting.create(contentEl, {
@@ -37,9 +32,9 @@ export class ConfigurableSettingModal extends Modal {
 			className: 'setting-name',
 			textInput: {
 				placeholder: 'Enter name',
-				value: this.frontmatterSetting.name,
+				value: this.props.frontmatterSetting.name,
 				onChange: async (value) => {
-					this.frontmatterSetting.name = value;
+					this.props.frontmatterSetting.name = value;
 				},
 			},
 		});
@@ -48,7 +43,7 @@ export class ConfigurableSettingModal extends Modal {
 		const controlsContainer = contentEl.createDiv({ cls: 'controls-container' });
 
 		// Only show LinkType if enabled
-		if (this.options.showLinkType) {
+		if (this.props.options.showLinkType) {
 			this.addLinkTypeSetting(controlsContainer);
 		}
 
@@ -59,7 +54,7 @@ export class ConfigurableSettingModal extends Modal {
 		this.addCountSetting(controlsContainer);
 
 		// Options section (conditional)
-		if (this.options.showOptions) {
+		if (this.props.options.showOptions) {
 			this.addOptionsSection(contentEl);
 		}
 
@@ -79,9 +74,9 @@ export class ConfigurableSettingModal extends Modal {
 					{ value: 'WikiLink', display: 'WikiLink' },
 					{ value: 'Normal', display: 'Normal' },
 				],
-				value: this.frontmatterSetting.linkType || 'Normal',
+				value: this.props.frontmatterSetting.linkType || 'Normal',
 				onChange: async (value) => {
-					this.frontmatterSetting.linkType = value as LinkType;
+					this.props.frontmatterSetting.linkType = value as LinkType;
 				},
 			},
 		});
@@ -92,9 +87,9 @@ export class ConfigurableSettingModal extends Modal {
 			name: 'Overwrite',
 			className: 'control-setting',
 			toggle: {
-				value: this.frontmatterSetting.overwrite,
+				value: this.props.frontmatterSetting.overwrite,
 				onChange: async (value) => {
-					this.frontmatterSetting.overwrite = value;
+					this.props.frontmatterSetting.overwrite = value;
 				},
 			},
 		});
@@ -108,11 +103,11 @@ export class ConfigurableSettingModal extends Modal {
 			rangeInput: {
 				minPlaceholder: 'Min',
 				maxPlaceholder: 'Max',
-				minValue: this.frontmatterSetting.count.min,
-				maxValue: this.frontmatterSetting.count.max,
+				minValue: this.props.frontmatterSetting.count.min,
+				maxValue: this.props.frontmatterSetting.count.max,
 				onChange: (min: number, max: number) => {
-					this.frontmatterSetting.count.min = min;
-					this.frontmatterSetting.count.max = max;
+					this.props.frontmatterSetting.count.min = min;
+					this.props.frontmatterSetting.count.max = max;
 				},
 			},
 		});
@@ -120,7 +115,7 @@ export class ConfigurableSettingModal extends Modal {
 
 	private addOptionsSection(containerEl: HTMLElement): void {
 		// Only add options section if showOptions is enabled
-		if (!this.options.showOptions) return;
+		if (!this.props.options.showOptions) return;
 
 		// Options section header with Browse Files button
 		CommonSetting.create(containerEl, {
@@ -132,16 +127,16 @@ export class ConfigurableSettingModal extends Modal {
 				icon: 'folder',
 				text: 'Browse Files',
 				onClick: () => {
-					const wikiLinkSelector = new WikiLinkSelector(this.plugin.app);
+					const wikiLinkSelector = new WikiLinkSelector(this.app);
 					wikiLinkSelector.openFileSelector((selectedLink) => {
 						// Format the link based on current linkType
 						const formattedLink =
-							this.frontmatterSetting.linkType === 'WikiLink'
+							this.props.frontmatterSetting.linkType === 'WikiLink'
 								? `[[${selectedLink}]]`
 								: selectedLink;
-						const currentOptions = this.frontmatterSetting.refs || [];
+						const currentOptions = this.props.frontmatterSetting.refs || [];
 
-						this.frontmatterSetting.refs = [...currentOptions, formattedLink];
+						this.props.frontmatterSetting.refs = [...currentOptions, formattedLink];
 						this.updateOptionsTextarea();
 					});
 				},
@@ -149,15 +144,15 @@ export class ConfigurableSettingModal extends Modal {
 		});
 
 		// Only add text area if showTextArea is enabled
-		if (this.options.showTextArea) {
+		if (this.props.options.showTextArea) {
 			const textareaContainer = containerEl.createDiv({ cls: 'textarea-container' });
 			textareaContainer.style.width = '100%';
 			textareaContainer.style.marginTop = '8px';
 			textareaContainer.style.minHeight = '100px';
 
 			let displayValue = '';
-			if (this.frontmatterSetting.refs && this.frontmatterSetting.refs.length > 0) {
-				displayValue = this.frontmatterSetting.refs.join(', ');
+			if (this.props.frontmatterSetting.refs && this.props.frontmatterSetting.refs.length > 0) {
+				displayValue = this.props.frontmatterSetting.refs.join(', ');
 			}
 
 			this.textAreaComponent = new TextAreaComponent(textareaContainer)
@@ -169,7 +164,7 @@ export class ConfigurableSettingModal extends Modal {
 						.map((option) => option.trim())
 						.filter(Boolean);
 
-					this.frontmatterSetting.refs = inputOptions;
+					this.props.frontmatterSetting.refs = inputOptions;
 				});
 			// Adjust text area height and width
 			this.textAreaComponent.inputEl.style.width = '100%';
@@ -180,8 +175,8 @@ export class ConfigurableSettingModal extends Modal {
 	private updateOptionsTextarea(): void {
 		if (this.textAreaComponent) {
 			let displayValue = '';
-			if (this.frontmatterSetting.refs && this.frontmatterSetting.refs.length > 0) {
-				displayValue = this.frontmatterSetting.refs.join(', ');
+			if (this.props.frontmatterSetting.refs && this.props.frontmatterSetting.refs.length > 0) {
+				displayValue = this.props.frontmatterSetting.refs.join(', ');
 			}
 			this.textAreaComponent.setValue(displayValue);
 		}
@@ -205,9 +200,9 @@ export class ConfigurableSettingModal extends Modal {
 		// Create the TextAreaComponent
 		const customQueryTextArea = new TextAreaComponent(textareaContainer)
 			.setPlaceholder('Enter specific classification rules or additional context here...')
-			.setValue(this.frontmatterSetting.customQuery || '')
+			.setValue(this.props.frontmatterSetting.customQuery || '')
 			.onChange(async (value) => {
-				this.frontmatterSetting.customQuery = value;
+				this.props.frontmatterSetting.customQuery = value;
 			});
 
 		// Adjust text area height and width
@@ -233,12 +228,7 @@ export class ConfigurableSettingModal extends Modal {
 			text: 'Save',
 			cta: true,
 			onClick: async () => {
-				this.plugin.registerCommand(
-					this.frontmatterSetting.name,
-					async () => await this.plugin.processFrontmatter(this.frontmatterSetting.id)
-				);
-
-				await this.plugin.saveSettings();
+				await this.props.onSave(this.props.frontmatterSetting);
 				this.close();
 			},
 		});

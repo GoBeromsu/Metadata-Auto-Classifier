@@ -1,40 +1,43 @@
-import type { Model, ProviderPreset } from 'api/types';
-import type AutoClassifierPlugin from 'main';
+import type { Model, ProviderConfig, ProviderPreset } from 'api/types';
+import type { App } from 'obsidian';
 import { Modal, Notice } from 'obsidian';
 import { CommonButton } from 'ui/components/common/CommonButton';
 import type { DropdownOption } from 'ui/components/common/CommonSetting';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
 const providersData = require('../../api/providerPreset.json');
 
+export interface ModelModalProps {
+	providers: ProviderConfig[];
+	onSave: (result: {
+		provider: string;
+		model: Model;
+		isEdit: boolean;
+		oldModel?: { model: string; provider: string };
+	}) => void;
+	editTarget?: { model: string; displayName: string; provider: string };
+}
+
 export class ModelModal extends Modal {
-	private plugin: AutoClassifierPlugin;
-	private onSave: () => void;
-	private existingModel?: { model: string; displayName: string; provider: string };
+	private props: ModelModalProps;
 
 	// Form state
 	private selectedProvider: string = '';
 	private displayName: string = '';
 	private modelId: string = '';
 
-	constructor(
-		plugin: AutoClassifierPlugin,
-		onSave: () => void,
-		existingModel?: { model: string; displayName: string; provider: string }
-	) {
-		super(plugin.app);
-		this.plugin = plugin;
-		this.onSave = onSave;
-		this.existingModel = existingModel;
+	constructor(app: App, props: ModelModalProps) {
+		super(app);
+		this.props = props;
 
 		// Set initial values
-		if (existingModel) {
-			this.selectedProvider = existingModel.provider;
-			this.displayName = existingModel.displayName;
-			this.modelId = existingModel.model;
+		if (props.editTarget) {
+			this.selectedProvider = props.editTarget.provider;
+			this.displayName = props.editTarget.displayName;
+			this.modelId = props.editTarget.model;
 		} else {
 			// Set default provider for new models
-			if (this.plugin.settings.providers.length > 0) {
-				this.selectedProvider = this.plugin.settings.providers[0].name;
+			if (props.providers.length > 0) {
+				this.selectedProvider = props.providers[0].name;
 			}
 		}
 	}
@@ -44,14 +47,14 @@ export class ModelModal extends Modal {
 		contentEl.empty();
 
 		// Modal title
-		const title = this.existingModel ? 'Edit Model' : 'Add Model';
+		const title = this.props.editTarget ? 'Edit Model' : 'Add Model';
 		contentEl.createEl('h2', { text: title });
 
 		// Provider selection
 		this.addProviderSetting(contentEl);
 
 		// Popular models section (only show for new models)
-		if (!this.existingModel) {
+		if (!this.props.editTarget) {
 			this.addPopularModelsSection(contentEl);
 		}
 
@@ -63,7 +66,7 @@ export class ModelModal extends Modal {
 	}
 
 	private addProviderSetting(containerEl: HTMLElement): void {
-		const providerOptions: DropdownOption[] = this.plugin.settings.providers.map((provider) => ({
+		const providerOptions: DropdownOption[] = this.props.providers.map((provider) => ({
 			value: provider.name,
 			display: provider.name,
 		}));
@@ -271,35 +274,18 @@ export class ModelModal extends Modal {
 						displayName: this.displayName,
 					};
 
-					// Find the provider and add/update the model
-					const newProvider = this.plugin.settings.providers.find(
-						(p) => p.name === this.selectedProvider
-					);
-					if (newProvider) {
-						if (this.existingModel) {
-							// Edit mode: remove old model from its original provider and add updated one to selected provider
-							const originalProvider = this.plugin.settings.providers.find(
-								(p) => p.name === this.existingModel!.provider
-							);
-							if (originalProvider) {
-								originalProvider.models = originalProvider.models.filter(
-									(m) => m.name !== this.existingModel!.model
-								);
-							}
-							newProvider.models.push(model);
-
-							// Update selected model if it was the one being edited
-							if (this.plugin.settings.selectedModel === this.existingModel.model) {
-								this.plugin.settings.selectedModel = model.name;
-							}
-						} else {
-							// Add mode: just add the new model
-							newProvider.models.push(model);
-						}
-					}
-
-					await this.plugin.saveSettings();
-					this.onSave();
+					// Use callback to handle business logic
+					this.props.onSave({
+						provider: this.selectedProvider,
+						model: model,
+						isEdit: !!this.props.editTarget,
+						oldModel: this.props.editTarget
+							? {
+									model: this.props.editTarget.model,
+									provider: this.props.editTarget.provider,
+								}
+							: undefined,
+					});
 					this.close();
 				}
 			},

@@ -1,6 +1,7 @@
 import type { ProviderConfig } from 'api/types';
 
 export interface UIComponent {
+	updateProps(newProps: any): void;
 	display(containerEl: HTMLElement): void;
 }
 

@@ -1,6 +1,9 @@
 import type { FrontmatterTemplate } from 'frontmatter/types';
 import type AutoClassifierPlugin from 'main';
-import { ConfigurableSettingModal } from 'ui/modals/FrontmatterEditorModal';
+import {
+	ConfigurableSettingModal,
+	FrontmatterEditorModalProps,
+} from 'ui/modals/FrontmatterEditorModal';
 import { CommonSetting } from './common/CommonSetting';
 
 export interface SettingsComponentOptions {
@@ -16,7 +19,10 @@ export interface SettingsComponent {
 export abstract class BaseSettingsComponent implements SettingsComponent {
 	protected options: SettingsComponentOptions;
 
-	constructor(protected plugin: AutoClassifierPlugin, options: SettingsComponentOptions = {}) {
+	constructor(
+		protected plugin: AutoClassifierPlugin,
+		options: SettingsComponentOptions = {}
+	) {
 		this.options = {
 			showLinkType: true,
 			showOptions: true,
@@ -39,13 +45,31 @@ export abstract class BaseSettingsComponent implements SettingsComponent {
 				icon: 'pencil',
 				tooltip: 'Edit Frontmatter',
 				onClick: () => {
-					const modal = new ConfigurableSettingModal(
-						this.plugin.app,
-						this.plugin,
-						frontmatterSetting,
-						this.options
-					);
+					const modalProps: FrontmatterEditorModalProps = {
+						frontmatterSetting: frontmatterSetting,
+						options: this.options,
+						onSave: async (updatedFrontmatter: FrontmatterTemplate) => {
+							// Register command for the updated frontmatter
+							this.plugin.registerCommand(
+								updatedFrontmatter.name,
+								async () => await this.plugin.processFrontmatter(updatedFrontmatter.id)
+							);
 
+							await this.plugin.saveSettings();
+
+							// Refresh the display by finding and updating the container
+							const frontmatterContainer = containerEl.closest('.frontmatter-item-container');
+							if (frontmatterContainer) {
+								const frontmatterId = frontmatterContainer.getAttribute('data-frontmatter-id');
+								if (frontmatterId) {
+									// Re-render this specific frontmatter component
+									this.display(containerEl, parseInt(frontmatterId));
+								}
+							}
+						},
+					};
+
+					const modal = new ConfigurableSettingModal(this.plugin.app, modalProps);
 					modal.open();
 				},
 			},
