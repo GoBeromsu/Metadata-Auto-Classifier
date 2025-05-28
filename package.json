@@ -10,8 +10,8 @@
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:coverage": "jest --coverage",
-		"lint": "eslint src/ __tests__/ --ext .ts,.js",
-		"lint:fix": "eslint src/ __tests__/ --ext .ts,.js --fix",
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix",
 		"version": "1.5.16"
 	},
 	"keywords": [
@@ -26,17 +26,19 @@
 	"devDependencies": {
 		"@codemirror/state": "^6.0.0",
 		"@codemirror/view": "^6.0.0",
+		"@eslint/js": "^9.27.0",
 		"@types/jest": "^29.5.14",
 		"@types/node": "^16.11.6",
-		"@typescript-eslint/eslint-plugin": "5.29.0",
-		"@typescript-eslint/parser": "5.29.0",
 		"builtin-modules": "3.3.0",
 		"esbuild": "0.17.3",
-		"eslint": "^8.0.0",
+		"eslint": "^9.27.0",
+		"eslint-config-prettier": "^10.1.5",
 		"jest": "^29.7.0",
 		"obsidian": "latest",
+		"prettier": "^3.5.3",
 		"ts-jest": "^29.3.4",
 		"tslib": "2.6.2",
-		"typescript": "5.4.5"
+		"typescript": "^5.8.3",
+		"typescript-eslint": "^8.33.0"
 	}
 }
