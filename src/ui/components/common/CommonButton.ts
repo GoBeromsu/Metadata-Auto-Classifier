@@ -1,4 +1,4 @@
-import { ButtonComponent } from 'obsidian';
+import { ButtonComponent, ExtraButtonComponent } from 'obsidian';
 
 export interface CommonButtonProps {
 	text?: string;
@@ -22,16 +22,40 @@ export class CommonButton {
 	}
 
 	private updateButton(): void {
-		const { text, icon, tooltip, onClick, cta, warning, disabled, className } = this.props;
-
-		if (text) this.buttonComponent.setButtonText(text);
-		if (icon) this.buttonComponent.setIcon(icon);
-		if (tooltip) this.buttonComponent.setTooltip(tooltip);
-		if (cta) this.buttonComponent.setCta();
-		if (warning) this.buttonComponent.setWarning();
-		if (disabled !== undefined) this.buttonComponent.setDisabled(disabled);
-		if (className) this.buttonComponent.buttonEl.addClass(className);
-
-		this.buttonComponent.onClick(onClick);
+		createButtonConfig(this.props)(this.buttonComponent);
 	}
+}
+// Setting.addButton에 주입할 수 있는 설정 함수
+export function createButtonConfig(props: CommonButtonProps) {
+	return (button: ButtonComponent) => {
+		const { text, icon, tooltip, onClick, cta, warning, disabled, className } = props;
+
+		if (text) button.setButtonText(text);
+		if (icon) button.setIcon(icon);
+		if (tooltip) button.setTooltip(tooltip);
+		if (cta) button.setCta();
+		if (warning) button.setWarning();
+		if (disabled !== undefined) button.setDisabled(disabled);
+		if (className) button.buttonEl.addClass(className);
+
+		button.onClick(onClick);
+
+		return button;
+	};
+}
+
+export function createExtraButtonConfig(props: CommonButtonProps) {
+	return (button: ExtraButtonComponent) => {
+		const { icon, tooltip, onClick, disabled, className } = props;
+
+		// ExtraButtonComponent는 icon만 지원 (text, cta, warning 미지원)
+		if (icon) button.setIcon(icon);
+		if (tooltip) button.setTooltip(tooltip);
+		if (disabled !== undefined) button.setDisabled(disabled);
+		if (className) button.extraSettingsEl.addClass(className);
+
+		button.onClick(onClick);
+
+		return button;
+	};
 }
