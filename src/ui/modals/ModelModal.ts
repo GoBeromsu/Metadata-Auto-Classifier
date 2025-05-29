@@ -259,12 +259,12 @@ export class ModelModal extends Modal {
 		buttonContainer.style.gap = '8px';
 		buttonContainer.style.marginTop = '20px';
 
-		new CommonButton(buttonContainer, {
+		CommonButton(buttonContainer, {
 			text: 'Cancel',
 			onClick: () => this.close(),
 		});
 
-		new CommonButton(buttonContainer, {
+		CommonButton(buttonContainer, {
 			text: 'Save',
 			cta: true,
 			onClick: async () => {

@@ -66,7 +66,6 @@ export class CommonSetting {
 	private setting: Setting;
 	private props: CommonSettingProps;
 
-	// Store component references for potential updates
 	private textComponent?: TextComponent;
 	private rangeMinComponent?: TextComponent;
 	private rangeMaxComponent?: TextComponent;
