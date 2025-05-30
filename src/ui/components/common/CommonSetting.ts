@@ -156,13 +156,11 @@ export class CommonSetting {
 
 		// Inner composite function - encapsulates combination logic
 		const handleCombinedChange = () => {
-			return () => {
-				const min = parseInt(minComponent?.getValue() || '0', 10);
-				const max = parseInt(maxComponent?.getValue() || '0', 10);
-				if (!isNaN(min) && !isNaN(max)) {
-					config.onChange(min, max);
-				}
-			};
+			const min = parseInt(minComponent?.getValue() || '0', 10);
+			const max = parseInt(maxComponent?.getValue() || '0', 10);
+			if (!isNaN(min) && !isNaN(max)) {
+				config.onChange(min, max);
+			}
 		};
 
 		// First component - same as any other TextInput
