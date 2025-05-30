@@ -1,7 +1,8 @@
 import type { ProviderConfig, ProviderPreset } from 'api/types';
 import type { App } from 'obsidian';
-import { Modal, Notice } from 'obsidian';
+import { Modal } from 'obsidian';
 import { CommonButton } from 'ui/components/common/CommonButton';
+import { CommonNotice } from 'ui/components/common/CommonNotice';
 import type { DropdownOption } from 'ui/components/common/CommonSetting';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
 
@@ -57,29 +58,37 @@ export class ProviderModal extends Modal {
 	}
 
 	private findMatchingPreset(existingProvider: ProviderConfig): void {
-		// Try to find a preset that matches the existing provider
-		const matchingPreset = Object.values(providersData).find((preset: any) => {
+		// Get only provider entries (exclude version)
+		const providerEntries = Object.entries(providersData).filter(([key]) => key !== 'version');
+
+		const matchingPreset = providerEntries.find(([key, preset]) => {
 			const typedPreset = preset as ProviderPreset;
 			return (
 				typedPreset.baseUrl === existingProvider.baseUrl ||
 				typedPreset.name === existingProvider.name
 			);
-		}) as ProviderPreset | undefined;
+		});
 
 		if (matchingPreset) {
-			this.selectedPreset = matchingPreset.id;
+			this.selectedPreset = matchingPreset[0]; // Use the key as id
 		} else {
 			this.selectedPreset = 'custom';
 		}
 	}
 
 	private addPresetSetting(containerEl: HTMLElement): void {
+		// Filter out version and map only provider presets
+		const providerEntries = Object.entries(providersData).filter(([key]) => key !== 'version');
+
 		const presetOptions: DropdownOption[] = [
-			...Object.values(providersData).map((preset: ProviderPreset) => ({
-				value: preset.id,
-				display: preset.name,
-			})),
 			{ value: 'custom', display: 'Custom Provider' },
+			...providerEntries.map(([key, preset]) => {
+				const typedPreset = preset as ProviderPreset;
+				return {
+					value: key, // Use the key as value
+					display: typedPreset.name,
+				};
+			}),
 		];
 
 		CommonSetting.create(containerEl, {
@@ -89,15 +98,40 @@ export class ProviderModal extends Modal {
 				options: presetOptions,
 				value: this.selectedPreset,
 				onChange: (value) => {
-					this.selectedPreset = value;
-					this.loadPresetData(value);
+					if (value === 'custom') {
+						this.selectedPreset = value;
+						this.providerConfig.name = '';
+						this.providerConfig.baseUrl = '';
+						this.updateForm();
+					} else {
+						this.selectedPreset = value;
+						this.loadPresetData(value);
+					}
 				},
 			},
 		});
 	}
 
 	private addProviderForm(containerEl: HTMLElement): void {
-		// API URL
+		// Provider Name - always show for custom, readonly for presets
+		const isCustom = this.selectedPreset === 'custom';
+
+		CommonSetting.create(containerEl, {
+			name: 'Provider Name',
+			desc: isCustom
+				? 'Enter a unique name for your custom provider'
+				: 'Provider name (from preset)',
+			textInput: {
+				placeholder: 'Enter provider name',
+				value: this.providerConfig.name,
+				disabled: !isCustom,
+				onChange: (value) => {
+					this.providerConfig.name = value;
+				},
+			},
+		});
+
+		// API URL with Obsidian TextComponent
 		CommonSetting.create(containerEl, {
 			name: 'API URL',
 			desc: 'The complete API URL including endpoint (e.g., https://api.openai.com/v1/chat/completions)',
@@ -188,13 +222,21 @@ export class ProviderModal extends Modal {
 	}
 
 	private validateForm(): boolean {
+		// Provider name validation
 		if (!this.providerConfig.name.trim()) {
-			new Notice('Provider name is required');
+			CommonNotice.showError(
+				new Error('Provider name is required. Please enter a name for your provider.'),
+				'Provider validation'
+			);
 			return false;
 		}
 
+		// API URL validation
 		if (!this.providerConfig.baseUrl.trim()) {
-			new Notice('API URL is required');
+			CommonNotice.showError(
+				new Error('API URL is required. Please enter a valid API endpoint URL.'),
+				'Provider validation'
+			);
 			return false;
 		}
 
@@ -202,7 +244,10 @@ export class ProviderModal extends Modal {
 		try {
 			new URL(this.providerConfig.baseUrl);
 		} catch {
-			new Notice('Please enter a valid URL');
+			CommonNotice.showError(
+				new Error('Please enter a valid URL (e.g., https://api.example.com/v1/chat/completions)'),
+				'URL validation'
+			);
 			return false;
 		}
 

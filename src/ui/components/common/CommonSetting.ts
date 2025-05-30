@@ -13,6 +13,7 @@ export interface DropdownOption {
 export interface TextInputConfig {
 	placeholder?: string;
 	value?: string;
+	disabled?: boolean;
 	onChange: (value: string) => void;
 }
 
@@ -112,6 +113,10 @@ export class CommonSetting {
 		this.setting.addText((text) => {
 			if (textInput.placeholder) text.setPlaceholder(textInput.placeholder);
 			if (textInput.value !== undefined) text.setValue(textInput.value);
+			if (textInput.disabled) {
+				text.inputEl.disabled = true;
+				text.inputEl.classList.add('mod-disabled');
+			}
 			text.onChange(textInput.onChange);
 		});
 	}
