@@ -3,31 +3,19 @@ import { WikiLinkSuggestModal } from '../modals/WikiLinkSuggestModal';
 
 /**
  * Helper class to manage wiki link selection
+ * Pure UI component without direct Obsidian App dependency
  */
 export class WikiLinkSelector {
-	readonly app: App;
-
-	constructor(app: App) {
-		this.app = app;
-	}
+	constructor(private readonly app: App) {}
 
 	/**
-	 * Opens a modal to select a file from the vault as a wiki link
+	 * Opens a modal to select a file from the current files as a wiki link
 	 * @param callback Function to call with the selected wiki link
 	 */
 	openFileSelector(callback: (wikiLink: string) => void): void {
 		const modal = new WikiLinkSuggestModal(this.app, (file: TFile) => {
-			// Return just the filename without extension as the wiki link
 			callback(file.basename);
 		});
 		modal.open();
-	}
-
-	/**
-	 * Gets all files in the vault as potential wiki links
-	 * @returns Array of filenames without extensions
-	 */
-	getAllPossibleWikiLinks(): string[] {
-		return this.app.vault.getMarkdownFiles().map((file) => file.basename);
 	}
 }

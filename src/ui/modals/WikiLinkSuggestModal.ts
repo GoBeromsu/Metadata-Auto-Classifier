@@ -6,11 +6,11 @@ import { FuzzySuggestModal } from 'obsidian';
  */
 
 export class WikiLinkSuggestModal extends FuzzySuggestModal<TFile> {
-	readonly onItemSelected: (file: TFile) => void;
-
-	constructor(app: App, onItemSelected: (file: TFile) => void) {
+	constructor(
+		app: App,
+		readonly onItemSelected: (file: TFile) => void
+	) {
 		super(app);
-		this.onItemSelected = onItemSelected;
 	}
 
 	getItems(): TFile[] {
@@ -28,5 +28,6 @@ export class WikiLinkSuggestModal extends FuzzySuggestModal<TFile> {
 
 	onChooseItem(file: TFile): void {
 		this.onItemSelected(file);
+		this.close();
 	}
 }
