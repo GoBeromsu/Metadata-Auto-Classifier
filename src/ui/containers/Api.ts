@@ -21,7 +21,7 @@ export class Api {
 		providers: ProviderConfig[],
 		selectedModel: string
 	): void {
-		containerEl.empty();
+		// containerEl.empty();
 
 		// Add API section header
 		containerEl.createEl('h2', { text: 'API Configuration' });
@@ -180,7 +180,7 @@ export class Api {
 							icon: 'trash',
 							tooltip: 'Delete',
 							onClick: async () => {
-								await this.modelCallbacks.onDelete(config.name);
+								await this.modelCallbacks.onDelete(provider.name, config.name);
 								this.onRefresh?.();
 							},
 						},
@@ -217,17 +217,21 @@ export class Api {
 			onSave: async (result) => {
 				if (result.isEdit && result.oldModel) {
 					// Edit mode: remove old model from its original provider
-					await this.modelCallbacks.onDelete(result.oldModel.model);
+					await this.modelCallbacks.onDelete(result.oldModel.provider, result.oldModel.model);
+
+					// Add the updated model to the selected provider
+					await this.modelCallbacks.onAdd(result.provider, result.model);
 
 					// Update selected model if it was the one being edited
 					if (editTarget && editTarget.model === result.oldModel.model) {
 						await this.modelCallbacks.onSelect(result.provider, result.model.name);
 					}
+				} else {
+					// Add mode: add the new model to the selected provider
+					await this.modelCallbacks.onAdd(result.provider, result.model);
 				}
 
-				// Add model to selected provider
-				// Note: This logic should be handled by the parent component
-				// For now, we'll call the callback to notify the parent
+				// Refresh the UI
 				this.onRefresh?.();
 			},
 			editTarget: editTarget,

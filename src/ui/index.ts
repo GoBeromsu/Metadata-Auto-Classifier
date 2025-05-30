@@ -1,7 +1,7 @@
 import type AutoClassifierPlugin from 'main';
 import { PluginSettingTab } from 'obsidian';
 
-import type { ProviderConfig } from 'api/types';
+import type { Model, ProviderConfig } from 'api/types';
 import type { FrontmatterTemplate } from 'frontmatter/types';
 import { generateId } from 'utils';
 import { DEFAULT_FRONTMATTER_SETTING } from 'utils/constants';
@@ -143,24 +143,28 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		};
 
 		const modelCallbacks: ModelCallbacks = {
+			onAdd: async (providerName: string, model: Model) => {
+				const provider = this.plugin.settings.providers.find((p) => p.name === providerName);
+				if (provider) {
+					provider.models.push(model);
+					await this.plugin.saveSettings();
+				}
+			},
+
 			onSelect: async (providerName: string, modelName: string) => {
 				this.plugin.settings.selectedProvider = providerName;
 				this.plugin.settings.selectedModel = modelName;
 				await this.plugin.saveSettings();
 			},
 
-			onDelete: async (modelName: string) => {
-				const selectedProvider = this.plugin.getSelectedProvider();
-				if (selectedProvider) {
-					selectedProvider.models = selectedProvider.models.filter((m) => m.name !== modelName);
+			onDelete: async (providerName: string, modelName: string) => {
+				const provider = this.plugin.settings.providers.find((p) => p.name === providerName);
 
-					// Clear selection if deleted model was selected
-					if (this.plugin.settings.selectedModel === modelName) {
-						this.plugin.settings.selectedModel = '';
-					}
-
-					await this.plugin.saveSettings();
+				if (provider) {
+					provider.models = provider.models.filter((m) => m.name !== modelName);
 				}
+
+				await this.plugin.saveSettings();
 			},
 		};
 

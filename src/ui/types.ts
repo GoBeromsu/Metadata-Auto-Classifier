@@ -1,4 +1,4 @@
-import type { ProviderConfig } from 'api/types';
+import type { ProviderConfig, Model } from 'api/types';
 import { FrontmatterTemplate } from 'frontmatter/types';
 
 // 🎯 도메인별 콜백 그룹화 - 직관적인 네이밍
@@ -13,8 +13,9 @@ export interface ProviderCallbacks {
 }
 
 export interface ModelCallbacks {
+	onAdd: (providerName: string, model: Model) => Promise<void>;
 	onSelect: (providerName: string, modelName: string) => Promise<void>;
-	onDelete: (modelName: string) => Promise<void>;
+	onDelete: (providerName: string, modelName: string) => Promise<void>;
 }
 
 // 🔄 기존 ApiCallbacks는 호환성을 위해 유지 (점진적 마이그레이션)
@@ -24,7 +25,7 @@ export interface ApiCallbacks {
 	onProviderUpdate: (oldName: string, newProvider: ProviderConfig) => Promise<void>;
 	onProviderDelete: (providerName: string) => Promise<void>;
 	onModelSelect: (providerName: string, modelName: string) => Promise<void>;
-	onModelDelete: (modelName: string) => Promise<void>;
+	onModelDelete: (providerName: string, modelName: string) => Promise<void>;
 	onOpenProviderModal: (type: 'add' | 'edit', provider?: ProviderConfig) => void;
 	onOpenModelModal: (
 		type: 'add' | 'edit',

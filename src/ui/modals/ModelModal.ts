@@ -1,10 +1,11 @@
 import type { Model, ProviderConfig, ProviderPreset } from 'api/types';
 import type { App } from 'obsidian';
-import { Modal, Notice } from 'obsidian';
+import { Modal } from 'obsidian';
 import { CommonButton } from 'ui/components/common/CommonButton';
+import { CommonNotice } from 'ui/components/common/CommonNotice';
 import type { DropdownOption } from 'ui/components/common/CommonSetting';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
-const providersData = require('../../api/providerPreset.json');
+import { getProviderPresets } from 'utils';
 
 export interface ModelModalProps {
 	providers: ProviderConfig[];
@@ -103,12 +104,11 @@ export class ModelModal extends Modal {
 			existingContainer.remove();
 		}
 
-		// Find the selected provider data
+		// Find the selected provider data using utils
 		let providerData: ProviderPreset | null = null;
 		if (this.selectedProvider) {
-			providerData = Object.values(providersData).find(
-				(p: any) => p.name === this.selectedProvider
-			) as ProviderPreset;
+			const presets = getProviderPresets();
+			providerData = presets.find((preset) => preset.name === this.selectedProvider) || null;
 		}
 
 		const modelsContainer = containerEl.createEl('div', {
@@ -301,17 +301,17 @@ export class ModelModal extends Modal {
 
 	private validateForm(): boolean {
 		if (!this.selectedProvider) {
-			new Notice('Provider is required');
+			CommonNotice.showError(new Error('Provider is required'), 'Model validation');
 			return false;
 		}
 
 		if (!this.modelId.trim()) {
-			new Notice('Model ID is required');
+			CommonNotice.showError(new Error('Model ID is required'), 'Model validation');
 			return false;
 		}
 
 		if (!this.displayName.trim()) {
-			new Notice('Display name is required');
+			CommonNotice.showError(new Error('Display name is required'), 'Model validation');
 			return false;
 		}
 
