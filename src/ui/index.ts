@@ -6,12 +6,10 @@ import type { FrontmatterTemplate } from 'frontmatter/types';
 import { generateId } from 'utils';
 import { DEFAULT_FRONTMATTER_SETTING } from 'utils/constants';
 import { CommonSetting } from './components/common/CommonSetting';
-import { ApiComponent } from './containers/Api';
+import { Api } from './containers/Api';
 import { Frontmatter } from './containers/Frontmatter';
 import { Tag } from './containers/Tag';
-import { ModelModal, type ModelModalProps } from './modals/ModelModal';
-import { ProviderModal } from './modals/ProviderModal';
-import type { ApiProps } from './types';
+import type { ClassificationCallbacks, ModelCallbacks, ProviderCallbacks } from './types';
 
 export interface AutoClassifierSettings {
 	providers: ProviderConfig[];
@@ -23,7 +21,7 @@ export interface AutoClassifierSettings {
 
 export class AutoClassifierSettingTab extends PluginSettingTab {
 	plugin: AutoClassifierPlugin;
-	apiComponent: ApiComponent;
+	api: Api;
 	tagSetting: Tag;
 	frontmatterSetting: Frontmatter;
 
@@ -31,8 +29,17 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		super(plugin.app, plugin);
 		this.plugin = plugin;
 
-		// Create API component with composition pattern and event-based modal
-		this.apiComponent = new ApiComponent(this.createApiProps());
+		// Create API component with domain-specific callbacks
+		const { classificationCallbacks, providerCallbacks, modelCallbacks } =
+			this.createDomainCallbacks();
+
+		this.api = new Api(
+			plugin.app, // 🎯 App 객체 전달
+			classificationCallbacks,
+			providerCallbacks,
+			modelCallbacks,
+			() => this.display() // Single onRefresh callback
+		);
 		this.tagSetting = new Tag(plugin);
 		this.frontmatterSetting = new Frontmatter(plugin);
 	}
@@ -41,10 +48,13 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		this.apiComponent.updateProps(this.createApiProps());
-
 		const apiSettingContainer = containerEl.createDiv();
-		this.apiComponent.display(apiSettingContainer);
+		this.api.display(
+			apiSettingContainer,
+			this.plugin.settings.classificationRule,
+			this.plugin.settings.providers,
+			this.plugin.settings.selectedModel
+		);
 
 		containerEl.createEl('h2', { text: 'Frontmatters' });
 		const frontmattersContainer = containerEl.createDiv({ cls: 'frontmatters-container' });
@@ -89,26 +99,22 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		newFrontmatterContainer.setAttribute('data-frontmatter-id', newFrontmatter.id.toString());
 		this.frontmatterSetting.display(newFrontmatterContainer, newFrontmatter.id);
 	}
-	private createApiProps(): ApiProps {
-		return {
-			// Current state (read-only)
-			classificationRule: this.plugin.settings.classificationRule,
-			providers: this.plugin.settings.providers,
-			selectedProvider: this.plugin.settings.selectedProvider,
-			selectedModel: this.plugin.settings.selectedModel,
 
-			// State change callbacks
-			onClassificationRuleChange: async (rule: string) => {
+	private createDomainCallbacks() {
+		const classificationCallbacks: ClassificationCallbacks = {
+			onChange: async (rule: string) => {
 				this.plugin.settings.classificationRule = rule;
 				await this.plugin.saveSettings();
 			},
+		};
 
-			onProviderAdd: async (provider: ProviderConfig) => {
+		const providerCallbacks: ProviderCallbacks = {
+			onAdd: async (provider: ProviderConfig) => {
 				this.plugin.settings.providers.push(provider);
 				await this.plugin.saveSettings();
 			},
 
-			onProviderUpdate: async (oldName: string, newProvider: ProviderConfig) => {
+			onUpdate: async (oldName: string, newProvider: ProviderConfig) => {
 				const index = this.plugin.settings.providers.findIndex((p) => p.name === oldName);
 				if (index !== -1) {
 					this.plugin.settings.providers[index] = newProvider;
@@ -121,7 +127,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 				await this.plugin.saveSettings();
 			},
 
-			onProviderDelete: async (providerName: string) => {
+			onDelete: async (providerName: string) => {
 				this.plugin.settings.providers = this.plugin.settings.providers.filter(
 					(p) => p.name !== providerName
 				);
@@ -134,14 +140,16 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 
 				await this.plugin.saveSettings();
 			},
+		};
 
-			onModelSelect: async (providerName: string, modelName: string) => {
+		const modelCallbacks: ModelCallbacks = {
+			onSelect: async (providerName: string, modelName: string) => {
 				this.plugin.settings.selectedProvider = providerName;
 				this.plugin.settings.selectedModel = modelName;
 				await this.plugin.saveSettings();
 			},
 
-			onModelDelete: async (modelName: string) => {
+			onDelete: async (modelName: string) => {
 				const selectedProvider = this.plugin.getSelectedProvider();
 				if (selectedProvider) {
 					selectedProvider.models = selectedProvider.models.filter((m) => m.name !== modelName);
@@ -154,79 +162,12 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}
 			},
+		};
 
-			// Modal event handlers (clean event-based pattern)
-			onOpenProviderModal: (type: 'add' | 'edit', provider?: ProviderConfig) => {
-				const modal = new ProviderModal(
-					this.plugin.app,
-					async (savedProvider: ProviderConfig) => {
-						if (type === 'add') {
-							this.plugin.settings.providers.push(savedProvider);
-						} else if (type === 'edit' && provider) {
-							const index = this.plugin.settings.providers.findIndex(
-								(p) => p.name === provider.name
-							);
-							if (index !== -1) {
-								this.plugin.settings.providers[index] = savedProvider;
-								if (this.plugin.settings.selectedProvider === provider.name) {
-									this.plugin.settings.selectedProvider = savedProvider.name;
-								}
-							}
-						}
-						await this.plugin.saveSettings();
-						this.display();
-					},
-					provider
-				);
-				modal.open();
-			},
-
-			onOpenModelModal: (
-				type: 'add' | 'edit',
-				editTarget?: { model: string; displayName: string; provider: string }
-			) => {
-				const modalProps: ModelModalProps = {
-					providers: this.plugin.settings.providers,
-					onSave: async (result) => {
-						if (result.isEdit && result.oldModel) {
-							// Edit mode: remove old model from its original provider
-							const originalProvider = this.plugin.settings.providers.find(
-								(p) => p.name === result.oldModel!.provider
-							);
-							if (originalProvider) {
-								originalProvider.models = originalProvider.models.filter(
-									(m) => m.name !== result.oldModel!.model
-								);
-							}
-
-							// Update selected model if it was the one being edited
-							if (this.plugin.settings.selectedModel === result.oldModel.model) {
-								this.plugin.settings.selectedModel = result.model.name;
-							}
-						}
-
-						// Add model to selected provider
-						const targetProvider = this.plugin.settings.providers.find(
-							(p) => p.name === result.provider
-						);
-						if (targetProvider) {
-							targetProvider.models.push(result.model);
-						}
-
-						await this.plugin.saveSettings();
-						this.display();
-					},
-					editTarget: editTarget,
-				};
-
-				const modal = new ModelModal(this.plugin.app, modalProps);
-				modal.open();
-			},
-
-			// UI refresh callback
-			onRefresh: () => {
-				this.display(); // Re-render the entire settings tab
-			},
+		return {
+			classificationCallbacks,
+			providerCallbacks,
+			modelCallbacks,
 		};
 	}
 }

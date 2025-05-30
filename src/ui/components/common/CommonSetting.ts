@@ -53,7 +53,7 @@ export interface CommonSettingProps {
 	rangeInput?: RangeInputConfig;
 	dropdown?: DropdownConfig;
 	toggle?: ToggleConfig;
-	// textArea?: TextAreaConfig;
+	textArea?: TextAreaConfig;
 
 	// Button components
 	button?: CommonButtonProps;
@@ -74,6 +74,7 @@ export class CommonSetting {
 			rangeInput,
 			dropdown,
 			toggle,
+			textArea,
 			button,
 			extraButton,
 			buttons,
@@ -92,6 +93,7 @@ export class CommonSetting {
 		if (rangeInput) this.initRangeInput(rangeInput);
 		if (dropdown) this.initDropdown(dropdown);
 		if (toggle) this.initToggle(toggle);
+		if (textArea) this.initTextArea(textArea);
 
 		if (button) this.addButton(button);
 		if (extraButton) this.addExtraButton(extraButton);

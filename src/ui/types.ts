@@ -1,34 +1,35 @@
 import type { ProviderConfig } from 'api/types';
 import { FrontmatterTemplate } from 'frontmatter/types';
 
-export interface UIComponent {
-	updateProps(newProps: any): void;
-	display(containerEl: HTMLElement): void;
+// 🎯 도메인별 콜백 그룹화 - 직관적인 네이밍
+export interface ClassificationCallbacks {
+	onChange: (rule: string) => Promise<void>;
 }
 
-export interface ApiProps {
-	// Current state (read-only)
-	classificationRule: string;
-	providers: ProviderConfig[];
-	selectedProvider: string;
-	selectedModel: string;
+export interface ProviderCallbacks {
+	onAdd: (provider: ProviderConfig) => Promise<void>;
+	onUpdate: (oldName: string, newProvider: ProviderConfig) => Promise<void>;
+	onDelete: (providerName: string) => Promise<void>;
+}
 
-	// State change callbacks
+export interface ModelCallbacks {
+	onSelect: (providerName: string, modelName: string) => Promise<void>;
+	onDelete: (modelName: string) => Promise<void>;
+}
+
+// 🔄 기존 ApiCallbacks는 호환성을 위해 유지 (점진적 마이그레이션)
+export interface ApiCallbacks {
 	onClassificationRuleChange: (rule: string) => Promise<void>;
 	onProviderAdd: (provider: ProviderConfig) => Promise<void>;
 	onProviderUpdate: (oldName: string, newProvider: ProviderConfig) => Promise<void>;
 	onProviderDelete: (providerName: string) => Promise<void>;
 	onModelSelect: (providerName: string, modelName: string) => Promise<void>;
 	onModelDelete: (modelName: string) => Promise<void>;
-
-	// Modal event handlers (clean event-based pattern)
 	onOpenProviderModal: (type: 'add' | 'edit', provider?: ProviderConfig) => void;
 	onOpenModelModal: (
 		type: 'add' | 'edit',
 		editTarget?: { model: string; displayName: string; provider: string }
 	) => void;
-
-	// UI refresh callback
 	onRefresh?: () => void;
 }
 
