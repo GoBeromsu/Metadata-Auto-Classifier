@@ -1,19 +1,14 @@
 import { getFrontmatterSetting } from 'frontmatter';
 import type { FrontmatterTemplate } from 'frontmatter/types';
-import type AutoClassifierPlugin from 'main';
 import { BaseSettingsComponent } from 'ui/components/BaseSettings';
-import type { FrontmatterActions } from 'ui/types';
+import type { FrontmatterActions, SettingsComponentOptions } from 'ui/types';
 
 export class Frontmatter extends BaseSettingsComponent {
-	private plugin: AutoClassifierPlugin;
-	constructor(plugin: AutoClassifierPlugin) {
-		super(plugin.app, {
-			showLinkType: true,
-			showOptions: true,
-			showTextArea: true,
-		});
-		this.plugin = plugin;
-	}
+	protected readonly options: SettingsComponentOptions = {
+		showLinkType: true,
+		showOptions: true,
+		showTextArea: true,
+	};
 
 	display(containerEl: HTMLElement, frontmatterId: number): void {
 		containerEl.empty();

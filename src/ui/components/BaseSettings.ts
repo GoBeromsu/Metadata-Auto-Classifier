@@ -1,5 +1,5 @@
 import type { FrontmatterTemplate } from 'frontmatter/types';
-import { App } from 'obsidian';
+import type AutoClassifierPlugin from 'main';
 import { ConfigurableSettingModal } from 'ui/modals/FrontmatterEditorModal';
 import type {
 	FrontmatterActions,
@@ -10,14 +10,9 @@ import type {
 import { CommonSetting } from './common/CommonSetting';
 
 export abstract class BaseSettingsComponent implements SettingsComponent {
-	protected options: SettingsComponentOptions;
+	protected abstract readonly options: SettingsComponentOptions;
 
-	constructor(
-		protected app: App,
-		options: SettingsComponentOptions = {}
-	) {
-		this.options = options;
-	}
+	constructor(protected readonly plugin: AutoClassifierPlugin) {}
 
 	abstract display(containerEl: HTMLElement, frontmatterId?: number): void;
 
@@ -58,7 +53,7 @@ export abstract class BaseSettingsComponent implements SettingsComponent {
 			onSave: onSave,
 		};
 
-		const modal = new ConfigurableSettingModal(this.app, modalProps);
+		const modal = new ConfigurableSettingModal(this.plugin.app, modalProps);
 		modal.open();
 	}
 }

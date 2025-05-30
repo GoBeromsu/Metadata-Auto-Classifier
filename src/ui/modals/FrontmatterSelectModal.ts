@@ -3,13 +3,12 @@ import { FuzzySuggestModal } from 'obsidian';
 import type { FrontmatterRef } from 'ui/types';
 
 export class FrontmatterSelectModal extends FuzzySuggestModal<FrontmatterRef> {
-	readonly options: FrontmatterRef[];
-	readonly callback: (selectedId: number | null) => void;
-
-	constructor(app: App, options: FrontmatterRef[], callback: (selectedId: number | null) => void) {
+	constructor(
+		app: App,
+		readonly options: FrontmatterRef[],
+		readonly callback: (selectedId: number | null) => void
+	) {
 		super(app);
-		this.options = options;
-		this.callback = callback;
 		this.setPlaceholder('Select frontmatter to fetch');
 	}
 

@@ -1,17 +1,14 @@
 import type { FrontmatterTemplate } from 'frontmatter/types';
-import type AutoClassifierPlugin from 'main';
 import { BaseSettingsComponent } from 'ui/components/BaseSettings';
-import type { FrontmatterActions } from 'ui/types';
+import type { FrontmatterActions, SettingsComponentOptions } from 'ui/types';
 import { DEFAULT_TAG_SETTING } from '../../utils/constants';
 
 export class Tag extends BaseSettingsComponent {
-	constructor(plugin: AutoClassifierPlugin) {
-		super(plugin.app, {
-			showLinkType: false,
-			showOptions: false,
-			showTextArea: false,
-		});
-	}
+	protected readonly options: SettingsComponentOptions = {
+		showLinkType: false,
+		showOptions: false,
+		showTextArea: false,
+	};
 
 	display(containerEl: HTMLElement): void {
 		containerEl.empty();
