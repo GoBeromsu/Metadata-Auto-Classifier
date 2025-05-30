@@ -1,19 +1,13 @@
-import type { FrontmatterTemplate, LinkType } from 'frontmatter/types';
+import type { LinkType } from 'frontmatter/types';
 import type { App } from 'obsidian';
 import { Modal, TextAreaComponent } from 'obsidian';
-import type { SettingsComponentOptions } from 'ui/components/BaseSettings';
 import { WikiLinkSelector } from 'ui/components/WikiLinkSelector';
 import { CommonButton } from 'ui/components/common/CommonButton';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
-
-export interface FrontmatterEditorModalProps {
-	frontmatterSetting: FrontmatterTemplate;
-	options: SettingsComponentOptions;
-	onSave: (frontmatter: FrontmatterTemplate) => Promise<void>;
-}
+import type { FrontmatterEditorModalProps } from 'ui/types';
 
 export class ConfigurableSettingModal extends Modal {
-	private props: FrontmatterEditorModalProps;
+	private readonly props: FrontmatterEditorModalProps;
 	private textAreaComponent: TextAreaComponent;
 
 	constructor(app: App, props: FrontmatterEditorModalProps) {

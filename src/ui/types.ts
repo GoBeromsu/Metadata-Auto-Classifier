@@ -1,4 +1,5 @@
 import type { ProviderConfig } from 'api/types';
+import { FrontmatterTemplate } from 'frontmatter/types';
 
 export interface UIComponent {
 	updateProps(newProps: any): void;
@@ -29,4 +30,25 @@ export interface ApiProps {
 
 	// UI refresh callback
 	onRefresh?: () => void;
+}
+
+export interface SettingsComponentOptions {
+	showLinkType?: boolean;
+	showOptions?: boolean;
+	showTextArea?: boolean;
+}
+
+export interface SettingsComponent {
+	display(containerEl: HTMLElement, frontmatterId?: number): void;
+}
+
+export interface FrontmatterActions {
+	onEdit: (frontmatterSetting: FrontmatterTemplate) => void;
+	onDelete: (frontmatterSetting: FrontmatterTemplate) => void;
+}
+
+export interface FrontmatterEditorModalProps {
+	frontmatterSetting: FrontmatterTemplate;
+	options: SettingsComponentOptions;
+	onSave: (frontmatter: FrontmatterTemplate) => Promise<void>;
 }

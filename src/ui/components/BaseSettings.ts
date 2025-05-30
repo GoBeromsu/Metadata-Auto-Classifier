@@ -1,41 +1,30 @@
 import type { FrontmatterTemplate } from 'frontmatter/types';
-import type AutoClassifierPlugin from 'main';
-import {
-	ConfigurableSettingModal,
+import { App } from 'obsidian';
+import { ConfigurableSettingModal } from 'ui/modals/FrontmatterEditorModal';
+import type {
+	FrontmatterActions,
 	FrontmatterEditorModalProps,
-} from 'ui/modals/FrontmatterEditorModal';
+	SettingsComponent,
+	SettingsComponentOptions,
+} from 'ui/types';
 import { CommonSetting } from './common/CommonSetting';
-
-export interface SettingsComponentOptions {
-	showLinkType?: boolean;
-	showOptions?: boolean;
-	showTextArea?: boolean;
-}
-
-export interface SettingsComponent {
-	display(containerEl: HTMLElement, frontmatterId?: number): void;
-}
 
 export abstract class BaseSettingsComponent implements SettingsComponent {
 	protected options: SettingsComponentOptions;
 
 	constructor(
-		protected plugin: AutoClassifierPlugin,
+		protected app: App,
 		options: SettingsComponentOptions = {}
 	) {
-		this.options = {
-			showLinkType: true,
-			showOptions: true,
-			showTextArea: true,
-			...options,
-		};
+		this.options = options;
 	}
 
 	abstract display(containerEl: HTMLElement, frontmatterId?: number): void;
 
-	defaultSettings(
+	protected defaultSettings(
 		containerEl: HTMLElement,
 		frontmatterSetting: FrontmatterTemplate,
+		actions: FrontmatterActions,
 		showDeleteButton: boolean = false
 	): void {
 		CommonSetting.create(containerEl, {
@@ -44,54 +33,32 @@ export abstract class BaseSettingsComponent implements SettingsComponent {
 			extraButton: {
 				icon: 'pencil',
 				tooltip: 'Edit Frontmatter',
-				onClick: () => {
-					const modalProps: FrontmatterEditorModalProps = {
-						frontmatterSetting: frontmatterSetting,
-						options: this.options,
-						onSave: async (updatedFrontmatter: FrontmatterTemplate) => {
-							// Register command for the updated frontmatter
-							this.plugin.registerCommand(
-								updatedFrontmatter.name,
-								async () => await this.plugin.processFrontmatter(updatedFrontmatter.id)
-							);
-
-							await this.plugin.saveSettings();
-
-							// Refresh the display by finding and updating the container
-							const frontmatterContainer = containerEl.closest('.frontmatter-item-container');
-							if (frontmatterContainer) {
-								const frontmatterId = frontmatterContainer.getAttribute('data-frontmatter-id');
-								if (frontmatterId) {
-									// Re-render this specific frontmatter component
-									this.display(containerEl, parseInt(frontmatterId));
-								}
-							}
-						},
-					};
-
-					const modal = new ConfigurableSettingModal(this.plugin.app, modalProps);
-					modal.open();
-				},
+				onClick: () => actions.onEdit(frontmatterSetting),
 			},
 			...(showDeleteButton && {
 				buttons: [
 					{
 						icon: 'trash',
 						tooltip: 'Delete Frontmatter',
-						onClick: async () => {
-							if (
-								confirm(`Are you sure you want to delete "${frontmatterSetting.name}" frontmatter?`)
-							) {
-								this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
-									(f: FrontmatterTemplate) => f.id !== frontmatterSetting.id
-								);
-								await this.plugin.saveSettings();
-								containerEl.empty();
-							}
-						},
+						onClick: () => actions.onDelete(frontmatterSetting),
 					},
 				],
 			}),
 		});
+	}
+
+	// Common modal creation and opening logic
+	protected openEditModal(
+		frontmatterSetting: FrontmatterTemplate,
+		onSave: (updatedFrontmatter: FrontmatterTemplate) => Promise<void>
+	): void {
+		const modalProps: FrontmatterEditorModalProps = {
+			frontmatterSetting: frontmatterSetting,
+			options: this.options,
+			onSave: onSave,
+		};
+
+		const modal = new ConfigurableSettingModal(this.app, modalProps);
+		modal.open();
 	}
 }
