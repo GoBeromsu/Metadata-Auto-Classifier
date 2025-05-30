@@ -1,4 +1,3 @@
-import type { DropdownComponent, ToggleComponent } from 'obsidian';
 import { Setting, TextAreaComponent, TextComponent } from 'obsidian';
 import {
 	createButtonConfig,
@@ -54,7 +53,7 @@ export interface CommonSettingProps {
 	rangeInput?: RangeInputConfig;
 	dropdown?: DropdownConfig;
 	toggle?: ToggleConfig;
-	textArea?: TextAreaConfig;
+	// textArea?: TextAreaConfig;
 
 	// Button components
 	button?: CommonButtonProps;
@@ -64,19 +63,39 @@ export interface CommonSettingProps {
 
 export class CommonSetting {
 	private setting: Setting;
-	private props: CommonSettingProps;
-
-	private textComponent?: TextComponent;
-	private rangeMinComponent?: TextComponent;
-	private rangeMaxComponent?: TextComponent;
-	private dropdownComponent?: DropdownComponent;
-	private toggleComponent?: ToggleComponent;
-	private textAreaComponent?: TextAreaComponent;
 
 	constructor(containerEl: HTMLElement, props: CommonSettingProps) {
-		this.props = props;
+		const {
+			name,
+			desc,
+			className,
+			heading,
+			textInput,
+			rangeInput,
+			dropdown,
+			toggle,
+			button,
+			extraButton,
+			buttons,
+		} = props;
+
 		this.setting = new Setting(containerEl);
-		this.initialize();
+		this.setting.setName(name);
+
+		if (desc) this.setting.setDesc(desc);
+		if (heading) this.setting.setHeading();
+
+		if (className) this.setting.settingEl.addClass(className);
+
+		// Initialize components based on configuration
+		if (textInput) this.initTextInput(textInput);
+		if (rangeInput) this.initRangeInput(rangeInput);
+		if (dropdown) this.initDropdown(dropdown);
+		if (toggle) this.initToggle(toggle);
+
+		if (button) this.addButton(button);
+		if (extraButton) this.addExtraButton(extraButton);
+		if (buttons) buttons.forEach((buttonProps) => this.addExtraButton(buttonProps));
 	}
 
 	/**
@@ -87,189 +106,90 @@ export class CommonSetting {
 		new CommonSetting(containerEl, props);
 	}
 
-	private initialize(): void {
-		const { name, desc, className, heading } = this.props;
-
-		// Set basic properties
-		this.setting.setName(name);
-
-		if (desc) this.setting.setDesc(desc);
-		if (heading) this.setting.setHeading();
-
-		if (className) this.setting.settingEl.addClass(className);
-
-		// Initialize components based on configuration
-		this.initializeTextInput();
-		this.initializeRangeInput();
-		this.initializeDropdown();
-		this.initializeToggle();
-		this.initializeTextArea();
-		this.initializeButtons();
-	}
-
-	private initializeTextInput(): void {
-		const { textInput } = this.props;
-		if (!textInput) return;
-
+	private initTextInput(textInput: TextInputConfig): void {
 		this.setting.addText((text) => {
-			this.textComponent = text;
-
 			if (textInput.placeholder) text.setPlaceholder(textInput.placeholder);
 			if (textInput.value !== undefined) text.setValue(textInput.value);
 			text.onChange(textInput.onChange);
 		});
 	}
 
-	private initializeRangeInput(): void {
-		const { rangeInput } = this.props;
-		if (!rangeInput) return;
+	private initDropdown(config: DropdownConfig): void {
+		this.setting.addDropdown((component) => {
+			config.options.forEach(({ value, display }) => {
+				component.addOption(value, display);
+			});
+			component.setValue(config.value ?? '');
+			component.onChange(config.onChange);
+		});
+	}
 
-		// Create a container for the range inputs
-		const rangeContainer = this.setting.controlEl.createDiv({ cls: 'range-input-container' });
-		rangeContainer.style.display = 'flex';
-		rangeContainer.style.gap = '8px';
-		rangeContainer.style.alignItems = 'center';
+	private initToggle(toggle: ToggleConfig): void {
+		this.setting.addToggle((component) => {
+			component.setValue(toggle.value);
+			component.onChange(toggle.onChange);
+		});
+	}
 
-		// Min input
-		const minContainer = rangeContainer.createDiv({ cls: 'range-min-container' });
-		minContainer.style.display = 'flex';
-		minContainer.style.flexDirection = 'column';
-		minContainer.style.flex = '1';
+	private initTextArea(textArea: TextAreaConfig): void {
+		const textareaContainer = this.setting.settingEl.createDiv({ cls: 'textarea-container' });
+		const component = new TextAreaComponent(textareaContainer);
 
-		const minLabel = minContainer.createEl('label', { text: 'Min', cls: 'range-label' });
-		minLabel.style.fontSize = '12px';
-		minLabel.style.marginBottom = '4px';
-		minLabel.style.color = 'var(--text-muted)';
+		if (textArea.placeholder) component.setPlaceholder(textArea.placeholder);
+		if (textArea.value !== undefined) component.setValue(textArea.value);
+		if (textArea.rows) component.inputEl.rows = textArea.rows;
+		component.onChange(textArea.onChange);
+	}
 
-		this.rangeMinComponent = new TextComponent(minContainer);
-		this.rangeMinComponent.inputEl.type = 'number';
-		this.rangeMinComponent.inputEl.style.width = '100%';
+	private addButton(buttonProps: CommonButtonProps): void {
+		this.setting.addButton(createButtonConfig(buttonProps));
+	}
 
-		if (rangeInput.minPlaceholder) {
-			this.rangeMinComponent.setPlaceholder(rangeInput.minPlaceholder);
-		}
+	private addExtraButton(buttonProps: CommonButtonProps): void {
+		this.setting.addExtraButton(createExtraButtonConfig(buttonProps));
+	}
 
-		if (rangeInput.minValue !== undefined) {
-			this.rangeMinComponent.setValue(rangeInput.minValue.toString());
-		}
+	private initRangeInput(config: RangeInputConfig): void {
+		// Local state for composition - no class fields needed!
+		let minComponent: TextComponent;
+		let maxComponent: TextComponent;
 
-		// Separator
-		const separator = rangeContainer.createEl('span', { text: '~', cls: 'range-separator' });
-		separator.style.margin = '0 4px';
-		separator.style.alignSelf = 'flex-end';
-		separator.style.marginBottom = '4px';
-
-		// Max input
-		const maxContainer = rangeContainer.createDiv({ cls: 'range-max-container' });
-		maxContainer.style.display = 'flex';
-		maxContainer.style.flexDirection = 'column';
-		maxContainer.style.flex = '1';
-
-		const maxLabel = maxContainer.createEl('label', { text: 'Max', cls: 'range-label' });
-		maxLabel.style.fontSize = '12px';
-		maxLabel.style.marginBottom = '4px';
-		maxLabel.style.color = 'var(--text-muted)';
-
-		this.rangeMaxComponent = new TextComponent(maxContainer);
-		this.rangeMaxComponent.inputEl.type = 'number';
-		this.rangeMaxComponent.inputEl.style.width = '100%';
-
-		if (rangeInput.maxPlaceholder) {
-			this.rangeMaxComponent.setPlaceholder(rangeInput.maxPlaceholder);
-		}
-
-		if (rangeInput.maxValue !== undefined) {
-			this.rangeMaxComponent.setValue(rangeInput.maxValue.toString());
-		}
-
-		// Handle changes
-		const handleRangeChange = () => {
-			const minValue = parseInt(this.rangeMinComponent?.getValue() || '0', 10);
-			const maxValue = parseInt(this.rangeMaxComponent?.getValue() || '0', 10);
-
-			if (!isNaN(minValue) && !isNaN(maxValue) && minValue > 0 && maxValue > 0) {
-				// Ensure min <= max
-				const adjustedMin = Math.min(minValue, maxValue);
-				const adjustedMax = Math.max(minValue, maxValue);
-
-				// Update the inputs if they were adjusted
-				if (adjustedMin !== minValue) {
-					this.rangeMinComponent?.setValue(adjustedMin.toString());
+		// Inner composite function - encapsulates combination logic
+		const handleCombinedChange = () => {
+			return () => {
+				const min = parseInt(minComponent?.getValue() || '0', 10);
+				const max = parseInt(maxComponent?.getValue() || '0', 10);
+				if (!isNaN(min) && !isNaN(max)) {
+					config.onChange(min, max);
 				}
-				if (adjustedMax !== maxValue) {
-					this.rangeMaxComponent?.setValue(adjustedMax.toString());
-				}
-
-				rangeInput.onChange(adjustedMin, adjustedMax);
-			}
+			};
 		};
 
-		this.rangeMinComponent.onChange(handleRangeChange);
-		this.rangeMaxComponent.onChange(handleRangeChange);
-	}
-
-	private initializeDropdown(): void {
-		const { dropdown } = this.props;
-		if (!dropdown) return;
-
-		this.setting.addDropdown((dropdownComponent) => {
-			this.dropdownComponent = dropdownComponent;
-
-			dropdown.options.forEach((option) => {
-				dropdownComponent.addOption(option.value, option.display);
-			});
-
-			if (dropdown.value !== undefined) {
-				dropdownComponent.setValue(dropdown.value);
-			}
-
-			dropdownComponent.onChange(dropdown.onChange);
+		// First component - same as any other TextInput
+		this.setting.addText((input) => {
+			minComponent = input;
+			input.inputEl.type = 'number';
+			input.inputEl.style.width = '80px';
+			if (config.minPlaceholder) input.setPlaceholder(config.minPlaceholder);
+			if (config.minValue !== undefined) input.setValue(config.minValue.toString());
+			input.onChange(handleCombinedChange);
 		});
-	}
 
-	private initializeToggle(): void {
-		const { toggle } = this.props;
-		if (!toggle) return;
-
-		this.setting.addToggle((toggleComponent) => {
-			this.toggleComponent = toggleComponent;
-			toggleComponent.setValue(toggle.value);
-			toggleComponent.onChange(toggle.onChange);
+		// Separator - pure presentation
+		this.setting.controlEl.createSpan({
+			text: '~',
+			cls: 'range-separator',
+			attr: { style: 'margin: 0 8px; color: var(--text-muted);' },
 		});
-	}
 
-	private initializeTextArea(): void {
-		const { textArea } = this.props;
-		if (!textArea) return;
-
-		// Create container for textarea
-		const textareaContainer = this.setting.settingEl.createDiv({ cls: 'textarea-container' });
-
-		this.textAreaComponent = new TextAreaComponent(textareaContainer);
-
-		if (textArea.placeholder) this.textAreaComponent.setPlaceholder(textArea.placeholder);
-		if (textArea.value !== undefined) this.textAreaComponent.setValue(textArea.value);
-		if (textArea.rows) this.textAreaComponent.inputEl.rows = textArea.rows;
-		this.textAreaComponent.onChange(textArea.onChange);
-	}
-
-	private initializeButtons(): void {
-		const { button, extraButton, buttons } = this.props;
-		// Single button
-		if (button) this.addButtonToSetting(button, false);
-
-		// Extra button (icon-only style)
-		if (extraButton) this.addButtonToSetting(extraButton, true);
-
-		// Multiple buttons (treat as extra buttons since they're typically icon-only)
-		if (buttons) buttons.forEach((buttonProps) => this.addButtonToSetting(buttonProps, true));
-	}
-
-	private addButtonToSetting(buttonProps: CommonButtonProps, isExtraButton: boolean): void {
-		if (isExtraButton) {
-			this.setting.addExtraButton(createExtraButtonConfig(buttonProps));
-		} else {
-			this.setting.addButton(createButtonConfig(buttonProps));
-		}
+		// Second component - same as any other TextInput
+		this.setting.addText((input) => {
+			maxComponent = input;
+			input.inputEl.type = 'number';
+			input.inputEl.style.width = '80px';
+			if (config.maxPlaceholder) input.setPlaceholder(config.maxPlaceholder);
+			if (config.maxValue !== undefined) input.setValue(config.maxValue.toString());
+			input.onChange(handleCombinedChange);
+		});
 	}
 }
