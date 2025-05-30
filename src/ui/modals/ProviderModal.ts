@@ -1,17 +1,14 @@
-import type { ProviderConfig, ProviderPreset } from 'api/types';
+import type { ProviderConfig } from 'api/types';
 import type { App } from 'obsidian';
 import { Modal } from 'obsidian';
 import { CommonButton } from 'ui/components/common/CommonButton';
 import { CommonNotice } from 'ui/components/common/CommonNotice';
-import type { DropdownOption } from 'ui/components/common/CommonSetting';
-import { CommonSetting } from 'ui/components/common/CommonSetting';
-
-// Import providers data
-const providersData = require('../../api/providerPreset.json');
+import { CommonSetting, DropdownOption } from 'ui/components/common/CommonSetting';
+import { findMatchingPreset, getProviderPresetById, getProviderPresets } from 'utils';
 
 export class ProviderModal extends Modal {
-	private providerConfig: ProviderConfig;
-	private onSave: (provider: ProviderConfig) => void;
+	private readonly providerConfig: ProviderConfig;
+	private readonly onSave: (provider: ProviderConfig) => void;
 	private selectedPreset: string = 'custom';
 
 	constructor(
@@ -27,7 +24,7 @@ export class ProviderModal extends Modal {
 			// Load existing data
 			this.providerConfig = { ...existingProvider };
 			// Try to find matching preset for existing provider
-			this.findMatchingPreset(existingProvider);
+			this.selectedPreset = findMatchingPreset(existingProvider);
 		} else {
 			// Start with empty config
 			this.providerConfig = {
@@ -57,38 +54,14 @@ export class ProviderModal extends Modal {
 		this.addButtons(contentEl);
 	}
 
-	private findMatchingPreset(existingProvider: ProviderConfig): void {
-		// Get only provider entries (exclude version)
-		const providerEntries = Object.entries(providersData).filter(([key]) => key !== 'version');
-
-		const matchingPreset = providerEntries.find(([key, preset]) => {
-			const typedPreset = preset as ProviderPreset;
-			return (
-				typedPreset.baseUrl === existingProvider.baseUrl ||
-				typedPreset.name === existingProvider.name
-			);
-		});
-
-		if (matchingPreset) {
-			this.selectedPreset = matchingPreset[0]; // Use the key as id
-		} else {
-			this.selectedPreset = 'custom';
-		}
-	}
-
 	private addPresetSetting(containerEl: HTMLElement): void {
-		// Filter out version and map only provider presets
-		const providerEntries = Object.entries(providersData).filter(([key]) => key !== 'version');
-
+		const presets = getProviderPresets();
 		const presetOptions: DropdownOption[] = [
 			{ value: 'custom', display: 'Custom Provider' },
-			...providerEntries.map(([key, preset]) => {
-				const typedPreset = preset as ProviderPreset;
-				return {
-					value: key, // Use the key as value
-					display: typedPreset.name,
-				};
-			}),
+			...presets.map((preset) => ({
+				value: preset.id,
+				display: preset.name,
+			})),
 		];
 
 		CommonSetting.create(containerEl, {
@@ -189,7 +162,7 @@ export class ProviderModal extends Modal {
 			return;
 		}
 
-		const preset = providersData[presetId] as ProviderPreset;
+		const preset = getProviderPresetById(presetId);
 		if (!preset) return;
 
 		// Load preset data into current config
