@@ -1,12 +1,17 @@
-import { COMMON_CONSTANTS, GEMINI_STRUCTURE_OUTPUT } from '../constants';
 import { sendRequest } from '../index';
+import { COMMON_CONSTANTS, LMSTUDIO_STRUCTURE_OUTPUT } from '../constants';
 import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
-export class Gemini implements APIProvider {
-	buildHeaders(apiKey?: string): Record<string, string> {
+export class LMStudio implements APIProvider {
+	buildHeaders(apiKey: string): Record<string, string> {
 		const headers: Record<string, string> = {
 			'Content-Type': 'application/json',
 		};
+
+		// LM Studio typically doesn't require API key, but support it if provided
+		if (apiKey) {
+			headers.Authorization = `Bearer ${apiKey}`;
+		}
 
 		return headers;
 	}
@@ -20,28 +25,28 @@ export class Gemini implements APIProvider {
 	): Promise<StructuredOutput> {
 		const headers: Record<string, string> = this.buildHeaders(provider.apiKey);
 
-		const combinedPrompt = `${systemRole}\n\n${user_prompt}`;
+		// Create messages array for the LM Studio API (OpenAI-compatible)
+		const messages = [
+			{ role: 'system', content: systemRole },
+			{ role: 'user', content: user_prompt },
+		];
 
+		// Create the request data with LM Studio structured output format
 		const data = {
-			contents: [
-				{
-					parts: [{ text: combinedPrompt }],
-				},
-			],
-			generationConfig: {
-				temperature: provider.temperature ?? temperature,
-				...GEMINI_STRUCTURE_OUTPUT,
-			},
+			model: selectedModel,
+			messages: messages,
+			temperature: temperature ?? provider.temperature,
+			response_format: LMSTUDIO_STRUCTURE_OUTPUT,
+			max_tokens: COMMON_CONSTANTS.DEFAULT_MAX_TOKENS,
 		};
 
-		const url = `${provider.baseUrl}/models/${selectedModel}:generateContent?key=${provider.apiKey}`;
-
-		const response = await sendRequest(url, headers, data);
+		const response = await sendRequest(provider.baseUrl, headers, data);
 		return this.processApiResponse(response);
 	}
 
 	processApiResponse(responseData: any): StructuredOutput {
-		const messageContent = responseData?.candidates[0]?.content?.parts[0]?.text;
+		const messageContent = responseData.choices[0].message.content;
+
 		const content = messageContent.trim();
 		const result = JSON.parse(content) as StructuredOutput;
 		return {

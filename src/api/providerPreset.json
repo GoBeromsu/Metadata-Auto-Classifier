@@ -125,5 +125,27 @@
 				"name": "DeepSeek R1"
 			}
 		]
+	},
+	"lmstudio": {
+		"name": "LM Studio",
+		"apiKeyUrl": "",
+		"apiKeyRequired": false,
+		"modelsList": "https://lmstudio.ai/docs/app/api/structured-output",
+		"baseUrl": "http://localhost:1234/v1/chat/completions",
+		"temperature": 0.7,
+		"popularModels": [
+			{
+				"id": "qwen2.5-7b-instruct",
+				"name": "Qwen2.5 7B Instruct"
+			},
+			{
+				"id": "meta-llama-3.1-8b-instruct",
+				"name": "Meta Llama 3.1 8B Instruct"
+			},
+			{
+				"id": "ministral-8b-instruct-2410",
+				"name": "Ministral 8B Instruct"
+			}
+		]
 	}
 }

@@ -32,7 +32,7 @@ export class Custom implements APIProvider {
 		const data = {
 			model: selectedModel,
 			messages: messages,
-			temperature: temperature || provider.temperature,
+			temperature: provider.temperature ?? temperature,
 			response_format: LMSTUDIO_STRUCTURE_OUTPUT,
 		};
 
@@ -45,12 +45,19 @@ export class Custom implements APIProvider {
 
 		// Some models might return parsed JSON directly
 		if (typeof messageContent === 'object' && messageContent !== null) {
-			return messageContent as StructuredOutput;
+			return {
+				output: messageContent.output,
+				reliability: messageContent.reliability,
+			};
 		}
 
 		// Otherwise parse the content as JSON
 		const content = messageContent.trim();
-		return JSON.parse(content) as StructuredOutput;
+		const result = JSON.parse(content) as StructuredOutput;
+		return {
+			output: result.output,
+			reliability: result.reliability,
+		};
 	}
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {

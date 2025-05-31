@@ -30,7 +30,7 @@ export class OpenAI implements APIProvider {
 		const data = {
 			model: selectedModel,
 			messages: messages,
-			temperature: temperature || provider.temperature,
+			temperature: provider.temperature ?? temperature,
 			response_format: OPENAI_STRUCTURE_OUTPUT,
 		};
 		const response = await sendRequest(provider.baseUrl, headers, data);
@@ -38,7 +38,8 @@ export class OpenAI implements APIProvider {
 	}
 
 	processApiResponse(responseData: any): StructuredOutput {
-		const content = responseData?.choices[0]?.message?.content;
+		const messageContent = responseData?.choices[0]?.message?.content;
+		const content = messageContent.trim();
 		const result = JSON.parse(content) as StructuredOutput;
 		return {
 			output: result.output,

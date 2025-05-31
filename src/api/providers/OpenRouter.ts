@@ -30,7 +30,7 @@ export class OpenRouter implements APIProvider {
 		const data = {
 			model: selectedModel,
 			messages: messages,
-			temperature: temperature || provider.temperature,
+			temperature: provider.temperature ?? temperature,
 			response_format: OPENROUTER_STRUCTURE_OUTPUT,
 		};
 
@@ -42,17 +42,24 @@ export class OpenRouter implements APIProvider {
 		try {
 			// Handle OpenRouter's response format
 			if (responseData.choices && responseData.choices.length > 0) {
-				const message = responseData.choices[0].message;
+				const messageContent = responseData.choices[0].message.content;
 
 				// If content is already a parsed object
-				if (message.content && typeof message.content === 'object') {
-					return message.content as StructuredOutput;
+				if (messageContent && typeof messageContent === 'object') {
+					return {
+						output: messageContent.output,
+						reliability: messageContent.reliability,
+					};
 				}
 
 				// If content is a string that needs parsing
-				if (message.content && typeof message.content === 'string') {
-					const content = message.content.trim();
-					return JSON.parse(content) as StructuredOutput;
+				if (messageContent && typeof messageContent === 'string') {
+					const content = messageContent.trim();
+					const result = JSON.parse(content) as StructuredOutput;
+					return {
+						output: result.output,
+						reliability: result.reliability,
+					};
 				}
 			}
 

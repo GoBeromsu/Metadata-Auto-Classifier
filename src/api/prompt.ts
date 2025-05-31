@@ -27,12 +27,8 @@ export function getPromptTemplate(
 
 	<output_format>
 	{
-	  "classifications": [
-		{
-		  "category": "string",
-		  "reliability": number
-		}
-	  ]
+	  "output": ["string"],
+	  "reliability": number
 	}
 	</output_format>
 

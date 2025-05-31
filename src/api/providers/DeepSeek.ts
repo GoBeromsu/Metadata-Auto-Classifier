@@ -29,7 +29,7 @@ export class DeepSeek implements APIProvider {
 		const data = {
 			model: selectedModel,
 			messages: messages,
-			temperature: temperature,
+			temperature: provider.temperature ?? temperature,
 			response_format: { type: 'json_object' },
 			max_tokens: 8192, // max token : https://api-docs.deepseek.com/quick_start/pricing
 		};
@@ -40,7 +40,8 @@ export class DeepSeek implements APIProvider {
 	}
 
 	processApiResponse(responseData: any): StructuredOutput {
-		const content = responseData?.choices[0]?.message?.content;
+		const messageContent = responseData?.choices[0]?.message?.content;
+		const content = messageContent.trim();
 		const result = JSON.parse(content) as StructuredOutput;
 		return {
 			output: result.output,

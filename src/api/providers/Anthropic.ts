@@ -29,7 +29,7 @@ export class Anthropic implements APIProvider {
 			max_tokens: COMMON_CONSTANTS.DEFAULT_MAX_TOKENS,
 			system: systemRole,
 			messages: messages,
-			temperature: temperature,
+			temperature: provider.temperature ?? temperature,
 			tools: [ANTHROPIC_TOOL_CONFIG],
 			tool_choice: { type: 'tool', name: 'classify_content' },
 		};

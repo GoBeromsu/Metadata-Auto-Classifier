@@ -5,6 +5,7 @@ import { Anthropic } from './providers/Anthropic';
 import { Custom } from './providers/Custom';
 import { DeepSeek } from './providers/DeepSeek';
 import { Gemini } from './providers/Gemini';
+import { LMStudio } from './providers/LMStudio';
 import { OpenAI } from './providers/OpenAI';
 import { OpenRouter } from './providers/OpenRouter';
 import type { APIProvider, ProviderConfig, StructuredOutput } from './types';
@@ -15,16 +16,16 @@ export const getProvider = (providerName: string): APIProvider => {
 			return new OpenAI();
 		case 'Anthropic':
 			return new Anthropic();
-		case 'Custom':
-			return new Custom();
 		case 'OpenRouter':
 			return new OpenRouter();
 		case 'Gemini':
 			return new Gemini();
 		case 'DeepSeek':
 			return new DeepSeek();
+		case 'LM Studio':
+			return new LMStudio();
 		default:
-			throw new Error(`Unknown AI provider: ${providerName}`);
+			return new Custom();
 	}
 };
 
