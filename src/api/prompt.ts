@@ -11,6 +11,19 @@ Classify the following content using the provided reference categories.
 3. Assign a "reliability" score between 0 and 1 to each selected category, indicating confidence in the classification.
 4. Maintain the full hierarchical structure for nested categories. (e.g. category/subcategory)
 </instructions>
+
+<plain_example>
+{
+	"output": ["machine learning", "natural language processing"],
+	"reliability": 0.87
+}
+</plain_example>	
+<wikilink_example>
+{
+	"output": ["[[Large Language Model]]", "[[Prompt Engineering]]"],
+	"reliability": 0.92
+}
+</wikilink_example>
 `;
 
 export function getPromptTemplate(
@@ -27,7 +40,7 @@ export function getPromptTemplate(
 
 	<output_format>
 	{
-	  "output": ["string"],
+	  "output": string[],
 	  "reliability": number
 	}
 	</output_format>
