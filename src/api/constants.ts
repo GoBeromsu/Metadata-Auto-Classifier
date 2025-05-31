@@ -57,7 +57,7 @@ export const ANTHROPIC_TOOL_CONFIG = {
 				type: 'number',
 				minimum: COMMON_CONSTANTS.DEFAULT_RELIABILITY_MIN,
 				maximum: COMMON_CONSTANTS.DEFAULT_RELIABILITY_MAX,
-				description: 'Confidence score from 0 to 100',
+				description: 'Confidence score from 0 to 1',
 			},
 		},
 		required: ['output', 'reliability'],
@@ -110,16 +110,22 @@ export const LMSTUDIO_STRUCTURE_OUTPUT = {
 export const GEMINI_STRUCTURE_OUTPUT = {
 	response_mime_type: 'application/json',
 	response_schema: {
-		type: 'OBJECT',
+		type: 'object',
 		properties: {
 			output: {
-				type: 'ARRAY',
-				items: { type: 'STRING' },
-				description: 'Array of classified tags or categories',
+				type: 'array',
+				items: { type: 'string' },
+				description:
+					'Pick only from the reference list. Match exactly, including case and slashes.\n' +
+					'Valid: ["technology/ai"]\n' +
+					'Invalid: ["string"], ["Technology"], ["technology - ai"]',
 			},
 			reliability: {
-				type: 'NUMBER',
-				description: 'A number between 0 and 1 indicating confidence in the classification',
+				type: 'number',
+				description:
+					'Float between 0 and 1. Do not exceed 1. Use lower value if uncertain.\n' +
+					'Valid: 0.83\n' +
+					'Invalid: 1.23, "high"',
 			},
 		},
 		required: ['output', 'reliability'],
