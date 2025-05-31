@@ -1,12 +1,11 @@
 {
-	"version": "2025.01.01",
 	"openai": {
-		"id": "openai",
 		"name": "OpenAI",
 		"apiKeyUrl": "https://platform.openai.com/api-keys",
 		"apiKeyRequired": true,
 		"modelsList": "https://platform.openai.com/docs/models",
 		"baseUrl": "https://api.openai.com/v1/chat/completions",
+		"temperature": 0.6,
 		"popularModels": [
 			{
 				"id": "gpt-4.1",
@@ -27,12 +26,12 @@
 		]
 	},
 	"anthropic": {
-		"id": "anthropic",
 		"name": "Anthropic",
 		"apiKeyUrl": "https://console.anthropic.com/settings/keys",
 		"apiKeyRequired": true,
 		"modelsList": "https://docs.anthropic.com/en/docs/about-claude/models",
 		"baseUrl": "https://api.anthropic.com/v1/messages",
+		"temperature": 0.6,
 		"popularModels": [
 			{
 				"id": "claude-opus-4-20250514",
@@ -48,18 +47,14 @@
 			}
 		]
 	},
-	"google-gemini": {
-		"id": "google-gemini",
-		"name": "Google Gemini",
+	"gemini": {
+		"name": "Gemini",
 		"apiKeyUrl": "https://aistudio.google.com/apikey",
 		"apiKeyRequired": true,
 		"modelsList": "https://ai.google.dev/gemini-api/docs/models",
-		"baseUrl": "https://generativelanguage.googleapis.com/v1beta/chat/completions",
+		"baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+		"temperature": 0.4,
 		"popularModels": [
-			{
-				"id": "gemini-2.5-flash",
-				"name": "Gemini 2.5 Flash"
-			},
 			{
 				"id": "gemini-2.0-flash",
 				"name": "Gemini 2.0 Flash"
@@ -67,16 +62,20 @@
 			{
 				"id": "gemini-1.5-pro",
 				"name": "Gemini 1.5 Pro"
+			},
+			{
+				"id": "gemini-1.5-flash",
+				"name": "Gemini 1.5 Flash"
 			}
 		]
 	},
 	"openrouter": {
-		"id": "openrouter",
 		"name": "OpenRouter",
 		"apiKeyUrl": "https://openrouter.ai/settings/keys",
 		"apiKeyRequired": true,
 		"modelsList": "https://openrouter.ai/models",
 		"baseUrl": "https://openrouter.ai/api/v1/chat/completions",
+		"temperature": 0.6,
 		"popularModels": [
 			{
 				"id": "meta-llama/llama-4-maverick:free",
@@ -93,7 +92,6 @@
 		]
 	},
 	"ollama": {
-		"id": "ollama",
 		"name": "Ollama",
 		"apiKeyUrl": "",
 		"apiKeyRequired": false,
@@ -115,12 +113,12 @@
 		]
 	},
 	"deepseek": {
-		"id": "deepseek",
 		"name": "DeepSeek",
 		"apiKeyUrl": "https://platform.deepseek.com/api_keys",
 		"apiKeyRequired": true,
 		"modelsList": "https://api-docs.deepseek.com/quick_start/pricing",
 		"baseUrl": "https://api.deepseek.com/v1/chat/completions",
+		"temperature": 0.6,
 		"popularModels": [
 			{
 				"id": "deepseek-v3",

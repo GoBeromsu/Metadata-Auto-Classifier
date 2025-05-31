@@ -23,6 +23,7 @@ export interface ProviderPreset {
 	apiKeyRequired: boolean;
 	modelsList: string;
 	baseUrl: string;
+	temperature?: number;
 	popularModels: Array<{ id: string; name: string }>;
 }
 

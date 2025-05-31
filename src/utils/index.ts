@@ -12,24 +12,17 @@ export const generateId = (): number => {
  * Excludes the version field and returns only valid ProviderPreset objects
  */
 export const getProviderPresets = (): ProviderPreset[] => {
-	const entries = Object.entries(providerPresetsData).filter(([key]) => key !== 'version');
-	return entries.map(([key, preset]) => ({
+	return Object.entries(providerPresetsData).map(([key, preset]) => ({
 		...(preset as ProviderPreset),
-		id: key, // Ensure id matches the key from JSON
+		id: key,
 	}));
 };
 
 /**
  * Get a specific provider preset by ID
  */
-export const getProviderPresetById = (id: string): ProviderPreset | undefined => {
-	if (id === 'version' || !providerPresetsData[id]) {
-		return undefined;
-	}
-	return {
-		...(providerPresetsData[id] as ProviderPreset),
-		id,
-	};
+export const getProviderPreset = (providerName: string): ProviderPreset => {
+	return providerPresetsData[providerName] as ProviderPreset;
 };
 
 /**

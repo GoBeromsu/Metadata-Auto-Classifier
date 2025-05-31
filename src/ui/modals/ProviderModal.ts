@@ -4,7 +4,7 @@ import { Modal } from 'obsidian';
 import { CommonButton } from 'ui/components/common/CommonButton';
 import { CommonNotice } from 'ui/components/common/CommonNotice';
 import { CommonSetting, DropdownOption } from 'ui/components/common/CommonSetting';
-import { findMatchingPreset, getProviderPresetById, getProviderPresets } from 'utils';
+import { findMatchingPreset, getProviderPreset, getProviderPresets } from 'utils';
 
 export class ProviderModal extends Modal {
 	private readonly providerConfig: ProviderConfig;
@@ -70,15 +70,15 @@ export class ProviderModal extends Modal {
 			dropdown: {
 				options: presetOptions,
 				value: this.selectedPreset,
-				onChange: (value) => {
-					if (value === 'custom') {
-						this.selectedPreset = value;
+				onChange: (providerName) => {
+					if (providerName === 'custom') {
+						this.selectedPreset = providerName;
 						this.providerConfig.name = '';
 						this.providerConfig.baseUrl = '';
 						this.updateForm();
 					} else {
-						this.selectedPreset = value;
-						this.loadPresetData(value);
+						this.selectedPreset = providerName;
+						this.loadPresetData(providerName);
 					}
 				},
 			},
@@ -155,20 +155,19 @@ export class ProviderModal extends Modal {
 		});
 	}
 
-	private loadPresetData(presetId: string): void {
-		if (presetId === 'custom') {
+	private loadPresetData(providerName: string): void {
+		if (providerName === 'custom') {
 			// For custom, keep current values or reset if needed
 			// Don't automatically clear - let user decide
 			return;
 		}
 
-		const preset = getProviderPresetById(presetId);
-		if (!preset) return;
+		const preset = getProviderPreset(providerName);
 
 		// Load preset data into current config
 		this.providerConfig.name = preset.name;
 		this.providerConfig.baseUrl = preset.baseUrl;
-		// Keep existing API key - don't overwrite user's key
+		this.providerConfig.temperature = preset.temperature;
 
 		// Update the form to reflect new data
 		this.updateForm();

@@ -1,13 +1,11 @@
-import { ApiError } from '../ApiError';
 import { COMMON_CONSTANTS, GEMINI_STRUCTURE_OUTPUT } from '../constants';
 import { sendRequest } from '../index';
 import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class Gemini implements APIProvider {
-	buildHeaders(apiKey: string): Record<string, string> {
+	buildHeaders(apiKey?: string): Record<string, string> {
 		const headers: Record<string, string> = {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${apiKey}`,
 		};
 
 		return headers;
@@ -22,62 +20,33 @@ export class Gemini implements APIProvider {
 	): Promise<StructuredOutput> {
 		const headers: Record<string, string> = this.buildHeaders(provider.apiKey);
 
-		// Create messages array for the Gemini API
-		const messages = [
-			{ role: 'system', content: systemRole },
-			{ role: 'user', content: user_prompt },
-		];
+		const combinedPrompt = `${systemRole}\n\n${user_prompt}`;
 
-		// Create the request data with Gemini structured output configuration
 		const data = {
-			model: selectedModel,
-			messages: messages,
-			temperature: temperature || provider.temperature,
-			...GEMINI_STRUCTURE_OUTPUT,
+			contents: [
+				{
+					parts: [{ text: combinedPrompt }],
+				},
+			],
+			generationConfig: {
+				temperature: provider.temperature ?? temperature,
+				...GEMINI_STRUCTURE_OUTPUT,
+			},
 		};
 
-		const response = await sendRequest(provider.baseUrl, headers, data);
+		const url = `${provider.baseUrl}/models/${selectedModel}:generateContent?key=${provider.apiKey}`;
+
+		const response = await sendRequest(url, headers, data);
 		return this.processApiResponse(response);
 	}
 
 	processApiResponse(responseData: any): StructuredOutput {
-		try {
-			// Handle Gemini's structured output response format
-			if (responseData.output && typeof responseData.reliability === 'number') {
-				return {
-					output: Array.isArray(responseData.output) ? responseData.output : [responseData.output],
-					reliability: Math.min(
-						Math.max(responseData.reliability, COMMON_CONSTANTS.DEFAULT_RELIABILITY_MIN),
-						COMMON_CONSTANTS.DEFAULT_RELIABILITY_MAX
-					),
-				};
-			}
-
-			// Handle potential different response structure from Gemini
-			if (responseData.candidates && responseData.candidates.length > 0) {
-				const candidate = responseData.candidates[0];
-				if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
-					const content = candidate.content.parts[0].text;
-					if (content) {
-						const parsed = JSON.parse(content);
-						return {
-							output: Array.isArray(parsed.output) ? parsed.output : [parsed.output],
-							reliability: Math.min(
-								Math.max(parsed.reliability || 0, COMMON_CONSTANTS.DEFAULT_RELIABILITY_MIN),
-								COMMON_CONSTANTS.DEFAULT_RELIABILITY_MAX
-							),
-						};
-					}
-				}
-			}
-
-			throw new ApiError('Invalid response format from Gemini API');
-		} catch (error) {
-			if (error instanceof ApiError) {
-				throw error;
-			}
-			throw new ApiError('Failed to parse response from Gemini API');
-		}
+		const content = responseData?.candidates[0]?.content?.parts[0]?.text;
+		const result = JSON.parse(content) as StructuredOutput;
+		return {
+			output: result.output,
+			reliability: result.reliability,
+		};
 	}
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {

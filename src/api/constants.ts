@@ -109,5 +109,19 @@ export const LMSTUDIO_STRUCTURE_OUTPUT = {
 // Gemini Configuration
 export const GEMINI_STRUCTURE_OUTPUT = {
 	response_mime_type: 'application/json',
-	response_schema: COMMON_SCHEMA_BASE,
+	response_schema: {
+		type: 'OBJECT',
+		properties: {
+			output: {
+				type: 'ARRAY',
+				items: { type: 'STRING' },
+				description: 'Array of classified tags or categories',
+			},
+			reliability: {
+				type: 'NUMBER',
+				description: 'A number between 0 and 1 indicating confidence in the classification',
+			},
+		},
+		required: ['output', 'reliability'],
+	},
 };
