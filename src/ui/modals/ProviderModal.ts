@@ -18,10 +18,8 @@ export class ProviderModal extends Modal {
 		super(app);
 		this.onSave = onSave;
 
-		// Initialize provider config - unified approach
 		if (existingProvider) {
-			// Load existing data
-			this.providerConfig = { ...existingProvider };
+			this.providerConfig = existingProvider;
 		} else {
 			this.providerConfig = {
 				name: 'Custom Provider',
