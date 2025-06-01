@@ -6,6 +6,7 @@ import { Custom } from './providers/Custom';
 import { DeepSeek } from './providers/DeepSeek';
 import { Gemini } from './providers/Gemini';
 import { LMStudio } from './providers/LMStudio';
+import { Ollama } from './providers/Ollama';
 import { OpenAI } from './providers/OpenAI';
 import { OpenRouter } from './providers/OpenRouter';
 import type { APIProvider, ProviderConfig, StructuredOutput } from './types';
@@ -24,6 +25,8 @@ export const getProvider = (providerName: string): APIProvider => {
 			return new DeepSeek();
 		case 'LM Studio':
 			return new LMStudio();
+		case 'Ollama':
+			return new Ollama();
 		default:
 			return new Custom();
 	}

@@ -131,3 +131,23 @@ export const GEMINI_STRUCTURE_OUTPUT = {
 		required: ['output', 'reliability'],
 	},
 };
+
+// Ollama Configuration (Native API)
+export const OLLAMA_STRUCTURE_OUTPUT = {
+	type: 'object',
+	properties: {
+		output: {
+			type: 'array',
+			items: { type: 'string' },
+			description: 'Array of classified tags or categories from the reference list',
+		},
+		reliability: {
+			type: 'number',
+			minimum: COMMON_CONSTANTS.DEFAULT_RELIABILITY_MIN,
+			maximum: COMMON_CONSTANTS.DEFAULT_RELIABILITY_MAX,
+			description: 'Confidence score between 0 and 1',
+		},
+	},
+	required: ['output', 'reliability'],
+	additionalProperties: false,
+};

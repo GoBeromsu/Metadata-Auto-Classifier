@@ -6,6 +6,7 @@ import { Gemini } from '../../src/api/providers/Gemini';
 import { OpenAI } from '../../src/api/providers/OpenAI';
 import { OpenRouter } from '../../src/api/providers/OpenRouter';
 import { ProviderConfig, StructuredOutput } from '../../src/api/types';
+import { Ollama } from '../../src/api/providers/Ollama';
 
 describe('API callAPI Tests', () => {
 	const createMockProvider = (name: string, baseUrl: string): ProviderConfig => ({
@@ -82,6 +83,15 @@ describe('API callAPI Tests', () => {
 		},
 	});
 
+	const createOllamaResponse = (output: string[], reliability: number) => ({
+		status: 200,
+		json: {
+			message: {
+				content: JSON.stringify({ output, reliability }),
+			},
+		},
+	});
+
 	beforeEach(() => {
 		jest.clearAllMocks();
 	});
@@ -123,6 +133,12 @@ describe('API callAPI Tests', () => {
 			class: DeepSeek,
 			baseUrl: 'https://api.deepseek.com/v1/chat/completions',
 			createResponse: () => createDeepSeekResponse(DEFAULT_OUTPUT, DEFAULT_RELIABILITY),
+		},
+		{
+			name: 'Ollama',
+			class: Ollama,
+			baseUrl: 'http://localhost:11434/api/chat',
+			createResponse: () => createOllamaResponse(DEFAULT_OUTPUT, DEFAULT_RELIABILITY),
 		},
 	];
 
