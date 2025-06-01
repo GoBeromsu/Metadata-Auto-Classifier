@@ -1,7 +1,6 @@
 import type { RequestUrlParam } from 'obsidian';
 import { requestUrl } from 'obsidian';
 import { PROVIDER_NAMES } from '../utils';
-import { ApiError } from './ApiError';
 import { Anthropic } from './providers/Anthropic';
 import { Custom } from './providers/Custom';
 import { DeepSeek } from './providers/DeepSeek';
@@ -77,15 +76,15 @@ export const sendRequest = async (
 	try {
 		response = await requestUrl(requestParam);
 	} catch (error) {
-		throw new ApiError(`${error}`);
+		throw new Error(`Network error: ${error}`);
 	}
 
 	if (response.status >= 500) {
-		throw new ApiError(`Server error (HTTP ${response.status}) from ${baseUrl}: ${response.text}`);
+		throw new Error(`Server error (HTTP ${response.status}) from ${baseUrl}: ${response.text}`);
 	}
 
 	if (response.status >= 400) {
-		throw new ApiError(`Client error (HTTP ${response.status}) from ${baseUrl}: ${response.text}`);
+		throw new Error(`Client error (HTTP ${response.status}) from ${baseUrl}: ${response.text}`);
 	}
 
 	return response.json;

@@ -1,6 +1,5 @@
-import { sendRequest } from '../index';
-import { ApiError } from '../ApiError';
 import { COMMON_CONSTANTS, OPENROUTER_STRUCTURE_OUTPUT } from '../constants';
+import { sendRequest } from '../index';
 import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class OpenRouter implements APIProvider {
@@ -39,37 +38,29 @@ export class OpenRouter implements APIProvider {
 	}
 
 	processApiResponse(responseData: any): StructuredOutput {
-		try {
-			// Handle OpenRouter's response format
-			if (responseData.choices && responseData.choices.length > 0) {
-				const messageContent = responseData.choices[0].message.content;
+		// Handle OpenRouter's response format
+		if (responseData.choices && responseData.choices.length > 0) {
+			const messageContent = responseData.choices[0].message.content;
 
-				// If content is already a parsed object
-				if (messageContent && typeof messageContent === 'object') {
-					return {
-						output: messageContent.output,
-						reliability: messageContent.reliability,
-					};
-				}
-
-				// If content is a string that needs parsing
-				if (messageContent && typeof messageContent === 'string') {
-					const content = messageContent.trim();
-					const result = JSON.parse(content) as StructuredOutput;
-					return {
-						output: result.output,
-						reliability: result.reliability,
-					};
-				}
+			// If content is already a parsed object
+			if (messageContent && typeof messageContent === 'object') {
+				return {
+					output: messageContent.output,
+					reliability: messageContent.reliability,
+				};
 			}
 
-			throw new ApiError('Invalid response format from OpenRouter API');
-		} catch (error) {
-			if (error instanceof ApiError) {
-				throw error;
+			// If content is a string that needs parsing
+			if (messageContent && typeof messageContent === 'string') {
+				const content = messageContent.trim();
+				const result = JSON.parse(content) as StructuredOutput;
+				return {
+					output: result.output,
+					reliability: result.reliability,
+				};
 			}
-			throw new ApiError('Failed to parse response from OpenRouter API');
 		}
+		throw new Error('Failed to parse response from OpenRouter API');
 	}
 
 	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
