@@ -114,15 +114,15 @@
 		"apiKeyRequired": true,
 		"modelsList": "https://api-docs.deepseek.com/quick_start/pricing",
 		"baseUrl": "https://api.deepseek.com/v1/chat/completions",
-		"temperature": 0.6,
+		"temperature": 1.0,
 		"popularModels": [
 			{
-				"id": "deepseek-v3",
-				"name": "DeepSeek V3"
+				"id": "deepseek-chat",
+				"name": "DeepSeek-V3"
 			},
 			{
-				"id": "deepseek-r1",
-				"name": "DeepSeek R1"
+				"id": "deepseek-reasoner",
+				"name": "DeepSeek-R1"
 			}
 		]
 	},

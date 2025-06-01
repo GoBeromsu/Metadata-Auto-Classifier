@@ -31,9 +31,8 @@ export class DeepSeek implements APIProvider {
 			messages: messages,
 			temperature: provider.temperature ?? temperature,
 			response_format: { type: 'json_object' },
-			max_tokens: 8192, // max token : https://api-docs.deepseek.com/quick_start/pricing
+			max_tokens: 8192, // max output token : https://api-docs.deepseek.com/quick_start/pricing
 		};
-
 		const response = await sendRequest(provider.baseUrl, headers, data);
 
 		return this.processApiResponse(response);
