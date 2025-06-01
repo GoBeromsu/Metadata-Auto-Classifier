@@ -4,12 +4,11 @@ import { Modal } from 'obsidian';
 import { CommonButton } from 'ui/components/common/CommonButton';
 import { CommonNotice } from 'ui/components/common/CommonNotice';
 import { CommonSetting, DropdownOption } from 'ui/components/common/CommonSetting';
-import { findMatchingPreset, getProviderPreset, getProviderPresets } from 'utils';
+import { getProviderPreset, getProviderPresets } from 'utils';
 
 export class ProviderModal extends Modal {
 	private readonly providerConfig: ProviderConfig;
 	private readonly onSave: (provider: ProviderConfig) => void;
-	private selectedPreset: string = 'custom';
 
 	constructor(
 		app: App,
@@ -23,12 +22,9 @@ export class ProviderModal extends Modal {
 		if (existingProvider) {
 			// Load existing data
 			this.providerConfig = { ...existingProvider };
-			// Try to find matching preset for existing provider
-			this.selectedPreset = findMatchingPreset(existingProvider);
 		} else {
-			// Start with empty config
 			this.providerConfig = {
-				name: '',
+				name: 'Custom Provider',
 				apiKey: '',
 				baseUrl: '',
 				models: [],
@@ -56,55 +52,48 @@ export class ProviderModal extends Modal {
 
 	private addPresetSetting(containerEl: HTMLElement): void {
 		const presets = getProviderPresets();
-		const presetOptions: DropdownOption[] = [
-			{ value: 'custom', display: 'Custom Provider' },
-			...presets.map((preset) => ({
-				value: preset.id,
-				display: preset.name,
-			})),
-		];
+		const presetOptions: DropdownOption[] = presets.map((preset) => ({
+			value: preset.name,
+			display: preset.name,
+		}));
+
+		// Determine current preset value
+		const currentValue = this.providerConfig.name || 'Custom Provider';
 
 		CommonSetting.create(containerEl, {
 			name: 'Provider Preset',
-			desc: 'Select a predefined provider or choose Custom to create your own',
+			desc: 'Select a predefined provider',
 			dropdown: {
 				options: presetOptions,
-				value: this.selectedPreset,
+				value: currentValue,
 				onChange: (providerName) => {
-					if (providerName === 'custom') {
-						this.selectedPreset = providerName;
-						this.providerConfig.name = '';
-						this.providerConfig.baseUrl = '';
-						this.updateForm();
-					} else {
-						this.selectedPreset = providerName;
-						this.loadPresetData(providerName);
-					}
+					this.loadPresetData(providerName);
 				},
 			},
 		});
 	}
 
 	private addProviderForm(containerEl: HTMLElement): void {
-		// Provider Name - always show for custom, readonly for presets
-		const isCustom = this.selectedPreset === 'custom';
+		// Provider Name - always editable, but show hint if it matches preset
+		const presets = getProviderPresets();
+		const isPresetProvider = presets.some((preset) => preset.name === this.providerConfig.name);
 
 		CommonSetting.create(containerEl, {
 			name: 'Provider Name',
-			desc: isCustom
-				? 'Enter a unique name for your custom provider'
-				: 'Provider name (from preset)',
+			desc: isPresetProvider
+				? 'Provider name (from preset)'
+				: 'Enter a unique name for your provider',
 			textInput: {
 				placeholder: 'Enter provider name',
 				value: this.providerConfig.name,
-				disabled: !isCustom,
+				disabled: false,
 				onChange: (value) => {
 					this.providerConfig.name = value;
 				},
 			},
 		});
 
-		// API URL with Obsidian TextComponent
+		// API URL
 		CommonSetting.create(containerEl, {
 			name: 'API URL',
 			desc: 'The complete API URL including endpoint (e.g., https://api.openai.com/v1/chat/completions)',
@@ -117,10 +106,11 @@ export class ProviderModal extends Modal {
 			},
 		});
 
-		// API Key
+		const preset = presets.find((p) => p.name === this.providerConfig.name);
+
 		CommonSetting.create(containerEl, {
 			name: 'API Key',
-			desc: 'Your API key for this provider (leave empty if not required)',
+			desc: 'Your API key for this provider',
 			textInput: {
 				placeholder: 'Enter API key',
 				value: this.providerConfig.apiKey,
@@ -129,8 +119,23 @@ export class ProviderModal extends Modal {
 				},
 			},
 		});
-	}
 
+		// Add link manually if preset has apiKeyUrl
+		if (preset?.apiKeyUrl) {
+			const settingEl = containerEl.querySelector(
+				'.setting-item:last-child .setting-item-description'
+			);
+			if (settingEl) {
+				const linkEl = document.createElement('a');
+				linkEl.href = preset.apiKeyUrl;
+				linkEl.target = '_blank';
+				linkEl.style.color = 'var(--interactive-accent)';
+				linkEl.style.marginLeft = '4px';
+				linkEl.textContent = 'Get your API key here';
+				settingEl.appendChild(linkEl);
+			}
+		}
+	}
 	private addButtons(containerEl: HTMLElement): void {
 		const buttonContainer = containerEl.createDiv({ cls: 'button-container' });
 		buttonContainer.style.display = 'flex';
@@ -156,15 +161,8 @@ export class ProviderModal extends Modal {
 	}
 
 	private loadPresetData(providerName: string): void {
-		if (providerName === 'custom') {
-			// For custom, keep current values or reset if needed
-			// Don't automatically clear - let user decide
-			return;
-		}
-
 		const preset = getProviderPreset(providerName);
 
-		// Load preset data into current config
 		this.providerConfig.name = preset.name;
 		this.providerConfig.baseUrl = preset.baseUrl;
 		this.providerConfig.temperature = preset.temperature;

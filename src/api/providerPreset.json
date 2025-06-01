@@ -1,4 +1,13 @@
 {
+	"custom": {
+		"name": "Custom Provider",
+		"apiKeyUrl": "",
+		"apiKeyRequired": false,
+		"modelsList": "",
+		"baseUrl": "",
+		"temperature": 0.7,
+		"popularModels": []
+	},
 	"openai": {
 		"name": "OpenAI",
 		"apiKeyUrl": "https://platform.openai.com/api-keys",

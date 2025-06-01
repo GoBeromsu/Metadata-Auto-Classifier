@@ -12,17 +12,19 @@ export const generateId = (): number => {
  * Excludes the version field and returns only valid ProviderPreset objects
  */
 export const getProviderPresets = (): ProviderPreset[] => {
-	return Object.entries(providerPresetsData).map(([key, preset]) => ({
-		...(preset as ProviderPreset),
-		id: key,
-	}));
+	return Object.values(providerPresetsData);
 };
 
 /**
- * Get a specific provider preset by ID
+ * Get a specific provider preset by name
  */
 export const getProviderPreset = (providerName: string): ProviderPreset => {
-	return providerPresetsData[providerName] as ProviderPreset;
+	const presets = getProviderPresets();
+	const preset = presets.find((p) => p.name === providerName);
+	if (!preset) {
+		throw new Error(`Provider preset not found: ${providerName}`);
+	}
+	return preset;
 };
 
 /**
@@ -34,5 +36,5 @@ export const findMatchingPreset = (providerConfig: { baseUrl: string; name: stri
 	const matchingPreset = presets.find(
 		(preset) => preset.baseUrl === providerConfig.baseUrl || preset.name === providerConfig.name
 	);
-	return matchingPreset?.id || 'custom';
+	return matchingPreset?.name || 'Custom Provider';
 };
