@@ -1,5 +1,6 @@
 import type { RequestUrlParam } from 'obsidian';
 import { requestUrl } from 'obsidian';
+import { PROVIDER_NAMES } from '../utils';
 import { ApiError } from './ApiError';
 import { Anthropic } from './providers/Anthropic';
 import { Custom } from './providers/Custom';
@@ -13,19 +14,19 @@ import type { APIProvider, ProviderConfig, StructuredOutput } from './types';
 
 export const getProvider = (providerName: string): APIProvider => {
 	switch (providerName) {
-		case 'OpenAI':
+		case PROVIDER_NAMES.OPENAI:
 			return new OpenAI();
-		case 'Anthropic':
+		case PROVIDER_NAMES.ANTHROPIC:
 			return new Anthropic();
-		case 'OpenRouter':
+		case PROVIDER_NAMES.OPENROUTER:
 			return new OpenRouter();
-		case 'Gemini':
+		case PROVIDER_NAMES.GEMINI:
 			return new Gemini();
-		case 'DeepSeek':
+		case PROVIDER_NAMES.DEEPSEEK:
 			return new DeepSeek();
-		case 'LM Studio':
+		case PROVIDER_NAMES.LMSTUDIO:
 			return new LMStudio();
-		case 'Ollama':
+		case PROVIDER_NAMES.OLLAMA:
 			return new Ollama();
 		default:
 			return new Custom();

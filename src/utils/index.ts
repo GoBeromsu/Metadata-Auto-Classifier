@@ -3,6 +3,17 @@ import type { ProviderPreset } from 'api/types';
 // Import provider presets data
 const providerPresetsData = require('../api/providerPreset.json');
 
+export const PROVIDER_NAMES = {
+	OPENAI: providerPresetsData.openai.name,
+	ANTHROPIC: providerPresetsData.anthropic.name,
+	OPENROUTER: providerPresetsData.openrouter.name,
+	GEMINI: providerPresetsData.gemini.name,
+	DEEPSEEK: providerPresetsData.deepseek.name,
+	LMSTUDIO: providerPresetsData.lmstudio.name,
+	OLLAMA: providerPresetsData.ollama.name,
+	CUSTOM: providerPresetsData.custom.name,
+} as const;
+
 export const generateId = (): number => {
 	return Date.now();
 };
