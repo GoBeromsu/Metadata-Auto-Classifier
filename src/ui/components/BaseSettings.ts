@@ -22,23 +22,25 @@ export abstract class BaseSettingsComponent implements SettingsComponent {
 		actions: FrontmatterActions,
 		showDeleteButton: boolean = false
 	): void {
-		CommonSetting.create(containerEl, {
-			name: frontmatterSetting.name || 'Please enter name',
-			desc: `Type: ${frontmatterSetting.linkType}, Count: ${frontmatterSetting.count.min}-${frontmatterSetting.count.max}`,
-			extraButton: {
+		const button = [
+			{
 				icon: 'pencil',
 				tooltip: 'Edit Frontmatter',
 				onClick: () => actions.onEdit(frontmatterSetting),
 			},
-			...(showDeleteButton && {
-				buttons: [
-					{
-						icon: 'trash',
-						tooltip: 'Delete Frontmatter',
-						onClick: () => actions.onDelete(frontmatterSetting),
-					},
-				],
-			}),
+		];
+		if (showDeleteButton) {
+			button.push({
+				icon: 'trash',
+				tooltip: 'Delete Frontmatter',
+				onClick: () => actions.onDelete(frontmatterSetting),
+			});
+		}
+
+		CommonSetting.create(containerEl, {
+			name: frontmatterSetting.name || 'Please enter name',
+			desc: `Type: ${frontmatterSetting.linkType}, Count: ${frontmatterSetting.count.min}-${frontmatterSetting.count.max}, Overwrite: ${frontmatterSetting.overwrite}`,
+			buttons: button,
 		});
 	}
 

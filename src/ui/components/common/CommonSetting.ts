@@ -98,7 +98,11 @@ export class CommonSetting {
 
 		if (button) this.addButton(button);
 		if (extraButton) this.addExtraButton(extraButton);
-		if (buttons) buttons.forEach((buttonProps) => this.addExtraButton(buttonProps));
+		if (buttons) {
+			buttons.forEach((buttonProps) => {
+				buttonProps.text ? this.addButton(buttonProps) : this.addExtraButton(buttonProps);
+			});
+		}
 	}
 
 	/**

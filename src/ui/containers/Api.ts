@@ -122,14 +122,14 @@ export class Api {
 			const buttons = [
 				{
 					icon: 'pencil',
-					tooltip: 'Edit',
+					text: 'Edit',
 					onClick: () => {
 						this.openProviderModal('edit', provider);
 					},
 				},
 				{
 					icon: 'trash',
-					tooltip: 'Delete',
+					text: 'Delete',
 					onClick: async () => {
 						await this.providerCallbacks.onDelete(provider.name);
 						this.onRefresh?.();
@@ -160,8 +160,8 @@ export class Api {
 
 				const buttons = [
 					{
-						icon: 'play',
-						tooltip: 'Test model connection',
+						icon: 'check-circle',
+						text: 'Test Connection',
 						onClick: async () => {
 							const success = await this.modelCallbacks.onTest(provider.name, config.name);
 							success
@@ -173,14 +173,14 @@ export class Api {
 					},
 					{
 						icon: 'pencil',
-						tooltip: 'Edit',
+						text: 'Edit',
 						onClick: () => {
 							this.openModelModal('edit', providers, editTarget);
 						},
 					},
 					{
 						icon: 'trash',
-						tooltip: 'Delete',
+						text: 'Delete',
 						onClick: async () => {
 							await this.modelCallbacks.onDelete(provider.name, config.name);
 							this.onRefresh?.();
