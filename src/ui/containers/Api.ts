@@ -9,6 +9,7 @@ import { ModelModal, type ModelModalProps } from 'ui/modals/ModelModal';
 import { ProviderModal } from 'ui/modals/ProviderModal';
 
 export class Api {
+	private currentProviders: ProviderConfig[] = [];
 	private readonly containerEl: HTMLElement;
 
 	constructor(
@@ -20,10 +21,10 @@ export class Api {
 	}
 
 	display(): void {
+		const { classificationRule, providers, selectedModel } = this.plugin.settings;
+		this.currentProviders = providers;
 		this.containerEl.empty();
 		this.containerEl.createEl('h2', { text: 'API Configuration' });
-
-		const { classificationRule, providers, selectedModel } = this.plugin.settings;
 
 		this.addClassificationRule(this.containerEl, classificationRule);
 		this.addProviderSection(this.containerEl, providers);
@@ -32,39 +33,35 @@ export class Api {
 
 	private addProviderSection(containerEl: HTMLElement, providers: ProviderConfig[]): void {
 		const providerSection = containerEl.createEl('div', { cls: 'provider-section' });
-
 		providerSection.createEl('h3', { text: 'Providers' });
 
 		providers.forEach((provider) => {
-			const buttons = [
-				{
-					icon: 'pencil',
-					text: 'Edit',
-					onClick: () => {
-						this.openProviderModal('edit', provider);
-					},
-				},
-				{
-					icon: 'trash',
-					text: 'Delete',
-					onClick: async () => {
-						this.plugin.settings.providers = this.plugin.settings.providers.filter(
-							(p) => p.name !== provider.name
-						);
-						// Clear selection if deleted provider was selected
-						if (this.plugin.settings.selectedProvider === provider.name) {
-							this.plugin.settings.selectedProvider = '';
-							this.plugin.settings.selectedModel = '';
-						}
-						await this.plugin.saveSettings();
-						this.display(); // Refresh the entire Api section
-					},
-				},
-			];
-
 			CommonSetting.create(providerSection, {
 				name: provider.name,
-				buttons: buttons,
+				buttons: [
+					{
+						icon: 'pencil',
+						text: 'Edit',
+						onClick: () => this.openProviderModal('edit', provider),
+					},
+					{
+						icon: 'trash',
+						text: 'Delete',
+						onClick: async () => {
+							this.plugin.settings.providers = this.plugin.settings.providers.filter(
+								(p) => p.name !== provider.name
+							);
+
+							if (this.plugin.settings.selectedProvider === provider.name) {
+								this.plugin.settings.selectedProvider = '';
+								this.plugin.settings.selectedModel = '';
+							}
+
+							await this.plugin.saveSettings();
+							this.display();
+						},
+					},
+				],
 			});
 		});
 
@@ -72,9 +69,7 @@ export class Api {
 			name: '',
 			button: {
 				text: '+ Add provider',
-				onClick: () => {
-					this.openProviderModal('add');
-				},
+				onClick: () => this.openProviderModal('add'),
 			},
 		});
 	}
@@ -84,6 +79,8 @@ export class Api {
 		textAreaContainer.style.width = '100%';
 		textAreaContainer.style.marginTop = '8px';
 		textAreaContainer.style.marginBottom = '16px';
+
+		const textAreaComponent = new TextAreaComponent(textAreaContainer);
 
 		CommonSetting.create(textAreaContainer, {
 			name: 'Classification Rule',
@@ -95,10 +92,12 @@ export class Api {
 					textAreaComponent.setValue(DEFAULT_TASK_TEMPLATE);
 					this.plugin.settings.classificationRule = DEFAULT_TASK_TEMPLATE;
 					this.plugin.saveSettings();
+					this.display();
 				},
 			},
 		});
-		const textAreaComponent = new TextAreaComponent(textAreaContainer)
+
+		textAreaComponent
 			.setPlaceholder(DEFAULT_TASK_TEMPLATE)
 			.setValue(classificationRule)
 			.onChange(async (value) => {
@@ -116,11 +115,7 @@ export class Api {
 		selectedModel: string
 	): void {
 		const modelSection = containerEl.createEl('div', { cls: 'model-section' });
-
-		// Section header
 		modelSection.createEl('h3', { text: 'Models' });
-
-		// Model list
 
 		providers.forEach((provider) => {
 			provider.models.forEach((config: Model) => {
@@ -130,49 +125,6 @@ export class Api {
 					displayName: config.displayName,
 					provider: provider.name,
 				};
-
-				const buttons = [
-					{
-						icon: 'check-circle',
-						text: 'Test Connection',
-						onClick: async () => {
-							const providerToTest = this.plugin.settings.providers.find(
-								(p) => p.name === provider.name
-							);
-							if (!providerToTest) {
-								CommonNotice.showError(new Error(`Provider '${provider.name}' not found`));
-								return;
-							}
-							const success = await testModel(providerToTest, config.name);
-							if (success) {
-								CommonNotice.showSuccess(`${config.displayName} connection test successful!`);
-							} else {
-								CommonNotice.showError(new Error(`${config.displayName} connection test failed!`));
-							}
-						},
-					},
-					{
-						icon: 'pencil',
-						text: 'Edit',
-						onClick: () => {
-							this.openModelModal('edit', editTarget);
-						},
-					},
-					{
-						icon: 'trash',
-						text: 'Delete',
-						onClick: async () => {
-							const targetProvider = this.plugin.settings.providers.find(
-								(p) => p.name === provider.name
-							);
-							if (targetProvider) {
-								targetProvider.models = targetProvider.models.filter((m) => m.name !== config.name);
-								await this.plugin.saveSettings();
-								this.display(); // Refresh UI
-							}
-						},
-					},
-				];
 
 				CommonSetting.create(modelSection, {
 					name: config.displayName,
@@ -184,11 +136,57 @@ export class Api {
 								this.plugin.settings.selectedProvider = provider.name;
 								this.plugin.settings.selectedModel = config.name;
 								await this.plugin.saveSettings();
-								this.display(); // Refresh UI
+								this.display();
 							}
 						},
 					},
-					buttons: buttons,
+					buttons: [
+						{
+							icon: 'check-circle',
+							text: 'Test Connection',
+							onClick: async () => {
+								try {
+									const success = await testModel(provider, config.name);
+									if (success) {
+										CommonNotice.showSuccess(`${config.displayName} connection test successful!`);
+									} else {
+										CommonNotice.showError(
+											new Error(`${config.displayName} connection test failed!`)
+										);
+									}
+								} catch (error) {
+									CommonNotice.showError(error instanceof Error ? error : new Error('Test failed'));
+								}
+							},
+						},
+						{
+							icon: 'pencil',
+							text: 'Edit',
+							onClick: () => this.openModelModal('edit', editTarget),
+						},
+						{
+							icon: 'trash',
+							text: 'Delete',
+							onClick: async () => {
+								const currentProvider = this.plugin.settings.providers.find(
+									(p) => p.name === provider.name
+								);
+								if (currentProvider) {
+									currentProvider.models = currentProvider.models.filter(
+										(m: Model) => m.name !== config.name
+									);
+								}
+
+								if (this.plugin.settings.selectedModel === config.name) {
+									this.plugin.settings.selectedProvider = '';
+									this.plugin.settings.selectedModel = '';
+								}
+
+								await this.plugin.saveSettings();
+								this.display();
+							},
+						},
+					],
 				});
 			});
 		});
@@ -197,9 +195,7 @@ export class Api {
 			name: '',
 			button: {
 				text: '+ Add model',
-				onClick: () => {
-					this.openModelModal('add');
-				},
+				onClick: () => this.openModelModal('add'),
 			},
 		});
 	}
@@ -216,14 +212,14 @@ export class Api {
 					);
 					if (index !== -1) {
 						this.plugin.settings.providers[index] = savedProvider;
-						// Update selection if the updated provider was selected
+
 						if (this.plugin.settings.selectedProvider === providerToEdit.name) {
 							this.plugin.settings.selectedProvider = savedProvider.name;
 						}
 					}
 				}
 				await this.plugin.saveSettings();
-				this.display(); // Refresh UI
+				this.display();
 			},
 			providerToEdit
 		);
@@ -235,16 +231,14 @@ export class Api {
 		editTarget?: { model: string; displayName: string; provider: string }
 	): void {
 		const modalProps: ModelModalProps = {
-			providers: this.plugin.settings.providers,
+			providers: this.currentProviders,
 			onSave: async (result) => {
 				if (result.isEdit && result.oldModel) {
-					const oldProvider = this.plugin.settings.providers.find(
-						(p) => p.name === result.oldModel!.provider
+					const provider = this.plugin.settings.providers.find(
+						(p) => p.name === result.oldModel?.provider
 					);
-					if (oldProvider) {
-						oldProvider.models = oldProvider.models.filter(
-							(m) => m.name !== result.oldModel!.model
-						);
+					if (provider) {
+						provider.models = provider.models.filter((m) => m.name !== result.oldModel?.model);
 					}
 
 					const newProvider = this.plugin.settings.providers.find(
@@ -264,8 +258,9 @@ export class Api {
 						provider.models.push(result.model);
 					}
 				}
+
 				await this.plugin.saveSettings();
-				this.display(); // Refresh UI
+				this.display();
 			},
 			editTarget: editTarget,
 		};

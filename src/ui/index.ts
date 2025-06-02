@@ -20,7 +20,7 @@ export interface AutoClassifierSettings {
 
 export class AutoClassifierSettingTab extends PluginSettingTab {
 	plugin: AutoClassifierPlugin;
-	api!: Api;
+	api: Api;
 	tagSetting: Tag;
 	frontmatterSetting: Frontmatter;
 
@@ -28,6 +28,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		super(plugin.app, plugin);
 		this.plugin = plugin;
 
+		this.api = new Api(plugin.app, plugin, this.containerEl);
 		this.tagSetting = new Tag(plugin);
 		this.frontmatterSetting = new Frontmatter(plugin);
 	}
@@ -50,8 +51,6 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 			},
 		});
 
-		const apiSettingContainer = containerEl.createDiv();
-		this.api = new Api(this.plugin.app, this.plugin, apiSettingContainer);
 		this.api.display();
 
 		containerEl.createEl('h2', { text: 'Frontmatters' });
@@ -102,4 +101,3 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 export * from './components/WikiLinkSelector';
 export * from './modals/FrontmatterEditorModal';
 export * from './modals/FrontmatterSelectModal';
-
