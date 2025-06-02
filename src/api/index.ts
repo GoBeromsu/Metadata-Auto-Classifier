@@ -1,6 +1,7 @@
 import type { RequestUrlParam } from 'obsidian';
 import { requestUrl } from 'obsidian';
 import { PROVIDER_NAMES } from '../utils';
+import { COMMON_CONSTANTS } from './constants';
 import { Anthropic } from './providers/Anthropic';
 import { Custom } from './providers/Custom';
 import { DeepSeek } from './providers/DeepSeek';
@@ -29,6 +30,24 @@ export const getProvider = (providerName: string): APIProvider => {
 			return new Ollama();
 		default:
 			return new Custom();
+	}
+};
+
+export const testModel = async (
+	providerConfig: ProviderConfig,
+	modelName: string
+): Promise<boolean> => {
+	try {
+		const apiProvider = getProvider(providerConfig.name);
+		await apiProvider.callAPI(
+			COMMON_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
+			COMMON_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
+			providerConfig,
+			modelName
+		);
+		return true;
+	} catch (error) {
+		return false;
 	}
 };
 

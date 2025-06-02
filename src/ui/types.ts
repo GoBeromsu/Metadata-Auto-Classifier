@@ -16,6 +16,7 @@ export interface ModelCallbacks {
 	onAdd: (providerName: string, model: Model) => Promise<void>;
 	onSelect: (providerName: string, modelName: string) => Promise<void>;
 	onDelete: (providerName: string, modelName: string) => Promise<void>;
+	onTest: (providerName: string, modelName: string) => Promise<boolean>;
 }
 
 // 🔄 기존 ApiCallbacks는 호환성을 위해 유지 (점진적 마이그레이션)

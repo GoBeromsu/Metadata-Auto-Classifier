@@ -1,5 +1,5 @@
 import type AutoClassifierPlugin from 'main';
-import { PluginSettingTab } from 'obsidian';
+import { Notice, PluginSettingTab } from 'obsidian';
 
 import type { Model, ProviderConfig } from 'api/types';
 import type { FrontmatterTemplate } from 'frontmatter/types';
@@ -10,6 +10,7 @@ import { Api } from './containers/Api';
 import { Frontmatter } from './containers/Frontmatter';
 import { Tag } from './containers/Tag';
 import type { ClassificationCallbacks, ModelCallbacks, ProviderCallbacks } from './types';
+import { testModel } from 'api';
 
 export interface AutoClassifierSettings {
 	providers: ProviderConfig[];
@@ -165,6 +166,15 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 				}
 
 				await this.plugin.saveSettings();
+			},
+
+			onTest: async (providerName: string, modelName: string): Promise<boolean> => {
+				const provider = this.plugin.settings.providers.find((p) => p.name === providerName);
+				if (!provider) {
+					throw new Error(`Provider '${providerName}' not found`);
+				}
+
+				return await testModel(provider, modelName);
 			},
 		};
 

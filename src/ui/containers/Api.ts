@@ -1,6 +1,7 @@
 import { DEFAULT_TASK_TEMPLATE } from 'api/prompt';
 import type { Model, ProviderConfig } from 'api/types';
 import { App, TextAreaComponent } from 'obsidian';
+import { CommonNotice } from 'ui/components/common/CommonNotice';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
 import { ModelModal, type ModelModalProps } from 'ui/modals/ModelModal';
 import { ProviderModal } from 'ui/modals/ProviderModal';
@@ -156,6 +157,37 @@ export class Api {
 					displayName: config.displayName,
 					provider: provider.name,
 				};
+
+				const buttons = [
+					{
+						icon: 'play',
+						tooltip: 'Test model connection',
+						onClick: async () => {
+							const success = await this.modelCallbacks.onTest(provider.name, config.name);
+							success
+								? CommonNotice.showSuccess(`${config.displayName} connection test successful!`)
+								: CommonNotice.showError(
+										new Error(`${config.displayName} connection test failed!`)
+									);
+						},
+					},
+					{
+						icon: 'pencil',
+						tooltip: 'Edit',
+						onClick: () => {
+							this.openModelModal('edit', providers, editTarget);
+						},
+					},
+					{
+						icon: 'trash',
+						tooltip: 'Delete',
+						onClick: async () => {
+							await this.modelCallbacks.onDelete(provider.name, config.name);
+							this.onRefresh?.();
+						},
+					},
+				];
+
 				CommonSetting.create(containerEl, {
 					name: config.displayName,
 					desc: provider.name,
@@ -168,23 +200,7 @@ export class Api {
 							}
 						},
 					},
-					buttons: [
-						{
-							icon: 'pencil',
-							tooltip: 'Edit',
-							onClick: () => {
-								this.openModelModal('edit', providers, editTarget);
-							},
-						},
-						{
-							icon: 'trash',
-							tooltip: 'Delete',
-							onClick: async () => {
-								await this.modelCallbacks.onDelete(provider.name, config.name);
-								this.onRefresh?.();
-							},
-						},
-					],
+					buttons: buttons,
 				});
 			});
 		});

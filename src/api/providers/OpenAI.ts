@@ -46,14 +46,4 @@ export class OpenAI implements APIProvider {
 			reliability: result.reliability,
 		};
 	}
-
-	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
-		await this.callAPI(
-			COMMON_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
-			COMMON_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
-			provider,
-			provider.models[0]?.name
-		);
-		return true;
-	}
 }

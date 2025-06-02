@@ -62,14 +62,4 @@ export class OpenRouter implements APIProvider {
 		}
 		throw new Error('Failed to parse response from OpenRouter API');
 	}
-
-	async verifyConnection(provider: ProviderConfig): Promise<boolean> {
-		await this.callAPI(
-			COMMON_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
-			COMMON_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
-			provider,
-			provider.models[0]?.name
-		);
-		return true;
-	}
 }
