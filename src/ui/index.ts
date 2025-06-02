@@ -1,6 +1,7 @@
 import type AutoClassifierPlugin from 'main';
-import { Notice, PluginSettingTab } from 'obsidian';
+import { PluginSettingTab } from 'obsidian';
 
+import { testModel } from 'api';
 import type { Model, ProviderConfig } from 'api/types';
 import type { FrontmatterTemplate } from 'frontmatter/types';
 import { generateId } from 'utils';
@@ -10,7 +11,6 @@ import { Api } from './containers/Api';
 import { Frontmatter } from './containers/Frontmatter';
 import { Tag } from './containers/Tag';
 import type { ClassificationCallbacks, ModelCallbacks, ProviderCallbacks } from './types';
-import { testModel } from 'api';
 
 export interface AutoClassifierSettings {
 	providers: ProviderConfig[];
@@ -48,6 +48,20 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
+
+		CommonSetting.create(containerEl, {
+			name: 'Support Auto Classifier',
+			desc: 'If you find Auto Classifier valuable, consider supporting its development!',
+			heading: true,
+			className: 'auto-classifier-settings-support',
+			button: {
+				text: 'Buy Me a Coffee',
+				cta: true,
+				onClick: () => {
+					window.open('https://www.buymeacoffee.com/gobeumsu9', '_blank');
+				},
+			},
+		});
 
 		const apiSettingContainer = containerEl.createDiv();
 		this.api.display(
