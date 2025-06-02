@@ -10,14 +10,12 @@ import { ProviderModal } from 'ui/modals/ProviderModal';
 
 export class Api {
 	private currentProviders: ProviderConfig[] = [];
-	private readonly containerEl: HTMLElement;
-
+	private readonly app: App;
 	constructor(
-		private readonly app: App,
 		private readonly plugin: AutoClassifierPlugin,
-		containerEl: HTMLElement
+		private readonly containerEl: HTMLElement
 	) {
-		this.containerEl = containerEl;
+		this.app = plugin.app;
 	}
 
 	display(): void {
@@ -80,8 +78,6 @@ export class Api {
 		textAreaContainer.style.marginTop = '8px';
 		textAreaContainer.style.marginBottom = '16px';
 
-		const textAreaComponent = new TextAreaComponent(textAreaContainer);
-
 		CommonSetting.create(textAreaContainer, {
 			name: 'Classification Rule',
 			desc: 'Customize the prompt template for classification requests',
@@ -96,8 +92,7 @@ export class Api {
 				},
 			},
 		});
-
-		textAreaComponent
+		const textAreaComponent = new TextAreaComponent(textAreaContainer)
 			.setPlaceholder(DEFAULT_TASK_TEMPLATE)
 			.setValue(classificationRule)
 			.onChange(async (value) => {

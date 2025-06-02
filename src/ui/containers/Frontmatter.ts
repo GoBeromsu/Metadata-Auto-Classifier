@@ -10,23 +10,21 @@ export class Frontmatter extends BaseSettingsComponent {
 		showTextArea: true,
 	};
 
-	display(containerEl: HTMLElement, frontmatterId: number): void {
-		containerEl.empty();
-
+	display(frontmatterId: number): void {
 		const frontmatterSetting = getFrontmatterSetting(
 			frontmatterId,
 			this.plugin.settings.frontmatter
 		);
 
 		const actions: FrontmatterActions = {
-			onEdit: (setting: FrontmatterTemplate) => this.handleEdit(containerEl, setting),
-			onDelete: (setting: FrontmatterTemplate) => this.handleDelete(containerEl, setting),
+			onEdit: (setting: FrontmatterTemplate) => this.handleEdit(setting),
+			onDelete: (setting: FrontmatterTemplate) => this.handleDelete(setting),
 		};
 
-		this.defaultSettings(containerEl, frontmatterSetting, actions, true);
+		this.defaultSettings(this.containerEl, frontmatterSetting, actions, true);
 	}
 
-	private handleEdit(containerEl: HTMLElement, frontmatterSetting: FrontmatterTemplate): void {
+	private handleEdit(frontmatterSetting: FrontmatterTemplate): void {
 		this.openEditModal(frontmatterSetting, async (updatedFrontmatter) => {
 			// Register command for the updated frontmatter
 			this.plugin.registerCommand(
@@ -35,20 +33,17 @@ export class Frontmatter extends BaseSettingsComponent {
 			);
 
 			await this.plugin.saveSettings();
-			this.display(containerEl, frontmatterSetting.id);
+			this.display(frontmatterSetting.id);
 		});
 	}
 
-	private async handleDelete(
-		containerEl: HTMLElement,
-		frontmatterSetting: FrontmatterTemplate
-	): Promise<void> {
+	private async handleDelete(frontmatterSetting: FrontmatterTemplate): Promise<void> {
 		confirm(`Are you sure you want to delete "${frontmatterSetting.name}" frontmatter?`);
 		this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
 			(f: FrontmatterTemplate) => f.id !== frontmatterSetting.id
 		);
 
 		await this.plugin.saveSettings();
-		containerEl.empty();
+		this.containerEl.empty();
 	}
 }

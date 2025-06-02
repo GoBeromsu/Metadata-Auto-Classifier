@@ -7,7 +7,7 @@ export interface SettingsComponentOptions {
 }
 
 export interface SettingsComponent {
-	display(containerEl: HTMLElement, frontmatterId?: number): void;
+	display(frontmatterId?: number): void;
 }
 
 export interface FrontmatterActions {

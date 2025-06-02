@@ -28,9 +28,9 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		super(plugin.app, plugin);
 		this.plugin = plugin;
 
-		this.api = new Api(plugin.app, plugin, this.containerEl);
-		this.tagSetting = new Tag(plugin);
-		this.frontmatterSetting = new Frontmatter(plugin);
+		this.api = new Api(plugin, this.containerEl);
+		this.tagSetting = new Tag(plugin, this.containerEl);
+		this.frontmatterSetting = new Frontmatter(plugin, this.containerEl);
 	}
 
 	display(): void {
@@ -45,28 +45,17 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 			button: {
 				text: 'Buy Me a Coffee',
 				cta: true,
-				onClick: () => {
-					window.open('https://www.buymeacoffee.com/gobeumsu9', '_blank');
-				},
+				onClick: () => window.open('https://www.buymeacoffee.com/gobeumsu9', '_blank'),
 			},
 		});
 
 		this.api.display();
-
 		containerEl.createEl('h2', { text: 'Frontmatters' });
-		const frontmattersContainer = containerEl.createDiv({ cls: 'frontmatters-container' });
 
-		this.tagSetting.display(frontmattersContainer);
+		this.tagSetting.display();
 
 		this.plugin.settings.frontmatter.forEach((frontmatter) => {
-			if (frontmatter.id !== 0) {
-				// Skip tag setting which has id 0
-				const frontmatterContainer = frontmattersContainer.createDiv({
-					cls: 'frontmatter-item-container',
-				});
-				frontmatterContainer.setAttribute('data-frontmatter-id', frontmatter.id.toString());
-				this.frontmatterSetting.display(frontmatterContainer, frontmatter.id);
-			}
+			if (frontmatter.id !== 0) this.frontmatterSetting.display(frontmatter.id);
 		});
 
 		const addButtonContainer = containerEl.createDiv({ cls: 'add-button-container' });
@@ -74,14 +63,12 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 			name: '',
 			button: {
 				text: '+ Add frontmatter',
-				onClick: () => {
-					this.addNewFrontmatter(frontmattersContainer);
-				},
+				onClick: () => this.addNewFrontmatter(),
 			},
 		});
 	}
 
-	private addNewFrontmatter(frontmattersContainer: HTMLElement): void {
+	private addNewFrontmatter(): void {
 		const newFrontmatter: FrontmatterTemplate = {
 			id: generateId(),
 			...DEFAULT_FRONTMATTER_SETTING,
@@ -89,12 +76,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 
 		this.plugin.settings.frontmatter.push(newFrontmatter);
 		this.plugin.saveSettings();
-
-		const newFrontmatterContainer = frontmattersContainer.createDiv({
-			cls: 'frontmatter-item-container',
-		});
-		newFrontmatterContainer.setAttribute('data-frontmatter-id', newFrontmatter.id.toString());
-		this.frontmatterSetting.display(newFrontmatterContainer, newFrontmatter.id);
+		this.frontmatterSetting.display(newFrontmatter.id);
 	}
 }
 

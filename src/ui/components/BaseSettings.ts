@@ -12,9 +12,12 @@ import { CommonSetting } from './common/CommonSetting';
 export abstract class BaseSettingsComponent implements SettingsComponent {
 	protected abstract readonly options: SettingsComponentOptions;
 
-	constructor(protected readonly plugin: AutoClassifierPlugin) {}
+	constructor(
+		protected readonly plugin: AutoClassifierPlugin,
+		protected readonly containerEl: HTMLElement
+	) {}
 
-	abstract display(containerEl: HTMLElement, frontmatterId?: number): void;
+	abstract display(frontmatterId?: number): void;
 
 	protected defaultSettings(
 		containerEl: HTMLElement,

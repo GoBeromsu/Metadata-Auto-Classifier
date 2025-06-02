@@ -10,27 +10,24 @@ export class Tag extends BaseSettingsComponent {
 		showTextArea: false,
 	};
 
-	display(containerEl: HTMLElement): void {
-		containerEl.empty();
-
+	display(): void {
 		const actions: FrontmatterActions = {
-			onEdit: (setting: FrontmatterTemplate) => this.handleEdit(containerEl, setting),
-			onDelete: () => {}, // Tag settings cannot be deleted
+			onEdit: (setting: FrontmatterTemplate) => this.handleEdit(setting),
+			onDelete: () => {},
 		};
 
-		this.defaultSettings(containerEl, DEFAULT_TAG_SETTING, actions, false);
+		this.defaultSettings(this.containerEl, DEFAULT_TAG_SETTING, actions, false);
 	}
 
-	private handleEdit(containerEl: HTMLElement, frontmatterSetting: FrontmatterTemplate): void {
+	private handleEdit(frontmatterSetting: FrontmatterTemplate): void {
 		this.openEditModal(frontmatterSetting, async (updatedFrontmatter) => {
-			// Update the tag setting in the frontmatter array
 			const tagSettingIndex = this.plugin.settings.frontmatter.findIndex((f) => f.id === 0);
 			if (tagSettingIndex !== -1) {
 				this.plugin.settings.frontmatter[tagSettingIndex] = updatedFrontmatter;
 			}
 
 			await this.plugin.saveSettings();
-			this.display(containerEl);
+			this.display();
 		});
 	}
 }
