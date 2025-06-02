@@ -1,0 +1,58 @@
+name: Bug Report
+description: Report something that isn't working as expected
+title: '[Bug]: '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ Before reporting a bug, check if it already exists in the [issues](https://github.com/GoBeromsu/Metadata-Auto-Classifier/issues).
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: What happened?
+      placeholder: e.g. The auto-classifier throws an error when processing certain YAML formats.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this?
+      placeholder: |
+        1. Use test vault X
+        2. Run command Y
+        3. Observe error Z
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behaviour
+      description: What should have happened?
+      placeholder: e.g. The file should have been tagged automatically without error.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Plugin and app environment
+      placeholder: |
+        - OS: macOS 14.1
+        - Obsidian: v1.6.0
+        - Plugin version: 1.5.22
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or Screenshots
+      description: Add any error logs or screenshots if possible
+      placeholder: Attach console output, if available
