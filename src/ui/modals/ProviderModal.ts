@@ -193,8 +193,9 @@ export class ProviderModal extends Modal {
 		// Provider name validation
 		if (!this.providerConfig.name.trim()) {
 			CommonNotice.showError(
-				new Error('Provider name is required. Please enter a name for your provider.'),
-				'Provider validation'
+				new Error(
+					'[Provider validation] Provider name is required. Please enter a name for your provider.'
+				)
 			);
 			return false;
 		}
@@ -202,8 +203,9 @@ export class ProviderModal extends Modal {
 		// API URL validation
 		if (!this.providerConfig.baseUrl.trim()) {
 			CommonNotice.showError(
-				new Error('API URL is required. Please enter a valid API endpoint URL.'),
-				'Provider validation'
+				new Error(
+					'[Provider validation] API URL is required. Please enter a valid API endpoint URL.'
+				)
 			);
 			return false;
 		}
@@ -213,8 +215,9 @@ export class ProviderModal extends Modal {
 			new URL(this.providerConfig.baseUrl);
 		} catch {
 			CommonNotice.showError(
-				new Error('Please enter a valid URL (e.g., https://api.example.com/v1/chat/completions)'),
-				'URL validation'
+				new Error(
+					'[URL validation] Please enter a valid URL (e.g., https://api.example.com/v1/chat/completions)'
+				)
 			);
 			return false;
 		}
