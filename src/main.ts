@@ -1,6 +1,7 @@
 import { processAPIRequest } from 'api';
 import type { TFile } from 'obsidian';
-import { Notice, Plugin } from 'obsidian';
+import { Plugin } from 'obsidian';
+import { CommonNotice } from 'ui/components/common/CommonNotice';
 import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from './api/prompt';
 import type { ProviderConfig } from './api/types';
 import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
@@ -46,25 +47,25 @@ export default class AutoClassifierPlugin extends Plugin {
 	async processFrontmatter(frontmatterId: number): Promise<void> {
 		const currentFile = this.app.workspace.getActiveFile();
 		if (!currentFile) {
-			new Notice('No active file.');
+			CommonNotice.error(new Error('No active file.'));
 			return;
 		}
 
 		const selectedProvider = this.getSelectedProvider();
 		if (!selectedProvider) {
-			new Notice('No provider selected.');
+			CommonNotice.error(new Error('No provider selected.'));
 			return;
 		}
 
 		const frontmatter = this.settings.frontmatter.find((fm) => fm.id === frontmatterId);
 		if (!frontmatter) {
-			new Notice(`No setting found for frontmatter ID ${frontmatterId}.`);
+			CommonNotice.error(new Error(`No setting found for frontmatter ID ${frontmatterId}.`));
 			return;
 		}
 		await this.processFrontmatterItem(selectedProvider, currentFile, frontmatter);
 	}
 
-	private processFrontmatterItem = async (
+	private readonly processFrontmatterItem = async (
 		selectedProvider: ProviderConfig,
 		currentFile: TFile,
 		frontmatter: FrontmatterTemplate
@@ -84,9 +85,7 @@ export default class AutoClassifierPlugin extends Plugin {
 				: currentValues;
 
 		if (processedValues.length === 0) {
-			new Notice(
-				`⛔ ${this.manifest.name}: No current values found for frontmatter ${frontmatter.name}`
-			);
+			CommonNotice.error(new Error(`No current values found for frontmatter ${frontmatter.name}`));
 			return;
 		}
 		const currentContent = await this.app.vault.read(currentFile);
@@ -125,13 +124,11 @@ export default class AutoClassifierPlugin extends Plugin {
 					? apiResponse.output.map((item) => `[[${item}]]`)
 					: apiResponse.output;
 
-			new Notice(
-				`✅ ${apiResponse.output.length} ${frontmatter.name} added: ${displayOutput.join(', ')}`
+			CommonNotice.success(
+				`${apiResponse.output.length} ${frontmatter.name} added: ${displayOutput.join(', ')}`
 			);
 		} else if (apiResponse) {
-			new Notice(
-				`⛔ ${this.manifest.name}: Response has low reliability (${apiResponse.reliability})`
-			);
+			CommonNotice.error(new Error(`Response has low reliability (${apiResponse.reliability})`));
 		}
 	};
 

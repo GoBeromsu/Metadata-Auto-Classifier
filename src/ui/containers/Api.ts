@@ -143,14 +143,12 @@ export class Api {
 								try {
 									const success = await testModel(provider, config.name);
 									if (success) {
-										CommonNotice.showSuccess(`${config.displayName} connection test successful!`);
+										CommonNotice.success(`${config.displayName} connection test successful!`);
 									} else {
-										CommonNotice.showError(
-											new Error(`${config.displayName} connection test failed!`)
-										);
+										CommonNotice.error(new Error(`${config.displayName} connection test failed!`));
 									}
 								} catch (error) {
-									CommonNotice.showError(error instanceof Error ? error : new Error('Test failed'));
+									CommonNotice.error(error instanceof Error ? error : new Error('Test failed'));
 								}
 							},
 						},
