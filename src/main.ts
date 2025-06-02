@@ -70,6 +70,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		currentFile: TFile,
 		frontmatter: FrontmatterTemplate
 	): Promise<void> => {
+		const fileNameWithoutExt = currentFile.name.replace(/\.[^/.]+$/, '');
 		if (frontmatter.name === 'tags') {
 			frontmatter.refs = await getTags(this.app.vault.getMarkdownFiles(), this.app.metadataCache);
 			await this.saveSettings();
@@ -85,7 +86,9 @@ export default class AutoClassifierPlugin extends Plugin {
 				: currentValues;
 
 		if (processedValues.length === 0) {
-			CommonNotice.error(new Error(`No current values found for frontmatter ${frontmatter.name}`));
+			CommonNotice.error(
+				new Error(`Tagging ${fileNameWithoutExt} (${frontmatter.name}) - No values found`)
+			);
 			return;
 		}
 		const currentContent = await this.app.vault.read(currentFile);
@@ -119,18 +122,20 @@ export default class AutoClassifierPlugin extends Plugin {
 				overwrite: frontmatter.overwrite,
 				linkType: frontmatter.linkType,
 			});
+			const successMessage = [
+				`✓ ${fileNameWithoutExt} (${frontmatter.name})`,
+				`Reliability: ${apiResponse.reliability}`,
+				'Added:',
+				...apiResponse.output.map((tag) => `- ${tag}`),
+			].join('\n');
 
-			// Display the appropriate format in the notification based on linkType
-			const displayOutput =
-				frontmatter.linkType === 'WikiLink'
-					? apiResponse.output.map((item) => `[[${item}]]`)
-					: apiResponse.output;
-
-			CommonNotice.success(
-				`${apiResponse.output.length} ${frontmatter.name} added: ${displayOutput.join(', ')}`
-			);
+			CommonNotice.success(successMessage);
 		} else if (apiResponse) {
-			CommonNotice.error(new Error(`Response has low reliability (${apiResponse.reliability})`));
+			CommonNotice.error(
+				new Error(
+					`Tagging ${fileNameWithoutExt} (${frontmatter.name}) - Low reliability (${apiResponse.reliability})`
+				)
+			);
 		}
 	};
 
