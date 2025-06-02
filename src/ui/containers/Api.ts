@@ -22,16 +22,10 @@ export class Api {
 		providers: ProviderConfig[],
 		selectedModel: string
 	): void {
-		// containerEl.empty();
-
-		// Add API section header
 		containerEl.createEl('h2', { text: 'API Configuration' });
-		this.addCustomPromptSetting(containerEl, classificationRule);
 
-		// Provider section
+		this.addClassificationRule(containerEl, classificationRule);
 		this.addProviderSection(containerEl, providers);
-
-		// Model section
 		this.addModelSection(containerEl, providers, selectedModel);
 	}
 
@@ -42,82 +36,6 @@ export class Api {
 		providerSection.createEl('h3', { text: 'Providers' });
 
 		// Provider list
-		this.renderProviderList(providerSection, providers);
-
-		// Add provider button
-		CommonSetting.create(providerSection, {
-			name: '',
-			button: {
-				text: '+ Add provider',
-				onClick: () => {
-					this.openProviderModal('add');
-				},
-			},
-		});
-	}
-
-	private addCustomPromptSetting(containerEl: HTMLElement, classificationRule: string): void {
-		// Create a container for the textarea
-		const textAreaContainer = containerEl.createDiv({ cls: 'custom-prompt-container' });
-		textAreaContainer.style.width = '100%';
-		textAreaContainer.style.marginTop = '8px';
-		textAreaContainer.style.marginBottom = '16px';
-
-		// Create the TextAreaComponent first
-		const textAreaComponent = new TextAreaComponent(textAreaContainer)
-			.setPlaceholder(DEFAULT_TASK_TEMPLATE)
-			.setValue(classificationRule)
-			.onChange(async (value) => {
-				await this.classificationCallbacks.onChange(value);
-			});
-
-		// Set the text area dimensions
-		textAreaComponent.inputEl.rows = 10;
-		textAreaComponent.inputEl.style.width = '100%';
-
-		// Create the setting with reset button using CommonSetting
-		CommonSetting.create(containerEl, {
-			name: 'Classification Rules',
-			desc: 'Customize the prompt template for classification requests',
-			extraButton: {
-				icon: 'reset',
-				tooltip: 'Reset to default template',
-				onClick: async () => {
-					textAreaComponent.setValue(DEFAULT_TASK_TEMPLATE);
-					await this.classificationCallbacks.onChange(DEFAULT_TASK_TEMPLATE);
-				},
-			},
-		});
-
-		containerEl.appendChild(textAreaContainer);
-	}
-
-	private addModelSection(
-		containerEl: HTMLElement,
-		providers: ProviderConfig[],
-		selectedModel: string
-	): void {
-		const modelSection = containerEl.createEl('div', { cls: 'model-section' });
-
-		// Section header
-		modelSection.createEl('h3', { text: 'Models' });
-
-		// Model list
-		this.renderModelList(modelSection, providers, selectedModel);
-
-		// Add model button
-		CommonSetting.create(modelSection, {
-			name: '',
-			button: {
-				text: '+ Add model',
-				onClick: () => {
-					this.openModelModal('add', providers);
-				},
-			},
-		});
-	}
-
-	private renderProviderList(containerEl: HTMLElement, providers: ProviderConfig[]): void {
 		providers.forEach((provider) => {
 			const buttons = [
 				{
@@ -137,18 +55,64 @@ export class Api {
 				},
 			];
 
-			CommonSetting.create(containerEl, {
+			CommonSetting.create(providerSection, {
 				name: provider.name,
 				buttons: buttons,
 			});
 		});
+
+		CommonSetting.create(providerSection, {
+			name: '',
+			button: {
+				text: '+ Add provider',
+				onClick: () => {
+					this.openProviderModal('add');
+				},
+			},
+		});
 	}
 
-	private renderModelList(
+	private addClassificationRule(containerEl: HTMLElement, classificationRule: string): void {
+		const textAreaContainer = containerEl.createDiv({ cls: 'custom-prompt-container' });
+		textAreaContainer.style.width = '100%';
+		textAreaContainer.style.marginTop = '8px';
+		textAreaContainer.style.marginBottom = '16px';
+
+		CommonSetting.create(textAreaContainer, {
+			name: 'Classification Rule',
+			desc: 'Customize the prompt template for classification requests',
+			button: {
+				icon: 'reset',
+				tooltip: 'Reset to default template',
+				onClick: () => {
+					textAreaComponent.setValue(DEFAULT_TASK_TEMPLATE);
+					this.classificationCallbacks.onChange(DEFAULT_TASK_TEMPLATE);
+				},
+			},
+		});
+		const textAreaComponent = new TextAreaComponent(textAreaContainer)
+			.setPlaceholder(DEFAULT_TASK_TEMPLATE)
+			.setValue(classificationRule)
+			.onChange(async (value) => {
+				await this.classificationCallbacks.onChange(value);
+			});
+
+		textAreaComponent.inputEl.rows = 10;
+		textAreaComponent.inputEl.style.width = '100%';
+	}
+
+	private addModelSection(
 		containerEl: HTMLElement,
 		providers: ProviderConfig[],
 		selectedModel: string
 	): void {
+		const modelSection = containerEl.createEl('div', { cls: 'model-section' });
+
+		// Section header
+		modelSection.createEl('h3', { text: 'Models' });
+
+		// Model list
+
 		providers.forEach((provider) => {
 			provider.models.forEach((config: Model) => {
 				const isActive = selectedModel === config.name;
@@ -188,7 +152,7 @@ export class Api {
 					},
 				];
 
-				CommonSetting.create(containerEl, {
+				CommonSetting.create(modelSection, {
 					name: config.displayName,
 					desc: provider.name,
 					toggle: {
@@ -204,9 +168,18 @@ export class Api {
 				});
 			});
 		});
+
+		CommonSetting.create(modelSection, {
+			name: '',
+			button: {
+				text: '+ Add model',
+				onClick: () => {
+					this.openModelModal('add', providers);
+				},
+			},
+		});
 	}
 
-	// 🎯 Modal UI 로직을 여기로 이동
 	private openProviderModal(type: 'add' | 'edit', provider?: ProviderConfig): void {
 		const modal = new ProviderModal(
 			this.app,
