@@ -99,11 +99,13 @@ export default class AutoClassifierPlugin extends Plugin {
 			classificationRule
 		);
 
-		const apiResponse = await processAPIRequest(
-			DEFAULT_SYSTEM_ROLE,
-			promptTemplate,
-			selectedProvider,
-			this.settings.selectedModel
+		const apiResponse = await CommonNotice.withProgress(currentFile.name, frontmatter.name, () =>
+			processAPIRequest(
+				DEFAULT_SYSTEM_ROLE,
+				promptTemplate,
+				selectedProvider,
+				this.settings.selectedModel
+			)
 		);
 
 		if (apiResponse && apiResponse.reliability > 0.2) {
