@@ -1,5 +1,5 @@
+import { OLLAMA_STRUCTURE_OUTPUT } from '../constants';
 import { sendRequest } from '../index';
-import { COMMON_CONSTANTS, OLLAMA_STRUCTURE_OUTPUT } from '../constants';
 import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
 export class Ollama implements APIProvider {

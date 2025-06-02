@@ -1,4 +1,4 @@
-import { COMMON_CONSTANTS, OPENROUTER_STRUCTURE_OUTPUT } from '../constants';
+import { OPENROUTER_STRUCTURE_OUTPUT } from '../constants';
 import { sendRequest } from '../index';
 import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 

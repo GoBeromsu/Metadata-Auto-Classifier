@@ -1,4 +1,3 @@
-import { COMMON_CONSTANTS } from '../constants';
 import { sendRequest } from '../index';
 import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 

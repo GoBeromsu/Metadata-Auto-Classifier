@@ -100,7 +100,11 @@ export class CommonSetting {
 		if (extraButton) this.addExtraButton(extraButton);
 		if (buttons) {
 			buttons.forEach((buttonProps) => {
-				buttonProps.text ? this.addButton(buttonProps) : this.addExtraButton(buttonProps);
+				if (buttonProps.text) {
+					this.addButton(buttonProps);
+				} else {
+					this.addExtraButton(buttonProps);
+				}
 			});
 		}
 	}

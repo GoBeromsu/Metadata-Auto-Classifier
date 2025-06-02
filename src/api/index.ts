@@ -37,18 +37,14 @@ export const testModel = async (
 	providerConfig: ProviderConfig,
 	modelName: string
 ): Promise<boolean> => {
-	try {
-		const apiProvider = getProvider(providerConfig.name);
-		await apiProvider.callAPI(
-			COMMON_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
-			COMMON_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
-			providerConfig,
-			modelName
-		);
-		return true;
-	} catch (error) {
-		return false;
-	}
+	const apiProvider = getProvider(providerConfig.name);
+	await apiProvider.callAPI(
+		COMMON_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
+		COMMON_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
+		providerConfig,
+		modelName
+	);
+	return true;
 };
 
 export const processAPIRequest = async (

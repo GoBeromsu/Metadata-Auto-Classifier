@@ -5,7 +5,7 @@ import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from './api/prompt';
 import type { ProviderConfig } from './api/types';
 import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
 import type { FrontmatterTemplate } from './frontmatter/types';
-import type { AutoClassifierSettings} from './ui';
+import type { AutoClassifierSettings } from './ui';
 import { AutoClassifierSettingTab } from './ui';
 import { DEFAULT_SETTINGS } from './utils/constants';
 
@@ -80,7 +80,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			frontmatter.linkType === 'WikiLink'
 				? currentValues.map((value) =>
 						value.startsWith('[[') && value.endsWith(']]') ? value.slice(2, -2) : value
-				  )
+					)
 				: currentValues;
 
 		if (processedValues.length === 0) {
@@ -141,7 +141,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		await this.saveSettings();
 	}
 
-	async saveSettings() {
+	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
 	}
 

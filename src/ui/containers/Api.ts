@@ -1,41 +1,40 @@
+import { testModel } from 'api';
 import { DEFAULT_TASK_TEMPLATE } from 'api/prompt';
 import type { Model, ProviderConfig } from 'api/types';
+import type AutoClassifierPlugin from 'main';
 import { App, TextAreaComponent } from 'obsidian';
 import { CommonNotice } from 'ui/components/common/CommonNotice';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
 import { ModelModal, type ModelModalProps } from 'ui/modals/ModelModal';
 import { ProviderModal } from 'ui/modals/ProviderModal';
-import { ClassificationCallbacks, ModelCallbacks, ProviderCallbacks } from 'ui/types';
 
 export class Api {
+	private readonly containerEl: HTMLElement;
+
 	constructor(
 		private readonly app: App,
-		private readonly classificationCallbacks: ClassificationCallbacks,
-		private readonly providerCallbacks: ProviderCallbacks,
-		private readonly modelCallbacks: ModelCallbacks,
-		private readonly onRefresh?: () => void
-	) {}
+		private readonly plugin: AutoClassifierPlugin,
+		containerEl: HTMLElement
+	) {
+		this.containerEl = containerEl;
+	}
 
-	display(
-		containerEl: HTMLElement,
-		classificationRule: string,
-		providers: ProviderConfig[],
-		selectedModel: string
-	): void {
-		containerEl.createEl('h2', { text: 'API Configuration' });
+	display(): void {
+		this.containerEl.empty();
+		this.containerEl.createEl('h2', { text: 'API Configuration' });
 
-		this.addClassificationRule(containerEl, classificationRule);
-		this.addProviderSection(containerEl, providers);
-		this.addModelSection(containerEl, providers, selectedModel);
+		const { classificationRule, providers, selectedModel } = this.plugin.settings;
+
+		this.addClassificationRule(this.containerEl, classificationRule);
+		this.addProviderSection(this.containerEl, providers);
+		this.addModelSection(this.containerEl, providers, selectedModel);
 	}
 
 	private addProviderSection(containerEl: HTMLElement, providers: ProviderConfig[]): void {
 		const providerSection = containerEl.createEl('div', { cls: 'provider-section' });
 
-		// Section header
 		providerSection.createEl('h3', { text: 'Providers' });
 
-		// Provider list
 		providers.forEach((provider) => {
 			const buttons = [
 				{
@@ -49,8 +48,16 @@ export class Api {
 					icon: 'trash',
 					text: 'Delete',
 					onClick: async () => {
-						await this.providerCallbacks.onDelete(provider.name);
-						this.onRefresh?.();
+						this.plugin.settings.providers = this.plugin.settings.providers.filter(
+							(p) => p.name !== provider.name
+						);
+						// Clear selection if deleted provider was selected
+						if (this.plugin.settings.selectedProvider === provider.name) {
+							this.plugin.settings.selectedProvider = '';
+							this.plugin.settings.selectedModel = '';
+						}
+						await this.plugin.saveSettings();
+						this.display(); // Refresh the entire Api section
 					},
 				},
 			];
@@ -86,7 +93,8 @@ export class Api {
 				tooltip: 'Reset to default template',
 				onClick: () => {
 					textAreaComponent.setValue(DEFAULT_TASK_TEMPLATE);
-					this.classificationCallbacks.onChange(DEFAULT_TASK_TEMPLATE);
+					this.plugin.settings.classificationRule = DEFAULT_TASK_TEMPLATE;
+					this.plugin.saveSettings();
 				},
 			},
 		});
@@ -94,7 +102,8 @@ export class Api {
 			.setPlaceholder(DEFAULT_TASK_TEMPLATE)
 			.setValue(classificationRule)
 			.onChange(async (value) => {
-				await this.classificationCallbacks.onChange(value);
+				this.plugin.settings.classificationRule = value;
+				await this.plugin.saveSettings();
 			});
 
 		textAreaComponent.inputEl.rows = 10;
@@ -127,27 +136,40 @@ export class Api {
 						icon: 'check-circle',
 						text: 'Test Connection',
 						onClick: async () => {
-							const success = await this.modelCallbacks.onTest(provider.name, config.name);
-							success
-								? CommonNotice.showSuccess(`${config.displayName} connection test successful!`)
-								: CommonNotice.showError(
-										new Error(`${config.displayName} connection test failed!`)
-									);
+							const providerToTest = this.plugin.settings.providers.find(
+								(p) => p.name === provider.name
+							);
+							if (!providerToTest) {
+								CommonNotice.showError(new Error(`Provider '${provider.name}' not found`));
+								return;
+							}
+							const success = await testModel(providerToTest, config.name);
+							if (success) {
+								CommonNotice.showSuccess(`${config.displayName} connection test successful!`);
+							} else {
+								CommonNotice.showError(new Error(`${config.displayName} connection test failed!`));
+							}
 						},
 					},
 					{
 						icon: 'pencil',
 						text: 'Edit',
 						onClick: () => {
-							this.openModelModal('edit', providers, editTarget);
+							this.openModelModal('edit', editTarget);
 						},
 					},
 					{
 						icon: 'trash',
 						text: 'Delete',
 						onClick: async () => {
-							await this.modelCallbacks.onDelete(provider.name, config.name);
-							this.onRefresh?.();
+							const targetProvider = this.plugin.settings.providers.find(
+								(p) => p.name === provider.name
+							);
+							if (targetProvider) {
+								targetProvider.models = targetProvider.models.filter((m) => m.name !== config.name);
+								await this.plugin.saveSettings();
+								this.display(); // Refresh UI
+							}
 						},
 					},
 				];
@@ -159,8 +181,10 @@ export class Api {
 						value: isActive,
 						onChange: async (value) => {
 							if (value) {
-								await this.modelCallbacks.onSelect(provider.name, config.name);
-								this.onRefresh?.();
+								this.plugin.settings.selectedProvider = provider.name;
+								this.plugin.settings.selectedModel = config.name;
+								await this.plugin.saveSettings();
+								this.display(); // Refresh UI
 							}
 						},
 					},
@@ -174,54 +198,74 @@ export class Api {
 			button: {
 				text: '+ Add model',
 				onClick: () => {
-					this.openModelModal('add', providers);
+					this.openModelModal('add');
 				},
 			},
 		});
 	}
 
-	private openProviderModal(type: 'add' | 'edit', provider?: ProviderConfig): void {
+	private openProviderModal(type: 'add' | 'edit', providerToEdit?: ProviderConfig): void {
 		const modal = new ProviderModal(
 			this.app,
 			async (savedProvider: ProviderConfig) => {
 				if (type === 'add') {
-					await this.providerCallbacks.onAdd(savedProvider);
-				} else if (type === 'edit' && provider) {
-					await this.providerCallbacks.onUpdate(provider.name, savedProvider);
+					this.plugin.settings.providers.push(savedProvider);
+				} else if (type === 'edit' && providerToEdit) {
+					const index = this.plugin.settings.providers.findIndex(
+						(p) => p.name === providerToEdit.name
+					);
+					if (index !== -1) {
+						this.plugin.settings.providers[index] = savedProvider;
+						// Update selection if the updated provider was selected
+						if (this.plugin.settings.selectedProvider === providerToEdit.name) {
+							this.plugin.settings.selectedProvider = savedProvider.name;
+						}
+					}
 				}
-				this.onRefresh?.();
+				await this.plugin.saveSettings();
+				this.display(); // Refresh UI
 			},
-			provider
+			providerToEdit
 		);
 		modal.open();
 	}
 
 	private openModelModal(
 		type: 'add' | 'edit',
-		providers: ProviderConfig[],
 		editTarget?: { model: string; displayName: string; provider: string }
 	): void {
 		const modalProps: ModelModalProps = {
-			providers: providers,
+			providers: this.plugin.settings.providers,
 			onSave: async (result) => {
 				if (result.isEdit && result.oldModel) {
-					// Edit mode: remove old model from its original provider
-					await this.modelCallbacks.onDelete(result.oldModel.provider, result.oldModel.model);
+					const oldProvider = this.plugin.settings.providers.find(
+						(p) => p.name === result.oldModel!.provider
+					);
+					if (oldProvider) {
+						oldProvider.models = oldProvider.models.filter(
+							(m) => m.name !== result.oldModel!.model
+						);
+					}
 
-					// Add the updated model to the selected provider
-					await this.modelCallbacks.onAdd(result.provider, result.model);
+					const newProvider = this.plugin.settings.providers.find(
+						(p) => p.name === result.provider
+					);
+					if (newProvider) {
+						newProvider.models.push(result.model);
+					}
 
-					// Update selected model if it was the one being edited
 					if (editTarget && editTarget.model === result.oldModel.model) {
-						await this.modelCallbacks.onSelect(result.provider, result.model.name);
+						this.plugin.settings.selectedProvider = result.provider;
+						this.plugin.settings.selectedModel = result.model.name;
 					}
 				} else {
-					// Add mode: add the new model to the selected provider
-					await this.modelCallbacks.onAdd(result.provider, result.model);
+					const provider = this.plugin.settings.providers.find((p) => p.name === result.provider);
+					if (provider) {
+						provider.models.push(result.model);
+					}
 				}
-
-				// Refresh the UI
-				this.onRefresh?.();
+				await this.plugin.saveSettings();
+				this.display(); // Refresh UI
 			},
 			editTarget: editTarget,
 		};

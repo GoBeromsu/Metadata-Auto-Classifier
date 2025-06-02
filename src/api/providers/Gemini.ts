@@ -1,4 +1,4 @@
-import { COMMON_CONSTANTS, GEMINI_STRUCTURE_OUTPUT } from '../constants';
+import { GEMINI_STRUCTURE_OUTPUT } from '../constants';
 import { sendRequest } from '../index';
 import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 
