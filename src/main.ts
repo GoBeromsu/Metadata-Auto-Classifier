@@ -47,19 +47,25 @@ export default class AutoClassifierPlugin extends Plugin {
 	async processFrontmatter(frontmatterId: number): Promise<void> {
 		const currentFile = this.app.workspace.getActiveFile();
 		if (!currentFile) {
-			CommonNotice.error(new Error('No active file.'));
+			const error = new Error('No active file.');
+			console.error(error);
+			CommonNotice.error(error);
 			return;
 		}
 
 		const selectedProvider = this.getSelectedProvider();
 		if (!selectedProvider) {
-			CommonNotice.error(new Error('No provider selected.'));
+			const error = new Error('No provider selected.');
+			console.error(error);
+			CommonNotice.error(error);
 			return;
 		}
 
 		const frontmatter = this.settings.frontmatter.find((fm) => fm.id === frontmatterId);
 		if (!frontmatter) {
-			CommonNotice.error(new Error(`No setting found for frontmatter ID ${frontmatterId}.`));
+			const error = new Error(`No setting found for frontmatter ID ${frontmatterId}.`);
+			console.error(error);
+			CommonNotice.error(error);
 			return;
 		}
 		await this.processFrontmatterItem(selectedProvider, currentFile, frontmatter);
@@ -86,9 +92,28 @@ export default class AutoClassifierPlugin extends Plugin {
 				: currentValues;
 
 		if (processedValues.length === 0) {
-			CommonNotice.error(
-				new Error(`Tagging ${fileNameWithoutExt} (${frontmatter.name}) - No values found`)
+			const error = new Error(
+				`Tagging ${fileNameWithoutExt} (${frontmatter.name}) - No reference values found. Please add some reference tags/categories in the plugin settings.`
 			);
+			console.error(error);
+			CommonNotice.error(error);
+			return;
+		}
+
+		// Validate API configuration
+		if (!selectedProvider.apiKey) {
+			const error = new Error(
+				`API key not configured for provider ${selectedProvider.name}. Please check your settings.`
+			);
+			console.error(error);
+			CommonNotice.error(error);
+			return;
+		}
+
+		if (!this.settings.selectedModel) {
+			const error = new Error(`No model selected. Please select a model in the plugin settings.`);
+			console.error(error);
+			CommonNotice.error(error);
 			return;
 		}
 		const currentContent = await this.app.vault.read(currentFile);
@@ -131,11 +156,11 @@ export default class AutoClassifierPlugin extends Plugin {
 
 			CommonNotice.success(successMessage);
 		} else if (apiResponse) {
-			CommonNotice.error(
-				new Error(
-					`Tagging ${fileNameWithoutExt} (${frontmatter.name}) - Low reliability (${apiResponse.reliability})`
-				)
+			const error = new Error(
+				`Tagging ${fileNameWithoutExt} (${frontmatter.name}) - Low reliability (${apiResponse.reliability})`
 			);
+			console.error(error);
+			CommonNotice.error(error);
 		}
 	};
 
