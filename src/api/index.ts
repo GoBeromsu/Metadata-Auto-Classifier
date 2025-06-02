@@ -91,7 +91,7 @@ export const sendRequest = async (
 	try {
 		response = await requestUrl(requestParam);
 	} catch (error) {
-		throw new Error(`Network error: ${error}`);
+		throw new Error(error);
 	}
 
 	if (response.status >= 500) {
