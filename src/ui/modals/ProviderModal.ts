@@ -192,7 +192,7 @@ export class ProviderModal extends Modal {
 	private validateForm(): boolean {
 		// Provider name validation
 		if (!this.providerConfig.name.trim()) {
-			CommonNotice.showError(
+			CommonNotice.error(
 				new Error(
 					'[Provider validation] Provider name is required. Please enter a name for your provider.'
 				)
@@ -202,7 +202,7 @@ export class ProviderModal extends Modal {
 
 		// API URL validation
 		if (!this.providerConfig.baseUrl.trim()) {
-			CommonNotice.showError(
+			CommonNotice.error(
 				new Error(
 					'[Provider validation] API URL is required. Please enter a valid API endpoint URL.'
 				)
@@ -214,7 +214,7 @@ export class ProviderModal extends Modal {
 		try {
 			new URL(this.providerConfig.baseUrl);
 		} catch {
-			CommonNotice.showError(
+			CommonNotice.error(
 				new Error(
 					'[URL validation] Please enter a valid URL (e.g., https://api.example.com/v1/chat/completions)'
 				)

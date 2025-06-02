@@ -301,17 +301,17 @@ export class ModelModal extends Modal {
 
 	private validateForm(): boolean {
 		if (!this.selectedProvider) {
-			CommonNotice.showError(new Error('Provider is required'));
+			CommonNotice.error(new Error('Provider is required'));
 			return false;
 		}
 
 		if (!this.modelId.trim()) {
-			CommonNotice.showError(new Error('Model ID is required'));
+			CommonNotice.error(new Error('Model ID is required'));
 			return false;
 		}
 
 		if (!this.displayName.trim()) {
-			CommonNotice.showError(new Error('Display name is required'));
+			CommonNotice.error(new Error('Display name is required'));
 			return false;
 		}
 
