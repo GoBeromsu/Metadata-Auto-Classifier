@@ -16,7 +16,7 @@ export class Tag extends BaseSettingsComponent {
 			onDelete: () => {},
 		};
 
-		this.defaultSettings(this.containerEl, DEFAULT_TAG_SETTING, actions, false);
+		this.createFrontmatterSetting(this.containerEl, DEFAULT_TAG_SETTING, actions, false);
 	}
 
 	private handleEdit(frontmatterSetting: FrontmatterTemplate): void {

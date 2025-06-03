@@ -19,7 +19,7 @@ export abstract class BaseSettingsComponent implements SettingsComponent {
 
 	abstract display(frontmatterId?: number): void;
 
-	protected defaultSettings(
+	protected createFrontmatterSetting(
 		containerEl: HTMLElement,
 		frontmatterSetting: FrontmatterTemplate,
 		actions: FrontmatterActions,

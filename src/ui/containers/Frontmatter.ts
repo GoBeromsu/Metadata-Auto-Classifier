@@ -1,4 +1,3 @@
-import { getFrontmatterSetting } from 'frontmatter';
 import type { FrontmatterTemplate } from 'frontmatter/types';
 import { BaseSettingsComponent } from 'ui/components/BaseSettings';
 import type { FrontmatterActions, SettingsComponentOptions } from 'ui/types';
@@ -10,18 +9,19 @@ export class Frontmatter extends BaseSettingsComponent {
 		showTextArea: true,
 	};
 
-	display(frontmatterId: number): void {
-		const frontmatterSetting = getFrontmatterSetting(
-			frontmatterId,
-			this.plugin.settings.frontmatter
-		);
+	display(): void {
+		const { frontmatter } = this.plugin.settings;
+		const filteredFrontmatter = frontmatter.filter((frontmatter) => frontmatter.id !== 0);
 
-		const actions: FrontmatterActions = {
-			onEdit: (setting: FrontmatterTemplate) => this.handleEdit(setting),
-			onDelete: (setting: FrontmatterTemplate) => this.handleDelete(setting),
-		};
+		this.containerEl.empty();
+		filteredFrontmatter.forEach((frontmatter: FrontmatterTemplate) => {
+			const actions: FrontmatterActions = {
+				onEdit: (setting: FrontmatterTemplate) => this.handleEdit(setting),
+				onDelete: (setting: FrontmatterTemplate) => this.handleDelete(setting),
+			};
 
-		this.defaultSettings(this.containerEl, frontmatterSetting, actions, true);
+			this.createFrontmatterSetting(this.containerEl, frontmatter, actions, true);
+		});
 	}
 
 	private handleEdit(frontmatterSetting: FrontmatterTemplate): void {
@@ -33,7 +33,7 @@ export class Frontmatter extends BaseSettingsComponent {
 			);
 
 			await this.plugin.saveSettings();
-			this.display(frontmatterSetting.id);
+			this.display();
 		});
 	}
 
@@ -44,6 +44,6 @@ export class Frontmatter extends BaseSettingsComponent {
 		);
 
 		await this.plugin.saveSettings();
-		this.containerEl.empty();
+		this.display();
 	}
 }
