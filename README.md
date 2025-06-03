@@ -50,7 +50,7 @@ The user interface design draws inspiration from [Obsidian Web Clipper](https://
 
 ## Support
 
-For questions, issues, or feature requests, please visit our [GitHub repository](https://github.com/beromkoh/obsidian-metadata-auto-classifier). We're committed to continuously improving this plugin for the Obsidian community.
+For questions, issues, or feature requests, please visit the [GitHub repository](https://github.com/GoBeromsu/Metadata-Auto-Classifier).
 
 ## License
 
