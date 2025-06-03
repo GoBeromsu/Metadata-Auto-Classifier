@@ -4,6 +4,17 @@
 
 Metadata Auto Classifier transforms how you organize your Obsidian vault by intelligently analyzing note content and automatically generating relevant tags and frontmatter. It analyses your notes and generates context-aware tags and frontmatter.
 
+## Example
+![Usage Example](./assets/usecase.gif)
+
+1. Open any note you want to classify
+2. Access commands via Command Palette (Cmd/Ctrl + P):
+   - **"Fetch tags using current provider"** - Generate relevant tags
+   - **"Fetch all frontmatter using current provider"** - Populate all custom frontmatter fields
+   - **Individual field commands** - Update specific frontmatter fields
+3. Review and refine AI-generated suggestions as needed
+4. Test and validate results using built-in testing tools
+
 ## Features
 
 - **Automatically Tag Metadata**: AI-powered analysis generates contextually relevant tags and populates custom frontmatter fields
@@ -32,17 +43,6 @@ To install the beta version using BRAT (Beta Reviewers Auto-update Tool):
 
 ![BRAT Installation](./assets/brat-install.gif)
 
-## Usage
-
-![Usage Example](./assets/usecase.gif)
-
-1. Open any note you want to classify
-2. Access commands via Command Palette (Cmd/Ctrl + P):
-   - **"Fetch tags using current provider"** - Generate relevant tags
-   - **"Fetch all frontmatter using current provider"** - Populate all custom frontmatter fields
-   - **Individual field commands** - Update specific frontmatter fields
-3. Review and refine AI-generated suggestions as needed
-4. Test and validate results using built-in testing tools
 
 ## Inspiration
 
