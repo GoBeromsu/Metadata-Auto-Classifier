@@ -48,7 +48,6 @@ export default class AutoClassifierPlugin extends Plugin {
 		const currentFile = this.app.workspace.getActiveFile();
 		if (!currentFile) {
 			const error = new Error('No active file.');
-			console.error(error);
 			CommonNotice.error(error);
 			return;
 		}
@@ -56,7 +55,6 @@ export default class AutoClassifierPlugin extends Plugin {
 		const selectedProvider = this.getSelectedProvider();
 		if (!selectedProvider) {
 			const error = new Error('No provider selected.');
-			console.error(error);
 			CommonNotice.error(error);
 			return;
 		}
@@ -64,7 +62,6 @@ export default class AutoClassifierPlugin extends Plugin {
 		const frontmatter = this.settings.frontmatter.find((fm) => fm.id === frontmatterId);
 		if (!frontmatter) {
 			const error = new Error(`No setting found for frontmatter ID ${frontmatterId}.`);
-			console.error(error);
 			CommonNotice.error(error);
 			return;
 		}
@@ -95,7 +92,6 @@ export default class AutoClassifierPlugin extends Plugin {
 			const error = new Error(
 				`Tagging ${fileNameWithoutExt} (${frontmatter.name}) - No reference values found. Please add some reference tags/categories in the plugin settings.`
 			);
-			console.error(error);
 			CommonNotice.error(error);
 			return;
 		}
@@ -105,14 +101,12 @@ export default class AutoClassifierPlugin extends Plugin {
 			const error = new Error(
 				`API key not configured for provider ${selectedProvider.name}. Please check your settings.`
 			);
-			console.error(error);
 			CommonNotice.error(error);
 			return;
 		}
 
 		if (!this.settings.selectedModel) {
 			const error = new Error(`No model selected. Please select a model in the plugin settings.`);
-			console.error(error);
 			CommonNotice.error(error);
 			return;
 		}
@@ -159,7 +153,6 @@ export default class AutoClassifierPlugin extends Plugin {
 			const error = new Error(
 				`Tagging ${fileNameWithoutExt} (${frontmatter.name}) - Low reliability (${apiResponse.reliability})`
 			);
-			console.error(error);
 			CommonNotice.error(error);
 		}
 	};
