@@ -1,6 +1,17 @@
 {
 	"compilerOptions": {
-		"baseUrl": "src",
+		"baseUrl": ".",
+		"outDir": "dist",
+		"paths": {
+			"api": ["src/api/index"],
+			"api/*": ["src/api/*"],
+			"utils": ["src/utils/index"],
+			"utils/*": ["src/utils/*"],
+			"ui": ["src/ui/index"],
+			"ui/*": ["src/ui/*"],
+			"frontmatter": ["src/frontmatter/index"],
+			"frontmatter/*": ["src/frontmatter/*"]
+		},
 		"inlineSourceMap": true,
 		"inlineSources": true,
 		"module": "ESNext",
@@ -14,5 +25,5 @@
 		"forceConsistentCasingInFileNames": true,
 		"lib": ["DOM", "ES5", "ES6", "ES7"]
 	},
-	"include": ["src/**/*.ts"]
+	"include": ["src/**/*.ts", "__tests__/**/*.ts"]
 }

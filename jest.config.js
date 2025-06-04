@@ -8,8 +8,14 @@ const config = {
 	},
 	moduleNameMapper: {
 		'^obsidian$': '<rootDir>/__mocks__/obsidian.ts',
+		'^api$': '<rootDir>/src/api',
 		'^api/(.*)$': '<rootDir>/src/api/$1',
+		'^utils$': '<rootDir>/src/utils',
 		'^utils/(.*)$': '<rootDir>/src/utils/$1',
+		'^ui$': '<rootDir>/src/ui',
+		'^ui/(.*)$': '<rootDir>/src/ui/$1',
+		'^frontmatter$': '<rootDir>/src/frontmatter',
+		'^frontmatter/(.*)$': '<rootDir>/src/frontmatter/$1',
 	},
 	testMatch: ['**/*.test.ts'],
 };
