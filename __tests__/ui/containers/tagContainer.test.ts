@@ -2,10 +2,23 @@ jest.mock('ui/modals/FrontmatterEditorModal', () => ({
 	ConfigurableSettingModal: class {},
 }));
 
+import type { FrontmatterTemplate } from 'frontmatter/types';
 import { Tag } from 'ui/containers/Tag';
 import { DEFAULT_TAG_SETTING } from 'utils/constants';
 
-const createMockPlugin = () => ({
+interface MockPlugin {
+	app: { vault: { getMarkdownFiles: jest.Mock } };
+	settings: { frontmatter: FrontmatterTemplate[] };
+	saveSettings: jest.Mock;
+}
+
+interface MockContainer {
+	empty: jest.Mock;
+	createEl: jest.Mock;
+	createDiv: jest.Mock;
+}
+
+const createMockPlugin = (): MockPlugin => ({
 	app: { vault: { getMarkdownFiles: jest.fn() } },
 	settings: {
 		frontmatter: [{ ...DEFAULT_TAG_SETTING }],
@@ -13,7 +26,7 @@ const createMockPlugin = () => ({
 	saveSettings: jest.fn().mockResolvedValue(undefined),
 });
 
-const createMockContainer = () => ({
+const createMockContainer = (): MockContainer => ({
 	empty: jest.fn(),
 	createEl: jest.fn(),
 	createDiv: jest.fn().mockReturnValue({
@@ -22,14 +35,14 @@ const createMockContainer = () => ({
 });
 
 describe('Tag Container - Regression Tests', () => {
-	let mockPlugin: any;
-	let mockContainer: any;
+	let mockPlugin: MockPlugin;
+	let mockContainer: MockContainer;
 	let tag: Tag;
 
 	beforeEach(() => {
 		mockPlugin = createMockPlugin();
 		mockContainer = createMockContainer();
-		tag = new (Tag as any)(mockPlugin, mockContainer);
+		tag = new (Tag as any)(mockPlugin, mockContainer as unknown as HTMLElement);
 		jest.clearAllMocks();
 	});
 
@@ -57,7 +70,10 @@ describe('Tag Container - Regression Tests', () => {
 			// Mock openEditModal
 			(tag as any).openEditModal = jest
 				.fn()
-				.mockImplementation((_: any, onSave: (s: any) => Promise<void>) => onSave(updatedSetting));
+				.mockImplementation(
+					(_: FrontmatterTemplate, onSave: (s: FrontmatterTemplate) => Promise<void>) =>
+						onSave(updatedSetting)
+				);
 
 			// When: tag setting is edited
 			await (tag as any).handleEdit(DEFAULT_TAG_SETTING);
@@ -69,12 +85,25 @@ describe('Tag Container - Regression Tests', () => {
 
 		test('handles id=0 not found without errors', async () => {
 			// Given: frontmatter array without id=0
-			mockPlugin.settings.frontmatter = [{ id: 1, name: 'other' }];
+			mockPlugin.settings.frontmatter = [
+				{
+					id: 1,
+					name: 'other',
+					count: { min: 1, max: 1 },
+					refs: [],
+					overwrite: false,
+					linkType: 'WikiLink',
+					customQuery: '',
+				},
+			];
 			const updatedSetting = { ...DEFAULT_TAG_SETTING, name: 'Updated' };
 
 			(tag as any).openEditModal = jest
 				.fn()
-				.mockImplementation((_: any, onSave: (s: any) => Promise<void>) => onSave(updatedSetting));
+				.mockImplementation(
+					(_: FrontmatterTemplate, onSave: (s: FrontmatterTemplate) => Promise<void>) =>
+						onSave(updatedSetting)
+				);
 
 			// When: handleEdit is called
 			await (tag as any).handleEdit(DEFAULT_TAG_SETTING);
