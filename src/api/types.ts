@@ -1,30 +1,34 @@
-export interface ProviderConfig {
-	name: string;
-	apiKey: string;
-	baseUrl: string;
-	models: Model[];
-	temperature?: number;
+export interface Range {
+        min: number;
+        max: number;
 }
 
 export interface Model {
-	name: string;
-	displayName: string;
+        id: string;
+        name: string;
 }
+
+export interface ProviderBase {
+        name: string;
+        baseUrl: string;
+        temperature?: number;
+        models: Model[];
+        apiKey: string;
+}
+
+export type ProviderConfig = ProviderBase;
 export interface StructuredOutput {
 	output: string[];
 	reliability: number;
 }
 
 // Provider preset interface
-export interface ProviderPreset {
-	id: string;
-	name: string;
-	apiKeyUrl: string;
-	apiKeyRequired: boolean;
-	modelsList: string;
-	baseUrl: string;
-	temperature?: number;
-	popularModels: Array<{ id: string; name: string }>;
+export interface ProviderPreset extends Omit<ProviderBase, 'apiKey'> {
+        presetId?: string;
+        apiKeyUrl: string;
+        apiKeyRequired: boolean;
+        modelsList: string;
+        popularModels: Model[];
 }
 
 export interface APIProvider {

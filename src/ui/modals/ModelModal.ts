@@ -9,13 +9,13 @@ import { getProviderPresets } from 'utils';
 
 export interface ModelModalProps {
 	providers: ProviderConfig[];
-	onSave: (result: {
-		provider: string;
-		model: Model;
-		isEdit: boolean;
-		oldModel?: { model: string; provider: string };
-	}) => void;
-	editTarget?: { model: string; displayName: string; provider: string };
+        onSave: (result: {
+                provider: string;
+                model: Model;
+                isEdit: boolean;
+                oldModel?: { model: string; provider: string };
+        }) => void;
+        editTarget?: { model: string; name: string; provider: string };
 }
 
 export class ModelModal extends Modal {
@@ -23,7 +23,7 @@ export class ModelModal extends Modal {
 
 	// Form state
 	private selectedProvider: string = '';
-	private displayName: string = '';
+        private modelName: string = '';
 	private modelId: string = '';
 
 	constructor(app: App, props: ModelModalProps) {
@@ -32,9 +32,9 @@ export class ModelModal extends Modal {
 
 		// Set initial values
 		if (props.editTarget) {
-			this.selectedProvider = props.editTarget.provider;
-			this.displayName = props.editTarget.displayName;
-			this.modelId = props.editTarget.model;
+                        this.selectedProvider = props.editTarget.provider;
+                        this.modelName = props.editTarget.name;
+                        this.modelId = props.editTarget.model;
 		} else {
 			// Set default provider for new models
 			if (props.providers.length > 0) {
@@ -141,7 +141,7 @@ export class ModelModal extends Modal {
 				radio.style.marginRight = '8px';
 				radio.addEventListener('change', () => {
 					if (radio.checked) {
-						this.displayName = model.name;
+                                                this.modelName = model.name;
 						this.modelId = model.id;
 						this.updateFormInputs();
 						this.updateRadioSelection();
@@ -172,7 +172,7 @@ export class ModelModal extends Modal {
 		customRadio.checked = true; // Set Custom as default selection
 		customRadio.addEventListener('change', () => {
 			if (customRadio.checked) {
-				this.displayName = '';
+                                this.modelName = '';
 				this.modelId = '';
 				this.updateFormInputs();
 				this.updateRadioSelection();
@@ -209,10 +209,10 @@ export class ModelModal extends Modal {
 			desc: 'The name of the model you want to display in the interface.',
 			textInput: {
 				placeholder: 'Enter display name',
-				value: this.displayName,
-				onChange: (value) => {
-					this.displayName = value;
-				},
+                                value: this.modelName,
+                                onChange: (value) => {
+                                        this.modelName = value;
+                                },
 			},
 		});
 
@@ -236,12 +236,12 @@ export class ModelModal extends Modal {
 		if (!formContainer) return;
 
 		// Update display name input
-		const displayNameInput = formContainer.querySelector(
-			'input[placeholder="Enter display name"]'
-		) as HTMLInputElement;
-		if (displayNameInput) {
-			displayNameInput.value = this.displayName;
-		}
+                const displayNameInput = formContainer.querySelector(
+                        'input[placeholder="Enter display name"]'
+                ) as HTMLInputElement;
+                if (displayNameInput) {
+                        displayNameInput.value = this.modelName;
+                }
 
 		// Update model ID input
 		const modelIdInput = formContainer.querySelector(
@@ -269,23 +269,23 @@ export class ModelModal extends Modal {
 			cta: true,
 			onClick: async () => {
 				if (this.validateForm()) {
-					const model: Model = {
-						name: this.modelId,
-						displayName: this.displayName,
-					};
+                                        const model: Model = {
+                                                id: this.modelId,
+                                                name: this.modelName,
+                                        };
 
 					// Use callback to handle business logic
 					this.props.onSave({
 						provider: this.selectedProvider,
 						model: model,
-						isEdit: !!this.props.editTarget,
-						oldModel: this.props.editTarget
-							? {
-									model: this.props.editTarget.model,
-									provider: this.props.editTarget.provider,
-								}
-							: undefined,
-					});
+                                                isEdit: !!this.props.editTarget,
+                                                oldModel: this.props.editTarget
+                                                        ? {
+                                                                        model: this.props.editTarget.model,
+                                                                        provider: this.props.editTarget.provider,
+                                                                }
+                                                        : undefined,
+                                        });
 					this.close();
 				}
 			},
@@ -310,10 +310,10 @@ export class ModelModal extends Modal {
 			return false;
 		}
 
-		if (!this.displayName.trim()) {
-			CommonNotice.error(new Error('Display name is required'));
-			return false;
-		}
+                if (!this.modelName.trim()) {
+                        CommonNotice.error(new Error('Display name is required'));
+                        return false;
+                }
 
 		return true;
 	}
