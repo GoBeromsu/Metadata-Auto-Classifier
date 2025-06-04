@@ -90,6 +90,12 @@ describe('Frontmatter Container - Regression Tests', () => {
 		test('filters templates with id=0 in display (Critical Regression)', () => {
 			// Given: templates including id=0
 			mockPlugin.settings.frontmatter = [makeItem(0), makeItem(1), makeItem(2)];
+			const templateWithId0 = makeItem(0);
+
+			// Spy on createFrontmatterSetting
+			const createSpy = jest
+				.spyOn(frontmatter as any, 'createFrontmatterSetting')
+				.mockImplementation(() => {});
 
 			// When: display is called
 			frontmatter.display();
@@ -97,6 +103,13 @@ describe('Frontmatter Container - Regression Tests', () => {
 			// Then: id=0 should not be displayed (reserved for Tag)
 			expect(mockContainer.empty).toHaveBeenCalled();
 			// Only createFrontmatterSetting with id!=0 should be called
+			expect(createSpy).toHaveBeenCalledTimes(2);
+			expect(createSpy).not.toHaveBeenCalledWith(
+				expect.any(Object),
+				templateWithId0,
+				expect.any(Object),
+				expect.any(Boolean)
+			);
 		});
 
 		test('deletes template and saves settings in handleDelete', async () => {

@@ -55,12 +55,16 @@ describe('sendRequest', () => {
 
 	test('throws server error when status >= 500', async () => {
 		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 500, text: 'oops' });
-		await expect(sendRequest(url, headers, body)).rejects.toThrow('Server error');
+		await expect(sendRequest(url, headers, body)).rejects.toThrow(
+			`Server error (HTTP 500) from ${url}: oops`
+		);
 	});
 
 	test('throws client error when status >= 400', async () => {
 		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 404, text: 'missing' });
-		await expect(sendRequest(url, headers, body)).rejects.toThrow('Client error');
+		await expect(sendRequest(url, headers, body)).rejects.toThrow(
+			`Client error (HTTP 404) from ${url}: missing`
+		);
 	});
 });
 
