@@ -2,7 +2,7 @@ import type AutoClassifierPlugin from 'main';
 import { PluginSettingTab } from 'obsidian';
 
 import type { ProviderConfig } from 'api/types';
-import type { FrontmatterTemplate } from 'frontmatter/types';
+import type { FrontmatterField } from 'frontmatter/types';
 import { generateId } from 'utils';
 import { DEFAULT_FRONTMATTER_SETTING } from 'utils/constants';
 import { CommonSetting } from './components/common/CommonSetting';
@@ -14,7 +14,7 @@ export interface AutoClassifierSettings {
 	providers: ProviderConfig[];
 	selectedProvider: string;
 	selectedModel: string;
-	frontmatter: FrontmatterTemplate[];
+        frontmatter: FrontmatterField[];
 	classificationRule: string;
 }
 
@@ -82,7 +82,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 	}
 
 	private addNewFrontmatter(): void {
-		const newFrontmatter: FrontmatterTemplate = {
+                const newFrontmatter: FrontmatterField = {
 			id: generateId(),
 			...DEFAULT_FRONTMATTER_SETTING,
 		};

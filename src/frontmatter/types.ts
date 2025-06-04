@@ -2,17 +2,19 @@ import type { TFile } from 'obsidian';
 
 export type LinkType = 'WikiLink' | 'Normal';
 
-export interface FrontmatterTemplate {
-	id: number;
-	name: string;
-	count: {
-		min: number;
-		max: number;
-	};
-	refs: string[];
-	overwrite: boolean;
-	linkType: LinkType;
-	customQuery: string;
+export interface Range {
+        min: number;
+        max: number;
+}
+
+export interface FrontmatterField {
+        id: number;
+        name: string;
+        count: Range;
+        refs: string[];
+        overwrite: boolean;
+        linkType: LinkType;
+        customQuery: string;
 }
 
 export interface FrontMatter {
@@ -24,10 +26,8 @@ export type ProcessFrontMatterFn = (
 	fn: (frontmatter: FrontMatter) => void
 ) => Promise<void>;
 
-export interface InsertFrontMatterParams {
-	file: TFile;
-	key: string;
-	value: string[];
-	overwrite: boolean;
-	linkType?: LinkType;
+export interface InsertFrontMatterParams
+        extends Pick<FrontmatterField, 'name' | 'overwrite' | 'linkType'> {
+        file: TFile;
+        value: string[];
 }

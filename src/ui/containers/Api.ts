@@ -112,17 +112,17 @@ export class Api {
 		const modelSection = containerEl.createEl('div', { cls: 'model-section' });
 		modelSection.createEl('h3', { text: 'Models' });
 
-		providers.forEach((provider) => {
-			provider.models.forEach((config: Model) => {
-				const isActive = selectedModel === config.name;
-				const editTarget = {
-					model: config.name,
-					displayName: config.displayName,
-					provider: provider.name,
-				};
+                providers.forEach((provider) => {
+                        provider.models.forEach((config: Model) => {
+                                const isActive = selectedModel === config.id;
+                                const editTarget = {
+                                        model: config.id,
+                                        name: config.name,
+                                        provider: provider.name,
+                                };
 
-				CommonSetting.create(modelSection, {
-					name: config.displayName,
+                                CommonSetting.create(modelSection, {
+                                        name: config.name,
 					desc: provider.name,
 					toggle: {
 						value: isActive,
@@ -141,12 +141,12 @@ export class Api {
 							text: 'Test Connection',
 							onClick: async () => {
 								try {
-									const success = await testModel(provider, config.name);
-									if (success) {
-										CommonNotice.success(`${config.displayName} connection test successful!`);
-									} else {
-										CommonNotice.error(new Error(`${config.displayName} connection test failed!`));
-									}
+                                                                        const success = await testModel(provider, config.id);
+                                                                        if (success) {
+                                                                                CommonNotice.success(`${config.name} connection test successful!`);
+                                                                        } else {
+                                                                                CommonNotice.error(new Error(`${config.name} connection test failed!`));
+                                                                        }
 								} catch (error) {
 									CommonNotice.error(error instanceof Error ? error : new Error('Test failed'));
 								}
@@ -165,12 +165,12 @@ export class Api {
 									(p) => p.name === provider.name
 								);
 								if (currentProvider) {
-									currentProvider.models = currentProvider.models.filter(
-										(m: Model) => m.name !== config.name
-									);
+                                                                        currentProvider.models = currentProvider.models.filter(
+                                                                               (m: Model) => m.id !== config.id
+                                                                        );
 								}
 
-								if (this.plugin.settings.selectedModel === config.name) {
+                                                                if (this.plugin.settings.selectedModel === config.id) {
 									this.plugin.settings.selectedProvider = '';
 									this.plugin.settings.selectedModel = '';
 								}
@@ -219,20 +219,20 @@ export class Api {
 		modal.open();
 	}
 
-	private openModelModal(
-		type: 'add' | 'edit',
-		editTarget?: { model: string; displayName: string; provider: string }
-	): void {
+        private openModelModal(
+                type: 'add' | 'edit',
+                editTarget?: { model: string; name: string; provider: string }
+        ): void {
 		const modalProps: ModelModalProps = {
 			providers: this.currentProviders,
 			onSave: async (result) => {
 				if (result.isEdit && result.oldModel) {
-					const provider = this.plugin.settings.providers.find(
-						(p) => p.name === result.oldModel?.provider
-					);
-					if (provider) {
-						provider.models = provider.models.filter((m) => m.name !== result.oldModel?.model);
-					}
+                                        const provider = this.plugin.settings.providers.find(
+                                                (p) => p.name === result.oldModel?.provider
+                                        );
+                                        if (provider) {
+                                                provider.models = provider.models.filter((m) => m.id !== result.oldModel?.model);
+                                        }
 
 					const newProvider = this.plugin.settings.providers.find(
 						(p) => p.name === result.provider
@@ -241,10 +241,10 @@ export class Api {
 						newProvider.models.push(result.model);
 					}
 
-					if (editTarget && editTarget.model === result.oldModel.model) {
-						this.plugin.settings.selectedProvider = result.provider;
-						this.plugin.settings.selectedModel = result.model.name;
-					}
+                                        if (editTarget && editTarget.model === result.oldModel.model) {
+                                                this.plugin.settings.selectedProvider = result.provider;
+                                                this.plugin.settings.selectedModel = result.model.id;
+                                        }
 				} else {
 					const provider = this.plugin.settings.providers.find((p) => p.name === result.provider);
 					if (provider) {

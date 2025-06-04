@@ -1,6 +1,6 @@
 import { DEFAULT_TASK_TEMPLATE } from 'api/prompt';
 import { DEFAULT_PROVIDER } from '../api/constants';
-import type { FrontmatterTemplate, LinkType } from '../frontmatter/types';
+import type { FrontmatterField, LinkType } from '../frontmatter/types';
 import type { AutoClassifierSettings } from '../ui';
 
 export const DEFAULT_FRONTMATTER_SETTING = {
@@ -12,7 +12,7 @@ export const DEFAULT_FRONTMATTER_SETTING = {
 	customQuery: '',
 };
 
-export const DEFAULT_TAG_SETTING: FrontmatterTemplate = {
+export const DEFAULT_TAG_SETTING: FrontmatterField = {
 	id: 0,
 	name: 'tags',
 	refs: [],

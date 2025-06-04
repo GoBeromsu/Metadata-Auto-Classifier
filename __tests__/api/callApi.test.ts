@@ -13,8 +13,8 @@ describe('API callAPI Tests', () => {
 		name,
 		apiKey: 'test-api-key',
 		baseUrl,
-		temperature: 0.7,
-		models: [{ name: 'test-model', displayName: 'Test Model' }],
+                temperature: 0.7,
+                models: [{ id: 'test-model', name: 'Test Model' }],
 	});
 
 	const testSystemRole = 'You are a helpful assistant that classifies content.';

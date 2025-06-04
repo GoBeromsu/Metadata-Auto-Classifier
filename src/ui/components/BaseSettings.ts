@@ -1,4 +1,4 @@
-import type { FrontmatterTemplate } from 'frontmatter/types';
+import type { FrontmatterField } from 'frontmatter/types';
 import type AutoClassifierPlugin from 'main';
 import { ConfigurableSettingModal } from 'ui/modals/FrontmatterEditorModal';
 import type {
@@ -19,12 +19,12 @@ export abstract class BaseSettingsComponent implements SettingsComponent {
 
 	abstract display(frontmatterId?: number): void;
 
-	protected createFrontmatterSetting(
-		containerEl: HTMLElement,
-		frontmatterSetting: FrontmatterTemplate,
-		actions: FrontmatterActions,
-		showDeleteButton: boolean = false
-	): void {
+        protected createFrontmatterSetting(
+                containerEl: HTMLElement,
+                frontmatterSetting: FrontmatterField,
+                actions: FrontmatterActions,
+                showDeleteButton: boolean = false
+        ): void {
 		const button = [
 			{
 				icon: 'pencil',
@@ -48,10 +48,10 @@ export abstract class BaseSettingsComponent implements SettingsComponent {
 	}
 
 	// Common modal creation and opening logic
-	protected openEditModal(
-		frontmatterSetting: FrontmatterTemplate,
-		onSave: (updatedFrontmatter: FrontmatterTemplate) => Promise<void>
-	): void {
+        protected openEditModal(
+                frontmatterSetting: FrontmatterField,
+                onSave: (updatedFrontmatter: FrontmatterField) => Promise<void>
+        ): void {
 		const modalProps: FrontmatterEditorModalProps = {
 			frontmatterSetting: frontmatterSetting,
 			options: this.options,

@@ -1,4 +1,4 @@
-import { FrontmatterTemplate } from 'frontmatter/types';
+import { FrontmatterField } from 'frontmatter/types';
 
 export interface SettingsComponentOptions {
 	showLinkType?: boolean;
@@ -11,18 +11,18 @@ export interface SettingsComponent {
 }
 
 export interface FrontmatterActions {
-	onEdit: (frontmatterSetting: FrontmatterTemplate) => void;
-	onDelete: (frontmatterSetting: FrontmatterTemplate) => void;
+        onEdit: (frontmatterSetting: FrontmatterField) => void;
+        onDelete: (frontmatterSetting: FrontmatterField) => void;
 }
 
 export interface FrontmatterEditorModalProps {
-	frontmatterSetting: FrontmatterTemplate;
-	options: SettingsComponentOptions;
-	onSave: (frontmatter: FrontmatterTemplate) => Promise<void>;
+        frontmatterSetting: FrontmatterField;
+        options: SettingsComponentOptions;
+        onSave: (frontmatter: FrontmatterField) => Promise<void>;
 }
 
 /**
  * Frontmatter 참조 타입 - 선택/참조를 위한 최소 식별 정보
  * 모달, 드롭다운, 리스트 등에서 frontmatter를 식별할 때 사용
  */
-export type FrontmatterRef = Pick<FrontmatterTemplate, 'id' | 'name'>;
+export type FrontmatterRef = Pick<FrontmatterField, 'id' | 'name'>;

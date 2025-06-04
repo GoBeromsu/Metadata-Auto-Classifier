@@ -1,4 +1,4 @@
-import type { FrontmatterTemplate } from 'frontmatter/types';
+import type { FrontmatterField } from 'frontmatter/types';
 import { BaseSettingsComponent } from 'ui/components/BaseSettings';
 import type { FrontmatterActions, SettingsComponentOptions } from 'ui/types';
 
@@ -14,17 +14,17 @@ export class Frontmatter extends BaseSettingsComponent {
 		const filteredFrontmatter = frontmatter.filter((frontmatter) => frontmatter.id !== 0);
 
 		this.containerEl.empty();
-		filteredFrontmatter.forEach((frontmatter: FrontmatterTemplate) => {
+                filteredFrontmatter.forEach((frontmatter: FrontmatterField) => {
 			const actions: FrontmatterActions = {
-				onEdit: (setting: FrontmatterTemplate) => this.handleEdit(setting),
-				onDelete: (setting: FrontmatterTemplate) => this.handleDelete(setting),
+                                onEdit: (setting: FrontmatterField) => this.handleEdit(setting),
+                                onDelete: (setting: FrontmatterField) => this.handleDelete(setting),
 			};
 
 			this.createFrontmatterSetting(this.containerEl, frontmatter, actions, true);
 		});
 	}
 
-	private handleEdit(frontmatterSetting: FrontmatterTemplate): void {
+        private handleEdit(frontmatterSetting: FrontmatterField): void {
 		this.openEditModal(frontmatterSetting, async (updatedFrontmatter) => {
 			// Register command for the updated frontmatter
 			this.plugin.registerCommand(
@@ -37,11 +37,11 @@ export class Frontmatter extends BaseSettingsComponent {
 		});
 	}
 
-	private async handleDelete(frontmatterSetting: FrontmatterTemplate): Promise<void> {
+        private async handleDelete(frontmatterSetting: FrontmatterField): Promise<void> {
 		confirm(`Are you sure you want to delete "${frontmatterSetting.name}" frontmatter?`);
-		this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
-			(f: FrontmatterTemplate) => f.id !== frontmatterSetting.id
-		);
+                this.plugin.settings.frontmatter = this.plugin.settings.frontmatter.filter(
+                        (f: FrontmatterField) => f.id !== frontmatterSetting.id
+                );
 
 		await this.plugin.saveSettings();
 		this.display();

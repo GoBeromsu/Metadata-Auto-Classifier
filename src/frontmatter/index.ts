@@ -2,10 +2,10 @@ import type { MetadataCache, TFile } from 'obsidian';
 import { getAllTags, getFrontMatterInfo } from 'obsidian';
 
 import type {
-	FrontMatter,
-	FrontmatterTemplate,
-	InsertFrontMatterParams,
-	ProcessFrontMatterFn
+        FrontMatter,
+        FrontmatterField,
+        InsertFrontMatterParams,
+        ProcessFrontMatterFn
 } from './types';
 
 /**
@@ -40,9 +40,9 @@ export const getTags = async (
 
 // Moved from BaseSettingsComponent
 export const getFrontmatterSetting = (
-	id: number,
-	settings: FrontmatterTemplate[]
-): FrontmatterTemplate => {
+        id: number,
+        settings: FrontmatterField[]
+): FrontmatterField => {
 	const setting = settings?.find((f) => f.id === id);
 	if (!setting) {
 		throw new Error('Setting not found');
@@ -59,7 +59,7 @@ export const insertToFrontMatter = async (
 		const rawValues =
 			params.linkType === 'WikiLink' ? params.value.map((item) => `[[${item}]]`) : params.value;
 
-		const existingRawValues = frontmatter[params.key] || [];
+                const existingRawValues = frontmatter[params.name] || [];
 		// Combine values based on overwrite setting
 		let combinedRawValues = params.overwrite ? rawValues : [...existingRawValues, ...rawValues];
 
@@ -67,6 +67,6 @@ export const insertToFrontMatter = async (
 		combinedRawValues = [...new Set(combinedRawValues)].filter(Boolean);
 
 		// Format back for storage context
-		frontmatter[params.key] = combinedRawValues;
-	});
+                frontmatter[params.name] = combinedRawValues;
+        });
 };
