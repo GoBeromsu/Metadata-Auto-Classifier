@@ -74,7 +74,7 @@ export class TextComponent {
 export class TextAreaComponent {
 	inputEl = { rows: 0, style: { width: '' } } as any;
 	constructor(public containerEl: HTMLElement) {}
-	setPlaceholder = jest.fn();
-	setValue = jest.fn();
-	onChange = jest.fn();
+	setPlaceholder = jest.fn().mockReturnThis();
+	setValue = jest.fn().mockReturnThis();
+	onChange = jest.fn().mockReturnThis();
 }

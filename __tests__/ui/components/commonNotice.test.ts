@@ -1,4 +1,4 @@
-import { CommonNotice } from '../../src/ui/components/common/CommonNotice';
+import { CommonNotice } from 'ui/components/common/CommonNotice';
 import { Notice } from 'obsidian';
 
 (global as any).window = global;

@@ -1,12 +1,12 @@
+import { Anthropic } from 'api/providers/Anthropic';
+import { Custom } from 'api/providers/Custom';
+import { DeepSeek } from 'api/providers/DeepSeek';
+import { Gemini } from 'api/providers/Gemini';
+import { Ollama } from 'api/providers/Ollama';
+import { OpenAI } from 'api/providers/OpenAI';
+import { OpenRouter } from 'api/providers/OpenRouter';
+import { ProviderConfig, StructuredOutput } from 'api/types';
 import { requestUrl } from 'obsidian';
-import { Anthropic } from '../../src/api/providers/Anthropic';
-import { Custom } from '../../src/api/providers/Custom';
-import { DeepSeek } from '../../src/api/providers/DeepSeek';
-import { Gemini } from '../../src/api/providers/Gemini';
-import { OpenAI } from '../../src/api/providers/OpenAI';
-import { OpenRouter } from '../../src/api/providers/OpenRouter';
-import { ProviderConfig, StructuredOutput } from '../../src/api/types';
-import { Ollama } from '../../src/api/providers/Ollama';
 
 describe('API callAPI Tests', () => {
 	const createMockProvider = (name: string, baseUrl: string): ProviderConfig => ({

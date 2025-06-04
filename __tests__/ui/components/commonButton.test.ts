@@ -2,7 +2,7 @@ import {
 	CommonButton,
 	createButtonConfig,
 	createExtraButtonConfig,
-} from '../../src/ui/components/common/CommonButton';
+} from 'ui/components/common/CommonButton';
 import { ButtonComponent, ExtraButtonComponent } from 'obsidian';
 
 describe('CommonButton utilities', () => {
