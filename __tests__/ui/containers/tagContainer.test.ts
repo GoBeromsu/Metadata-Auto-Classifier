@@ -32,47 +32,49 @@ describe('Tag Container - Regression Tests', () => {
 		jest.clearAllMocks();
 	});
 
-	describe('Tag Setting Management', () => {
-		test('handleEdit id=0 템플릿 업데이트 (Critical Regression)', async () => {
-			// Given: DEFAULT_TAG_SETTING (id=0)
-			const updatedSetting = { ...DEFAULT_TAG_SETTING, name: 'Updated Tag Name' };
-
-			// openEditModal 모킹
-			(tag as any).openEditModal = jest
-				.fn()
-				.mockImplementation((_: any, onSave: (s: any) => Promise<void>) => onSave(updatedSetting));
-
-			// When: tag 설정 편집
-			await (tag as any).handleEdit(DEFAULT_TAG_SETTING);
-
-			// Then: id=0 템플릿이 업데이트되어야 함
-			expect(mockPlugin.settings.frontmatter[0].name).toBe('Updated Tag Name');
-			expect(mockPlugin.saveSettings).toHaveBeenCalled();
-		});
-
-		test('display DEFAULT_TAG_SETTING 표시', () => {
-			// Given: tag 인스턴스
-			const createFrontmatterSettingSpy = jest
+	describe('Basic Rendering', () => {
+		test('renders DEFAULT_TAG_SETTING without delete button', () => {
+			// Spy on createFrontmatterSetting
+			const createSpy = jest
 				.spyOn(tag as any, 'createFrontmatterSetting')
 				.mockImplementation(() => {});
 
-			// When: display 호출
+			// When: display is called
 			tag.display();
 
-			// Then: DEFAULT_TAG_SETTING이 표시되어야 함 (삭제 버튼 없이)
-			expect(createFrontmatterSettingSpy).toHaveBeenCalledWith(
+			// Then: DEFAULT_TAG_SETTING should be displayed without delete button
+			expect(createSpy).toHaveBeenCalledWith(
 				expect.any(Object),
 				DEFAULT_TAG_SETTING,
 				expect.objectContaining({
 					onEdit: expect.any(Function),
 					onDelete: expect.any(Function),
 				}),
-				false // showDeleteButton = false
+				false // showDeleteButton = false (important!)
 			);
 		});
+	});
 
-		test('id=0 찾기 실패시 에러 없이 처리', async () => {
-			// Given: frontmatter 배열에 id=0이 없는 상황
+	describe('Tag Setting Management', () => {
+		test('updates id=0 template in handleEdit (Critical Regression)', async () => {
+			// Given: DEFAULT_TAG_SETTING (id=0)
+			const updatedSetting = { ...DEFAULT_TAG_SETTING, name: 'Updated Tag Name' };
+
+			// Mock openEditModal
+			(tag as any).openEditModal = jest
+				.fn()
+				.mockImplementation((_: any, onSave: (s: any) => Promise<void>) => onSave(updatedSetting));
+
+			// When: tag setting is edited
+			await (tag as any).handleEdit(DEFAULT_TAG_SETTING);
+
+			// Then: id=0 template should be updated
+			expect(mockPlugin.settings.frontmatter[0].name).toBe('Updated Tag Name');
+			expect(mockPlugin.saveSettings).toHaveBeenCalled();
+		});
+
+		test('handles id=0 not found without errors', async () => {
+			// Given: frontmatter array without id=0
 			mockPlugin.settings.frontmatter = [{ id: 1, name: 'other' }];
 			const updatedSetting = { ...DEFAULT_TAG_SETTING, name: 'Updated' };
 
@@ -80,10 +82,10 @@ describe('Tag Container - Regression Tests', () => {
 				.fn()
 				.mockImplementation((_: any, onSave: (s: any) => Promise<void>) => onSave(updatedSetting));
 
-			// When: handleEdit 호출
+			// When: handleEdit is called
 			await (tag as any).handleEdit(DEFAULT_TAG_SETTING);
 
-			// Then: 에러 없이 처리되어야 함
+			// Then: should handle without errors
 			expect(mockPlugin.saveSettings).toHaveBeenCalled();
 		});
 	});

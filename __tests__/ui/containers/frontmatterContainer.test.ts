@@ -44,46 +44,88 @@ describe('Frontmatter Container - Regression Tests', () => {
 		jest.clearAllMocks();
 	});
 
-	describe('Template Management', () => {
-		test('display에서 id=0 템플릿 필터링 (Critical Regression)', () => {
-			// Given: id=0 포함한 템플릿들
-			mockPlugin.settings.frontmatter = [makeItem(0), makeItem(1), makeItem(2)];
+	describe('Basic Rendering', () => {
+		test('renders frontmatter templates correctly', () => {
+			// Given: 3 frontmatter templates (id: 1,2,3)
+			expect(mockPlugin.settings.frontmatter).toHaveLength(3);
+			const templates = mockPlugin.settings.frontmatter;
 
-			// When: display 호출
+			// Spy on createFrontmatterSetting
+			const createSpy = jest
+				.spyOn(frontmatter as any, 'createFrontmatterSetting')
+				.mockImplementation(() => {});
+
+			// When: display is called
 			frontmatter.display();
 
-			// Then: id=0은 표시되지 않아야 함 (Tag용)
+			// Then: container should be emptied and each template displayed with delete button
 			expect(mockContainer.empty).toHaveBeenCalled();
-			// 실제로는 createFrontmatterSetting이 id!=0인 것들만 호출되어야 함
+			expect(createSpy).toHaveBeenCalledTimes(3);
+			templates.forEach((template: any) => {
+				expect(createSpy).toHaveBeenCalledWith(
+					expect.any(Object),
+					template,
+					expect.objectContaining({
+						onEdit: expect.any(Function),
+						onDelete: expect.any(Function),
+					}),
+					true // showDeleteButton = true
+				);
+			});
 		});
 
-		test('handleDelete 템플릿 삭제 및 저장', async () => {
-			// Given: 3개 템플릿
+		test('handles empty template array without errors', () => {
+			// Given: empty frontmatter array
+			mockPlugin.settings.frontmatter = [];
+
+			// When: display is called
+			frontmatter.display();
+
+			// Then: should only empty container without errors
+			expect(mockContainer.empty).toHaveBeenCalled();
+		});
+	});
+
+	describe('Template Management', () => {
+		test('filters templates with id=0 in display (Critical Regression)', () => {
+			// Given: templates including id=0
+			mockPlugin.settings.frontmatter = [makeItem(0), makeItem(1), makeItem(2)];
+
+			// When: display is called
+			frontmatter.display();
+
+			// Then: id=0 should not be displayed (reserved for Tag)
+			expect(mockContainer.empty).toHaveBeenCalled();
+			// Only createFrontmatterSetting with id!=0 should be called
+		});
+
+		test('deletes template and saves settings in handleDelete', async () => {
+			// Given: 3 templates
 			expect(mockPlugin.settings.frontmatter).toHaveLength(3);
 
-			// When: 첫 번째 템플릿 삭제
+			// When: delete first template
 			await (frontmatter as any).handleDelete(makeItem(1));
 
-			// Then: 해당 템플릿만 삭제
+			// Then: only that template should be deleted
 			expect(mockPlugin.settings.frontmatter).toHaveLength(2);
 			expect(mockPlugin.settings.frontmatter.find((f: any) => f.id === 1)).toBeUndefined();
 			expect(mockPlugin.saveSettings).toHaveBeenCalled();
 		});
 
-		test('handleEdit 템플릿 수정 및 커맨드 재등록 (Critical Regression)', async () => {
-			// Given: 수정할 템플릿
+		test('edits template and re-registers command in handleEdit (Critical Regression)', async () => {
+			// Given: template to edit
 			const originalTemplate = makeItem(1);
 			const updatedTemplate = { ...originalTemplate, name: 'Updated Template' };
 
-			// openEditModal 모킹
+			// Mock openEditModal
 			(frontmatter as any).openEditModal = jest
 				.fn()
 				.mockImplementation((template: any, onSave: any) => onSave(updatedTemplate));
 
-			// When: 템플릿 편집
+			// When: template is edited
 			await (frontmatter as any).handleEdit(originalTemplate);
 
-			// Then: 커맨드 재등록 및 설정 저장
+			// Then: command should be re-registered and settings saved
 			expect(mockPlugin.registerCommand).toHaveBeenCalledWith(
 				updatedTemplate.name,
 				expect.any(Function)
@@ -92,27 +134,22 @@ describe('Frontmatter Container - Regression Tests', () => {
 		});
 	});
 
-	describe('Display Logic', () => {
-		test('빈 frontmatter 배열 처리', () => {
-			// Given: 빈 배열
-			mockPlugin.settings.frontmatter = [];
-
-			// When: display 호출
-			frontmatter.display();
-
-			// Then: 에러 없이 처리
-			expect(mockContainer.empty).toHaveBeenCalled();
-		});
-
-		test('id=0만 있는 경우 아무것도 표시하지 않음', () => {
-			// Given: id=0 템플릿만 존재
+	describe('Edge Cases', () => {
+		test('displays nothing when only id=0 exists', () => {
+			// Given: only id=0 template exists (reserved for Tag)
 			mockPlugin.settings.frontmatter = [makeItem(0)];
 
-			// When: display 호출
+			// Spy on createFrontmatterSetting
+			const createSpy = jest
+				.spyOn(frontmatter as any, 'createFrontmatterSetting')
+				.mockImplementation(() => {});
+
+			// When: display is called
 			frontmatter.display();
 
-			// Then: 컨테이너는 비워지지만 템플릿은 표시되지 않음
+			// Then: container is emptied but createFrontmatterSetting is not called
 			expect(mockContainer.empty).toHaveBeenCalled();
+			expect(createSpy).not.toHaveBeenCalled();
 		});
 	});
 });

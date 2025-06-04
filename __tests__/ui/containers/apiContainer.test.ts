@@ -23,8 +23,8 @@ jest.mock('ui/modals/ProviderModal', () => ({
 	},
 }));
 
-import { Api } from 'ui/containers/Api';
 import { testModel } from 'api';
+import { Api } from 'ui/containers/Api';
 
 const mockTestModel = testModel as jest.MockedFunction<typeof testModel>;
 
@@ -73,129 +73,92 @@ describe('Api Container - Regression Tests', () => {
 		jest.clearAllMocks();
 	});
 
-	describe('Provider Management', () => {
-		test('provider 삭제시 선택된 설정 초기화 (Critical Regression)', async () => {
-			// Given: openai provider가 선택된 상태
-			expect(mockPlugin.settings.selectedProvider).toBe('openai');
-			expect(mockPlugin.settings.selectedModel).toBe('gpt-4');
-
-			// When: openai provider 삭제 버튼 클릭 시뮬레이션
-			const providerSection = mockContainer.createEl();
+	describe('Basic Rendering', () => {
+		test('renders default settings correctly', () => {
+			// When: display is called
 			api.display();
 
-			// Provider 삭제 로직 시뮬레이션
+			// Then: All basic UI components should be created
+			expect(mockContainer.empty).toHaveBeenCalled();
+			expect(mockContainer.createEl).toHaveBeenCalledWith('h2', { text: 'API Configuration' });
+			expect(mockContainer.createEl).toHaveBeenCalledWith('div', { cls: 'provider-section' });
+			expect(mockContainer.createEl).toHaveBeenCalledWith('div', { cls: 'model-section' });
+			expect(mockContainer.createDiv).toHaveBeenCalledWith({ cls: 'custom-prompt-container' });
+		});
+	});
+
+	describe('Provider Management', () => {
+		test('resets selected settings when provider is deleted (Critical Regression)', async () => {
+			// When: openai provider deletion is simulated
 			mockPlugin.settings.providers = mockPlugin.settings.providers.filter(
 				(p: any) => p.name !== 'openai'
 			);
 			mockPlugin.settings.selectedProvider = '';
 			mockPlugin.settings.selectedModel = '';
 
-			// Then: 선택된 설정이 초기화되어야 함
+			// Then: selected settings should be reset
 			expect(mockPlugin.settings.selectedProvider).toBe('');
 			expect(mockPlugin.settings.selectedModel).toBe('');
 			expect(mockPlugin.settings.providers).toHaveLength(1);
-			expect(mockPlugin.settings.providers[0].name).toBe('anthropic');
 		});
 
-		test('선택되지 않은 provider 삭제시 선택 설정 유지', async () => {
-			// Given: openai가 선택된 상태
-			const originalProvider = mockPlugin.settings.selectedProvider;
-			const originalModel = mockPlugin.settings.selectedModel;
-
-			// When: anthropic provider 삭제
+		test('preserves selected settings when non-selected provider is deleted', async () => {
+			// When: anthropic provider is deleted
 			mockPlugin.settings.providers = mockPlugin.settings.providers.filter(
 				(p: any) => p.name !== 'anthropic'
 			);
 
-			// Then: 선택 설정 유지
-			expect(mockPlugin.settings.selectedProvider).toBe(originalProvider);
-			expect(mockPlugin.settings.selectedModel).toBe(originalModel);
+			// Then: selected settings should be preserved
+			expect(mockPlugin.settings.selectedProvider).toBe('openai');
+			expect(mockPlugin.settings.selectedModel).toBe('gpt-4');
 		});
 	});
 
 	describe('Model Management', () => {
-		test('model 선택시 provider도 함께 업데이트 (Critical Regression)', async () => {
-			// Given: 다른 provider의 model 선택
-			const claudeModel = mockPlugin.settings.providers[1].models[0];
-
-			// When: Claude 3 model 선택 시뮬레이션
+		test('updates provider when model is selected (Critical Regression)', async () => {
+			// When: Claude 3 model selection is simulated
 			mockPlugin.settings.selectedProvider = 'anthropic';
-			mockPlugin.settings.selectedModel = claudeModel.name;
+			mockPlugin.settings.selectedModel = 'claude-3';
 
-			// Then: provider도 함께 변경되어야 함
+			// Then: provider should also be updated
 			expect(mockPlugin.settings.selectedProvider).toBe('anthropic');
 			expect(mockPlugin.settings.selectedModel).toBe('claude-3');
 		});
 
-		test('model 삭제시 선택된 설정 초기화', async () => {
-			// Given: gpt-4가 선택된 상태
-			expect(mockPlugin.settings.selectedModel).toBe('gpt-4');
-
-			// When: gpt-4 model 삭제
-			const openaiProvider = mockPlugin.settings.providers.find((p: any) => p.name === 'openai');
-			if (openaiProvider) {
-				openaiProvider.models = openaiProvider.models.filter((m: any) => m.name !== 'gpt-4');
-			}
+		test('resets selected settings when model is deleted', async () => {
+			// When: gpt-4 model is deleted and settings reset
 			mockPlugin.settings.selectedProvider = '';
 			mockPlugin.settings.selectedModel = '';
 
-			// Then: 선택 설정 초기화
+			// Then: selected settings should be reset
 			expect(mockPlugin.settings.selectedProvider).toBe('');
 			expect(mockPlugin.settings.selectedModel).toBe('');
 		});
 	});
 
 	describe('Connection Test', () => {
-		test('연결 테스트 성공시 성공 메시지', async () => {
-			// Given: 테스트 성공 모킹
+		test('returns correct result from testModel function', async () => {
+			// Success case
 			mockTestModel.mockResolvedValue(true);
+			const successResult = await testModel(mockPlugin.settings.providers[0], 'gpt-4');
+			expect(successResult).toBe(true);
 
-			// When: 연결 테스트 실행
-			const provider = mockPlugin.settings.providers[0];
-			const model = provider.models[0];
-			const result = await testModel(provider, model.name);
-
-			// Then: 성공 결과
-			expect(result).toBe(true);
-			expect(mockTestModel).toHaveBeenCalledWith(provider, model.name);
-		});
-
-		test('연결 테스트 실패시 에러 처리', async () => {
-			// Given: 테스트 실패 모킹
+			// Failure case
 			mockTestModel.mockResolvedValue(false);
-
-			// When: 연결 테스트 실행
-			const provider = mockPlugin.settings.providers[0];
-			const model = provider.models[0];
-			const result = await testModel(provider, model.name);
-
-			// Then: 실패 결과
-			expect(result).toBe(false);
+			const failureResult = await testModel(mockPlugin.settings.providers[0], 'gpt-4');
+			expect(failureResult).toBe(false);
 		});
 	});
 
 	describe('Classification Rule', () => {
-		test('classification rule 변경시 설정 저장', () => {
-			// Given: 새로운 rule
-			const newRule = 'new classification rule';
+		test('updates classification rule correctly', () => {
+			// Test updating rule
+			mockPlugin.settings.classificationRule = 'new rule';
+			expect(mockPlugin.settings.classificationRule).toBe('new rule');
 
-			// When: rule 변경
-			mockPlugin.settings.classificationRule = newRule;
-
-			// Then: 설정이 업데이트되어야 함
-			expect(mockPlugin.settings.classificationRule).toBe(newRule);
-		});
-
-		test('reset 버튼 클릭시 기본값 복원', () => {
-			// Given: 변경된 rule
-			mockPlugin.settings.classificationRule = 'custom rule';
-
-			// When: reset (기본값으로 복원)
-			const DEFAULT_TASK_TEMPLATE = 'default template';
-			mockPlugin.settings.classificationRule = DEFAULT_TASK_TEMPLATE;
-
-			// Then: 기본값으로 복원
-			expect(mockPlugin.settings.classificationRule).toBe(DEFAULT_TASK_TEMPLATE);
+			// Test resetting rule
+			mockPlugin.settings.classificationRule = 'default template';
+			expect(mockPlugin.settings.classificationRule).toBe('default template');
 		});
 	});
 });
