@@ -1,43 +1,24 @@
 import type { RequestUrlParam } from 'obsidian';
 import { requestUrl } from 'obsidian';
-import { PROVIDER_NAMES } from '../utils';
 import { COMMON_CONSTANTS } from './constants';
-import { Anthropic } from './providers/Anthropic';
-import { Custom } from './providers/Custom';
-import { DeepSeek } from './providers/DeepSeek';
-import { Gemini } from './providers/Gemini';
-import { LMStudio } from './providers/LMStudio';
-import { Ollama } from './providers/Ollama';
-import { OpenAI } from './providers/OpenAI';
-import { OpenRouter } from './providers/OpenRouter';
+import { UnifiedProvider } from './UnifiedProvider';
 import type { APIProvider, ProviderConfig, StructuredOutput } from './types';
 
-export const getProvider = (providerName: string): APIProvider => {
-	switch (providerName) {
-		case PROVIDER_NAMES.OPENAI:
-			return new OpenAI();
-		case PROVIDER_NAMES.ANTHROPIC:
-			return new Anthropic();
-		case PROVIDER_NAMES.OPENROUTER:
-			return new OpenRouter();
-		case PROVIDER_NAMES.GEMINI:
-			return new Gemini();
-		case PROVIDER_NAMES.DEEPSEEK:
-			return new DeepSeek();
-		case PROVIDER_NAMES.LMSTUDIO:
-			return new LMStudio();
-		case PROVIDER_NAMES.OLLAMA:
-			return new Ollama();
-		default:
-			return new Custom();
-	}
+// Re-export for backward compatibility in tests
+export { UnifiedProvider } from './UnifiedProvider';
+
+// Single instance of UnifiedProvider for all providers
+const unifiedProvider = new UnifiedProvider();
+
+export const getProvider = (): APIProvider => {
+	return unifiedProvider;
 };
 
 export const testModel = async (
 	providerConfig: ProviderConfig,
 	modelName: string
 ): Promise<boolean> => {
-	const apiProvider = getProvider(providerConfig.name);
+	const apiProvider = getProvider();
 	await apiProvider.callAPI(
 		COMMON_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
 		COMMON_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
@@ -53,7 +34,7 @@ export const processAPIRequest = async (
 	selectedProvider: ProviderConfig,
 	selectedModel: string
 ): Promise<StructuredOutput> => {
-	const providerInstance = getProvider(selectedProvider.name);
+	const providerInstance = getProvider();
 	const response = await providerInstance.callAPI(
 		systemRole,
 		promptTemplate,
