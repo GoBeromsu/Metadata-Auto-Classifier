@@ -3,6 +3,20 @@
 
 * Always use the **sequential thinking** tool for reasoning and execution
 
+### Obsidian API Documentation Access
+
+* Use Context7 MCP for real-time Obsidian API docs:
+  ```typescript
+  mcp__upstash-context-7-mcp__get-library-docs("/obsidianmd/obsidian-api", 5000, "Plugin Development")
+  mcp__upstash-context-7-mcp__get-library-docs("/obsidianmd/obsidian-developer-docs", 10000, "Complete Guide")
+  ```
+* Common Obsidian API patterns:
+  * Register events: `this.registerEvent(app.on('event-name', callback))`
+  * Process frontmatter: `app.fileManager.processFrontMatter(file, (fm) => {...})`
+  * Get active editor: `app.workspace.activeEditor`
+  * Register DOM: `this.registerDomEvent(element, 'click', callback)`
+  * Register interval: `this.registerInterval(setInterval(callback, 1000))`
+
 ## Code Style
 
 * Comments in English only
