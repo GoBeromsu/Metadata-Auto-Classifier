@@ -30,7 +30,7 @@ export const getTags = async (
 		const fileTags: string[] | null = getAllTags(cache);
 
 		if (fileTags && fileTags.length > 0) {
-			fileTags.forEach((tag) => tags.add(tag.replace('#', '')));
+			fileTags.forEach((tag) => tags.add(tag));
 		}
 
 		return tags;
