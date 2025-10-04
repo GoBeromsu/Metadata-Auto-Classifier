@@ -1,31 +1,19 @@
-import { getProvider, sendRequest } from 'api';
+import { getProvider, sendRequest, UnifiedProvider } from 'api';
 import { COMMON_CONSTANTS } from 'api/constants';
-import { Anthropic } from 'api/providers/Anthropic';
-import { Custom } from 'api/providers/Custom';
-import { DeepSeek } from 'api/providers/DeepSeek';
-import { Gemini } from 'api/providers/Gemini';
-import { LMStudio } from 'api/providers/LMStudio';
-import { Ollama } from 'api/providers/Ollama';
-import { OpenAI } from 'api/providers/OpenAI';
-import { OpenRouter } from 'api/providers/OpenRouter';
 import { ProviderConfig, StructuredOutput } from 'api/types';
 import { requestUrl } from 'obsidian';
 import { PROVIDER_NAMES } from 'utils';
 
 // -------------------- getProvider Tests --------------------
 describe('getProvider', () => {
-	test('returns correct provider instances', () => {
-		expect(getProvider(PROVIDER_NAMES.OPENAI)).toBeInstanceOf(OpenAI);
-		expect(getProvider(PROVIDER_NAMES.ANTHROPIC)).toBeInstanceOf(Anthropic);
-		expect(getProvider(PROVIDER_NAMES.OPENROUTER)).toBeInstanceOf(OpenRouter);
-		expect(getProvider(PROVIDER_NAMES.GEMINI)).toBeInstanceOf(Gemini);
-		expect(getProvider(PROVIDER_NAMES.DEEPSEEK)).toBeInstanceOf(DeepSeek);
-		expect(getProvider(PROVIDER_NAMES.LMSTUDIO)).toBeInstanceOf(LMStudio);
-		expect(getProvider(PROVIDER_NAMES.OLLAMA)).toBeInstanceOf(Ollama);
+	test('returns UnifiedProvider instance', () => {
+		expect(getProvider()).toBeInstanceOf(UnifiedProvider);
 	});
 
-	test('returns Custom provider for unknown name', () => {
-		expect(getProvider('Unknown')).toBeInstanceOf(Custom);
+	test('returns the same instance every time', () => {
+		const provider1 = getProvider();
+		const provider2 = getProvider();
+		expect(provider1).toBe(provider2);
 	});
 });
 
@@ -85,10 +73,12 @@ describe('processAPIRequest and testModel', () => {
 
 	beforeAll(() => {
 		jest.resetModules();
-		jest.doMock('api/providers/OpenAI', () => {
+		jest.doMock('api/UnifiedProvider', () => {
 			return {
-				OpenAI: jest.fn().mockImplementation(() => ({
+				UnifiedProvider: jest.fn().mockImplementation(() => ({
 					callAPI: mockCallAPI,
+					buildHeaders: jest.fn(),
+					processApiResponse: jest.fn(),
 				})),
 			};
 		});
