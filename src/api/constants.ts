@@ -14,12 +14,12 @@ export const DEFAULT_PROVIDER: ProviderConfig = {
 	name: 'OpenAI',
 	apiKey: '',
 	baseUrl: 'https://api.openai.com/v1/chat/completions',
-	models: [
-		{
-			name: 'gpt-4.1-mini',
-			displayName: 'GPT-4.1 Mini',
-		},
-	],
+        models: [
+                {
+                        id: 'gpt-4.1-mini',
+                        name: 'GPT-4.1 Mini',
+                },
+        ],
 	temperature: COMMON_CONSTANTS.DEFAULT_TEMPERATURE,
 };
 

@@ -1,4 +1,4 @@
-import type { FrontmatterTemplate } from 'frontmatter/types';
+import type { FrontmatterField } from 'frontmatter/types';
 import { BaseSettingsComponent } from 'ui/components/BaseSettings';
 import type { FrontmatterActions, SettingsComponentOptions } from 'ui/types';
 import { DEFAULT_TAG_SETTING } from '../../utils/constants';
@@ -11,15 +11,15 @@ export class Tag extends BaseSettingsComponent {
 	};
 
 	display(): void {
-		const actions: FrontmatterActions = {
-			onEdit: (setting: FrontmatterTemplate) => this.handleEdit(setting),
+                const actions: FrontmatterActions = {
+                        onEdit: (setting: FrontmatterField) => this.handleEdit(setting),
 			onDelete: () => {},
 		};
 
 		this.createFrontmatterSetting(this.containerEl, DEFAULT_TAG_SETTING, actions, false);
 	}
 
-	private handleEdit(frontmatterSetting: FrontmatterTemplate): void {
+        private handleEdit(frontmatterSetting: FrontmatterField): void {
 		this.openEditModal(frontmatterSetting, async (updatedFrontmatter) => {
 			const tagSettingIndex = this.plugin.settings.frontmatter.findIndex((f) => f.id === 0);
 			if (tagSettingIndex !== -1) {
