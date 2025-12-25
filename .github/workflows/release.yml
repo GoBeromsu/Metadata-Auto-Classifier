@@ -7,7 +7,7 @@ on:
       - '*' # Push events to matching any tag format, i.e. 1.0, 20.15.10
 
 env:
-  PLUGIN_NAME: obsidian-eagle-plugin
+  PLUGIN_NAME: metadata-auto-classifier
 
 permissions:
   contents: write
@@ -42,4 +42,5 @@ jobs:
             --generate-notes \
             ./${{ env.PLUGIN_NAME }}.zip#${{ env.PLUGIN_NAME }}-$TAG_NAME.zip \
             ./main.js \
-            ./manifest.json
+            ./manifest.json \
+            ./versions.json
