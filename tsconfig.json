@@ -3,6 +3,7 @@
 		"baseUrl": ".",
 		"outDir": "dist",
 		"paths": {
+			"main": ["src/main"],
 			"api": ["src/api/index"],
 			"api/*": ["src/api/*"],
 			"utils": ["src/utils/index"],

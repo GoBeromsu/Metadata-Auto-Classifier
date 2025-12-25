@@ -12,7 +12,7 @@ describe('UnifiedProvider Tests', () => {
 		name: '',
 		apiKey: 'test-key',
 		baseUrl: 'https://api.test.com',
-		models: ['test-model'],
+		models: [{ id: 'test-model', name: 'Test Model' }],
 		temperature: 0.7
 	};
 

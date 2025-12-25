@@ -2,13 +2,13 @@ jest.mock('ui/modals/FrontmatterEditorModal', () => ({
 	ConfigurableSettingModal: class {},
 }));
 
-import type { FrontmatterTemplate } from 'frontmatter/types';
+import type { FrontmatterField } from 'frontmatter/types';
 import { Tag } from 'ui/containers/Tag';
 import { DEFAULT_TAG_SETTING } from 'utils/constants';
 
 interface MockPlugin {
 	app: { vault: { getMarkdownFiles: jest.Mock } };
-	settings: { frontmatter: FrontmatterTemplate[] };
+	settings: { frontmatter: FrontmatterField[] };
 	saveSettings: jest.Mock;
 }
 
@@ -71,7 +71,7 @@ describe('Tag Container - Regression Tests', () => {
 			(tag as any).openEditModal = jest
 				.fn()
 				.mockImplementation(
-					(_: FrontmatterTemplate, onSave: (s: FrontmatterTemplate) => Promise<void>) =>
+					(_: FrontmatterField, onSave: (s: FrontmatterField) => Promise<void>) =>
 						onSave(updatedSetting)
 				);
 
@@ -101,7 +101,7 @@ describe('Tag Container - Regression Tests', () => {
 			(tag as any).openEditModal = jest
 				.fn()
 				.mockImplementation(
-					(_: FrontmatterTemplate, onSave: (s: FrontmatterTemplate) => Promise<void>) =>
+					(_: FrontmatterField, onSave: (s: FrontmatterField) => Promise<void>) =>
 						onSave(updatedSetting)
 				);
 
