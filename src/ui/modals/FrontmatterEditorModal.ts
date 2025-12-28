@@ -89,48 +89,49 @@ export class ConfigurableSettingModal extends Modal {
 	}
 
 	private addCountSetting(containerEl: HTMLElement): void {
-		new Setting(containerEl)
-			.setName('Maximum Count')
-			.addSlider((slider) => {
-				slider
-					.setLimits(1, 10, 1)
-					.setValue(this.props.frontmatterSetting.count.max)
-					.setDynamicTooltip()
-					.onChange((value) => {
-						this.props.frontmatterSetting.count.min = 1;
-						this.props.frontmatterSetting.count.max = value;
-					});
-			});
+		new Setting(containerEl).setName('Maximum Count').addSlider((slider) => {
+			slider
+				.setLimits(1, 10, 1)
+				.setValue(this.props.frontmatterSetting.count.max)
+				.setDynamicTooltip()
+				.onChange((value) => {
+					this.props.frontmatterSetting.count.min = 1;
+					this.props.frontmatterSetting.count.max = value;
+				});
+		});
 	}
 
 	private addOptionsSection(containerEl: HTMLElement): void {
 		if (!this.props.options.showOptions) return;
 
-		new Setting(containerEl)
+		let displayValue = '';
+		if (this.props.frontmatterSetting.refs && this.props.frontmatterSetting.refs.length > 0) {
+			displayValue = this.props.frontmatterSetting.refs.join(', ');
+		}
+
+		const optionsSetting = new Setting(containerEl)
 			.setName('Available Options')
 			.setDesc('Values that the AI can use as suggestions')
 			.addButton((button) => {
-				button.setButtonText('Browse Files').setIcon('folder').onClick(() => {
-					const wikiLinkSelector = new WikiLinkSelector(this.app);
-					wikiLinkSelector.openFileSelector((selectedLink) => {
-						const formattedLink =
-							this.props.frontmatterSetting.linkType === 'WikiLink'
-								? `[[${selectedLink}]]`
-								: selectedLink;
-						const currentOptions = this.props.frontmatterSetting.refs || [];
-						this.props.frontmatterSetting.refs = [...currentOptions, formattedLink];
-						this.updateOptionsTextarea();
+				button
+					.setButtonText('Browse Files')
+					.setIcon('folder')
+					.onClick(() => {
+						const wikiLinkSelector = new WikiLinkSelector(this.app);
+						wikiLinkSelector.openFileSelector((selectedLink) => {
+							const formattedLink =
+								this.props.frontmatterSetting.linkType === 'WikiLink'
+									? `[[${selectedLink}]]`
+									: selectedLink;
+							const currentOptions = this.props.frontmatterSetting.refs || [];
+							this.props.frontmatterSetting.refs = [...currentOptions, formattedLink];
+							this.updateOptionsTextarea();
+						});
 					});
-				});
 			});
 
 		if (this.props.options.showTextArea) {
-			let displayValue = '';
-			if (this.props.frontmatterSetting.refs && this.props.frontmatterSetting.refs.length > 0) {
-				displayValue = this.props.frontmatterSetting.refs.join(', ');
-			}
-
-			new Setting(containerEl).addTextArea((textArea) => {
+			optionsSetting.addTextArea((textArea) => {
 				this.textAreaComponent = textArea;
 				textArea
 					.setPlaceholder('Option1, Option2, Option3...')
@@ -160,17 +161,16 @@ export class ConfigurableSettingModal extends Modal {
 	private addCustomQuerySection(containerEl: HTMLElement): void {
 		new Setting(containerEl)
 			.setName('Custom Classification Rules')
-			.setDesc('Add custom instructions to provide more context for classification.');
-
-		new Setting(containerEl).addTextArea((textArea) => {
-			textArea
-				.setPlaceholder('Enter specific classification rules or additional context here...')
-				.setValue(this.props.frontmatterSetting.customQuery || '')
-				.onChange(async (value) => {
-					this.props.frontmatterSetting.customQuery = value;
-				});
-			textArea.inputEl.rows = 4;
-		});
+			.setDesc('Add custom instructions to provide more context for classification.')
+			.addTextArea((textArea) => {
+				textArea
+					.setPlaceholder('Enter specific classification rules or additional context here...')
+					.setValue(this.props.frontmatterSetting.customQuery || '')
+					.onChange(async (value) => {
+						this.props.frontmatterSetting.customQuery = value;
+					});
+				textArea.inputEl.rows = 4;
+			});
 	}
 
 	private addActionButtons(containerEl: HTMLElement): void {
