@@ -9,7 +9,7 @@ import { getContentWithoutFrontmatter, getFieldValues, insertToFrontMatter } fro
 import type { FrontmatterField } from './frontmatter/types';
 import type { AutoClassifierSettings } from './ui';
 import { AutoClassifierSettingTab } from './ui';
-import { DEFAULT_SETTINGS } from './utils/constants';
+import { DEFAULT_FRONTMATTER_SETTING, DEFAULT_SETTINGS } from './utils/constants';
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
@@ -165,6 +165,13 @@ export default class AutoClassifierPlugin extends Plugin {
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+
+		// Migrate old frontmatter settings that may be missing count
+		this.settings.frontmatter = this.settings.frontmatter.map((fm) => ({
+			...DEFAULT_FRONTMATTER_SETTING,
+			...fm,
+			count: fm.count ?? { min: 1, max: 5 },
+		}));
 
 		await this.saveSettings();
 	}

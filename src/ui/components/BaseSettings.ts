@@ -42,7 +42,7 @@ export abstract class BaseSettingsComponent implements SettingsComponent {
 
 		CommonSetting.create(containerEl, {
 			name: frontmatterSetting.name || 'Please enter name',
-			desc: `Type: ${frontmatterSetting.linkType}, Count: ${frontmatterSetting.count.min}-${frontmatterSetting.count.max}, Overwrite: ${frontmatterSetting.overwrite}`,
+			desc: `Type: ${frontmatterSetting.linkType}, Max: ${frontmatterSetting.count?.max ?? 5}, Overwrite: ${frontmatterSetting.overwrite}`,
 			buttons: button,
 		});
 	}
