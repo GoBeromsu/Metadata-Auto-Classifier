@@ -1,8 +1,3 @@
-export interface Range {
-        min: number;
-        max: number;
-}
-
 export interface Model {
         id: string;
         name: string;
