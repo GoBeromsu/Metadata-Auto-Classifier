@@ -1,7 +1,6 @@
 import type { FrontmatterField } from 'frontmatter/types';
 import { BaseSettingsComponent } from 'ui/components/BaseSettings';
 import type { FrontmatterActions, SettingsComponentOptions } from 'ui/types';
-import { DEFAULT_TAG_SETTING } from '../../utils/constants';
 
 export class Tag extends BaseSettingsComponent {
 	protected readonly options: SettingsComponentOptions = {
@@ -11,12 +10,19 @@ export class Tag extends BaseSettingsComponent {
 	};
 
 	display(): void {
+		this.containerEl.empty();
+
+		const tagSetting = this.plugin.settings.frontmatter.find((f) => f.id === 0);
+		if (!tagSetting) {
+			return;
+		}
+
                 const actions: FrontmatterActions = {
                         onEdit: (setting: FrontmatterField) => this.handleEdit(setting),
 			onDelete: () => {},
 		};
 
-		this.createFrontmatterSetting(this.containerEl, DEFAULT_TAG_SETTING, actions, false);
+		this.createFrontmatterSetting(this.containerEl, tagSetting, actions, false);
 	}
 
         private handleEdit(frontmatterSetting: FrontmatterField): void {
