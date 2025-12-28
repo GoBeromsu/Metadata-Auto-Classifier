@@ -1,8 +1,80 @@
 export const requestUrl = jest.fn();
 
+// Obsidian API functions
+export const getFrontMatterInfo = jest.fn((content: string) => {
+	const match = content.match(/^---\n[\s\S]*?\n---\n/);
+	if (match) {
+		return {
+			exists: true,
+			frontmatter: match[0],
+			contentStart: match[0].length,
+		};
+	}
+	return {
+		exists: false,
+		frontmatter: '',
+		contentStart: 0,
+	};
+});
+
+export const parseFrontMatterStringArray = jest.fn((frontmatter: any, key: string) => {
+	if (!frontmatter || !frontmatter[key]) {
+		return null;
+	}
+	const value = frontmatter[key];
+	if (Array.isArray(value)) {
+		return value;
+	}
+	return [value];
+});
+
+export const getAllTags = jest.fn((cache: any) => {
+	if (!cache) return null;
+	const tags = new Set<string>();
+
+	// Add frontmatter tags
+	if (cache.frontmatter && cache.frontmatter.tags) {
+		const frontmatterTags = Array.isArray(cache.frontmatter.tags)
+			? cache.frontmatter.tags
+			: [cache.frontmatter.tags];
+		frontmatterTags.forEach((tag: string) => tags.add(tag));
+	}
+
+	// Add inline tags (simulated)
+	if (cache.tags) {
+		cache.tags.forEach((tag: any) => tags.add(tag.tag));
+	}
+
+	return tags.size > 0 ? Array.from(tags) : null;
+});
+
+// MetadataCache mock
+export class MetadataCache {
+	private fileCaches = new Map<any, any>();
+
+	getFileCache = jest.fn((file: any) => {
+		return this.fileCaches.get(file) || null;
+	});
+
+	// Helper for testing
+	setFileCache(file: any, cache: any) {
+		this.fileCaches.set(file, cache);
+	}
+
+	clearCache() {
+		this.fileCaches.clear();
+	}
+}
+
+// TFile mock
+export class TFile {
+	constructor(public path: string, public basename: string) {}
+}
+
 // Basic App mock for components relying on Obsidian's App
 export class App {
 	vault = { getMarkdownFiles: jest.fn().mockReturnValue([]) } as any;
+	metadataCache = new MetadataCache();
 }
 
 export class FuzzySuggestModal<T> {
