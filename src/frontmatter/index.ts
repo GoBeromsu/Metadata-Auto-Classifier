@@ -18,7 +18,14 @@ export const getContentWithoutFrontmatter = (content: string): string => {
 	return content.slice(contentStart);
 };
 
-// Collect all values for a specific frontmatter field from the vault
+/**
+ * Collects all unique values for a specific frontmatter field from the vault.
+ *
+ * @param fieldName - The name of the frontmatter field to collect values for (for example, "tags").
+ * @param files - The list of files to scan for the specified frontmatter field.
+ * @param metadataCache - The Obsidian metadata cache used to access frontmatter and tags.
+ * @returns An array of unique string values found for the specified field across all files.
+ */
 export const getFieldValues = (
 	fieldName: string,
 	files: ReadonlyArray<TFile>,
