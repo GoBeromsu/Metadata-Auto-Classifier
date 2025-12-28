@@ -75,16 +75,6 @@ export const OPENAI_STRUCTURE_OUTPUT = {
 	},
 };
 
-// OpenRouter Configuration
-export const OPENROUTER_STRUCTURE_OUTPUT = {
-	type: 'json_schema',
-	json_schema: {
-		name: 'metadata_classifier',
-		schema: COMMON_SCHEMA_BASE,
-		strict: true,
-	},
-};
-
 // LMStudio Configuration
 export const LMSTUDIO_STRUCTURE_OUTPUT = {
 	type: 'json_schema',
