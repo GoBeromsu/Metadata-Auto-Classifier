@@ -66,9 +66,23 @@ export class MetadataCache {
 	}
 }
 
-// TFile mock
+// TFile mock - minimal implementation for testing
 export class TFile {
-	constructor(public path: string, public basename: string) {}
+	path: string = '';
+	basename: string = '';
+	name: string = '';
+	extension: string = 'md';
+	stat = { ctime: 0, mtime: 0, size: 0 };
+	vault: any = null;
+	parent: any = null;
+}
+
+export function createMockTFile(path: string, basename: string): TFile {
+	const file = new TFile();
+	file.path = path;
+	file.basename = basename;
+	file.name = basename + '.md';
+	return file;
 }
 
 // Basic App mock for components relying on Obsidian's App

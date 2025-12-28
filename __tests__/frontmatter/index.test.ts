@@ -5,7 +5,9 @@ import {
 	insertToFrontMatter,
 } from 'frontmatter';
 import type { FrontmatterField, InsertFrontMatterParams } from 'frontmatter/types';
-import { getAllTags, getFrontMatterInfo, MetadataCache, parseFrontMatterStringArray, TFile } from 'obsidian';
+import { getAllTags, getFrontMatterInfo, parseFrontMatterStringArray } from 'obsidian';
+// Import mock helpers directly from mock file
+import { MetadataCache, createMockTFile } from '../../__mocks__/obsidian';
 
 // -------------------- getContentWithoutFrontmatter Tests --------------------
 describe('getContentWithoutFrontmatter', () => {
@@ -61,16 +63,16 @@ describe('getFrontmatterSetting', () => {
 // -------------------- getFieldValues Tests --------------------
 describe('getFieldValues', () => {
 	let metadataCache: MetadataCache;
-	let file1: TFile;
-	let file2: TFile;
-	let file3: TFile;
+	let file1: ReturnType<typeof createMockTFile>;
+	let file2: ReturnType<typeof createMockTFile>;
+	let file3: ReturnType<typeof createMockTFile>;
 
 	beforeEach(() => {
 		jest.clearAllMocks();
 		metadataCache = new MetadataCache();
-		file1 = new TFile('note1.md', 'note1');
-		file2 = new TFile('note2.md', 'note2');
-		file3 = new TFile('note3.md', 'note3');
+		file1 = createMockTFile('note1.md', 'note1');
+		file2 = createMockTFile('note2.md', 'note2');
+		file3 = createMockTFile('note3.md', 'note3');
 	});
 
 	test('collects unique values for regular frontmatter field', () => {
@@ -84,7 +86,7 @@ describe('getFieldValues', () => {
 			frontmatter: { category: 'programming' },
 		});
 
-		const result = getFieldValues('category', [file1, file2, file3], metadataCache);
+		const result = getFieldValues('category', [file1, file2, file3] as any, metadataCache as any);
 
 		expect(parseFrontMatterStringArray).toHaveBeenCalledTimes(3);
 		expect(result).toEqual(expect.arrayContaining(['tech', 'programming', 'design']));
@@ -101,7 +103,7 @@ describe('getFieldValues', () => {
 			tags: [{ tag: '#tag4' }],
 		});
 
-		const result = getFieldValues('tags', [file1, file2], metadataCache);
+		const result = getFieldValues('tags', [file1, file2] as any, metadataCache as any);
 
 		expect(getAllTags).toHaveBeenCalledTimes(2);
 		expect(parseFrontMatterStringArray).not.toHaveBeenCalled();
@@ -114,7 +116,7 @@ describe('getFieldValues', () => {
 		});
 		// file2 has no cache
 
-		const result = getFieldValues('category', [file1, file2], metadataCache);
+		const result = getFieldValues('category', [file1, file2] as any, metadataCache as any);
 
 		expect(metadataCache.getFileCache).toHaveBeenCalledTimes(2);
 		expect(result).toEqual(['tech']);
@@ -128,7 +130,7 @@ describe('getFieldValues', () => {
 			frontmatter: { other: 'value' },
 		});
 
-		const result = getFieldValues('category', [file1, file2], metadataCache);
+		const result = getFieldValues('category', [file1, file2] as any, metadataCache as any);
 
 		expect(result).toEqual(['tech']);
 	});
@@ -137,7 +139,7 @@ describe('getFieldValues', () => {
 // -------------------- insertToFrontMatter Tests --------------------
 describe('insertToFrontMatter', () => {
 	let mockProcessFrontMatter: jest.Mock;
-	let mockFile: TFile;
+	let mockFile: ReturnType<typeof createMockTFile>;
 
 	beforeEach(() => {
 		jest.clearAllMocks();
@@ -146,7 +148,7 @@ describe('insertToFrontMatter', () => {
 			callback(frontmatter);
 			return Promise.resolve();
 		});
-		mockFile = new TFile('test.md', 'test');
+		mockFile = createMockTFile('test.md', 'test');
 	});
 
 	test('inserts values with Normal link type', async () => {
