@@ -69,11 +69,11 @@ export default class AutoClassifierPlugin extends Plugin {
 		await this.processFrontmatterItem(selectedProvider, currentFile, frontmatter);
 	}
 
-        private readonly processFrontmatterItem = async (
-                selectedProvider: ProviderConfig,
-                currentFile: TFile,
-                frontmatter: FrontmatterField
-        ): Promise<void> => {
+	private readonly processFrontmatterItem = async (
+		selectedProvider: ProviderConfig,
+		currentFile: TFile,
+		frontmatter: FrontmatterField
+	): Promise<void> => {
 		const fileNameWithoutExt = currentFile.name.replace(/\.[^/.]+$/, '');
 		if (frontmatter.name === 'tags') {
 			frontmatter.refs = await getTags(this.app.vault.getMarkdownFiles(), this.app.metadataCache);
@@ -135,13 +135,13 @@ export default class AutoClassifierPlugin extends Plugin {
 			const processFrontMatter = (file: TFile, fn: (frontmatter: any) => void) =>
 				this.app.fileManager.processFrontMatter(file, fn);
 
-                        await insertToFrontMatter(processFrontMatter, {
-                                file: currentFile,
-                                name: frontmatter.name,
-                                value: apiResponse.output,
-                                overwrite: frontmatter.overwrite,
-                                linkType: frontmatter.linkType,
-                        });
+			await insertToFrontMatter(processFrontMatter, {
+				file: currentFile,
+				name: frontmatter.name,
+				value: apiResponse.output,
+				overwrite: frontmatter.overwrite,
+				linkType: frontmatter.linkType,
+			});
 			const successMessage = [
 				`✓ ${fileNameWithoutExt} (${frontmatter.name})`,
 				`Reliability: ${apiResponse.reliability}`,
