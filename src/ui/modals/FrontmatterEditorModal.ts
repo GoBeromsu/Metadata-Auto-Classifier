@@ -1,4 +1,5 @@
-import type { LinkType } from 'frontmatter/types';
+import { deepCloneFrontmatterField } from 'frontmatter';
+import type { FrontmatterField, LinkType } from 'frontmatter/types';
 import type { App, TextAreaComponent } from 'obsidian';
 import { Modal, Setting, TextAreaComponent as ObsidianTextArea } from 'obsidian';
 import { WikiLinkSelector } from 'ui/components/WikiLinkSelector';
@@ -7,17 +8,19 @@ import type { FrontmatterEditorModalProps } from 'ui/types';
 
 export class ConfigurableSettingModal extends Modal {
 	private readonly props: FrontmatterEditorModalProps;
+	private readonly localState: FrontmatterField;
 	private textAreaComponent: TextAreaComponent;
 
 	constructor(app: App, props: FrontmatterEditorModalProps) {
 		super(app);
 		this.props = props;
+		this.localState = deepCloneFrontmatterField(props.frontmatterSetting);
 	}
 
 	onOpen(): void {
 		const { contentEl } = this;
 
-		this.setTitle(`Edit Setting: ${this.props.frontmatterSetting.name}`);
+		this.setTitle(`Edit Setting: ${this.localState.name}`);
 
 		// Name setting (always shown)
 		CommonSetting.create(contentEl, {
@@ -25,9 +28,9 @@ export class ConfigurableSettingModal extends Modal {
 			className: 'setting-name',
 			textInput: {
 				placeholder: 'Enter name',
-				value: this.props.frontmatterSetting.name,
+				value: this.localState.name,
 				onChange: async (value) => {
-					this.props.frontmatterSetting.name = value;
+					this.localState.name = value;
 				},
 			},
 		});
@@ -67,9 +70,9 @@ export class ConfigurableSettingModal extends Modal {
 					{ value: 'WikiLink', display: 'WikiLink' },
 					{ value: 'Normal', display: 'Normal' },
 				],
-				value: this.props.frontmatterSetting.linkType || 'Normal',
+				value: this.localState.linkType || 'Normal',
 				onChange: async (value) => {
-					this.props.frontmatterSetting.linkType = value as LinkType;
+					this.localState.linkType = value as LinkType;
 				},
 			},
 		});
@@ -80,9 +83,9 @@ export class ConfigurableSettingModal extends Modal {
 			name: 'Overwrite',
 			className: 'control-setting',
 			toggle: {
-				value: this.props.frontmatterSetting.overwrite,
+				value: this.localState.overwrite,
 				onChange: async (value) => {
-					this.props.frontmatterSetting.overwrite = value;
+					this.localState.overwrite = value;
 				},
 			},
 		});
@@ -92,11 +95,11 @@ export class ConfigurableSettingModal extends Modal {
 		new Setting(containerEl).setName('Maximum Count').addSlider((slider) => {
 			slider
 				.setLimits(1, 10, 1)
-				.setValue(this.props.frontmatterSetting.count.max)
+				.setValue(this.localState.count.max)
 				.setDynamicTooltip()
 				.onChange((value) => {
-					this.props.frontmatterSetting.count.min = 1;
-					this.props.frontmatterSetting.count.max = value;
+					this.localState.count.min = 1;
+					this.localState.count.max = value;
 				});
 		});
 	}
@@ -115,11 +118,11 @@ export class ConfigurableSettingModal extends Modal {
 						const wikiLinkSelector = new WikiLinkSelector(this.app);
 						wikiLinkSelector.openFileSelector((selectedLink) => {
 							const formattedLink =
-								this.props.frontmatterSetting.linkType === 'WikiLink'
+								this.localState.linkType === 'WikiLink'
 									? `[[${selectedLink}]]`
 									: selectedLink;
-							const currentOptions = this.props.frontmatterSetting.refs || [];
-							this.props.frontmatterSetting.refs = [...currentOptions, formattedLink];
+							const currentOptions = this.localState.refs || [];
+							this.localState.refs = [...currentOptions, formattedLink];
 							this.updateOptionsTextarea();
 						});
 					});
@@ -127,8 +130,8 @@ export class ConfigurableSettingModal extends Modal {
 
 		if (this.props.options.showTextArea) {
 			let displayValue = '';
-			if (this.props.frontmatterSetting.refs && this.props.frontmatterSetting.refs.length > 0) {
-				displayValue = this.props.frontmatterSetting.refs.join(', ');
+			if (this.localState.refs && this.localState.refs.length > 0) {
+				displayValue = this.localState.refs.join(', ');
 			}
 
 			this.textAreaComponent = new ObsidianTextArea(containerEl);
@@ -140,7 +143,7 @@ export class ConfigurableSettingModal extends Modal {
 						.split(',')
 						.map((option) => option.trim())
 						.filter(Boolean);
-					this.props.frontmatterSetting.refs = inputOptions;
+					this.localState.refs = inputOptions;
 				});
 			this.textAreaComponent.inputEl.rows = 4;
 			this.textAreaComponent.inputEl.setCssStyles({ width: '100%' });
@@ -150,8 +153,8 @@ export class ConfigurableSettingModal extends Modal {
 	private updateOptionsTextarea(): void {
 		if (this.textAreaComponent) {
 			let displayValue = '';
-			if (this.props.frontmatterSetting.refs && this.props.frontmatterSetting.refs.length > 0) {
-				displayValue = this.props.frontmatterSetting.refs.join(', ');
+			if (this.localState.refs && this.localState.refs.length > 0) {
+				displayValue = this.localState.refs.join(', ');
 			}
 			this.textAreaComponent.setValue(displayValue);
 		}
@@ -165,9 +168,9 @@ export class ConfigurableSettingModal extends Modal {
 		const textArea = new ObsidianTextArea(containerEl);
 		textArea
 			.setPlaceholder('Enter specific classification rules or additional context here...')
-			.setValue(this.props.frontmatterSetting.customQuery || '')
+			.setValue(this.localState.customQuery || '')
 			.onChange(async (value) => {
-				this.props.frontmatterSetting.customQuery = value;
+				this.localState.customQuery = value;
 			});
 		textArea.inputEl.rows = 4;
 		textArea.inputEl.setCssStyles({ width: '100%' });
@@ -185,7 +188,7 @@ export class ConfigurableSettingModal extends Modal {
 					.setButtonText('Save')
 					.setCta()
 					.onClick(async () => {
-						await this.props.onSave(this.props.frontmatterSetting);
+						await this.props.onSave(this.localState);
 						this.close();
 					})
 			);
