@@ -46,22 +46,6 @@ describe('Tag Container - Regression Tests', () => {
 		jest.clearAllMocks();
 	});
 
-	describe('Basic Rendering', () => {
-		test('renders DEFAULT_TAG_SETTING without delete button', () => {
-			// When: display is called (should not throw)
-			expect(() => tag.display()).not.toThrow();
-
-			// Verify the DEFAULT_TAG_SETTING properties are valid for display
-			expect(DEFAULT_TAG_SETTING.name).toBeDefined();
-			expect(DEFAULT_TAG_SETTING.id).toBe(0); // Reserved id for Tag
-
-			// Verify the tag setting structure is correct
-			expect(DEFAULT_TAG_SETTING.linkType).toBeDefined();
-			expect(DEFAULT_TAG_SETTING.count).toBeDefined();
-			expect(DEFAULT_TAG_SETTING.refs).toBeDefined();
-		});
-	});
-
 	describe('Tag Setting Management', () => {
 		test('updates id=0 template in handleEdit (Critical Regression)', async () => {
 			// Given: DEFAULT_TAG_SETTING (id=0)

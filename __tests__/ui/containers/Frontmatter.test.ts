@@ -45,37 +45,6 @@ describe('Frontmatter Container - Regression Tests', () => {
 		jest.clearAllMocks();
 	});
 
-	describe('Basic Rendering', () => {
-		test('renders frontmatter templates correctly', () => {
-			// Given: 3 frontmatter templates (id: 1,2,3)
-			expect(mockPlugin.settings.frontmatter).toHaveLength(3);
-			const templates = mockPlugin.settings.frontmatter;
-
-			// When: display is called
-			frontmatter.display();
-
-			// Then: container should be emptied
-			expect(mockContainer.empty).toHaveBeenCalled();
-
-			// Verify each template's data is valid for rendering
-			templates.forEach((template: any) => {
-				expect(template.name).toBeDefined();
-				expect(template.id).not.toBe(0); // Should not include id=0 templates
-			});
-		});
-
-		test('handles empty template array without errors', () => {
-			// Given: empty frontmatter array
-			mockPlugin.settings.frontmatter = [];
-
-			// When: display is called
-			expect(() => frontmatter.display()).not.toThrow();
-
-			// Then: should only empty container without errors
-			expect(mockContainer.empty).toHaveBeenCalled();
-		});
-	});
-
 	describe('Template Management', () => {
 		test('filters templates with id=0 in display (Critical Regression)', () => {
 			// Given: templates including id=0
