@@ -5,7 +5,7 @@ import { CommonNotice } from 'ui/components/common/CommonNotice';
 import { COMMON_CONSTANTS } from './api/constants';
 import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from './api/prompt';
 import type { ProviderConfig } from './api/types';
-import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
+import { getContentWithoutFrontmatter, getFieldValues, insertToFrontMatter } from './frontmatter';
 import type { FrontmatterField } from './frontmatter/types';
 import type { AutoClassifierSettings } from './ui';
 import { AutoClassifierSettingTab } from './ui';
@@ -69,14 +69,19 @@ export default class AutoClassifierPlugin extends Plugin {
 		await this.processFrontmatterItem(selectedProvider, currentFile, frontmatter);
 	}
 
-        private readonly processFrontmatterItem = async (
-                selectedProvider: ProviderConfig,
-                currentFile: TFile,
-                frontmatter: FrontmatterField
-        ): Promise<void> => {
+	private readonly processFrontmatterItem = async (
+		selectedProvider: ProviderConfig,
+		currentFile: TFile,
+		frontmatter: FrontmatterField
+	): Promise<void> => {
 		const fileNameWithoutExt = currentFile.name.replace(/\.[^/.]+$/, '');
-		if (frontmatter.name === 'tags') {
-			frontmatter.refs = await getTags(this.app.vault.getMarkdownFiles(), this.app.metadataCache);
+		// Auto-collect refs from vault if not already set
+		if (!frontmatter.refs || frontmatter.refs.length === 0) {
+			frontmatter.refs = getFieldValues(
+				frontmatter.name,
+				this.app.vault.getMarkdownFiles(),
+				this.app.metadataCache
+			);
 			await this.saveSettings();
 		}
 
@@ -135,13 +140,13 @@ export default class AutoClassifierPlugin extends Plugin {
 			const processFrontMatter = (file: TFile, fn: (frontmatter: any) => void) =>
 				this.app.fileManager.processFrontMatter(file, fn);
 
-                        await insertToFrontMatter(processFrontMatter, {
-                                file: currentFile,
-                                name: frontmatter.name,
-                                value: apiResponse.output,
-                                overwrite: frontmatter.overwrite,
-                                linkType: frontmatter.linkType,
-                        });
+			await insertToFrontMatter(processFrontMatter, {
+				file: currentFile,
+				name: frontmatter.name,
+				value: apiResponse.output,
+				overwrite: frontmatter.overwrite,
+				linkType: frontmatter.linkType,
+			});
 			const successMessage = [
 				`✓ ${fileNameWithoutExt} (${frontmatter.name})`,
 				`Reliability: ${apiResponse.reliability}`,

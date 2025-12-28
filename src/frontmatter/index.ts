@@ -1,11 +1,11 @@
 import type { MetadataCache, TFile } from 'obsidian';
-import { getAllTags, getFrontMatterInfo } from 'obsidian';
+import { getAllTags, getFrontMatterInfo, parseFrontMatterStringArray } from 'obsidian';
 
 import type {
-        FrontMatter,
-        FrontmatterField,
-        InsertFrontMatterParams,
-        ProcessFrontMatterFn
+	FrontMatter,
+	FrontmatterField,
+	InsertFrontMatterParams,
+	ProcessFrontMatterFn,
 } from './types';
 
 /**
@@ -18,30 +18,42 @@ export const getContentWithoutFrontmatter = (content: string): string => {
 	return content.slice(contentStart);
 };
 
-// Get all tags from the vault
-export const getTags = async (
+/**
+ * Collects all unique values for a specific frontmatter field from the vault.
+ *
+ * @param fieldName - The name of the frontmatter field to collect values for (for example, "tags").
+ * @param files - The list of files to scan for the specified frontmatter field.
+ * @param metadataCache - The Obsidian metadata cache used to access frontmatter and tags.
+ * @returns An array of unique string values found for the specified field across all files.
+ */
+export const getFieldValues = (
+	fieldName: string,
 	files: ReadonlyArray<TFile>,
 	metadataCache: MetadataCache
-): Promise<string[]> => {
-	const allTags = files.reduce((tags, file) => {
+): string[] => {
+	const values = new Set<string>();
+
+	for (const file of files) {
 		const cache = metadataCache.getFileCache(file);
-		if (!cache) return tags;
+		if (!cache) continue;
 
-		const fileTags: string[] | null = getAllTags(cache);
-
-		if (fileTags && fileTags.length > 0) {
-			fileTags.forEach((tag) => tags.add(tag));
+		if (fieldName === 'tags') {
+			// tags requires getAllTags() to include inline tags (#tag in content)
+			// parseFrontMatterStringArray would only get frontmatter tags
+			getAllTags(cache)?.forEach((tag) => values.add(tag));
+		} else {
+			// Delegate to Obsidian API - handles both single values and arrays
+			parseFrontMatterStringArray(cache.frontmatter, fieldName)?.forEach((v) => values.add(v));
 		}
+	}
 
-		return tags;
-	}, new Set<string>());
-	return [...allTags];
+	return [...values];
 };
 
 // Moved from BaseSettingsComponent
 export const getFrontmatterSetting = (
-        id: number,
-        settings: FrontmatterField[]
+	id: number,
+	settings: FrontmatterField[]
 ): FrontmatterField => {
 	const setting = settings?.find((f) => f.id === id);
 	if (!setting) {
@@ -59,7 +71,7 @@ export const insertToFrontMatter = async (
 		const rawValues =
 			params.linkType === 'WikiLink' ? params.value.map((item) => `[[${item}]]`) : params.value;
 
-                const existingRawValues = frontmatter[params.name] || [];
+		const existingRawValues = frontmatter[params.name] || [];
 		// Combine values based on overwrite setting
 		let combinedRawValues = params.overwrite ? rawValues : [...existingRawValues, ...rawValues];
 
@@ -67,6 +79,6 @@ export const insertToFrontMatter = async (
 		combinedRawValues = [...new Set(combinedRawValues)].filter(Boolean);
 
 		// Format back for storage context
-                frontmatter[params.name] = combinedRawValues;
-        });
+		frontmatter[params.name] = combinedRawValues;
+	});
 };
