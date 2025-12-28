@@ -1,7 +1,5 @@
 import type { ProviderPreset } from 'api/types';
-
-// Import provider presets data
-const providerPresetsData = require('../api/providerPreset.json');
+import providerPresetsData from '../api/providerPreset.json';
 
 export const PROVIDER_NAMES = {
 	OPENAI: providerPresetsData.openai.name,
@@ -23,7 +21,7 @@ export const generateId = (): number => {
  * Excludes the version field and returns only valid ProviderPreset objects
  */
 export const getProviderPresets = (): ProviderPreset[] => {
-	return Object.values(providerPresetsData);
+	return Object.values(providerPresetsData) as unknown as ProviderPreset[];
 };
 
 /**
