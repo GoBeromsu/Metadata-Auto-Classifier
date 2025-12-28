@@ -1,8 +1,7 @@
 import type { LinkType } from 'frontmatter/types';
-import type { App } from 'obsidian';
-import { Modal, TextAreaComponent } from 'obsidian';
+import type { App, TextAreaComponent } from 'obsidian';
+import { Modal, Setting, TextAreaComponent as ObsidianTextArea } from 'obsidian';
 import { WikiLinkSelector } from 'ui/components/WikiLinkSelector';
-import { CommonButton } from 'ui/components/common/CommonButton';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
 import type { FrontmatterEditorModalProps } from 'ui/types';
 
@@ -15,7 +14,7 @@ export class ConfigurableSettingModal extends Modal {
 		this.props = props;
 	}
 
-	onOpen() {
+	onOpen(): void {
 		const { contentEl } = this;
 
 		this.setTitle(`Edit Setting: ${this.props.frontmatterSetting.name}`);
@@ -49,11 +48,11 @@ export class ConfigurableSettingModal extends Modal {
 
 		// Options section (conditional)
 		if (this.props.options.showOptions) {
-			this.addOptionsSection(contentEl);
+			this.addOptionsSection(controlsContainer);
 		}
 
 		// Custom Query section (always shown)
-		this.addCustomQuerySection(contentEl);
+		this.addCustomQuerySection(controlsContainer);
 
 		// Add save/cancel buttons
 		this.addActionButtons(contentEl);
@@ -90,66 +89,50 @@ export class ConfigurableSettingModal extends Modal {
 	}
 
 	private addCountSetting(containerEl: HTMLElement): void {
-		CommonSetting.create(containerEl, {
-			name: 'Count Range',
-			desc: 'Set the minimum and maximum number of items to classify',
-			className: 'control-setting',
-			rangeInput: {
-				minPlaceholder: 'Min',
-				maxPlaceholder: 'Max',
-				minValue: this.props.frontmatterSetting.count.min,
-				maxValue: this.props.frontmatterSetting.count.max,
-				onChange: (min: number, max: number) => {
-					this.props.frontmatterSetting.count.min = min;
-					this.props.frontmatterSetting.count.max = max;
-				},
-			},
+		new Setting(containerEl).setName('Maximum Count').addSlider((slider) => {
+			slider
+				.setLimits(1, 10, 1)
+				.setValue(this.props.frontmatterSetting.count.max)
+				.setDynamicTooltip()
+				.onChange((value) => {
+					this.props.frontmatterSetting.count.min = 1;
+					this.props.frontmatterSetting.count.max = value;
+				});
 		});
 	}
 
 	private addOptionsSection(containerEl: HTMLElement): void {
-		// Only add options section if showOptions is enabled
 		if (!this.props.options.showOptions) return;
 
-		// Options section header with Browse Files button
-		CommonSetting.create(containerEl, {
-			name: 'Available Options',
-			desc: 'Enter values that the AI can use as suggestions, separated by commas.',
-			className: 'options-header',
-			heading: true,
-			button: {
-				icon: 'folder',
-				text: 'Browse Files',
-				onClick: () => {
-					const wikiLinkSelector = new WikiLinkSelector(this.app);
-					wikiLinkSelector.openFileSelector((selectedLink) => {
-						// Format the link based on current linkType
-						const formattedLink =
-							this.props.frontmatterSetting.linkType === 'WikiLink'
-								? `[[${selectedLink}]]`
-								: selectedLink;
-						const currentOptions = this.props.frontmatterSetting.refs || [];
-
-						this.props.frontmatterSetting.refs = [...currentOptions, formattedLink];
-						this.updateOptionsTextarea();
+		new Setting(containerEl)
+			.setName('Available Options')
+			.setDesc('Values that the AI can use as suggestions')
+			.addButton((button) => {
+				button
+					.setButtonText('Browse Files')
+					.setIcon('folder')
+					.onClick(() => {
+						const wikiLinkSelector = new WikiLinkSelector(this.app);
+						wikiLinkSelector.openFileSelector((selectedLink) => {
+							const formattedLink =
+								this.props.frontmatterSetting.linkType === 'WikiLink'
+									? `[[${selectedLink}]]`
+									: selectedLink;
+							const currentOptions = this.props.frontmatterSetting.refs || [];
+							this.props.frontmatterSetting.refs = [...currentOptions, formattedLink];
+							this.updateOptionsTextarea();
+						});
 					});
-				},
-			},
-		});
+			});
 
-		// Only add text area if showTextArea is enabled
 		if (this.props.options.showTextArea) {
-			const textareaContainer = containerEl.createDiv({ cls: 'textarea-container' });
-			textareaContainer.style.width = '100%';
-			textareaContainer.style.marginTop = '8px';
-			textareaContainer.style.minHeight = '100px';
-
 			let displayValue = '';
 			if (this.props.frontmatterSetting.refs && this.props.frontmatterSetting.refs.length > 0) {
 				displayValue = this.props.frontmatterSetting.refs.join(', ');
 			}
 
-			this.textAreaComponent = new TextAreaComponent(textareaContainer)
+			this.textAreaComponent = new ObsidianTextArea(containerEl);
+			this.textAreaComponent
 				.setPlaceholder('Option1, Option2, Option3...')
 				.setValue(displayValue)
 				.onChange(async (value) => {
@@ -157,12 +140,10 @@ export class ConfigurableSettingModal extends Modal {
 						.split(',')
 						.map((option) => option.trim())
 						.filter(Boolean);
-
 					this.props.frontmatterSetting.refs = inputOptions;
 				});
-			// Adjust text area height and width
-			this.textAreaComponent.inputEl.style.width = '100%';
-			this.textAreaComponent.inputEl.style.height = '100px';
+			this.textAreaComponent.inputEl.rows = 4;
+			this.textAreaComponent.inputEl.setCssStyles({ width: '100%' });
 		}
 	}
 
@@ -177,58 +158,40 @@ export class ConfigurableSettingModal extends Modal {
 	}
 
 	private addCustomQuerySection(containerEl: HTMLElement): void {
-		// Custom Query section header
-		CommonSetting.create(containerEl, {
-			name: 'Custom Classification Rules',
-			desc: 'Add custom instructions to provide more context for classification.',
-			className: 'custom-query-header',
-			heading: true,
-		});
+		new Setting(containerEl)
+			.setName('Custom Classification Rules')
+			.setDesc('Add custom instructions to provide more context for classification.');
 
-		// Create a container for the textarea
-		const textareaContainer = containerEl.createDiv({ cls: 'textarea-container' });
-		textareaContainer.style.width = '100%';
-		textareaContainer.style.marginTop = '8px';
-		textareaContainer.style.minHeight = '100px';
-
-		// Create the TextAreaComponent
-		const customQueryTextArea = new TextAreaComponent(textareaContainer)
+		const textArea = new ObsidianTextArea(containerEl);
+		textArea
 			.setPlaceholder('Enter specific classification rules or additional context here...')
 			.setValue(this.props.frontmatterSetting.customQuery || '')
 			.onChange(async (value) => {
 				this.props.frontmatterSetting.customQuery = value;
 			});
-
-		// Adjust text area height and width
-		customQueryTextArea.inputEl.style.width = '100%';
-		customQueryTextArea.inputEl.style.height = '100px';
+		textArea.inputEl.rows = 4;
+		textArea.inputEl.setCssStyles({ width: '100%' });
 	}
 
 	private addActionButtons(containerEl: HTMLElement): void {
-		const buttonContainer = containerEl.createDiv({ cls: 'modal-buttons' });
-		buttonContainer.style.display = 'flex';
-		buttonContainer.style.justifyContent = 'flex-end';
-		buttonContainer.style.gap = '8px';
-		buttonContainer.style.marginTop = '20px';
-
-		CommonButton(buttonContainer, {
-			text: 'Cancel',
-			onClick: () => {
-				this.close();
-			},
-		});
-
-		CommonButton(buttonContainer, {
-			text: 'Save',
-			cta: true,
-			onClick: async () => {
-				await this.props.onSave(this.props.frontmatterSetting);
-				this.close();
-			},
-		});
+		new Setting(containerEl)
+			.addButton((btn) =>
+				btn.setButtonText('Cancel').onClick(() => {
+					this.close();
+				})
+			)
+			.addButton((btn) =>
+				btn
+					.setButtonText('Save')
+					.setCta()
+					.onClick(async () => {
+						await this.props.onSave(this.props.frontmatterSetting);
+						this.close();
+					})
+			);
 	}
 
-	onClose() {
+	onClose(): void {
 		const { contentEl } = this;
 		contentEl.empty();
 	}
