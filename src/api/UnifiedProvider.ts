@@ -9,6 +9,22 @@ import {
 import { sendRequest } from './index';
 import type { APIProvider, ProviderConfig, StructuredOutput } from './types';
 
+const parseJsonResponse = (content: string, providerName: string): StructuredOutput => {
+	try {
+		const result = JSON.parse(content.trim());
+		if (!Array.isArray(result.output) || typeof result.reliability !== 'number') {
+			throw new Error('Invalid response structure: missing output array or reliability number');
+		}
+		return {
+			output: result.output,
+			reliability: result.reliability,
+		};
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		throw new Error(`Failed to parse ${providerName} response: ${message}. Raw content: ${content.substring(0, 200)}`);
+	}
+};
+
 interface ProviderSpec {
 	buildHeaders: (apiKey: string) => Record<string, string>;
 	buildRequestBody: (systemRole: string, userPrompt: string, model: string, temperature?: number) => any;
@@ -58,12 +74,11 @@ export class UnifiedProvider implements APIProvider {
 			buildUrl: (baseUrl, model, apiKey) =>
 				`${baseUrl}/models/${model}:generateContent?key=${apiKey}`,
 			parseResponse: (data) => {
-				const content = data?.candidates[0]?.content?.parts[0]?.text;
-				const result = JSON.parse(content.trim());
-				return {
-					output: result.output,
-					reliability: result.reliability,
-				};
+				const content = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+				if (!content) {
+					throw new Error('Gemini response missing content');
+				}
+				return parseJsonResponse(content, 'Gemini');
 			}
 		},
 		[PROVIDER_NAMES.OLLAMA]: {
@@ -88,12 +103,11 @@ export class UnifiedProvider implements APIProvider {
 			}),
 			buildUrl: (baseUrl) => baseUrl,
 			parseResponse: (data) => {
-				const content = data.message.content;
-				const result = JSON.parse(content.trim());
-				return {
-					output: result.output,
-					reliability: result.reliability,
-				};
+				const content = data?.message?.content;
+				if (!content) {
+					throw new Error('Ollama response missing content');
+				}
+				return parseJsonResponse(content, 'Ollama');
 			}
 		},
 		[PROVIDER_NAMES.OPENROUTER]: {
@@ -113,12 +127,11 @@ export class UnifiedProvider implements APIProvider {
 			}),
 			buildUrl: (baseUrl) => baseUrl,
 			parseResponse: (data) => {
-				const content = data?.choices[0]?.message?.content;
-				const result = JSON.parse(content.trim());
-				return {
-					output: result.output,
-					reliability: result.reliability,
-				};
+				const content = data?.choices?.[0]?.message?.content;
+				if (!content) {
+					throw new Error('OpenRouter response missing content');
+				}
+				return parseJsonResponse(content, 'OpenRouter');
 			}
 		}
 	};
@@ -140,12 +153,11 @@ export class UnifiedProvider implements APIProvider {
 		}),
 		buildUrl: (baseUrl) => baseUrl,
 		parseResponse: (data) => {
-			const content = data?.choices[0]?.message?.content;
-			const result = JSON.parse(content.trim());
-			return {
-				output: result.output,
-				reliability: result.reliability,
-			};
+			const content = data?.choices?.[0]?.message?.content;
+			if (!content) {
+				throw new Error('API response missing content');
+			}
+			return parseJsonResponse(content, 'API');
 		}
 	};
 

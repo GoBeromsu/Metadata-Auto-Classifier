@@ -65,14 +65,17 @@ export const sendRequest = async (
 	baseUrl: string,
 	headers: Record<string, string>,
 	data: object
-): Promise<any> => {
+): Promise<unknown> => {
 	const requestParam: RequestUrlParam = getRequestParam(baseUrl, headers, data);
-	let response: any;
+	let response: { status: number; text: string; json: unknown };
 
 	try {
 		response = await requestUrl(requestParam);
 	} catch (error) {
-		throw new Error(error);
+		if (error instanceof Error) {
+			throw error;
+		}
+		throw new Error(String(error));
 	}
 
 	if (response.status >= 500) {
