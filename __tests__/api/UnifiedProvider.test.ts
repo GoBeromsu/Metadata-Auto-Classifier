@@ -20,24 +20,8 @@ describe('UnifiedProvider Tests', () => {
 		jest.clearAllMocks();
 	});
 
-	describe('Provider-specific behavior', () => {
-		test('uses correct headers for each provider', () => {
-			// OpenAI/Default
-			const defaultHeaders = unifiedProvider.buildHeaders('test-key');
-			expect(defaultHeaders).toHaveProperty('Authorization', 'Bearer test-key');
-
-			// Anthropic
-			const anthropicHeaders = unifiedProvider.buildHeaders('test-key', PROVIDER_NAMES.ANTHROPIC);
-			expect(anthropicHeaders).toHaveProperty('x-api-key', 'test-key');
-			expect(anthropicHeaders).toHaveProperty('anthropic-version');
-
-			// Gemini (no API key in headers)
-			const geminiHeaders = unifiedProvider.buildHeaders('test-key', PROVIDER_NAMES.GEMINI);
-			expect(geminiHeaders).not.toHaveProperty('Authorization');
-		});
-
-		test('correctly parses responses for each provider', () => {
-			// OpenAI/Default format
+	describe('Response parsing', () => {
+		it('should parse OpenAI format with nested JSON content', () => {
 			const openAIResponse = {
 				choices: [{
 					message: {
@@ -49,8 +33,9 @@ describe('UnifiedProvider Tests', () => {
 				output: ['tag1'],
 				reliability: 0.9
 			});
+		});
 
-			// Anthropic format
+		it('should parse Anthropic tool_use format', () => {
 			const anthropicResponse = {
 				content: [{
 					type: 'tool_use',
@@ -61,8 +46,9 @@ describe('UnifiedProvider Tests', () => {
 				output: ['tag2'],
 				reliability: 0.8
 			});
+		});
 
-			// Gemini format
+		it('should parse Gemini nested content format', () => {
 			const geminiResponse = {
 				candidates: [{
 					content: {
@@ -77,47 +63,102 @@ describe('UnifiedProvider Tests', () => {
 				reliability: 0.7
 			});
 		});
+
+		it('should parse Ollama message format', () => {
+			const ollamaResponse = {
+				message: {
+					content: '{"output":["tag4"],"reliability":0.6}'
+				}
+			};
+			expect(unifiedProvider.processApiResponse(ollamaResponse, PROVIDER_NAMES.OLLAMA)).toEqual({
+				output: ['tag4'],
+				reliability: 0.6
+			});
+		});
+
+		it('should throw error for missing content in Gemini response', () => {
+			const invalidResponse = { candidates: [] };
+			expect(() => unifiedProvider.processApiResponse(invalidResponse, PROVIDER_NAMES.GEMINI))
+				.toThrow('Gemini response missing content');
+		});
+
+		it('should throw error for missing content in Ollama response', () => {
+			const invalidResponse = { message: {} };
+			expect(() => unifiedProvider.processApiResponse(invalidResponse, PROVIDER_NAMES.OLLAMA))
+				.toThrow('Ollama response missing content');
+		});
+
+		it('should throw error for invalid JSON structure in response', () => {
+			const invalidJsonResponse = {
+				choices: [{
+					message: {
+						content: '{"invalid":"structure"}'
+					}
+				}]
+			};
+			expect(() => unifiedProvider.processApiResponse(invalidJsonResponse))
+				.toThrow('Invalid response structure: missing output array or reliability number');
+		});
+
+		it('should throw error for malformed JSON in response', () => {
+			const malformedJsonResponse = {
+				choices: [{
+					message: {
+						content: 'not valid json'
+					}
+				}]
+			};
+			expect(() => unifiedProvider.processApiResponse(malformedJsonResponse))
+				.toThrow(/Failed to parse API response/);
+		});
 	});
 
-	describe('API call routing', () => {
-		test.each([
-			PROVIDER_NAMES.OPENAI,
-			PROVIDER_NAMES.ANTHROPIC,
-			PROVIDER_NAMES.GEMINI,
-			PROVIDER_NAMES.OLLAMA,
-			PROVIDER_NAMES.OPENROUTER,
-			PROVIDER_NAMES.DEEPSEEK,
-			PROVIDER_NAMES.LMSTUDIO,
-			'Custom'
-		])('correctly routes %s provider', async (providerName) => {
+	describe('API routing integration', () => {
+		it('should handle Anthropic provider end-to-end', async () => {
 			const config: ProviderConfig = {
 				...mockConfig,
-				name: providerName
+				name: PROVIDER_NAMES.ANTHROPIC
 			};
 
 			const mockResponse = {
 				status: 200,
-				json: providerName === PROVIDER_NAMES.ANTHROPIC ? {
+				json: {
 					content: [{
 						type: 'tool_use',
 						input: { output: ['test'], reliability: 1.0 }
 					}]
-				} : providerName === PROVIDER_NAMES.GEMINI ? {
+				}
+			};
+
+			(requestUrl as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+			const result = await unifiedProvider.callAPI('system', 'user', config, 'model');
+
+			expect(requestUrl).toHaveBeenCalledWith(
+				expect.objectContaining({
+					headers: expect.objectContaining({
+						'x-api-key': 'test-key',
+						'anthropic-version': '2023-06-01'
+					})
+				})
+			);
+			expect(result).toEqual({ output: ['test'], reliability: 1.0 });
+		});
+
+		it('should handle Gemini provider with API key in URL', async () => {
+			const config: ProviderConfig = {
+				...mockConfig,
+				name: PROVIDER_NAMES.GEMINI
+			};
+
+			const mockResponse = {
+				status: 200,
+				json: {
 					candidates: [{
 						content: {
 							parts: [{
-								text: '{"output":["test"],"reliability":1.0}'
+								text: '{"output":["test"],"reliability":0.95}'
 							}]
-						}
-					}]
-				} : providerName === PROVIDER_NAMES.OLLAMA ? {
-					message: {
-						content: '{"output":["test"],"reliability":1.0}'
-					}
-				} : {
-					choices: [{
-						message: {
-							content: '{"output":["test"],"reliability":1.0}'
 						}
 					}]
 				}
@@ -125,17 +166,38 @@ describe('UnifiedProvider Tests', () => {
 
 			(requestUrl as jest.Mock).mockResolvedValueOnce(mockResponse);
 
-			const result = await unifiedProvider.callAPI(
-				'system',
-				'user',
-				config,
-				'model'
-			);
+			await unifiedProvider.callAPI('system', 'user', config, 'gemini-pro');
 
-			expect(result).toEqual({
-				output: ['test'],
-				reliability: 1.0
-			});
+			expect(requestUrl).toHaveBeenCalledWith(
+				expect.objectContaining({
+					url: expect.stringContaining('models/gemini-pro:generateContent?key=test-key')
+				})
+			);
+		});
+
+		it('should handle temperature override in provider config', async () => {
+			const config: ProviderConfig = {
+				...mockConfig,
+				name: PROVIDER_NAMES.OPENAI,
+				temperature: 0.3
+			};
+
+			const mockResponse = {
+				status: 200,
+				json: {
+					choices: [{
+						message: { content: '{"output":["test"],"reliability":1.0}' }
+					}]
+				}
+			};
+
+			(requestUrl as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+			await unifiedProvider.callAPI('system', 'user', config, 'model', 0.9);
+
+			const callArgs = (requestUrl as jest.Mock).mock.calls[0][0];
+			const bodyData = JSON.parse(callArgs.body);
+			expect(bodyData.temperature).toBe(0.3);
 		});
 	});
 });

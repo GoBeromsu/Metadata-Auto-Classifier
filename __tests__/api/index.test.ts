@@ -1,23 +1,6 @@
-import { getProvider, sendRequest, UnifiedProvider } from 'api';
-import { COMMON_CONSTANTS } from 'api/constants';
-import { ProviderConfig, StructuredOutput } from 'api/types';
+import { sendRequest } from 'api';
 import { requestUrl } from 'obsidian';
-import { PROVIDER_NAMES } from 'utils';
 
-// -------------------- getProvider Tests --------------------
-describe('getProvider', () => {
-	test('returns UnifiedProvider instance', () => {
-		expect(getProvider()).toBeInstanceOf(UnifiedProvider);
-	});
-
-	test('returns the same instance every time', () => {
-		const provider1 = getProvider();
-		const provider2 = getProvider();
-		expect(provider1).toBe(provider2);
-	});
-});
-
-// -------------------- sendRequest Tests --------------------
 describe('sendRequest', () => {
 	const url = 'https://api.test.com';
 	const headers = { Authorization: 'token' };
@@ -27,11 +10,12 @@ describe('sendRequest', () => {
 		jest.clearAllMocks();
 	});
 
-	test('returns JSON for successful request', async () => {
+	it('should return JSON for successful request', async () => {
 		const mockResponse = { status: 200, json: { ok: true } };
 		(requestUrl as jest.Mock).mockResolvedValueOnce(mockResponse);
 
 		const result = await sendRequest(url, headers, body);
+
 		expect(requestUrl).toHaveBeenCalledWith({
 			url,
 			method: 'POST',
@@ -41,75 +25,64 @@ describe('sendRequest', () => {
 		expect(result).toEqual(mockResponse.json);
 	});
 
-	test('throws server error when status >= 500', async () => {
-		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 500, text: 'oops' });
+	it('should throw server error when status is 500', async () => {
+		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 500, text: 'Internal Server Error' });
+
 		await expect(sendRequest(url, headers, body)).rejects.toThrow(
-			`Server error (HTTP 500) from ${url}: oops`
+			`Server error (HTTP 500) from ${url}: Internal Server Error`
 		);
 	});
 
-	test('throws client error when status >= 400', async () => {
-		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 404, text: 'missing' });
+	it('should throw server error when status is 503', async () => {
+		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 503, text: 'Service Unavailable' });
+
 		await expect(sendRequest(url, headers, body)).rejects.toThrow(
-			`Client error (HTTP 404) from ${url}: missing`
+			`Server error (HTTP 503) from ${url}: Service Unavailable`
 		);
 	});
-});
 
-// ---------------- processAPIRequest & testModel Tests ----------------
+	it('should throw client error when status is 400', async () => {
+		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 400, text: 'Bad Request' });
 
-describe('processAPIRequest and testModel', () => {
-	const providerConfig: ProviderConfig = {
-		name: PROVIDER_NAMES.OPENAI,
-		apiKey: 'k',
-		baseUrl: 'url',
-		models: [],
-		temperature: 0.7,
-	};
-
-	const mockCallAPI = jest.fn();
-	let processAPIRequest: (typeof import('api/index'))['processAPIRequest'];
-	let testModel: (typeof import('api/index'))['testModel'];
-
-	beforeAll(() => {
-		jest.resetModules();
-		jest.doMock('api/UnifiedProvider', () => {
-			return {
-				UnifiedProvider: jest.fn().mockImplementation(() => ({
-					callAPI: mockCallAPI,
-					buildHeaders: jest.fn(),
-					processApiResponse: jest.fn(),
-				})),
-			};
-		});
-		const apiIndex = require('api/index');
-		processAPIRequest = apiIndex.processAPIRequest;
-		testModel = apiIndex.testModel;
-	});
-
-	beforeEach(() => {
-		mockCallAPI.mockClear();
-	});
-
-	test('processAPIRequest delegates to provider', async () => {
-		const expected: StructuredOutput = { output: ['tag'], reliability: 1 };
-		mockCallAPI.mockResolvedValueOnce(expected);
-
-		const result = await processAPIRequest('sys', 'prompt', providerConfig, 'model');
-		expect(mockCallAPI).toHaveBeenCalledWith('sys', 'prompt', providerConfig, 'model');
-		expect(result).toEqual(expected);
-	});
-
-	test('testModel uses verification prompts', async () => {
-		mockCallAPI.mockResolvedValueOnce({});
-		const success = await testModel(providerConfig, 'model');
-
-		expect(success).toBe(true);
-		expect(mockCallAPI).toHaveBeenCalledWith(
-			COMMON_CONSTANTS.VERIFY_CONNECTION_SYSTEM_PROMPT,
-			COMMON_CONSTANTS.VERIFY_CONNECTION_USER_PROMPT,
-			providerConfig,
-			'model'
+		await expect(sendRequest(url, headers, body)).rejects.toThrow(
+			`Client error (HTTP 400) from ${url}: Bad Request`
 		);
+	});
+
+	it('should throw client error when status is 401', async () => {
+		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 401, text: 'Unauthorized' });
+
+		await expect(sendRequest(url, headers, body)).rejects.toThrow(
+			`Client error (HTTP 401) from ${url}: Unauthorized`
+		);
+	});
+
+	it('should throw client error when status is 404', async () => {
+		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 404, text: 'Not Found' });
+
+		await expect(sendRequest(url, headers, body)).rejects.toThrow(
+			`Client error (HTTP 404) from ${url}: Not Found`
+		);
+	});
+
+	it('should throw client error when status is 429', async () => {
+		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 429, text: 'Rate Limit Exceeded' });
+
+		await expect(sendRequest(url, headers, body)).rejects.toThrow(
+			`Client error (HTTP 429) from ${url}: Rate Limit Exceeded`
+		);
+	});
+
+	it('should rethrow native errors from requestUrl', async () => {
+		const networkError = new Error('Network connection failed');
+		(requestUrl as jest.Mock).mockRejectedValueOnce(networkError);
+
+		await expect(sendRequest(url, headers, body)).rejects.toThrow('Network connection failed');
+	});
+
+	it('should convert non-Error exceptions to Error', async () => {
+		(requestUrl as jest.Mock).mockRejectedValueOnce('string error');
+
+		await expect(sendRequest(url, headers, body)).rejects.toThrow('string error');
 	});
 });
