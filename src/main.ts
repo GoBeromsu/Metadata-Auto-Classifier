@@ -2,6 +2,7 @@ import { processAPIRequest } from 'api';
 import type { TFile } from 'obsidian';
 import { Plugin } from 'obsidian';
 import { CommonNotice } from 'ui/components/common/CommonNotice';
+import { COMMON_CONSTANTS } from './api/constants';
 import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from './api/prompt';
 import type { ProviderConfig } from './api/types';
 import { getContentWithoutFrontmatter, getTags, insertToFrontMatter } from './frontmatter';
@@ -130,7 +131,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			)
 		);
 
-		if (apiResponse && apiResponse.reliability > 0.2) {
+		if (apiResponse && apiResponse.reliability > COMMON_CONSTANTS.MIN_RELIABILITY_THRESHOLD) {
 			const processFrontMatter = (file: TFile, fn: (frontmatter: any) => void) =>
 				this.app.fileManager.processFrontMatter(file, fn);
 

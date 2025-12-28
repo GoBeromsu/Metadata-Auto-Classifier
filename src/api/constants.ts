@@ -6,6 +6,7 @@ export const COMMON_CONSTANTS = {
 	DEFAULT_RELIABILITY_MIN: 0,
 	DEFAULT_RELIABILITY_MAX: 1,
 	DEFAULT_TEMPERATURE: 0.7,
+	MIN_RELIABILITY_THRESHOLD: 0.2,
 	VERIFY_CONNECTION_SYSTEM_PROMPT: 'You are a test system. You must respond with valid JSON.',
 	VERIFY_CONNECTION_USER_PROMPT: 'Return a JSON object containing {"output": [], "reliability": 0}',
 };
