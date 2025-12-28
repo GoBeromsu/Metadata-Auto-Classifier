@@ -1,6 +1,6 @@
 import type { LinkType } from 'frontmatter/types';
 import type { App, TextAreaComponent } from 'obsidian';
-import { Modal, Setting } from 'obsidian';
+import { Modal, Setting, TextAreaComponent as ObsidianTextArea } from 'obsidian';
 import { WikiLinkSelector } from 'ui/components/WikiLinkSelector';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
 import type { FrontmatterEditorModalProps } from 'ui/types';
@@ -104,12 +104,10 @@ export class ConfigurableSettingModal extends Modal {
 	private addOptionsSection(containerEl: HTMLElement): void {
 		if (!this.props.options.showOptions) return;
 
-		let displayValue = '';
-		if (this.props.frontmatterSetting.refs && this.props.frontmatterSetting.refs.length > 0) {
-			displayValue = this.props.frontmatterSetting.refs.join(', ');
-		}
+		// Container for vertical layout: label on top, textarea below
+		const sectionContainer = containerEl.createDiv({ cls: 'setting-item' });
 
-		const optionsSetting = new Setting(containerEl)
+		new Setting(sectionContainer)
 			.setName('Available Options')
 			.setDesc('Values that the AI can use as suggestions')
 			.addButton((button) => {
@@ -131,20 +129,23 @@ export class ConfigurableSettingModal extends Modal {
 			});
 
 		if (this.props.options.showTextArea) {
-			optionsSetting.addTextArea((textArea) => {
-				this.textAreaComponent = textArea;
-				textArea
-					.setPlaceholder('Option1, Option2, Option3...')
-					.setValue(displayValue)
-					.onChange(async (value) => {
-						const inputOptions = value
-							.split(',')
-							.map((option) => option.trim())
-							.filter(Boolean);
-						this.props.frontmatterSetting.refs = inputOptions;
-					});
-				textArea.inputEl.rows = 4;
-			});
+			let displayValue = '';
+			if (this.props.frontmatterSetting.refs && this.props.frontmatterSetting.refs.length > 0) {
+				displayValue = this.props.frontmatterSetting.refs.join(', ');
+			}
+
+			this.textAreaComponent = new ObsidianTextArea(sectionContainer);
+			this.textAreaComponent
+				.setPlaceholder('Option1, Option2, Option3...')
+				.setValue(displayValue)
+				.onChange(async (value) => {
+					const inputOptions = value
+						.split(',')
+						.map((option) => option.trim())
+						.filter(Boolean);
+					this.props.frontmatterSetting.refs = inputOptions;
+				});
+			this.textAreaComponent.inputEl.rows = 4;
 		}
 	}
 
@@ -159,18 +160,21 @@ export class ConfigurableSettingModal extends Modal {
 	}
 
 	private addCustomQuerySection(containerEl: HTMLElement): void {
-		new Setting(containerEl)
+		// Container for vertical layout: label on top, textarea below
+		const sectionContainer = containerEl.createDiv({ cls: 'setting-item' });
+
+		new Setting(sectionContainer)
 			.setName('Custom Classification Rules')
-			.setDesc('Add custom instructions to provide more context for classification.')
-			.addTextArea((textArea) => {
-				textArea
-					.setPlaceholder('Enter specific classification rules or additional context here...')
-					.setValue(this.props.frontmatterSetting.customQuery || '')
-					.onChange(async (value) => {
-						this.props.frontmatterSetting.customQuery = value;
-					});
-				textArea.inputEl.rows = 4;
+			.setDesc('Add custom instructions to provide more context for classification.');
+
+		const textArea = new ObsidianTextArea(sectionContainer);
+		textArea
+			.setPlaceholder('Enter specific classification rules or additional context here...')
+			.setValue(this.props.frontmatterSetting.customQuery || '')
+			.onChange(async (value) => {
+				this.props.frontmatterSetting.customQuery = value;
 			});
+		textArea.inputEl.rows = 4;
 	}
 
 	private addActionButtons(containerEl: HTMLElement): void {
