@@ -82,3 +82,19 @@ export const insertToFrontMatter = async (
 		frontmatter[params.name] = combinedRawValues;
 	});
 };
+
+/**
+ * Creates a deep copy of a FrontmatterField to prevent input mutation.
+ * Used when editing frontmatter settings in modals.
+ */
+export const deepCloneFrontmatterField = (field: FrontmatterField): FrontmatterField => {
+	return {
+		id: field.id,
+		name: field.name,
+		count: { min: field.count.min, max: field.count.max },
+		refs: [...field.refs],
+		overwrite: field.overwrite,
+		linkType: field.linkType,
+		customQuery: field.customQuery,
+	};
+};
