@@ -129,7 +129,7 @@ export class Api {
 						onChange: async (value) => {
 							if (value) {
 								this.plugin.settings.selectedProvider = provider.name;
-								this.plugin.settings.selectedModel = config.name;
+								this.plugin.settings.selectedModel = config.id;
 								await this.plugin.saveSettings();
 								this.display();
 							}
