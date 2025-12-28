@@ -4,7 +4,7 @@ import {
 	COMMON_CONSTANTS,
 	GEMINI_STRUCTURE_OUTPUT,
 	OLLAMA_STRUCTURE_OUTPUT,
-	OPENAI_STRUCTURE_OUTPUT
+	OPENAI_STRUCTURE_OUTPUT,
 } from './constants';
 import { sendRequest } from './index';
 import type { APIProvider, ProviderConfig, StructuredOutput } from './types';
@@ -21,13 +21,20 @@ const parseJsonResponse = (content: string, providerName: string): StructuredOut
 		};
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
-		throw new Error(`Failed to parse ${providerName} response: ${message}. Raw content: ${content.substring(0, 200)}`);
+		throw new Error(
+			`Failed to parse ${providerName} response: ${message}. Raw content: ${content.substring(0, 200)}`
+		);
 	}
 };
 
 interface ProviderSpec {
 	buildHeaders: (apiKey: string) => Record<string, string>;
-	buildRequestBody: (systemRole: string, userPrompt: string, model: string, temperature?: number) => any;
+	buildRequestBody: (
+		systemRole: string,
+		userPrompt: string,
+		model: string,
+		temperature?: number
+	) => any;
 	buildUrl: (baseUrl: string, model: string, apiKey: string) => string;
 	parseResponse: (data: any) => StructuredOutput;
 }
@@ -56,16 +63,18 @@ export class UnifiedProvider implements APIProvider {
 					output: result.input.output,
 					reliability: result.input.reliability,
 				};
-			}
+			},
 		},
 		[PROVIDER_NAMES.GEMINI]: {
 			buildHeaders: () => ({
 				'Content-Type': 'application/json',
 			}),
 			buildRequestBody: (systemRole, userPrompt, _, temperature) => ({
-				contents: [{
-					parts: [{ text: `${systemRole}\n\n${userPrompt}` }],
-				}],
+				contents: [
+					{
+						parts: [{ text: `${systemRole}\n\n${userPrompt}` }],
+					},
+				],
 				generationConfig: {
 					temperature,
 					...GEMINI_STRUCTURE_OUTPUT,
@@ -79,7 +88,7 @@ export class UnifiedProvider implements APIProvider {
 					throw new Error('Gemini response missing content');
 				}
 				return parseJsonResponse(content, 'Gemini');
-			}
+			},
 		},
 		[PROVIDER_NAMES.OLLAMA]: {
 			buildHeaders: (apiKey: string) => {
@@ -108,7 +117,7 @@ export class UnifiedProvider implements APIProvider {
 					throw new Error('Ollama response missing content');
 				}
 				return parseJsonResponse(content, 'Ollama');
-			}
+			},
 		},
 		[PROVIDER_NAMES.OPENROUTER]: {
 			buildHeaders: (apiKey: string) => ({
@@ -132,8 +141,8 @@ export class UnifiedProvider implements APIProvider {
 					throw new Error('OpenRouter response missing content');
 				}
 				return parseJsonResponse(content, 'OpenRouter');
-			}
-		}
+			},
+		},
 	};
 
 	// Default spec for OpenAI, DeepSeek, LMStudio, Custom
@@ -158,7 +167,7 @@ export class UnifiedProvider implements APIProvider {
 				throw new Error('API response missing content');
 			}
 			return parseJsonResponse(content, 'API');
-		}
+		},
 	};
 
 	private getSpec(providerName: string): ProviderSpec {
