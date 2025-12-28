@@ -104,10 +104,7 @@ export class ConfigurableSettingModal extends Modal {
 	private addOptionsSection(containerEl: HTMLElement): void {
 		if (!this.props.options.showOptions) return;
 
-		// Container for vertical layout: label on top, textarea below
-		const sectionContainer = containerEl.createDiv({ cls: 'setting-item' });
-
-		new Setting(sectionContainer)
+		new Setting(containerEl)
 			.setName('Available Options')
 			.setDesc('Values that the AI can use as suggestions')
 			.addButton((button) => {
@@ -134,7 +131,7 @@ export class ConfigurableSettingModal extends Modal {
 				displayValue = this.props.frontmatterSetting.refs.join(', ');
 			}
 
-			this.textAreaComponent = new ObsidianTextArea(sectionContainer);
+			this.textAreaComponent = new ObsidianTextArea(containerEl);
 			this.textAreaComponent
 				.setPlaceholder('Option1, Option2, Option3...')
 				.setValue(displayValue)
@@ -146,6 +143,7 @@ export class ConfigurableSettingModal extends Modal {
 					this.props.frontmatterSetting.refs = inputOptions;
 				});
 			this.textAreaComponent.inputEl.rows = 4;
+			this.textAreaComponent.inputEl.setCssStyles({ width: '100%' });
 		}
 	}
 
@@ -160,14 +158,11 @@ export class ConfigurableSettingModal extends Modal {
 	}
 
 	private addCustomQuerySection(containerEl: HTMLElement): void {
-		// Container for vertical layout: label on top, textarea below
-		const sectionContainer = containerEl.createDiv({ cls: 'setting-item' });
-
-		new Setting(sectionContainer)
+		new Setting(containerEl)
 			.setName('Custom Classification Rules')
 			.setDesc('Add custom instructions to provide more context for classification.');
 
-		const textArea = new ObsidianTextArea(sectionContainer);
+		const textArea = new ObsidianTextArea(containerEl);
 		textArea
 			.setPlaceholder('Enter specific classification rules or additional context here...')
 			.setValue(this.props.frontmatterSetting.customQuery || '')
@@ -175,6 +170,7 @@ export class ConfigurableSettingModal extends Modal {
 				this.props.frontmatterSetting.customQuery = value;
 			});
 		textArea.inputEl.rows = 4;
+		textArea.inputEl.setCssStyles({ width: '100%' });
 	}
 
 	private addActionButtons(containerEl: HTMLElement): void {
