@@ -46,7 +46,8 @@ To install the beta version using BRAT (Beta Reviewers Auto-update Tool):
 
 ## Inspiration
 
-The user interface design draws inspiration from [Obsidian Web Clipper](https://obsidian.md/clipper).
+- UI design inspired by [Obsidian Web Clipper](https://obsidian.md/clipper)
+- Codex API integration inspired by [Smart Composer](https://github.com/glowingjade/obsidian-smart-composer)
 
 ## Support
 
