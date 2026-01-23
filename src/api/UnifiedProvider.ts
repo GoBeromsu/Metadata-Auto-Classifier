@@ -27,6 +27,14 @@ const parseJsonResponse = (content: string, providerName: string): StructuredOut
 	}
 };
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// Using any for API response data since providers return varied structures
+// that are validated at runtime in parseResponse functions
+type APIResponseData = any;
+
+// Generic request body type for API requests
+type RequestBody = Record<string, unknown>;
+
 interface ProviderSpec {
 	buildHeaders: (apiKey: string) => Record<string, string>;
 	buildRequestBody: (
@@ -34,9 +42,9 @@ interface ProviderSpec {
 		userPrompt: string,
 		model: string,
 		temperature?: number
-	) => any;
+	) => RequestBody;
 	buildUrl: (baseUrl: string, model: string, apiKey: string) => string;
-	parseResponse: (data: any) => StructuredOutput;
+	parseResponse: (data: APIResponseData) => StructuredOutput;
 }
 
 export class UnifiedProvider implements APIProvider {
@@ -59,9 +67,12 @@ export class UnifiedProvider implements APIProvider {
 			buildUrl: (baseUrl) => baseUrl,
 			parseResponse: (data) => {
 				const result = data?.content?.[0];
+				if (!result?.input) {
+					throw new Error('Anthropic response missing tool use content');
+				}
 				return {
-					output: result.input.output,
-					reliability: result.input.reliability,
+					output: result.input.output ?? [],
+					reliability: result.input.reliability ?? 0,
 				};
 			},
 		},
@@ -201,7 +212,7 @@ export class UnifiedProvider implements APIProvider {
 		return this.processApiResponse(response, provider.name);
 	}
 
-	processApiResponse(responseData: any, providerName?: string): StructuredOutput {
+	processApiResponse(responseData: APIResponseData, providerName?: string): StructuredOutput {
 		const spec = this.getSpec(providerName || '');
 		return spec.parseResponse(responseData);
 	}
