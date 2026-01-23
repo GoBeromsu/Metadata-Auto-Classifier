@@ -27,11 +27,39 @@ jobs:
         run: |
           yarn
           yarn run build --if-present
+
+      - name: Validate required files
+        run: |
+          echo "Checking required release files..."
+          REQUIRED_FILES="main.js manifest.json styles.css versions.json"
+          MISSING=""
+          for file in $REQUIRED_FILES; do
+            if [ ! -f "$file" ]; then
+              MISSING="$MISSING $file"
+            fi
+          done
+          if [ -n "$MISSING" ]; then
+            echo "::error::Missing required files:$MISSING"
+            exit 1
+          fi
+          echo "All required files present: $REQUIRED_FILES"
+
+      - name: Validate version consistency
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          MANIFEST_VERSION=$(node -p "require('./manifest.json').version")
+          if [ "$PKG_VERSION" != "$MANIFEST_VERSION" ]; then
+            echo "::error::Version mismatch! package.json=$PKG_VERSION, manifest.json=$MANIFEST_VERSION"
+            exit 1
+          fi
+          echo "Version consistent: $PKG_VERSION"
+
+      - name: Package plugin
+        run: |
           mkdir ${{ env.PLUGIN_NAME }}
           cp main.js manifest.json styles.css ${{ env.PLUGIN_NAME }}
           zip -r ${{ env.PLUGIN_NAME }}.zip ${{ env.PLUGIN_NAME }}
-          ls
-          echo "tag_name=$(git tag --sort version:refname | tail -n 1)" >> $GITHUB_OUTPUT
+          ls -la
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
