@@ -12,7 +12,7 @@ export const CODEX_OAUTH = {
 
 	// OAuth endpoints derived from issuer
 	get AUTHORIZATION_ENDPOINT() {
-		return `${this.ISSUER}/authorize`;
+		return `${this.ISSUER}/oauth/authorize`;
 	},
 	get TOKEN_ENDPOINT() {
 		return `${this.ISSUER}/oauth/token`;

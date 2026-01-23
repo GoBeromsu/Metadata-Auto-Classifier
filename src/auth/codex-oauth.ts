@@ -66,8 +66,10 @@ export class CodexOAuth {
 			state,
 			code_challenge: codeChallenge,
 			code_challenge_method: 'S256',
-			// Required for OpenAI OAuth
-			audience: 'https://api.openai.com/v1',
+			// Required for Codex OAuth
+			id_token_add_organizations: 'true',
+			codex_cli_simplified_flow: 'true',
+			originator: 'obsidian-smart-composer',
 		});
 
 		return `${CODEX_OAUTH.AUTHORIZATION_ENDPOINT}?${params.toString()}`;
