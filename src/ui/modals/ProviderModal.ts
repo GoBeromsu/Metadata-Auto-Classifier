@@ -4,11 +4,13 @@ import { Modal } from 'obsidian';
 import { CommonButton } from 'ui/components/common/CommonButton';
 import { CommonNotice } from 'ui/components/common/CommonNotice';
 import { CommonSetting, DropdownOption } from 'ui/components/common/CommonSetting';
+import { ModalAccessibilityHelper } from 'ui/utils/ModalAccessibilityHelper';
 import { getProviderPreset, getProviderPresets } from 'utils';
 
 export class ProviderModal extends Modal {
 	private readonly providerConfig: ProviderConfig;
 	private readonly onSave: (provider: ProviderConfig) => void;
+	private readonly accessibilityHelper = new ModalAccessibilityHelper();
 
 	constructor(
 		app: App,
@@ -57,32 +59,7 @@ export class ProviderModal extends Modal {
 	}
 
 	private setupAccessibility(contentEl: HTMLElement): void {
-		// Focus first focusable element
-		setTimeout(() => {
-			const firstInput = contentEl.querySelector('input, select, button') as HTMLElement;
-			if (firstInput) {
-				firstInput.focus();
-			}
-		}, 50);
-
-		// Keyboard navigation: Tab trapping
-		contentEl.addEventListener('keydown', (e: KeyboardEvent) => {
-			if (e.key === 'Tab') {
-				const focusableElements = contentEl.querySelectorAll(
-					'input, select, button, [tabindex]:not([tabindex="-1"])'
-				);
-				const firstElement = focusableElements[0] as HTMLElement;
-				const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
-
-				if (e.shiftKey && document.activeElement === firstElement) {
-					e.preventDefault();
-					lastElement.focus();
-				} else if (!e.shiftKey && document.activeElement === lastElement) {
-					e.preventDefault();
-					firstElement.focus();
-				}
-			}
-		});
+		this.accessibilityHelper.setup(contentEl);
 	}
 
 	private addPresetSetting(containerEl: HTMLElement): void {
@@ -256,6 +233,7 @@ export class ProviderModal extends Modal {
 
 	onClose(): void {
 		const { contentEl } = this;
+		this.accessibilityHelper.cleanup(contentEl);
 		contentEl.empty();
 	}
 }

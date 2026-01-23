@@ -5,6 +5,7 @@ import { CommonButton } from 'ui/components/common/CommonButton';
 import { CommonNotice } from 'ui/components/common/CommonNotice';
 import type { DropdownOption } from 'ui/components/common/CommonSetting';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
+import { ModalAccessibilityHelper } from 'ui/utils/ModalAccessibilityHelper';
 import { getProviderPresets } from 'utils';
 
 export interface ModelModalProps {
@@ -20,10 +21,11 @@ export interface ModelModalProps {
 
 export class ModelModal extends Modal {
 	private props: ModelModalProps;
+	private readonly accessibilityHelper = new ModalAccessibilityHelper();
 
 	// Form state
 	private selectedProvider: string = '';
-        private modelName: string = '';
+	private modelName: string = '';
 	private modelId: string = '';
 
 	constructor(app: App, props: ModelModalProps) {
@@ -75,32 +77,7 @@ export class ModelModal extends Modal {
 	}
 
 	private setupAccessibility(contentEl: HTMLElement): void {
-		// Focus first focusable element
-		setTimeout(() => {
-			const firstInput = contentEl.querySelector('input, select, button') as HTMLElement;
-			if (firstInput) {
-				firstInput.focus();
-			}
-		}, 50);
-
-		// Keyboard navigation: Tab trapping
-		contentEl.addEventListener('keydown', (e: KeyboardEvent) => {
-			if (e.key === 'Tab') {
-				const focusableElements = contentEl.querySelectorAll(
-					'input, select, button, [tabindex]:not([tabindex="-1"])'
-				);
-				const firstElement = focusableElements[0] as HTMLElement;
-				const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
-
-				if (e.shiftKey && document.activeElement === firstElement) {
-					e.preventDefault();
-					lastElement.focus();
-				} else if (!e.shiftKey && document.activeElement === lastElement) {
-					e.preventDefault();
-					firstElement.focus();
-				}
-			}
-		});
+		this.accessibilityHelper.setup(contentEl);
 	}
 
 	private addProviderSetting(containerEl: HTMLElement): void {
@@ -370,6 +347,7 @@ export class ModelModal extends Modal {
 
 	onClose(): void {
 		const { contentEl } = this;
+		this.accessibilityHelper.cleanup(contentEl);
 		contentEl.empty();
 	}
 }
