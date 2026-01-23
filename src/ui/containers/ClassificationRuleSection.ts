@@ -1,0 +1,45 @@
+import { DEFAULT_TASK_TEMPLATE } from 'api/prompt';
+import type AutoClassifierPlugin from 'main';
+import { TextAreaComponent } from 'obsidian';
+import { CommonSetting } from 'ui/components/common/CommonSetting';
+
+export class ClassificationRuleSection {
+	constructor(
+		private readonly plugin: AutoClassifierPlugin,
+		private readonly onRefresh: () => void
+	) {}
+
+	render(containerEl: HTMLElement, classificationRule: string): void {
+		const textAreaContainer = containerEl.createDiv({
+			cls: 'custom-prompt-container mac-custom-prompt-container',
+		});
+
+		let textAreaComponent: TextAreaComponent;
+
+		CommonSetting.create(textAreaContainer, {
+			name: 'Classification Rule',
+			desc: 'Customize the prompt template for classification requests',
+			button: {
+				icon: 'reset',
+				tooltip: 'Reset to default template',
+				onClick: () => {
+					textAreaComponent.setValue(DEFAULT_TASK_TEMPLATE);
+					this.plugin.settings.classificationRule = DEFAULT_TASK_TEMPLATE;
+					this.plugin.saveSettings();
+					this.onRefresh();
+				},
+			},
+		});
+
+		textAreaComponent = new TextAreaComponent(textAreaContainer)
+			.setPlaceholder(DEFAULT_TASK_TEMPLATE)
+			.setValue(classificationRule)
+			.onChange(async (value) => {
+				this.plugin.settings.classificationRule = value;
+				await this.plugin.saveSettings();
+			});
+
+		textAreaComponent.inputEl.rows = 10;
+		textAreaComponent.inputEl.style.width = '100%';
+	}
+}
