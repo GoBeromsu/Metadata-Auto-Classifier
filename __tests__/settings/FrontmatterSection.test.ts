@@ -1,8 +1,8 @@
-jest.mock('ui/modals/FrontmatterEditorModal', () => ({
+jest.mock('settings/modals/FrontmatterEditorModal', () => ({
 	ConfigurableSettingModal: class {},
 }));
 
-import { Frontmatter } from 'ui/containers/Frontmatter';
+import { FrontmatterSection } from 'settings/FrontmatterSection';
 
 const makeItem = (id: number) => ({
 	id,
@@ -35,12 +35,12 @@ const createMockContainer = () => ({
 describe('Frontmatter Container - Regression Tests', () => {
 	let mockPlugin: any;
 	let mockContainer: any;
-	let frontmatter: Frontmatter;
+	let frontmatterSection: FrontmatterSection;
 
 	beforeEach(() => {
 		mockPlugin = createMockPlugin();
 		mockContainer = createMockContainer();
-		frontmatter = new (Frontmatter as any)(mockPlugin, mockContainer);
+		frontmatterSection = new (FrontmatterSection as any)(mockPlugin, mockContainer);
 		(global as any).confirm = jest.fn().mockReturnValue(true);
 		jest.clearAllMocks();
 	});
@@ -52,7 +52,7 @@ describe('Frontmatter Container - Regression Tests', () => {
 			const templates = mockPlugin.settings.frontmatter;
 
 			// When: display is called
-			frontmatter.display();
+			frontmatterSection.display();
 
 			// Then: container should be emptied
 			expect(mockContainer.empty).toHaveBeenCalled();
@@ -69,7 +69,7 @@ describe('Frontmatter Container - Regression Tests', () => {
 			mockPlugin.settings.frontmatter = [];
 
 			// When: display is called
-			expect(() => frontmatter.display()).not.toThrow();
+			expect(() => frontmatterSection.display()).not.toThrow();
 
 			// Then: should only empty container without errors
 			expect(mockContainer.empty).toHaveBeenCalled();
@@ -82,7 +82,7 @@ describe('Frontmatter Container - Regression Tests', () => {
 			mockPlugin.settings.frontmatter = [makeItem(0), makeItem(1), makeItem(2)];
 
 			// When: display is called (should not throw)
-			expect(() => frontmatter.display()).not.toThrow();
+			expect(() => frontmatterSection.display()).not.toThrow();
 
 			// Then: container should be emptied (critical requirement)
 			expect(mockContainer.empty).toHaveBeenCalled();
@@ -99,7 +99,7 @@ describe('Frontmatter Container - Regression Tests', () => {
 			expect(mockPlugin.settings.frontmatter).toHaveLength(3);
 
 			// When: delete first template
-			await (frontmatter as any).handleDelete(makeItem(1));
+			await (frontmatterSection as any).handleDelete(makeItem(1));
 
 			// Then: only that template should be deleted
 			expect(mockPlugin.settings.frontmatter).toHaveLength(2);
@@ -113,12 +113,12 @@ describe('Frontmatter Container - Regression Tests', () => {
 			const updatedTemplate = { ...originalTemplate, name: 'Updated Template' };
 
 			// Mock openEditModal
-			(frontmatter as any).openEditModal = jest
+			(frontmatterSection as any).openEditModal = jest
 				.fn()
 				.mockImplementation((template: any, onSave: any) => onSave(updatedTemplate));
 
 			// When: template is edited
-			await (frontmatter as any).handleEdit(originalTemplate);
+			await (frontmatterSection as any).handleEdit(originalTemplate);
 
 			// Then: command should be re-registered and settings saved
 			expect(mockPlugin.registerCommand).toHaveBeenCalledWith(
@@ -135,7 +135,7 @@ describe('Frontmatter Container - Regression Tests', () => {
 			mockPlugin.settings.frontmatter = [makeItem(0)];
 
 			// When: display is called (should not throw)
-			expect(() => frontmatter.display()).not.toThrow();
+			expect(() => frontmatterSection.display()).not.toThrow();
 
 			// Then: container is emptied
 			expect(mockContainer.empty).toHaveBeenCalled();

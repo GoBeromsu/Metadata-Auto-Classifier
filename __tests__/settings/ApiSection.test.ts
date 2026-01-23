@@ -2,7 +2,7 @@ jest.mock('api', () => ({
 	testModel: jest.fn(),
 }));
 
-jest.mock('ui/modals/ModelModal', () => ({
+jest.mock('settings/modals/ModelModal', () => ({
 	ModelModal: class {
 		constructor(
 			public app: any,
@@ -12,7 +12,7 @@ jest.mock('ui/modals/ModelModal', () => ({
 	},
 }));
 
-jest.mock('ui/modals/ProviderModal', () => ({
+jest.mock('settings/modals/ProviderModal', () => ({
 	ProviderModal: class {
 		constructor(
 			public app: any,
@@ -24,7 +24,7 @@ jest.mock('ui/modals/ProviderModal', () => ({
 }));
 
 import { testModel } from 'api';
-import { Api } from 'ui/containers/Api';
+import { ApiSection } from 'settings/ApiSection';
 
 const mockTestModel = testModel as jest.MockedFunction<typeof testModel>;
 
@@ -64,19 +64,19 @@ const createMockContainer = () => ({
 describe('Api Container - Regression Tests', () => {
 	let mockPlugin: any;
 	let mockContainer: any;
-	let api: Api;
+	let apiSection: ApiSection;
 
 	beforeEach(() => {
 		mockPlugin = createMockPlugin();
 		mockContainer = createMockContainer();
-		api = new Api(mockPlugin, mockContainer);
+		apiSection = new ApiSection(mockPlugin, mockContainer);
 		jest.clearAllMocks();
 	});
 
 	describe('Basic Rendering', () => {
 		test('renders default settings correctly', () => {
 			// When: display is called
-			api.display();
+			apiSection.display();
 
 			// Then: All basic UI components should be created
 			expect(mockContainer.empty).toHaveBeenCalled();

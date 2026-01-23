@@ -1,5 +1,5 @@
-import { UnifiedProvider } from 'api';
-import { ProviderConfig } from 'api/types';
+import { UnifiedProvider } from 'provider/UnifiedProvider';
+import { ProviderConfig } from 'types';
 import { requestUrl } from 'obsidian';
 import { PROVIDER_NAMES } from 'utils';
 

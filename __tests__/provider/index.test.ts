@@ -1,4 +1,4 @@
-import { sendRequest } from 'api';
+import { sendRequest } from 'provider';
 import { requestUrl } from 'obsidian';
 
 describe('sendRequest', () => {

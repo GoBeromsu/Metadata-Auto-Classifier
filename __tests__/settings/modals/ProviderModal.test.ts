@@ -1,10 +1,10 @@
 import { App } from 'obsidian';
-import { ProviderModal } from 'ui/modals/ProviderModal';
-import type { ProviderConfig } from 'api/types';
+import { ProviderModal } from 'settings/modals/ProviderModal';
+import type { ProviderConfig } from 'types';
 
-// Mock CommonNotice
-jest.mock('ui/components/common/CommonNotice', () => ({
-	CommonNotice: {
+// Mock Notice
+jest.mock('settings/components/Notice', () => ({
+	Notice: {
 		error: jest.fn(),
 		success: jest.fn(),
 		validationError: jest.fn(),
@@ -12,8 +12,8 @@ jest.mock('ui/components/common/CommonNotice', () => ({
 	},
 }));
 
-// Mock utils
-jest.mock('utils', () => ({
+// Mock lib
+jest.mock('lib', () => ({
 	getProviderPresets: jest.fn().mockReturnValue([
 		{
 			name: 'OpenAI',
@@ -87,7 +87,7 @@ describe('ProviderModal', () => {
 	});
 
 	describe('Form Validation', () => {
-		const { CommonNotice } = require('ui/components/common/CommonNotice');
+		const { Notice: SettingsNotice } = require('settings/components/Notice');
 
 		it('should show error when provider name is empty', () => {
 			const modal = new ProviderModal(mockApp, mockOnSave);
@@ -96,7 +96,7 @@ describe('ProviderModal', () => {
 			const result = (modal as any).validateForm();
 
 			expect(result).toBe(false);
-			expect(CommonNotice.validationError).toHaveBeenCalledWith(
+			expect(SettingsNotice.validationError).toHaveBeenCalledWith(
 				'Provider',
 				expect.stringContaining('Provider name is required')
 			);
@@ -110,7 +110,7 @@ describe('ProviderModal', () => {
 			const result = (modal as any).validateForm();
 
 			expect(result).toBe(false);
-			expect(CommonNotice.validationError).toHaveBeenCalledWith(
+			expect(SettingsNotice.validationError).toHaveBeenCalledWith(
 				'Provider',
 				expect.stringContaining('API URL is required')
 			);
@@ -124,7 +124,7 @@ describe('ProviderModal', () => {
 			const result = (modal as any).validateForm();
 
 			expect(result).toBe(false);
-			expect(CommonNotice.validationError).toHaveBeenCalledWith(
+			expect(SettingsNotice.validationError).toHaveBeenCalledWith(
 				'Provider',
 				expect.stringContaining('valid URL')
 			);

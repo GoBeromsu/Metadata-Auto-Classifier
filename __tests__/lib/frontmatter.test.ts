@@ -3,11 +3,9 @@ import {
 	getFieldValues,
 	getFrontmatterSetting,
 	insertToFrontMatter,
-} from 'frontmatter';
-import type { FrontmatterField, InsertFrontMatterParams } from 'frontmatter/types';
-import { getAllTags, getFrontMatterInfo, parseFrontMatterStringArray } from 'obsidian';
-// Import mock helpers directly from mock file
-import { MetadataCache, createMockTFile } from '../../__mocks__/obsidian';
+} from 'lib/frontmatter';
+import type { FrontmatterField, InsertFrontMatterParams } from 'types';
+import { getAllTags, getFrontMatterInfo, parseFrontMatterStringArray, MetadataCache, createMockTFile } from 'obsidian';
 
 // -------------------- getContentWithoutFrontmatter Tests --------------------
 describe('getContentWithoutFrontmatter', () => {

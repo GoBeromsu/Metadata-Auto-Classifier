@@ -1,24 +1,23 @@
-import AutoClassifierPlugin from '../src/main';
+import AutoClassifierPlugin from 'main';
 import { App, TFile, createMockTFile } from 'obsidian';
-import { DEFAULT_SETTINGS, DEFAULT_FRONTMATTER_SETTING } from 'utils/constants';
-import type { ProviderConfig } from 'api/types';
-import type { FrontmatterField } from 'frontmatter/types';
+import { DEFAULT_SETTINGS, DEFAULT_FRONTMATTER_SETTING } from 'constants';
+import type { ProviderConfig, FrontmatterField } from 'types';
 
-// Mock the api module
-jest.mock('api', () => ({
+// Mock the provider module
+jest.mock('provider', () => ({
 	processAPIRequest: jest.fn(),
 }));
 
 // Mock the frontmatter module
-jest.mock('frontmatter', () => ({
+jest.mock('lib/frontmatter', () => ({
 	getContentWithoutFrontmatter: jest.fn().mockReturnValue('Test content'),
 	getFieldValues: jest.fn().mockReturnValue(['tag1', 'tag2', 'tag3']),
 	insertToFrontMatter: jest.fn().mockResolvedValue(undefined),
 }));
 
-// Mock CommonNotice
-jest.mock('ui/components/common/CommonNotice', () => ({
-	CommonNotice: {
+// Mock Notice
+jest.mock('settings/components/Notice', () => ({
+	Notice: {
 		error: jest.fn(),
 		success: jest.fn(),
 		withProgress: jest.fn(async (fileName, fmName, fn) => await fn()),
@@ -26,7 +25,7 @@ jest.mock('ui/components/common/CommonNotice', () => ({
 }));
 
 // Mock AutoClassifierSettingTab
-jest.mock('ui', () => ({
+jest.mock('settings', () => ({
 	AutoClassifierSettingTab: jest.fn().mockImplementation(() => ({
 		display: jest.fn(),
 	})),
@@ -167,7 +166,7 @@ describe('AutoClassifierPlugin', () => {
 	});
 
 	describe('processFrontmatter', () => {
-		const { CommonNotice } = require('ui/components/common/CommonNotice');
+		const { Notice } = require('settings/components/Notice');
 
 		beforeEach(() => {
 			jest.clearAllMocks();
@@ -178,7 +177,7 @@ describe('AutoClassifierPlugin', () => {
 
 			await plugin.processFrontmatter(1);
 
-			expect(CommonNotice.error).toHaveBeenCalledWith(
+			expect(Notice.error).toHaveBeenCalledWith(
 				expect.objectContaining({ message: 'No active file.' })
 			);
 		});
@@ -190,7 +189,7 @@ describe('AutoClassifierPlugin', () => {
 
 			await plugin.processFrontmatter(1);
 
-			expect(CommonNotice.error).toHaveBeenCalledWith(
+			expect(Notice.error).toHaveBeenCalledWith(
 				expect.objectContaining({ message: 'No provider selected.' })
 			);
 		});
@@ -201,7 +200,7 @@ describe('AutoClassifierPlugin', () => {
 
 			await plugin.processFrontmatter(999); // Non-existent ID
 
-			expect(CommonNotice.error).toHaveBeenCalledWith(
+			expect(Notice.error).toHaveBeenCalledWith(
 				expect.objectContaining({
 					message: 'No setting found for frontmatter ID 999.',
 				})
@@ -212,7 +211,7 @@ describe('AutoClassifierPlugin', () => {
 			const mockFile = createMockTFile('test/path.md', 'test');
 			mockApp.workspace.getActiveFile.mockReturnValue(mockFile);
 
-			const { processAPIRequest } = require('api');
+			const { processAPIRequest } = require('provider');
 			processAPIRequest.mockResolvedValue({
 				output: ['result-tag'],
 				reliability: 0.9,
@@ -221,14 +220,14 @@ describe('AutoClassifierPlugin', () => {
 			await plugin.processFrontmatter(1);
 
 			// Should have called withProgress
-			expect(CommonNotice.withProgress).toHaveBeenCalled();
+			expect(Notice.withProgress).toHaveBeenCalled();
 		});
 	});
 
 	describe('classifyFrontmatter (via classificationService)', () => {
-		const { CommonNotice } = require('ui/components/common/CommonNotice');
-		const { processAPIRequest } = require('api');
-		const { insertToFrontMatter, getFieldValues } = require('frontmatter');
+		const { Notice } = require('settings/components/Notice');
+		const { processAPIRequest } = require('provider');
+		const { insertToFrontMatter, getFieldValues } = require('lib/frontmatter');
 
 		beforeEach(() => {
 			jest.clearAllMocks();
@@ -269,7 +268,7 @@ describe('AutoClassifierPlugin', () => {
 
 			await plugin.processFrontmatter(frontmatterWithNoRefs.id);
 
-			expect(CommonNotice.error).toHaveBeenCalledWith(
+			expect(Notice.error).toHaveBeenCalledWith(
 				expect.objectContaining({
 					message: expect.stringContaining('No reference values found'),
 				})
@@ -289,7 +288,7 @@ describe('AutoClassifierPlugin', () => {
 
 			await plugin.processFrontmatter(mockFrontmatter.id);
 
-			expect(CommonNotice.error).toHaveBeenCalledWith(
+			expect(Notice.error).toHaveBeenCalledWith(
 				expect.objectContaining({
 					message: expect.stringContaining('API key not configured'),
 				})
@@ -303,7 +302,7 @@ describe('AutoClassifierPlugin', () => {
 
 			await plugin.processFrontmatter(mockFrontmatter.id);
 
-			expect(CommonNotice.error).toHaveBeenCalledWith(
+			expect(Notice.error).toHaveBeenCalledWith(
 				expect.objectContaining({
 					message: expect.stringContaining('No model selected'),
 				})
@@ -330,7 +329,7 @@ describe('AutoClassifierPlugin', () => {
 			await plugin.processFrontmatter(99);
 
 			// Should process values with brackets stripped
-			expect(CommonNotice.withProgress).toHaveBeenCalled();
+			expect(Notice.withProgress).toHaveBeenCalled();
 		});
 
 		it('should show success message when API response has high reliability', async () => {
@@ -345,7 +344,7 @@ describe('AutoClassifierPlugin', () => {
 			await plugin.processFrontmatter(mockFrontmatter.id);
 
 			expect(insertToFrontMatter).toHaveBeenCalled();
-			expect(CommonNotice.success).toHaveBeenCalled();
+			expect(Notice.success).toHaveBeenCalled();
 		});
 
 		it('should show error when API response has low reliability', async () => {
@@ -360,7 +359,7 @@ describe('AutoClassifierPlugin', () => {
 			await plugin.processFrontmatter(mockFrontmatter.id);
 
 			expect(insertToFrontMatter).not.toHaveBeenCalled();
-			expect(CommonNotice.error).toHaveBeenCalledWith(
+			expect(Notice.error).toHaveBeenCalledWith(
 				expect.objectContaining({
 					message: expect.stringContaining('Low reliability'),
 				})

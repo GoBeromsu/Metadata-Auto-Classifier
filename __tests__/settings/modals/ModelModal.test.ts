@@ -1,10 +1,10 @@
 import { App } from 'obsidian';
-import { ModelModal, ModelModalProps } from 'ui/modals/ModelModal';
-import type { ProviderConfig } from 'api/types';
+import { ModelModal, ModelModalProps } from 'settings/modals/ModelModal';
+import type { ProviderConfig } from 'types';
 
-// Mock CommonNotice
-jest.mock('ui/components/common/CommonNotice', () => ({
-	CommonNotice: {
+// Mock Notice
+jest.mock('settings/components/Notice', () => ({
+	Notice: {
 		error: jest.fn(),
 		success: jest.fn(),
 		validationError: jest.fn(),
@@ -12,8 +12,8 @@ jest.mock('ui/components/common/CommonNotice', () => ({
 	},
 }));
 
-// Mock utils
-jest.mock('utils', () => ({
+// Mock lib
+jest.mock('lib', () => ({
 	getProviderPresets: jest.fn().mockReturnValue([
 		{
 			name: 'OpenAI',
@@ -111,7 +111,7 @@ describe('ModelModal', () => {
 	});
 
 	describe('Form Validation', () => {
-		const { CommonNotice } = require('ui/components/common/CommonNotice');
+		const { Notice: SettingsNotice } = require('settings/components/Notice');
 
 		it('should show error when provider is not selected', () => {
 			const modal = new ModelModal(mockApp, mockProps);
@@ -120,7 +120,7 @@ describe('ModelModal', () => {
 			const result = (modal as any).validateForm();
 
 			expect(result).toBe(false);
-			expect(CommonNotice.validationError).toHaveBeenCalledWith('Model', 'Provider is required');
+			expect(SettingsNotice.validationError).toHaveBeenCalledWith('Model', 'Provider is required');
 		});
 
 		it('should show error when model ID is empty', () => {
@@ -131,7 +131,7 @@ describe('ModelModal', () => {
 			const result = (modal as any).validateForm();
 
 			expect(result).toBe(false);
-			expect(CommonNotice.validationError).toHaveBeenCalledWith('Model', 'Model ID is required');
+			expect(SettingsNotice.validationError).toHaveBeenCalledWith('Model', 'Model ID is required');
 		});
 
 		it('should show error when display name is empty', () => {
@@ -142,7 +142,7 @@ describe('ModelModal', () => {
 			const result = (modal as any).validateForm();
 
 			expect(result).toBe(false);
-			expect(CommonNotice.validationError).toHaveBeenCalledWith('Model', 'Display name is required');
+			expect(SettingsNotice.validationError).toHaveBeenCalledWith('Model', 'Display name is required');
 		});
 
 		it('should pass validation when all fields are valid', () => {
