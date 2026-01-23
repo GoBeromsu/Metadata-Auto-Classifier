@@ -28,9 +28,12 @@ export default class AutoClassifierPlugin extends Plugin {
 
 	/**
 	 * Refresh OAuth tokens for all providers that use OAuth authentication
+	 * Supports both new auth field and legacy oauth field
 	 */
 	private async refreshOAuthTokensIfNeeded(): Promise<void> {
-		const oauthProviders = this.settings.providers.filter((p) => p.authType === 'oauth' && p.oauth);
+		const oauthProviders = this.settings.providers.filter(
+			(p) => (p.authType === 'oauth' && p.oauth) || (p.auth?.type === 'oauth' && p.auth.oauth)
+		);
 
 		if (oauthProviders.length === 0) return;
 
@@ -38,11 +41,18 @@ export default class AutoClassifierPlugin extends Plugin {
 		let settingsChanged = false;
 
 		for (const provider of oauthProviders) {
-			if (!provider.oauth || !isTokenExpired(provider.oauth)) continue;
+			// Get oauth from either new auth field or legacy oauth field
+			const oauth = provider.auth?.type === 'oauth' ? provider.auth.oauth : provider.oauth;
+			if (!oauth || !isTokenExpired(oauth)) continue;
 
 			try {
-				const newTokens = await codexOAuth.refreshTokens(provider.oauth);
-				provider.oauth = newTokens;
+				const newTokens = await codexOAuth.refreshTokens(oauth);
+				// Update the oauth in the correct location
+				if (provider.auth?.type === 'oauth') {
+					provider.auth.oauth = newTokens;
+				} else {
+					provider.oauth = newTokens;
+				}
 				settingsChanged = true;
 				console.log(`OAuth tokens refreshed for provider: ${provider.name}`);
 			} catch (error) {

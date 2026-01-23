@@ -326,7 +326,7 @@ describe('UnifiedProvider Tests', () => {
 			};
 
 			await expect(unifiedProvider.callAPI('system', 'user', config, 'model'))
-				.rejects.toThrow('Codex requires OAuth authentication');
+				.rejects.toThrow('Codex OAuth tokens incomplete');
 		});
 
 		it('should parse Codex response format correctly', () => {

@@ -134,6 +134,16 @@ export class ClassificationService {
 			};
 		}
 
+		// Validate model belongs to selected provider
+		const providerModels = this.context.provider.models.map((m) => m.id);
+		if (!providerModels.includes(this.context.model)) {
+			return {
+				isValid: false,
+				processedValues: [],
+				errorMessage: `Model "${this.context.model}" is not available for provider ${this.context.provider.name}. Please select a valid model in settings.`,
+			};
+		}
+
 		return { isValid: true, processedValues };
 	}
 

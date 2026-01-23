@@ -159,9 +159,9 @@ export class UnifiedProvider implements APIProvider {
 				// Support both new auth field and legacy oauth field
 				const oauth = provider?.auth?.type === 'oauth' ? provider.auth.oauth : provider?.oauth;
 
-				if (!oauth) {
+				if (!oauth?.accessToken || !oauth?.accountId) {
 					throw new Error(
-						'Codex requires OAuth authentication. Please connect your account in settings.'
+						'Codex OAuth tokens incomplete. Please reconnect your account in settings.'
 					);
 				}
 				return {
@@ -170,18 +170,23 @@ export class UnifiedProvider implements APIProvider {
 					'ChatGPT-Account-ID': oauth.accountId,
 				};
 			},
-			buildRequestBody: (systemRole, userPrompt, model, temperature) => ({
-				model,
-				instructions: systemRole,
-				input: userPrompt,
-				temperature,
-				text: {
-					format: {
-						type: 'json_schema',
-						...OPENAI_STRUCTURE_OUTPUT.json_schema,
+			buildRequestBody: (systemRole, userPrompt, model, temperature) => {
+				const body: Record<string, unknown> = {
+					model,
+					instructions: systemRole,
+					input: userPrompt,
+					text: {
+						format: {
+							type: 'json_schema',
+							...OPENAI_STRUCTURE_OUTPUT.json_schema,
+						},
 					},
-				},
-			}),
+				};
+				if (temperature !== undefined) {
+					body.temperature = temperature;
+				}
+				return body;
+			},
 			buildUrl: () => CODEX_OAUTH.API_ENDPOINT,
 			parseResponse: (data) => {
 				// Codex API returns response in output array format
