@@ -1,5 +1,5 @@
-import type { ProviderPreset } from 'api/types';
-import providerPresetsData from '../api/providerPreset.json';
+import type { ProviderPreset } from '../types';
+import providerPresetsData from '../provider/presets.json';
 
 export const PROVIDER_NAMES = {
 	OPENAI: providerPresetsData.openai.name,

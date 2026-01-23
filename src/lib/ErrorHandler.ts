@@ -1,4 +1,4 @@
-import { CommonNotice } from 'ui/components/common/CommonNotice';
+import { Notice } from '../settings/components/Notice';
 
 /**
  * Centralized error handling utility for consistent error management across the application.
@@ -10,14 +10,14 @@ export class ErrorHandler {
 	static handleAPIError(error: Error, context?: string): void {
 		const message = context ? `[API] ${context}: ${error.message}` : `[API] ${error.message}`;
 		console.error(message, error);
-		CommonNotice.error(new Error(message));
+		Notice.error(new Error(message));
 	}
 
 	/**
 	 * Handle validation errors with component context.
 	 */
 	static handleValidationError(component: string, message: string): void {
-		CommonNotice.validationError(component, message);
+		Notice.validationError(component, message);
 	}
 
 	/**
@@ -30,7 +30,7 @@ export class ErrorHandler {
 			: `[Unexpected] ${errorObj.message}`;
 
 		console.error(message, error);
-		CommonNotice.error(new Error(message));
+		Notice.error(new Error(message));
 	}
 
 	/**

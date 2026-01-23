@@ -6,17 +6,17 @@ import type {
 	FrontmatterField,
 	InsertFrontMatterParams,
 	ProcessFrontMatterFn,
-} from './types';
+} from '../types';
 
 /**
  * Extracts the content of a markdown file excluding frontmatter
  * @param content - The full content of the markdown file
  * @returns The content without frontmatter
  */
-export const getContentWithoutFrontmatter = (content: string): string => {
+export function getContentWithoutFrontmatter(content: string): string {
 	const { contentStart } = getFrontMatterInfo(content);
 	return content.slice(contentStart);
-};
+}
 
 /**
  * Collects all unique values for a specific frontmatter field from the vault.
@@ -26,11 +26,11 @@ export const getContentWithoutFrontmatter = (content: string): string => {
  * @param metadataCache - The Obsidian metadata cache used to access frontmatter and tags.
  * @returns An array of unique string values found for the specified field across all files.
  */
-export const getFieldValues = (
+export function getFieldValues(
 	fieldName: string,
 	files: ReadonlyArray<TFile>,
 	metadataCache: MetadataCache
-): string[] => {
+): string[] {
 	const values = new Set<string>();
 
 	for (const file of files) {
@@ -48,24 +48,29 @@ export const getFieldValues = (
 	}
 
 	return [...values];
-};
+}
 
-// Moved from BaseSettingsComponent
-export const getFrontmatterSetting = (
+/**
+ * Gets a frontmatter setting by ID from the settings array.
+ */
+export function getFrontmatterSetting(
 	id: number,
 	settings: FrontmatterField[]
-): FrontmatterField => {
+): FrontmatterField {
 	const setting = settings?.find((f) => f.id === id);
 	if (!setting) {
 		throw new Error('Setting not found');
 	}
 	return setting;
-};
+}
 
-export const insertToFrontMatter = async (
+/**
+ * Inserts values into frontmatter with optional WikiLink formatting.
+ */
+export async function insertToFrontMatter(
 	processFrontMatter: ProcessFrontMatterFn,
 	params: InsertFrontMatterParams
-): Promise<void> => {
+): Promise<void> {
 	await processFrontMatter(params.file, (frontmatter: FrontMatter) => {
 		// Ensure values are in raw format for processing (API context)
 		const rawValues =
@@ -81,13 +86,13 @@ export const insertToFrontMatter = async (
 		// Format back for storage context
 		frontmatter[params.name] = combinedRawValues;
 	});
-};
+}
 
 /**
  * Creates a deep copy of a FrontmatterField to prevent input mutation.
  * Used when editing frontmatter settings in modals.
  */
-export const deepCloneFrontmatterField = (field: FrontmatterField): FrontmatterField => {
+export function deepCloneFrontmatterField(field: FrontmatterField): FrontmatterField {
 	return {
 		id: field.id,
 		name: field.name,
@@ -97,4 +102,4 @@ export const deepCloneFrontmatterField = (field: FrontmatterField): FrontmatterF
 		linkType: field.linkType,
 		customQuery: field.customQuery,
 	};
-};
+}
