@@ -10,8 +10,18 @@ export interface SSEEvent {
 }
 
 /**
+ * Masks sensitive header values (e.g., Authorization) for safe logging
+ */
+const maskSensitiveHeaders = (headers: Record<string, string>): Record<string, string> => {
+	return Object.fromEntries(
+		Object.entries(headers).map(([key, value]) =>
+			key.toLowerCase().includes('authorization') ? [key, '[MASKED]'] : [key, value]
+		)
+	);
+};
+
+/**
  * Creates standardized RequestUrlParam objects with enforced POST method
- * Implements convention-over-configuration to ensure API call consistency
  */
 const getRequestParam = (
 	url: string,
@@ -33,14 +43,9 @@ export const sendRequest = async (
 ): Promise<unknown> => {
 	const requestParam: RequestUrlParam = getRequestParam(baseUrl, headers, data);
 
-	// 디버그: 요청 정보 로깅 (Authorization 마스킹)
 	console.log('[API Request]', {
 		url: baseUrl,
-		headers: Object.fromEntries(
-			Object.entries(headers).map(([k, v]) =>
-				k.toLowerCase().includes('authorization') ? [k, '[MASKED]'] : [k, v]
-			)
-		),
+		headers: maskSensitiveHeaders(headers),
 		body: data,
 	});
 
@@ -105,16 +110,14 @@ const parseSSEEvents = (text: string): SSEEvent[] => {
 };
 
 /**
- * Send streaming request using Node's https module (like Smart Composer)
- * This bypasses CORS and provides better error handling than Obsidian's requestUrl
+ * Send streaming request using Node's https module.
+ * Required for Codex API which needs streaming and proper error response handling.
  */
 const sendStreamingRequestViaNode = async (
 	url: string,
 	headers: Record<string, string>,
 	body: Record<string, unknown>
 ): Promise<{ status: number; text: string }> => {
-	// Dynamic import of Node's https module (only works on desktop)
-
 	const https = require('https') as typeof import('https');
 
 	const parsedUrl = new URL(url);
@@ -125,8 +128,8 @@ const sendStreamingRequestViaNode = async (
 		const request = https.request(
 			{
 				hostname: parsedUrl.hostname,
-				port: parsedUrl.port ? Number(parsedUrl.port) : 443,
-				path: `${parsedUrl.pathname}${parsedUrl.search}`,
+				port: Number(parsedUrl.port) || 443,
+				path: parsedUrl.pathname + parsedUrl.search,
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -156,7 +159,6 @@ const sendStreamingRequestViaNode = async (
 
 /**
  * Send a streaming request and accumulate text from SSE events
- * Uses Node's https module for Codex (like Smart Composer) for better error handling
  */
 export const sendStreamingRequest = async (
 	url: string,
@@ -166,19 +168,13 @@ export const sendStreamingRequest = async (
 ): Promise<string> => {
 	console.log('[API Streaming Request]', {
 		url,
-		headers: Object.fromEntries(
-			Object.entries(headers).map(([k, v]) =>
-				k.toLowerCase().includes('authorization') ? [k, '[MASKED]'] : [k, v]
-			)
-		),
+		headers: maskSensitiveHeaders(headers),
 		body,
 	});
 
 	let response: { status: number; text: string };
 
 	try {
-		// Use Node's https module like Smart Composer does
-		// This bypasses CORS and allows reading error response bodies
 		response = await sendStreamingRequestViaNode(url, headers, body);
 	} catch (error) {
 		console.error('[API Streaming Error] Request failed:', error);

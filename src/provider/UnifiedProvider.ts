@@ -178,8 +178,8 @@ export class UnifiedProvider implements APIProvider {
 				};
 			},
 
-			// Note: Codex Responses API does not support temperature parameter
-			buildRequestBody: (systemRole, userPrompt, model, _temperature) => ({
+			// Codex Responses API does not support temperature
+			buildRequestBody: (systemRole, userPrompt, model) => ({
 				model,
 				instructions: systemRole,
 				input: [
@@ -215,9 +215,8 @@ export class UnifiedProvider implements APIProvider {
 				return parseJsonResponse(text, 'Codex');
 			},
 
-			// Fallback parseResponse (not used when streaming, but required by interface)
+			// Fallback parseResponse (kept for tests, not used in production since Codex uses streaming)
 			parseResponse: (data) => {
-				// This is kept for interface compatibility but won't be used with streaming
 				const output = data?.output;
 				if (!output || !Array.isArray(output)) {
 					throw new Error('Codex response missing output array');
