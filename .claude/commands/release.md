@@ -1,6 +1,6 @@
 | allowed-tools | description |
 |---|---|
-| Bash(git:*), Bash(yarn:*), Bash(gh:*), Bash(cat:*), Bash(cp:*), Bash(mkdir:*), Bash(rm:*), Bash(zip:*), Read, Edit | Create a consistent Obsidian plugin release |
+| Bash(git:*), Bash(yarn:*), Bash(gh:*), Bash(cat:*), Read, Edit | Create a consistent Obsidian plugin release |
 
 ## Obsidian Plugin Release Rules
 
@@ -27,25 +27,20 @@ Every release must include:
 
 ### 3. Release Sequence
 1. Update versions in package.json, manifest.json, versions.json
-2. Commit and push changes
-3. Build: `yarn build`
-4. Test: `yarn test`
-5. Create tag: `git tag -a X.Y.Z -m "X.Y.Z release"`
+2. Build: `yarn build`
+3. Test: `yarn test`
+4. Commit and push changes
+5. Create tag: `git tag X.Y.Z`
 6. Push tag: `git push origin X.Y.Z`
-7. Create release:
-```bash
-gh release create X.Y.Z \
-  --title "X.Y.Z" \
-  --generate-notes \
-  ./main.js \
-  ./manifest.json \
-  ./styles.css \
-  ./versions.json
-```
+7. Wait for CI to create release: `gh run watch` (the release.yml workflow creates the release automatically)
+8. Verify release was created successfully
+
+**IMPORTANT**: Do NOT manually create the release with `gh release create`. The CI workflow handles this automatically when a tag is pushed.
 
 ### 4. Release Verification
-Verify the download URL works after release:
+After CI completes, verify the release:
 ```bash
+gh release view X.Y.Z
 curl -sI "https://github.com/GoBeromsu/Metadata-Auto-Classifier/releases/download/X.Y.Z/manifest.json"
 # HTTP/2 302 indicates success (404 means failure)
 ```
@@ -62,4 +57,4 @@ curl -sI "https://github.com/GoBeromsu/Metadata-Auto-Classifier/releases/downloa
 
 ## Your Task
 
-Follow the rules above to create a release. Stop and notify the user if there is a version mismatch or missing required files.
+Follow the rules above to create a release. Stop and notify the user if there is a version mismatch or missing required files. Let CI handle the release creation - do NOT run `gh release create` manually.
