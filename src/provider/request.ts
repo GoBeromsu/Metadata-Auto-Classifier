@@ -107,6 +107,7 @@ const parseSSEEvents = (text: string): SSEEvent[] => {
 /**
  * Send a streaming request and accumulate text from SSE events
  * Uses provider-specific event parser to extract text deltas
+ * Uses fetch API instead of Obsidian's requestUrl for better error handling
  */
 export const sendStreamingRequest = async (
 	url: string,
@@ -124,8 +125,9 @@ export const sendStreamingRequest = async (
 		body,
 	});
 
-	const response = await requestUrl({
-		url,
+	// Use fetch instead of Obsidian's requestUrl for better error handling
+	// requestUrl throws on 4xx errors, making it impossible to read error body
+	const response = await fetch(url, {
 		method: 'POST',
 		headers: {
 			...headers,
@@ -134,17 +136,20 @@ export const sendStreamingRequest = async (
 		body: JSON.stringify(body),
 	});
 
-	if (response.status >= 400) {
+	if (!response.ok) {
+		const errorText = await response.text();
 		console.error('[API Streaming Error]', {
 			status: response.status,
 			url,
-			responseText: response.text,
+			responseText: errorText,
 		});
-		throw new Error(`Streaming request failed (HTTP ${response.status}): ${response.text}`);
+		throw new Error(`Streaming request failed (HTTP ${response.status}): ${errorText}`);
 	}
 
+	const responseText = await response.text();
+
 	// Parse SSE events from response text
-	const events = parseSSEEvents(response.text);
+	const events = parseSSEEvents(responseText);
 	let accumulatedText = '';
 
 	for (const event of events) {
