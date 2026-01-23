@@ -4,23 +4,28 @@
 
 ## Obsidian Plugin Release Rules
 
-### 1. Version Format
-- Use `X.Y.Z` format (e.g., `1.7.0`)
-- Versions must match across package.json, manifest.json, and versions.json
+### 1. Version Format (Semantic Versioning)
+Version follows `MAJOR.MINOR.PATCH` format:
 
-### 2. Tag Format
-- Tags use the version number **without "v" prefix**: `1.7.0`
-- Obsidian uses the manifest.json version value directly as the tag name
-- Example: `git tag -a 1.7.0 -m "1.7.0 release"`
+| Component | When to Increment | Example |
+|-----------|-------------------|---------|
+| **MAJOR** | Breaking changes, incompatible API changes | `1.0.0` → `2.0.0` |
+| **MINOR** | New features, backward compatible | `1.0.0` → `1.1.0` |
+| **PATCH** | Bug fixes, backward compatible | `1.0.0` → `1.0.1` |
 
-### 3. Required Release Files
+Rules:
+- Versions must match across `package.json`, `manifest.json`, and `versions.json`
+- Tags use the version number **without "v" prefix**: `1.7.0` (not `v1.7.0`)
+- Obsidian uses the manifest.json version value directly as the GitHub tag name
+
+### 2. Required Release Files
 Every release must include:
 - `main.js` - Built plugin code
 - `manifest.json` - Plugin metadata
 - `styles.css` - Plugin styles
 - `versions.json` - Version compatibility map
 
-### 4. Release Sequence
+### 3. Release Sequence
 1. Update versions in package.json, manifest.json, versions.json
 2. Commit and push changes
 3. Build: `yarn build`
@@ -38,7 +43,7 @@ gh release create X.Y.Z \
   ./versions.json
 ```
 
-### 5. Release Verification
+### 4. Release Verification
 Verify the download URL works after release:
 ```bash
 curl -sI "https://github.com/GoBeromsu/Metadata-Auto-Classifier/releases/download/X.Y.Z/manifest.json"
