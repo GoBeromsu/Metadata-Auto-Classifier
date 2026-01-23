@@ -22,25 +22,27 @@ export default [
 			unicorn,
 		},
 		settings: {
+			// Module boundary definitions
+			// Structure: provider/ | classifier/ | settings/ | lib/
 			'boundaries/elements': [
 				{
-					type: 'api',
-					pattern: 'src/api/**',
+					type: 'provider',
+					pattern: 'src/provider/**',
 					mode: 'folder',
 				},
 				{
-					type: 'ui',
-					pattern: 'src/ui/**',
+					type: 'classifier',
+					pattern: 'src/classifier/**',
 					mode: 'folder',
 				},
 				{
-					type: 'frontmatter',
-					pattern: 'src/frontmatter/**',
+					type: 'settings',
+					pattern: 'src/settings/**',
 					mode: 'folder',
 				},
 				{
-					type: 'utils',
-					pattern: 'src/utils/**',
+					type: 'lib',
+					pattern: 'src/lib/**',
 					mode: 'folder',
 				},
 				{
@@ -49,16 +51,22 @@ export default [
 					mode: 'file',
 				},
 			],
+			// Dependency rules between modules
 			'boundaries/rules': [
 				{
-					from: 'ui',
-					disallow: ['api'],
-					message: 'UI components should not directly import API modules',
+					from: 'settings',
+					disallow: ['provider'],
+					message: 'settings cannot import provider directly. Use classifier instead.',
 				},
 				{
-					from: 'api',
-					disallow: ['ui'],
-					message: 'API modules should not import UI components',
+					from: 'provider',
+					disallow: ['settings', 'classifier'],
+					message: 'provider is pure API layer. No UI/business logic dependency.',
+				},
+				{
+					from: 'lib',
+					disallow: ['provider', 'classifier', 'settings'],
+					message: 'lib is pure utility. No domain module dependency.',
 				},
 			],
 		},
@@ -87,20 +95,32 @@ export default [
 			},
 		},
 		rules: {
-			// Original rules from .eslintrc
+			// Disable base rules (use TypeScript versions)
 			'no-unused-vars': 'off',
 			'@typescript-eslint/no-unused-vars': ['error', { args: 'none' }],
 			'@typescript-eslint/ban-ts-comment': 'off',
 			'no-prototype-builtins': 'off',
 			'@typescript-eslint/no-empty-function': 'off',
 
-			// Allow any and require for existing code compatibility
+			// Legacy compatibility
 			'@typescript-eslint/no-explicit-any': 'off',
 			'@typescript-eslint/no-require-imports': 'off',
 
+			// Type safety
 			'no-fallthrough': 'error',
 			'@typescript-eslint/no-floating-promises': 'warn',
-			'@typescript-eslint/explicit-function-return-type': 'warn',
+
+			// Return type: required for declarations, optional for callbacks
+			'@typescript-eslint/explicit-function-return-type': [
+				'warn',
+				{
+					allowExpressions: true,
+					allowHigherOrderFunctions: true,
+					allowTypedFunctionExpressions: true,
+				},
+			],
+
+			// Code quality
 			'sonarjs/no-duplicate-string': 'warn',
 			'import/no-cycle': 'error',
 			'boundaries/element-types': 'warn',
