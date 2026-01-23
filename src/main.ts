@@ -1,12 +1,11 @@
 import type { TFile } from 'obsidian';
 import { Plugin } from 'obsidian';
-import { CommonNotice } from 'ui/components/common/CommonNotice';
-import type { ProviderConfig } from './api/types';
-import type { FrontmatterField } from './frontmatter/types';
-import { ClassificationService, CommandService } from './services';
-import type { AutoClassifierSettings } from './ui';
-import { AutoClassifierSettingTab } from './ui';
-import { DEFAULT_FRONTMATTER_SETTING, DEFAULT_SETTINGS } from './utils/constants';
+import { ClassificationService, CommandService } from './classifier';
+import { DEFAULT_FRONTMATTER_SETTING, DEFAULT_SETTINGS } from './constants';
+import { Notice } from './settings/components/Notice';
+import type { AutoClassifierSettings } from './settings';
+import { AutoClassifierSettingTab } from './settings';
+import type { FrontmatterField, ProviderConfig } from './types';
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
@@ -19,7 +18,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			this.setupCommand();
 		} catch (error) {
 			console.error('Failed to setup commands:', error);
-			CommonNotice.error(new Error('Plugin initialization failed: could not setup commands'));
+			Notice.error(new Error('Plugin initialization failed: could not setup commands'));
 		}
 		this.addSettingTab(new AutoClassifierSettingTab(this));
 	}
@@ -51,7 +50,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		const currentFile = this.app.workspace.getActiveFile();
 		if (!currentFile) {
 			const error = new Error('No active file.');
-			CommonNotice.error(error);
+			Notice.error(error);
 			return;
 		}
 
@@ -60,14 +59,14 @@ export default class AutoClassifierPlugin extends Plugin {
 			selectedProvider = this.getSelectedProvider();
 		} catch {
 			const error = new Error('No provider selected.');
-			CommonNotice.error(error);
+			Notice.error(error);
 			return;
 		}
 
 		const frontmatter = this.settings.frontmatter.find((fm) => fm.id === frontmatterId);
 		if (!frontmatter) {
 			const error = new Error(`No setting found for frontmatter ID ${frontmatterId}.`);
-			CommonNotice.error(error);
+			Notice.error(error);
 			return;
 		}
 
