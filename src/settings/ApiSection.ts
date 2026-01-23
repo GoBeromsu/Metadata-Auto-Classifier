@@ -1,5 +1,6 @@
-import type AutoClassifierPlugin from 'main';
 import { App } from 'obsidian';
+
+import type AutoClassifierPlugin from '../main';
 import { ClassificationRuleSection } from './ClassificationRuleSection';
 import { ModelSection } from './ModelSection';
 import { ProviderSection } from './ProviderSection';

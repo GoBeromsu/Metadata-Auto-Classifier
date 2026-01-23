@@ -1,6 +1,5 @@
-import type { FrontmatterField } from 'frontmatter/types';
-import { BaseSettingsComponent } from 'ui/components/BaseSettings';
-import type { FrontmatterActions, SettingsComponentOptions } from 'ui/types';
+import type { FrontmatterActions, FrontmatterField, SettingsComponentOptions } from '../types';
+import { BaseSettingsComponent } from './components/BaseSettings';
 
 export class Tag extends BaseSettingsComponent {
 	protected readonly options: SettingsComponentOptions = {

@@ -1,11 +1,12 @@
-import type { Model, ProviderConfig, ProviderPreset } from 'api/types';
 import type { App } from 'obsidian';
 import { ButtonComponent, Modal } from 'obsidian';
-import { CommonNotice } from 'ui/components/common/CommonNotice';
-import type { DropdownOption } from 'ui/components/common/CommonSetting';
-import { CommonSetting } from 'ui/components/common/CommonSetting';
-import { ModalAccessibilityHelper } from 'ui/utils/ModalAccessibilityHelper';
-import { getProviderPresets } from 'utils';
+
+import { getProviderPresets } from '../../lib';
+import type { Model, ProviderConfig, ProviderPreset } from '../../types';
+import { ModalAccessibilityHelper } from '../components/ModalAccessibilityHelper';
+import { Notice } from '../components/Notice';
+import type { DropdownOption } from '../components/Setting';
+import { Setting as CommonSetting } from '../components/Setting';
 
 export interface ModelModalProps {
 	providers: ProviderConfig[];
@@ -293,7 +294,7 @@ export class ModelModal extends Modal {
 			.setButtonText('Save')
 			.setCta()
 			.onClick(async () => {
-				const notice = CommonNotice.startProgress('Saving model...');
+				const notice = Notice.startProgress('Saving model...');
 				saveBtn.setDisabled(true);
 				try {
 					if (this.validateForm()) {
@@ -317,7 +318,7 @@ export class ModelModal extends Modal {
 						this.close();
 					}
 				} finally {
-					CommonNotice.endProgress(notice);
+					Notice.endProgress(notice);
 					saveBtn.setDisabled(false);
 				}
 			});
@@ -332,17 +333,17 @@ export class ModelModal extends Modal {
 
 	private validateForm(): boolean {
 		if (!this.selectedProvider) {
-			CommonNotice.validationError('Model', 'Provider is required');
+			Notice.validationError('Model', 'Provider is required');
 			return false;
 		}
 
 		if (!this.modelId.trim()) {
-			CommonNotice.validationError('Model', 'Model ID is required');
+			Notice.validationError('Model', 'Model ID is required');
 			return false;
 		}
 
                 if (!this.modelName.trim()) {
-                        CommonNotice.validationError('Model', 'Display name is required');
+                        Notice.validationError('Model', 'Display name is required');
                         return false;
                 }
 

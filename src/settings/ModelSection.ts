@@ -1,10 +1,11 @@
-import { testModel } from 'api';
-import type { Model, ProviderConfig } from 'api/types';
-import type AutoClassifierPlugin from 'main';
 import type { App } from 'obsidian';
-import { CommonNotice } from 'ui/components/common/CommonNotice';
-import { CommonSetting, DropdownOption } from 'ui/components/common/CommonSetting';
-import { ModelModal, type ModelModalProps } from 'ui/modals/ModelModal';
+
+import type AutoClassifierPlugin from '../main';
+import { testModel } from '../provider';
+import type { Model, ProviderConfig } from '../types';
+import { Notice } from './components/Notice';
+import { DropdownOption, Setting } from './components/Setting';
+import { ModelModal, type ModelModalProps } from './modals/ModelModal';
 
 export class ModelSection {
 	constructor(
@@ -20,7 +21,7 @@ export class ModelSection {
 		this.renderModelSelectionDropdown(modelSection, providers, selectedModel);
 		this.renderModelList(modelSection, providers, selectedModel);
 
-		CommonSetting.create(modelSection, {
+		Setting.create(modelSection, {
 			name: '',
 			button: {
 				text: '+ Add model',
@@ -57,7 +58,7 @@ export class ModelSection {
 		const currentValue =
 			currentProvider && selectedModel ? `${currentProvider}::${selectedModel}` : '';
 
-		CommonSetting.create(containerEl, {
+		Setting.create(containerEl, {
 			name: 'Selected Model',
 			desc: 'Choose the model to use for classification',
 			dropdown: {
@@ -94,7 +95,7 @@ export class ModelSection {
 
 				const displayName = isActive ? `${config.name} ✓` : config.name;
 
-				CommonSetting.create(containerEl, {
+				Setting.create(containerEl, {
 					name: displayName,
 					desc: provider.name,
 					buttons: [
@@ -105,14 +106,14 @@ export class ModelSection {
 								try {
 									const success = await testModel(provider, config.id);
 									if (success) {
-										CommonNotice.success(`${config.name} connection test successful!`);
+										Notice.success(`${config.name} connection test successful!`);
 									} else {
-										CommonNotice.error(
+										Notice.error(
 											new Error(`${config.name} connection test failed!`)
 										);
 									}
 								} catch (error) {
-									CommonNotice.error(
+									Notice.error(
 										error instanceof Error ? error : new Error('Test failed')
 									);
 								}

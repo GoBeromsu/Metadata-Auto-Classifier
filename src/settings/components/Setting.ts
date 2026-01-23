@@ -1,4 +1,4 @@
-import { ExtraButtonComponent, Setting, TextAreaComponent, TextComponent } from 'obsidian';
+import { ExtraButtonComponent, Setting as ObsidianSetting, TextAreaComponent, TextComponent } from 'obsidian';
 
 export interface ButtonProps {
 	text?: string;
@@ -48,7 +48,7 @@ export interface TextAreaConfig {
 	onChange: (value: string) => void;
 }
 
-export interface CommonSettingProps {
+export interface SettingProps {
 	name: string;
 	desc?: string;
 	className?: string;
@@ -67,10 +67,10 @@ export interface CommonSettingProps {
 	buttons?: ButtonProps[];
 }
 
-export class CommonSetting {
-	private setting: Setting;
+export class Setting {
+	private setting: ObsidianSetting;
 
-	constructor(containerEl: HTMLElement, props: CommonSettingProps) {
+	constructor(containerEl: HTMLElement, props: SettingProps) {
 		const {
 			name,
 			desc,
@@ -86,7 +86,7 @@ export class CommonSetting {
 			buttons,
 		} = props;
 
-		this.setting = new Setting(containerEl);
+		this.setting = new ObsidianSetting(containerEl);
 		this.setting.setName(name);
 
 		if (desc) this.setting.setDesc(desc);
@@ -118,8 +118,8 @@ export class CommonSetting {
 	 * Static factory method for creating settings with side effects.
 	 * This method clearly indicates that it performs DOM manipulation and returns void.
 	 */
-	public static create(containerEl: HTMLElement, props: CommonSettingProps): void {
-		new CommonSetting(containerEl, props);
+	public static create(containerEl: HTMLElement, props: SettingProps): void {
+		new Setting(containerEl, props);
 	}
 
 	private initTextInput(textInput: TextInputConfig): void {

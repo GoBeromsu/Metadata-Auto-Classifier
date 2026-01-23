@@ -1,11 +1,11 @@
-import { Notice } from 'obsidian';
+import { Notice as ObsidianNotice } from 'obsidian';
 
 // Maximum duration for progress spinner (30 seconds)
 const MAX_PROGRESS_DURATION_MS = 30000;
 
-export class CommonNotice {
+export class Notice {
 	private static show(message: string, duration: number): void {
-		new Notice(message, duration);
+		new ObsidianNotice(message, duration);
 	}
 
 	/**
@@ -35,12 +35,12 @@ export class CommonNotice {
 		this.show(message, 3000);
 	}
 
-	static startProgress(displayText: string): Notice & { interval?: number; timeout?: number } {
+	static startProgress(displayText: string): ObsidianNotice & { interval?: number; timeout?: number } {
 		const spinChars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 		let spinIndex = 0;
 
 		const noticeText = () => `${spinChars[spinIndex]} ${displayText}`;
-		const notice = new Notice(noticeText(), 0) as Notice & { interval?: number; timeout?: number };
+		const notice = new ObsidianNotice(noticeText(), 0) as ObsidianNotice & { interval?: number; timeout?: number };
 
 		notice.interval = window.setInterval(() => {
 			spinIndex = (spinIndex + 1) % spinChars.length;
@@ -55,7 +55,7 @@ export class CommonNotice {
 		return notice;
 	}
 
-	static endProgress(notice: Notice & { interval?: number; timeout?: number }): void {
+	static endProgress(notice: ObsidianNotice & { interval?: number; timeout?: number }): void {
 		if (notice.interval) {
 			clearInterval(notice.interval);
 		}

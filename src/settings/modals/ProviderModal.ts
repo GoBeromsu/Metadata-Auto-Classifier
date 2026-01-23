@@ -1,10 +1,11 @@
-import type { ProviderConfig } from 'api/types';
 import type { App } from 'obsidian';
 import { ButtonComponent, Modal } from 'obsidian';
-import { CommonNotice } from 'ui/components/common/CommonNotice';
-import { CommonSetting, DropdownOption } from 'ui/components/common/CommonSetting';
-import { ModalAccessibilityHelper } from 'ui/utils/ModalAccessibilityHelper';
-import { getProviderPreset, getProviderPresets } from 'utils';
+
+import { getProviderPreset, getProviderPresets } from '../../lib';
+import type { ProviderConfig } from '../../types';
+import { ModalAccessibilityHelper } from '../components/ModalAccessibilityHelper';
+import { Notice } from '../components/Notice';
+import { Setting as CommonSetting, type DropdownOption } from '../components/Setting';
 
 export class ProviderModal extends Modal {
 	private readonly providerConfig: ProviderConfig;
@@ -157,7 +158,7 @@ export class ProviderModal extends Modal {
 			.setButtonText('Save')
 			.setCta()
 			.onClick(async () => {
-				const notice = CommonNotice.startProgress('Saving provider...');
+				const notice = Notice.startProgress('Saving provider...');
 				saveBtn.setDisabled(true);
 				try {
 					if (this.validateForm()) {
@@ -165,7 +166,7 @@ export class ProviderModal extends Modal {
 						this.close();
 					}
 				} finally {
-					CommonNotice.endProgress(notice);
+					Notice.endProgress(notice);
 					saveBtn.setDisabled(false);
 				}
 			});
@@ -205,7 +206,7 @@ export class ProviderModal extends Modal {
 	private validateForm(): boolean {
 		// Provider name validation
 		if (!this.providerConfig.name.trim()) {
-			CommonNotice.validationError(
+			Notice.validationError(
 				'Provider',
 				'Provider name is required. Please enter a name for your provider.'
 			);
@@ -214,7 +215,7 @@ export class ProviderModal extends Modal {
 
 		// API URL validation
 		if (!this.providerConfig.baseUrl.trim()) {
-			CommonNotice.validationError(
+			Notice.validationError(
 				'Provider',
 				'API URL is required. Please enter a valid API endpoint URL.'
 			);
@@ -225,7 +226,7 @@ export class ProviderModal extends Modal {
 		try {
 			new URL(this.providerConfig.baseUrl);
 		} catch {
-			CommonNotice.validationError(
+			Notice.validationError(
 				'Provider',
 				'Please enter a valid URL (e.g., https://api.example.com/v1/chat/completions)'
 			);

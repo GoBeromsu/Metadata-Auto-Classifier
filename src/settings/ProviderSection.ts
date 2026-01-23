@@ -1,8 +1,9 @@
-import type { ProviderConfig } from 'api/types';
-import type AutoClassifierPlugin from 'main';
 import type { App } from 'obsidian';
-import { CommonSetting } from 'ui/components/common/CommonSetting';
-import { ProviderModal } from 'ui/modals/ProviderModal';
+
+import type AutoClassifierPlugin from '../main';
+import type { ProviderConfig } from '../types';
+import { Setting } from './components/Setting';
+import { ProviderModal } from './modals/ProviderModal';
 
 export class ProviderSection {
 	constructor(
@@ -16,7 +17,7 @@ export class ProviderSection {
 		providerSection.createEl('h3', { text: 'Providers' });
 
 		providers.forEach((provider) => {
-			CommonSetting.create(providerSection, {
+			Setting.create(providerSection, {
 				name: provider.name,
 				buttons: [
 					{
@@ -50,7 +51,7 @@ export class ProviderSection {
 			});
 		});
 
-		CommonSetting.create(providerSection, {
+		Setting.create(providerSection, {
 			name: '',
 			button: {
 				text: '+ Add provider',

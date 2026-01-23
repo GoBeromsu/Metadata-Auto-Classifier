@@ -1,22 +1,13 @@
 import type AutoClassifierPlugin from 'main';
 import { PluginSettingTab } from 'obsidian';
 
-import type { ProviderConfig } from 'api/types';
-import type { FrontmatterField } from 'frontmatter/types';
-import { generateId } from 'utils';
-import { DEFAULT_FRONTMATTER_SETTING } from 'utils/constants';
-import { CommonSetting } from './components/common/CommonSetting';
-import { Api } from './containers/Api';
-import { Frontmatter } from './containers/Frontmatter';
-import { Tag } from './containers/Tag';
-
-export interface AutoClassifierSettings {
-	providers: ProviderConfig[];
-	selectedProvider: string;
-	selectedModel: string;
-        frontmatter: FrontmatterField[];
-	classificationRule: string;
-}
+import type { AutoClassifierSettings, FrontmatterField } from '../types';
+import { generateId } from '../lib';
+import { DEFAULT_FRONTMATTER_SETTING } from '../constants';
+import { Setting } from './components/Setting';
+import { Api } from './ApiSection';
+import { Frontmatter } from './FrontmatterSection';
+import { Tag } from './TagSection';
 
 export class AutoClassifierSettingTab extends PluginSettingTab {
 	plugin: AutoClassifierPlugin;
@@ -45,7 +36,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		CommonSetting.create(containerEl, {
+		Setting.create(containerEl, {
 			name: 'Support Auto Classifier',
 			desc: 'If you find Auto Classifier valuable, consider supporting its development!',
 			heading: true,
@@ -72,7 +63,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		this.frontmatterSetting.display();
 
 		const addButtonContainer = containerEl.createDiv({ cls: 'add-button-container' });
-		CommonSetting.create(addButtonContainer, {
+		Setting.create(addButtonContainer, {
 			name: '',
 			button: {
 				text: '+ Add frontmatter',
@@ -93,6 +84,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 	}
 }
 
+export type { AutoClassifierSettings } from '../types';
 export * from './components/WikiLinkSelector';
 export * from './modals/FrontmatterEditorModal';
 export * from './modals/FrontmatterSelectModal';

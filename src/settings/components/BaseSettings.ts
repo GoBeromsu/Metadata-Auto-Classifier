@@ -1,13 +1,13 @@
-import type { FrontmatterField } from 'frontmatter/types';
-import type AutoClassifierPlugin from 'main';
-import { ConfigurableSettingModal } from 'ui/modals/FrontmatterEditorModal';
+import type { FrontmatterField } from '../../types';
+import type AutoClassifierPlugin from '../../main';
+import { ConfigurableSettingModal } from '../modals/FrontmatterEditorModal';
 import type {
 	FrontmatterActions,
 	FrontmatterEditorModalProps,
 	SettingsComponent,
 	SettingsComponentOptions,
-} from 'ui/types';
-import { CommonSetting } from './common/CommonSetting';
+} from '../../types';
+import { Setting } from './Setting';
 
 export abstract class BaseSettingsComponent implements SettingsComponent {
 	protected abstract readonly options: SettingsComponentOptions;
@@ -40,7 +40,7 @@ export abstract class BaseSettingsComponent implements SettingsComponent {
 			});
 		}
 
-		CommonSetting.create(containerEl, {
+		Setting.create(containerEl, {
 			name: frontmatterSetting.name || 'Please enter name',
 			desc: `Type: ${frontmatterSetting.linkType}, Max: ${frontmatterSetting.count?.max ?? 5}, Overwrite: ${frontmatterSetting.overwrite}`,
 			buttons: button,

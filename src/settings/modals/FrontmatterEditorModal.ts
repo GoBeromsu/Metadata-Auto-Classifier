@@ -1,11 +1,11 @@
-import { deepCloneFrontmatterField } from 'frontmatter';
-import type { FrontmatterField, LinkType } from 'frontmatter/types';
 import type { App, TextAreaComponent } from 'obsidian';
 import { Modal, Setting, TextAreaComponent as ObsidianTextArea } from 'obsidian';
-import { WikiLinkSelector } from 'ui/components/WikiLinkSelector';
-import { CommonNotice } from 'ui/components/common/CommonNotice';
-import { CommonSetting } from 'ui/components/common/CommonSetting';
-import type { FrontmatterEditorModalProps } from 'ui/types';
+
+import { deepCloneFrontmatterField } from '../../lib/frontmatter';
+import type { FrontmatterEditorModalProps, FrontmatterField, LinkType } from '../../types';
+import { Notice } from '../components/Notice';
+import { Setting as CommonSetting } from '../components/Setting';
+import { WikiLinkSelector } from '../components/WikiLinkSelector';
 
 export class ConfigurableSettingModal extends Modal {
 	private readonly props: FrontmatterEditorModalProps;
@@ -189,13 +189,13 @@ export class ConfigurableSettingModal extends Modal {
 					.setButtonText('Save')
 					.setCta()
 					.onClick(async () => {
-						const notice = CommonNotice.startProgress('Saving settings...');
+						const notice = Notice.startProgress('Saving settings...');
 						btn.setDisabled(true);
 						try {
 							await this.props.onSave(this.localState);
 							this.close();
 						} finally {
-							CommonNotice.endProgress(notice);
+							Notice.endProgress(notice);
 						}
 					})
 			);

@@ -1,6 +1,7 @@
 import type { App } from 'obsidian';
 import { FuzzySuggestModal } from 'obsidian';
-import type { FrontmatterRef } from 'ui/types';
+
+import type { FrontmatterRef } from '../../types';
 
 export class FrontmatterSelectModal extends FuzzySuggestModal<FrontmatterRef> {
 	constructor(

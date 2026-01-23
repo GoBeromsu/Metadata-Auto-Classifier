@@ -1,7 +1,8 @@
-import { DEFAULT_TASK_TEMPLATE } from 'api/prompt';
-import type AutoClassifierPlugin from 'main';
 import { TextAreaComponent } from 'obsidian';
-import { CommonSetting } from 'ui/components/common/CommonSetting';
+
+import { DEFAULT_TASK_TEMPLATE } from '../constants';
+import type AutoClassifierPlugin from '../main';
+import { Setting } from './components/Setting';
 
 export class ClassificationRuleSection {
 	constructor(
@@ -18,7 +19,7 @@ export class ClassificationRuleSection {
 		// eslint-disable-next-line prefer-const
 		let textAreaComponent: TextAreaComponent;
 
-		CommonSetting.create(textAreaContainer, {
+		Setting.create(textAreaContainer, {
 			name: 'Classification Rule',
 			desc: 'Customize the prompt template for classification requests',
 			button: {
