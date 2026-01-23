@@ -87,8 +87,22 @@ export function createMockTFile(path: string, basename: string): TFile {
 
 // Basic App mock for components relying on Obsidian's App
 export class App {
-	vault = { getMarkdownFiles: jest.fn().mockReturnValue([]) } as any;
+	vault = {
+		getMarkdownFiles: jest.fn().mockReturnValue([]),
+		read: jest.fn().mockResolvedValue(''),
+		modify: jest.fn().mockResolvedValue(undefined),
+		create: jest.fn().mockResolvedValue(undefined),
+		delete: jest.fn().mockResolvedValue(undefined),
+	} as any;
 	metadataCache = new MetadataCache();
+	workspace = {
+		getActiveFile: jest.fn().mockReturnValue(null),
+		on: jest.fn(),
+		off: jest.fn(),
+	} as any;
+	fileManager = {
+		processFrontMatter: jest.fn(),
+	} as any;
 }
 
 export class FuzzySuggestModal<T> {
@@ -108,7 +122,7 @@ export class FuzzySuggestModal<T> {
 // ---------------------- UI Mocks ----------------------
 
 export class ButtonComponent {
-	buttonEl = { addClass: jest.fn() } as any;
+	buttonEl = { addClass: jest.fn(), setAttribute: jest.fn() } as any;
 	setButtonText = jest.fn().mockReturnThis();
 	setIcon = jest.fn().mockReturnThis();
 	setTooltip = jest.fn().mockReturnThis();
@@ -120,7 +134,7 @@ export class ButtonComponent {
 }
 
 export class ExtraButtonComponent {
-	extraSettingsEl = { addClass: jest.fn() } as any;
+	extraSettingsEl = { addClass: jest.fn(), setAttribute: jest.fn() } as any;
 	setIcon = jest.fn().mockReturnThis();
 	setTooltip = jest.fn().mockReturnThis();
 	setDisabled = jest.fn().mockReturnThis();
@@ -163,4 +177,107 @@ export class TextAreaComponent {
 	setPlaceholder = jest.fn().mockReturnThis();
 	setValue = jest.fn().mockReturnThis();
 	onChange = jest.fn().mockReturnThis();
+}
+
+// Helper to create a recursive mock element
+function createMockElement(): any {
+	const mockElement: any = {
+		empty: jest.fn(),
+		style: {},
+		classList: {
+			add: jest.fn(),
+			remove: jest.fn(),
+		},
+		setAttribute: jest.fn(),
+		querySelector: jest.fn().mockReturnValue(null),
+		querySelectorAll: jest.fn().mockReturnValue([]),
+		addEventListener: jest.fn(),
+		appendChild: jest.fn(),
+		value: '',
+		checked: false,
+	};
+	// Recursive mock for createEl and createDiv
+	mockElement.createEl = jest.fn().mockImplementation(() => createMockElement());
+	mockElement.createDiv = jest.fn().mockImplementation(() => createMockElement());
+	return mockElement;
+}
+
+// Modal mock
+export class Modal {
+	app: App;
+	contentEl: HTMLElement;
+	modalEl: HTMLElement;
+
+	constructor(app: App) {
+		this.app = app;
+		this.contentEl = createMockElement() as any;
+		this.modalEl = {
+			addClass: jest.fn(),
+		} as any;
+	}
+
+	open = jest.fn();
+	close = jest.fn();
+	onOpen(): void {}
+	onClose(): void {}
+}
+
+// Plugin mock
+export class Plugin {
+	app: App;
+	manifest: any = { id: 'test-plugin', name: 'Test Plugin', version: '1.0.0' };
+
+	constructor(app?: App) {
+		this.app = app || new App();
+	}
+
+	loadData = jest.fn().mockResolvedValue({});
+	saveData = jest.fn().mockResolvedValue(undefined);
+	addCommand = jest.fn();
+	addSettingTab = jest.fn();
+	registerCommand = jest.fn();
+
+	onload(): Promise<void> | void {}
+	onunload(): void {}
+}
+
+// PluginSettingTab mock
+export class PluginSettingTab {
+	app: App;
+	plugin: Plugin;
+	containerEl: HTMLElement;
+
+	constructor(app: App, plugin: Plugin) {
+		this.app = app;
+		this.plugin = plugin;
+		this.containerEl = {
+			empty: jest.fn(),
+			createEl: jest.fn(),
+			createDiv: jest.fn(),
+		} as any;
+	}
+
+	display(): void {}
+	hide(): void {}
+}
+
+// Vault mock
+export class Vault {
+	getMarkdownFiles = jest.fn().mockReturnValue([]);
+	read = jest.fn().mockResolvedValue('');
+	modify = jest.fn().mockResolvedValue(undefined);
+	create = jest.fn().mockResolvedValue(undefined);
+	delete = jest.fn().mockResolvedValue(undefined);
+}
+
+// FileManager mock
+export class FileManager {
+	processFrontMatter = jest.fn();
+}
+
+// Workspace mock
+export class Workspace {
+	getActiveFile = jest.fn().mockReturnValue(null);
+	on = jest.fn();
+	off = jest.fn();
 }

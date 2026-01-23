@@ -83,7 +83,7 @@ describe('Api Container - Regression Tests', () => {
 			expect(mockContainer.createEl).toHaveBeenCalledWith('h2', { text: 'API Configuration' });
 			expect(mockContainer.createEl).toHaveBeenCalledWith('div', { cls: 'provider-section' });
 			expect(mockContainer.createEl).toHaveBeenCalledWith('div', { cls: 'model-section' });
-			expect(mockContainer.createDiv).toHaveBeenCalledWith({ cls: 'custom-prompt-container' });
+			expect(mockContainer.createDiv).toHaveBeenCalledWith({ cls: 'custom-prompt-container mac-custom-prompt-container' });
 		});
 	});
 
