@@ -105,9 +105,33 @@ const parseSSEEvents = (text: string): SSEEvent[] => {
 };
 
 /**
+ * Extract error details from requestUrl exceptions
+ * Obsidian's requestUrl throws on 4xx/5xx with limited info
+ */
+const extractErrorDetails = (error: unknown): { status?: number; message: string } => {
+	if (error instanceof Error) {
+		// Try to extract status from error message (e.g., "Request failed, status 400")
+		const statusMatch = error.message.match(/status\s*(\d{3})/i);
+		const status = statusMatch ? parseInt(statusMatch[1], 10) : undefined;
+		return { status, message: error.message };
+	}
+
+	// Check if error object has useful properties
+	if (typeof error === 'object' && error !== null) {
+		const err = error as Record<string, unknown>;
+		return {
+			status: typeof err.status === 'number' ? err.status : undefined,
+			message: String(err.message || err.error || JSON.stringify(error)),
+		};
+	}
+
+	return { message: String(error) };
+};
+
+/**
  * Send a streaming request and accumulate text from SSE events
  * Uses provider-specific event parser to extract text deltas
- * Uses fetch API instead of Obsidian's requestUrl for better error handling
+ * Uses Obsidian's requestUrl for CORS bypass with enhanced error handling
  */
 export const sendStreamingRequest = async (
 	url: string,
@@ -125,31 +149,43 @@ export const sendStreamingRequest = async (
 		body,
 	});
 
-	// Use fetch instead of Obsidian's requestUrl for better error handling
-	// requestUrl throws on 4xx errors, making it impossible to read error body
-	const response = await fetch(url, {
-		method: 'POST',
-		headers: {
-			...headers,
-			Accept: 'text/event-stream',
-		},
-		body: JSON.stringify(body),
-	});
+	let response: { status: number; text: string };
 
-	if (!response.ok) {
-		const errorText = await response.text();
+	try {
+		response = await requestUrl({
+			url,
+			method: 'POST',
+			headers: {
+				...headers,
+				Accept: 'text/event-stream',
+			},
+			body: JSON.stringify(body),
+		});
+	} catch (error) {
+		// requestUrl throws on 4xx/5xx errors - extract what info we can
+		const errorDetails = extractErrorDetails(error);
+		console.error('[API Streaming Error] Request threw:', {
+			url,
+			status: errorDetails.status,
+			message: errorDetails.message,
+			rawError: error,
+		});
+		throw new Error(
+			`Streaming request failed${errorDetails.status ? ` (HTTP ${errorDetails.status})` : ''}: ${errorDetails.message}`
+		);
+	}
+
+	if (response.status >= 400) {
 		console.error('[API Streaming Error]', {
 			status: response.status,
 			url,
-			responseText: errorText,
+			responseText: response.text,
 		});
-		throw new Error(`Streaming request failed (HTTP ${response.status}): ${errorText}`);
+		throw new Error(`Streaming request failed (HTTP ${response.status}): ${response.text}`);
 	}
 
-	const responseText = await response.text();
-
 	// Parse SSE events from response text
-	const events = parseSSEEvents(responseText);
+	const events = parseSSEEvents(response.text);
 	let accumulatedText = '';
 
 	for (const event of events) {
