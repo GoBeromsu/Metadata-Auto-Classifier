@@ -1,6 +1,6 @@
 {
 	"name": "metadata-auto-classifier",
-	"version": "1.5.0",
+	"version": "1.6.0",
 	"description": "Metadata Auto Classifier is an innovative Obsidian plugin that harnesses the power of AI to revolutionize your note-taking experience. By automatically generating and classifying metadata for your notes, this plugin streamlines your workflow and enhances the organization of your knowledge base.",
 	"main": "main.js",
 	"scripts": {
@@ -12,7 +12,8 @@
 		"test:coverage": "jest --coverage",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
-		"version": ""
+		"version": "",
+		"prepare": "husky"
 	},
 	"keywords": [
 		"obsidian",
@@ -37,12 +38,20 @@
 		"eslint-plugin-import": "^2.31.0",
 		"eslint-plugin-sonarjs": "^3.0.2",
 		"eslint-plugin-unicorn": "^59.0.1",
+		"husky": "^9.1.7",
 		"jest": "^29.7.0",
+		"lint-staged": "^16.2.7",
 		"obsidian": "latest",
 		"prettier": "^3.5.3",
 		"ts-jest": "^29.3.4",
 		"tslib": "2.6.2",
 		"typescript": "^5.8.3",
 		"typescript-eslint": "^8.33.0"
+	},
+	"lint-staged": {
+		"src/**/*.ts": [
+			"eslint --fix",
+			"prettier --write"
+		]
 	}
 }
