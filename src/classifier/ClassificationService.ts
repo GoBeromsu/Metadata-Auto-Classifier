@@ -1,11 +1,11 @@
-import { processAPIRequest } from 'api';
 import type { TFile, App } from 'obsidian';
-import { CommonNotice } from 'ui/components/common/CommonNotice';
-import { COMMON_CONSTANTS } from '../api/constants';
-import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from '../api/prompt';
-import type { ProviderConfig, StructuredOutput } from '../api/types';
-import { getContentWithoutFrontmatter, getFieldValues, insertToFrontMatter } from '../frontmatter';
-import type { FrontmatterField, FrontMatter } from '../frontmatter/types';
+
+import { COMMON_CONSTANTS } from '../constants';
+import { getContentWithoutFrontmatter, getFieldValues, insertToFrontMatter } from '../lib/frontmatter';
+import { processAPIRequest } from '../provider';
+import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from '../provider/prompt';
+import { Notice } from '../settings/components/Notice';
+import type { FrontmatterField, FrontMatter, ProviderConfig, StructuredOutput } from '../types';
 
 export interface ClassificationContext {
 	app: App;
@@ -31,7 +31,7 @@ export class ClassificationService {
 		await this.ensureRefsExist(frontmatter);
 		const validation = this.validateClassificationInput(frontmatter, fileNameWithoutExt);
 		if (!validation.isValid) {
-			CommonNotice.error(new Error(validation.errorMessage!));
+			Notice.error(new Error(validation.errorMessage!));
 			return;
 		}
 
@@ -120,7 +120,7 @@ export class ClassificationService {
 			this.context.classificationRule
 		);
 
-		return CommonNotice.withProgress(currentFile.name, frontmatter.name, () =>
+		return Notice.withProgress(currentFile.name, frontmatter.name, () =>
 			processAPIRequest(
 				DEFAULT_SYSTEM_ROLE,
 				promptTemplate,
@@ -155,12 +155,12 @@ export class ClassificationService {
 				...apiResponse.output.map((tag) => `- ${tag}`),
 			].join('\n');
 
-			CommonNotice.success(successMessage);
+			Notice.success(successMessage);
 		} else {
 			const error = new Error(
 				`Tagging ${fileNameWithoutExt} (${frontmatter.name}) - Low reliability (${apiResponse.reliability})`
 			);
-			CommonNotice.error(error);
+			Notice.error(error);
 		}
 	}
 }

@@ -1,5 +1,6 @@
 import type { Plugin } from 'obsidian';
-import type { FrontmatterField } from '../frontmatter/types';
+
+import type { FrontmatterField } from '../types';
 
 export interface CommandHandler {
 	processFrontmatter: (frontmatterId: number) => Promise<void>;
