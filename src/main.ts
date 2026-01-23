@@ -1,6 +1,6 @@
 import type { TFile } from 'obsidian';
 import { Plugin } from 'obsidian';
-import { CodexOAuth, isTokenExpired } from './auth';
+import { CodexOAuth, isTokenExpired } from './provider/auth';
 import { ClassificationService, CommandService } from './classifier';
 import { DEFAULT_FRONTMATTER_SETTING, DEFAULT_SETTINGS } from './constants';
 import { Notice } from './settings/components/Notice';
@@ -15,7 +15,8 @@ export default class AutoClassifierPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		await this.refreshCodexTokenIfNeeded();
+		await this.migrateSettings();
+		await this.refreshOAuthTokensIfNeeded();
 		try {
 			this.setupCommand();
 		} catch (error) {
@@ -26,34 +27,31 @@ export default class AutoClassifierPlugin extends Plugin {
 	}
 
 	/**
-	 * Refresh Codex OAuth tokens if they are expired or about to expire
+	 * Refresh OAuth tokens for all providers that use OAuth authentication
 	 */
-	private async refreshCodexTokenIfNeeded(): Promise<void> {
-		const tokens = this.settings.codexConnection;
-		if (!tokens) return;
+	private async refreshOAuthTokensIfNeeded(): Promise<void> {
+		const oauthProviders = this.settings.providers.filter((p) => p.authType === 'oauth' && p.oauth);
 
-		// Check if tokens are expired or will expire within 5 minutes
-		if (!isTokenExpired(tokens)) return;
+		if (oauthProviders.length === 0) return;
 
-		try {
-			const codexOAuth = new CodexOAuth();
-			const newTokens = await codexOAuth.refreshTokens(tokens);
+		const codexOAuth = new CodexOAuth();
+		let settingsChanged = false;
 
-			// Update stored tokens
-			this.settings.codexConnection = newTokens;
+		for (const provider of oauthProviders) {
+			if (!provider.oauth || !isTokenExpired(provider.oauth)) continue;
 
-			// Also update the Codex provider if it exists
-			const codexProvider = this.settings.providers.find((p) => p.name === 'Codex');
-			if (codexProvider) {
-				codexProvider.oauth = newTokens;
+			try {
+				const newTokens = await codexOAuth.refreshTokens(provider.oauth);
+				provider.oauth = newTokens;
+				settingsChanged = true;
+				console.log(`OAuth tokens refreshed for provider: ${provider.name}`);
+			} catch (error) {
+				console.error(`Failed to refresh OAuth tokens for ${provider.name}:`, error);
 			}
+		}
 
+		if (settingsChanged) {
 			await this.saveSettings();
-			console.log('Codex tokens refreshed successfully');
-		} catch (error) {
-			console.error('Failed to refresh Codex tokens:', error);
-			// Don't show notice on startup to avoid confusion
-			// User will see error when they try to use Codex
 		}
 	}
 
@@ -134,6 +132,31 @@ export default class AutoClassifierPlugin extends Plugin {
 		}));
 
 		await this.saveSettings();
+	}
+
+	/**
+	 * Migrate legacy settings to new format
+	 */
+	private async migrateSettings(): Promise<void> {
+		let settingsChanged = false;
+
+		// Migrate legacy codexConnection to Codex provider's oauth field
+		if (this.settings.codexConnection) {
+			const codexProvider = this.settings.providers.find((p) => p.name === 'Codex');
+			if (codexProvider && !codexProvider.oauth) {
+				codexProvider.oauth = this.settings.codexConnection;
+				codexProvider.authType = 'oauth';
+				settingsChanged = true;
+				console.log('Migrated codexConnection to Codex provider oauth field');
+			}
+			// Remove legacy field
+			delete this.settings.codexConnection;
+			settingsChanged = true;
+		}
+
+		if (settingsChanged) {
+			await this.saveSettings();
+		}
 	}
 
 	async saveSettings(): Promise<void> {

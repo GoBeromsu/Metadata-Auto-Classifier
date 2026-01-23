@@ -1,4 +1,4 @@
-import { CODEX_OAUTH } from './codex-constants';
+import { CODEX_OAUTH } from './oauth-constants';
 import type { OAuthCallbackResponse } from './types';
 
 // Types for Node.js http module (imported dynamically)

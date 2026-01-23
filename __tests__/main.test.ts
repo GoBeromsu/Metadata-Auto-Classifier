@@ -1,7 +1,20 @@
 import AutoClassifierPlugin from 'main';
 import { App, TFile, createMockTFile } from 'obsidian';
 import { DEFAULT_SETTINGS, DEFAULT_FRONTMATTER_SETTING } from '../src/constants';
-import type { ProviderConfig, FrontmatterField } from 'types';
+import type { ProviderConfig, FrontmatterField, OAuthTokens } from 'types';
+
+// Mock the provider/auth module
+jest.mock('provider/auth', () => ({
+	CodexOAuth: jest.fn().mockImplementation(() => ({
+		refreshTokens: jest.fn().mockResolvedValue({
+			accessToken: 'new-access-token',
+			refreshToken: 'new-refresh-token',
+			expiresAt: Math.floor(Date.now() / 1000) + 3600,
+			accountId: 'test-account-id',
+		}),
+	})),
+	isTokenExpired: jest.fn().mockReturnValue(false),
+}));
 
 // Mock the provider module
 jest.mock('provider', () => ({
@@ -433,6 +446,207 @@ describe('AutoClassifierPlugin', () => {
 
 			// Verify the method exists and has correct signature
 			expect(typeof plugin.registerCommand).toBe('function');
+		});
+	});
+
+	describe('migrateSettings', () => {
+		const mockOAuthTokens: OAuthTokens = {
+			accessToken: 'test-access-token',
+			refreshToken: 'test-refresh-token',
+			expiresAt: Math.floor(Date.now() / 1000) + 3600,
+			accountId: 'test-account-id',
+		};
+
+		it('should migrate codexConnection to Codex provider oauth field', async () => {
+			// Setup: Create a Codex provider without oauth and add legacy codexConnection
+			const codexProvider: ProviderConfig = {
+				name: 'Codex',
+				apiKey: '',
+				baseUrl: 'https://codex.api',
+				models: [],
+				temperature: 0.7,
+			};
+			plugin.settings.providers = [codexProvider];
+			(plugin.settings as any).codexConnection = mockOAuthTokens;
+
+			(plugin.loadData as jest.Mock).mockResolvedValue({
+				providers: [codexProvider],
+				codexConnection: mockOAuthTokens,
+			});
+
+			await plugin.loadSettings();
+			// migrateSettings is called in onload, but we can simulate it
+			// by checking if the migration would work
+
+			// Access the private method via any
+			const migrateSettings = (plugin as any).migrateSettings.bind(plugin);
+			await migrateSettings();
+
+			// Check that codexConnection was migrated
+			expect(plugin.settings.providers[0].oauth).toEqual(mockOAuthTokens);
+			expect(plugin.settings.providers[0].authType).toBe('oauth');
+			expect((plugin.settings as any).codexConnection).toBeUndefined();
+		});
+
+		it('should not overwrite existing oauth field in Codex provider', async () => {
+			const existingOAuth: OAuthTokens = {
+				accessToken: 'existing-token',
+				refreshToken: 'existing-refresh',
+				expiresAt: Math.floor(Date.now() / 1000) + 7200,
+				accountId: 'existing-account',
+			};
+
+			const codexProvider: ProviderConfig = {
+				name: 'Codex',
+				apiKey: '',
+				baseUrl: 'https://codex.api',
+				models: [],
+				temperature: 0.7,
+				authType: 'oauth',
+				oauth: existingOAuth,
+			};
+			plugin.settings.providers = [codexProvider];
+			(plugin.settings as any).codexConnection = mockOAuthTokens;
+
+			const migrateSettings = (plugin as any).migrateSettings.bind(plugin);
+			await migrateSettings();
+
+			// Should keep existing oauth and still remove codexConnection
+			expect(plugin.settings.providers[0].oauth).toEqual(existingOAuth);
+			expect((plugin.settings as any).codexConnection).toBeUndefined();
+		});
+
+		it('should do nothing when no codexConnection exists', async () => {
+			plugin.settings.providers = [mockProvider];
+			delete (plugin.settings as any).codexConnection;
+
+			const saveSpy = jest.spyOn(plugin, 'saveSettings');
+
+			const migrateSettings = (plugin as any).migrateSettings.bind(plugin);
+			await migrateSettings();
+
+			// Should not save settings if no migration needed
+			expect(saveSpy).not.toHaveBeenCalled();
+
+			saveSpy.mockRestore();
+		});
+	});
+
+	describe('refreshOAuthTokensIfNeeded', () => {
+		const { isTokenExpired, CodexOAuth } = require('provider/auth');
+
+		beforeEach(() => {
+			jest.clearAllMocks();
+		});
+
+		it('should not refresh when no OAuth providers exist', async () => {
+			plugin.settings.providers = [mockProvider]; // No OAuth provider
+
+			const refreshOAuthTokensIfNeeded = (plugin as any).refreshOAuthTokensIfNeeded.bind(plugin);
+			await refreshOAuthTokensIfNeeded();
+
+			// CodexOAuth should not be instantiated
+			expect(CodexOAuth).not.toHaveBeenCalled();
+		});
+
+		it('should not refresh when tokens are not expired', async () => {
+			const oauthProvider: ProviderConfig = {
+				name: 'Codex',
+				apiKey: '',
+				baseUrl: 'https://codex.api',
+				models: [],
+				temperature: 0.7,
+				authType: 'oauth',
+				oauth: {
+					accessToken: 'valid-token',
+					refreshToken: 'refresh-token',
+					expiresAt: Math.floor(Date.now() / 1000) + 3600,
+					accountId: 'account-id',
+				},
+			};
+			plugin.settings.providers = [oauthProvider];
+
+			isTokenExpired.mockReturnValue(false);
+
+			const refreshOAuthTokensIfNeeded = (plugin as any).refreshOAuthTokensIfNeeded.bind(plugin);
+			await refreshOAuthTokensIfNeeded();
+
+			// Should check if expired but not refresh
+			const mockCodexOAuthInstance = CodexOAuth.mock.results[0]?.value;
+			expect(mockCodexOAuthInstance?.refreshTokens).not.toHaveBeenCalled();
+		});
+
+		it('should refresh expired tokens and save settings', async () => {
+			const expiredTokens: OAuthTokens = {
+				accessToken: 'expired-token',
+				refreshToken: 'refresh-token',
+				expiresAt: Math.floor(Date.now() / 1000) - 100, // Expired
+				accountId: 'account-id',
+			};
+
+			const oauthProvider: ProviderConfig = {
+				name: 'Codex',
+				apiKey: '',
+				baseUrl: 'https://codex.api',
+				models: [],
+				temperature: 0.7,
+				authType: 'oauth',
+				oauth: expiredTokens,
+			};
+			plugin.settings.providers = [oauthProvider];
+
+			isTokenExpired.mockReturnValue(true);
+
+			const saveSpy = jest.spyOn(plugin, 'saveSettings').mockResolvedValue(undefined);
+
+			const refreshOAuthTokensIfNeeded = (plugin as any).refreshOAuthTokensIfNeeded.bind(plugin);
+			await refreshOAuthTokensIfNeeded();
+
+			// Should have called refresh and saved settings
+			expect(saveSpy).toHaveBeenCalled();
+			// Provider's oauth should be updated
+			expect(plugin.settings.providers[0].oauth?.accessToken).toBe('new-access-token');
+
+			saveSpy.mockRestore();
+		});
+
+		it('should handle refresh errors gracefully', async () => {
+			const expiredTokens: OAuthTokens = {
+				accessToken: 'expired-token',
+				refreshToken: 'refresh-token',
+				expiresAt: Math.floor(Date.now() / 1000) - 100,
+				accountId: 'account-id',
+			};
+
+			const oauthProvider: ProviderConfig = {
+				name: 'Codex',
+				apiKey: '',
+				baseUrl: 'https://codex.api',
+				models: [],
+				temperature: 0.7,
+				authType: 'oauth',
+				oauth: expiredTokens,
+			};
+			plugin.settings.providers = [oauthProvider];
+
+			isTokenExpired.mockReturnValue(true);
+
+			// Mock refresh to throw error
+			CodexOAuth.mockImplementationOnce(() => ({
+				refreshTokens: jest.fn().mockRejectedValue(new Error('Refresh failed')),
+			}));
+
+			const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+			const refreshOAuthTokensIfNeeded = (plugin as any).refreshOAuthTokensIfNeeded.bind(plugin);
+
+			// Should not throw
+			await expect(refreshOAuthTokensIfNeeded()).resolves.not.toThrow();
+
+			// Should log error
+			expect(consoleErrorSpy).toHaveBeenCalled();
+
+			consoleErrorSpy.mockRestore();
 		});
 	});
 });

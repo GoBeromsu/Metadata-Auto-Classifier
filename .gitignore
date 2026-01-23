@@ -30,3 +30,6 @@ data.json
 
 # Jest
 ts-jest.log
+
+# test
+coverage

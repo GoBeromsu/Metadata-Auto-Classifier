@@ -1,16 +1,19 @@
 import type { App } from 'obsidian';
-import { ButtonComponent, Modal } from 'obsidian';
+import { ButtonComponent, Modal, Platform } from 'obsidian';
 
 import { getProviderPreset, getProviderPresets } from '../../lib';
-import type { ProviderConfig } from '../../types';
+import { CodexOAuth, formatTokenExpiry, isTokenExpired, CODEX_OAUTH } from '../../provider/auth';
+import type { OAuthTokens, ProviderConfig } from '../../types';
 import { ModalAccessibilityHelper } from '../components/ModalAccessibilityHelper';
 import { Notice } from '../components/Notice';
 import { Setting as CommonSetting, type DropdownOption } from '../components/Setting';
 
 export class ProviderModal extends Modal {
-	private readonly providerConfig: ProviderConfig;
+	private providerConfig: ProviderConfig;
 	private readonly onSave: (provider: ProviderConfig) => void;
 	private readonly accessibilityHelper = new ModalAccessibilityHelper();
+	private readonly codexOAuth = new CodexOAuth();
+	private oauthTokens?: OAuthTokens;
 
 	constructor(
 		app: App,
@@ -21,7 +24,9 @@ export class ProviderModal extends Modal {
 		this.onSave = onSave;
 
 		if (existingProvider) {
-			this.providerConfig = existingProvider;
+			this.providerConfig = { ...existingProvider };
+			// Preserve OAuth tokens from existing provider
+			this.oauthTokens = existingProvider.oauth;
 		} else {
 			this.providerConfig = {
 				name: 'Custom Provider',
@@ -85,6 +90,14 @@ export class ProviderModal extends Modal {
 		});
 	}
 
+	/**
+	 * Check if the current provider uses OAuth authentication
+	 */
+	private isOAuthProvider(): boolean {
+		const preset = getProviderPresets().find((p) => p.name === this.providerConfig.name);
+		return preset?.authType === 'oauth' || this.providerConfig.authType === 'oauth';
+	}
+
 	private addProviderForm(containerEl: HTMLElement): void {
 		// Provider Name - always editable, but show hint if it matches preset
 		const presets = getProviderPresets();
@@ -120,39 +133,125 @@ export class ProviderModal extends Modal {
 
 		const preset = presets.find((p) => p.name === this.providerConfig.name);
 
-		CommonSetting.create(containerEl, {
-			name: 'API Key',
-			desc: 'Your API key for this provider',
-			textInput: {
-				placeholder: 'Enter API key',
-				value: this.providerConfig.apiKey,
-				onChange: (value) => {
-					this.providerConfig.apiKey = value;
+		// Show OAuth or API Key based on provider type
+		if (this.isOAuthProvider()) {
+			this.addOAuthSection(containerEl);
+		} else {
+			CommonSetting.create(containerEl, {
+				name: 'API Key',
+				desc: 'Your API key for this provider',
+				textInput: {
+					placeholder: 'Enter API key',
+					value: this.providerConfig.apiKey ?? '',
+					onChange: (value) => {
+						this.providerConfig.apiKey = value;
+					},
 				},
-			},
-		});
+			});
 
-		// Add link manually if preset has apiKeyUrl
-		if (preset?.apiKeyUrl) {
-			const settingEl = containerEl.querySelector(
-				'.setting-item:last-child .setting-item-description'
-			);
-			if (settingEl) {
-				const linkEl = document.createElement('a');
-				linkEl.href = preset.apiKeyUrl;
-				linkEl.target = '_blank';
-				linkEl.className = 'mac-api-key-link';
-				linkEl.textContent = 'Get your API key here';
-				settingEl.appendChild(linkEl);
+			// Add link manually if preset has apiKeyUrl
+			if (preset?.apiKeyUrl) {
+				const settingEl = containerEl.querySelector(
+					'.setting-item:last-child .setting-item-description'
+				);
+				if (settingEl) {
+					const linkEl = document.createElement('a');
+					linkEl.href = preset.apiKeyUrl;
+					linkEl.target = '_blank';
+					linkEl.className = 'mac-api-key-link';
+					linkEl.textContent = 'Get your API key here';
+					settingEl.appendChild(linkEl);
+				}
 			}
 		}
 	}
+
+	/**
+	 * Add OAuth authentication section for providers like Codex
+	 */
+	private addOAuthSection(containerEl: HTMLElement): void {
+		const isConnected = this.oauthTokens && !isTokenExpired(this.oauthTokens);
+		const statusText = isConnected
+			? `Connected (${formatTokenExpiry(this.oauthTokens!)})`
+			: 'Not connected';
+
+		// Desktop-only notice for OAuth
+		if (!Platform.isDesktop) {
+			CommonSetting.create(containerEl, {
+				name: 'Authentication',
+				desc: 'OAuth authentication requires the desktop app.',
+			});
+			return;
+		}
+
+		CommonSetting.create(containerEl, {
+			name: 'Authentication',
+			desc: isConnected ? statusText : 'Connect your account to use this provider',
+			button: {
+				text: isConnected ? 'Disconnect' : 'Connect Account',
+				warning: isConnected,
+				onClick: isConnected ? () => this.disconnectOAuth() : () => this.connectOAuth(),
+			},
+		});
+
+		// Add info text about requirements
+		if (!isConnected) {
+			const infoEl = containerEl.createEl('div', {
+				cls: 'setting-item-description oauth-connection-info',
+			});
+			infoEl.style.marginTop = '-8px';
+			infoEl.style.marginBottom = '16px';
+			infoEl.style.paddingLeft = '16px';
+			infoEl.style.color = 'var(--text-muted)';
+			infoEl.style.fontSize = '0.85em';
+			infoEl.innerHTML = 'Requires ChatGPT Pro subscription';
+		}
+	}
+
+	/**
+	 * Start OAuth connection flow
+	 */
+	private async connectOAuth(): Promise<void> {
+		try {
+			Notice.success('Opening browser for authentication...');
+
+			const tokens = await this.codexOAuth.startAuthFlow();
+			this.oauthTokens = tokens;
+
+			// Update provider config
+			this.providerConfig.authType = 'oauth';
+			this.providerConfig.oauth = tokens;
+
+			Notice.success('Successfully connected!');
+			this.updateForm();
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'Unknown error';
+			if (message.includes('timeout') || message.includes('cancelled')) {
+				Notice.success('Authentication cancelled');
+			} else {
+				Notice.error(new Error(`Failed to connect: ${message}`));
+			}
+		}
+	}
+
+	/**
+	 * Disconnect OAuth
+	 */
+	private disconnectOAuth(): void {
+		const confirmed = confirm('Are you sure you want to disconnect?');
+		if (!confirmed) return;
+
+		this.oauthTokens = undefined;
+		this.providerConfig.oauth = undefined;
+
+		Notice.success('Disconnected');
+		this.updateForm();
+	}
+
 	private addButtons(containerEl: HTMLElement): void {
 		const buttonContainer = containerEl.createDiv({ cls: 'button-container mac-button-container' });
 
-		new ButtonComponent(buttonContainer)
-			.setButtonText('Cancel')
-			.onClick(() => this.close());
+		new ButtonComponent(buttonContainer).setButtonText('Cancel').onClick(() => this.close());
 
 		const saveBtn = new ButtonComponent(buttonContainer)
 			.setButtonText('Save')
@@ -178,6 +277,12 @@ export class ProviderModal extends Modal {
 		this.providerConfig.name = preset.name;
 		this.providerConfig.baseUrl = preset.baseUrl;
 		this.providerConfig.temperature = preset.temperature;
+		this.providerConfig.authType = preset.authType;
+
+		// For OAuth providers, use the special endpoint
+		if (preset.authType === 'oauth' && preset.name === 'Codex') {
+			this.providerConfig.baseUrl = CODEX_OAUTH.API_ENDPOINT;
+		}
 
 		// Update the form to reflect new data
 		this.updateForm();
@@ -190,6 +295,12 @@ export class ProviderModal extends Modal {
 		// Remove form elements (keep preset dropdown - index 0)
 		for (let i = formElements.length - 1; i >= 1; i--) {
 			formElements[i].remove();
+		}
+
+		// Remove OAuth info element if exists
+		const oauthInfo = this.contentEl.querySelector('.oauth-connection-info');
+		if (oauthInfo) {
+			oauthInfo.remove();
 		}
 
 		// Re-add form elements with updated data
@@ -233,12 +344,21 @@ export class ProviderModal extends Modal {
 			return false;
 		}
 
+		// For OAuth providers, check if connected
+		if (this.isOAuthProvider() && Platform.isDesktop) {
+			if (!this.oauthTokens) {
+				Notice.validationError('Provider', 'Please connect your account before saving.');
+				return false;
+			}
+		}
+
 		return true;
 	}
 
 	onClose(): void {
 		const { contentEl } = this;
 		this.accessibilityHelper.cleanup(contentEl);
+		this.codexOAuth.cancelFlow();
 		contentEl.empty();
 	}
 }

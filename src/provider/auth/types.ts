@@ -1,5 +1,5 @@
 /**
- * OAuth token data structure for Codex authentication
+ * OAuth token data structure for authentication
  */
 export interface OAuthTokens {
 	accessToken: string;
@@ -25,7 +25,7 @@ export interface OAuthCallbackResponse {
 }
 
 /**
- * Token exchange response from OpenAI
+ * Token exchange response from OAuth provider
  */
 export interface TokenResponse {
 	access_token: string;

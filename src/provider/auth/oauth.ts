@@ -1,12 +1,12 @@
 import { Platform, requestUrl } from 'obsidian';
-import { CODEX_OAUTH } from './codex-constants';
+import { CODEX_OAUTH } from './oauth-constants';
 import { OAuthCallbackServer } from './oauth-server';
 import { generatePKCEChallenge, generateState } from './pkce';
 import { createTokensFromResponse, isTokenExpired } from './token-manager';
 import type { OAuthTokens, TokenResponse } from './types';
 
 /**
- * Codex OAuth handler for OpenAI ChatGPT Pro authentication
+ * OAuth handler for OpenAI Codex/ChatGPT Pro authentication
  */
 export class CodexOAuth {
 	private callbackServer: OAuthCallbackServer | null = null;

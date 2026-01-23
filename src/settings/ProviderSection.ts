@@ -1,6 +1,7 @@
 import type { App } from 'obsidian';
 
 import type AutoClassifierPlugin from '../main';
+import { formatTokenExpiry, isTokenExpired } from '../provider/auth';
 import type { ProviderConfig } from '../types';
 import { Setting } from './components/Setting';
 import { ProviderModal } from './modals/ProviderModal';
@@ -12,13 +13,29 @@ export class ProviderSection {
 		private readonly onRefresh: () => void
 	) {}
 
+	/**
+	 * Get display name with OAuth status for a provider
+	 */
+	private getProviderDisplayInfo(provider: ProviderConfig): { name: string; desc: string } {
+		if (provider.authType === 'oauth' || provider.oauth) {
+			const isConnected = provider.oauth && !isTokenExpired(provider.oauth);
+			const status = isConnected
+				? `OAuth Connected (${formatTokenExpiry(provider.oauth!)})`
+				: 'OAuth Not Connected';
+			return { name: provider.name, desc: status };
+		}
+		return { name: provider.name, desc: '' };
+	}
+
 	render(containerEl: HTMLElement, providers: ProviderConfig[]): void {
 		const providerSection = containerEl.createEl('div', { cls: 'provider-section' });
 		providerSection.createEl('h3', { text: 'Providers' });
 
 		providers.forEach((provider) => {
+			const displayInfo = this.getProviderDisplayInfo(provider);
 			Setting.create(providerSection, {
-				name: provider.name,
+				name: displayInfo.name,
+				desc: displayInfo.desc,
 				buttons: [
 					{
 						icon: 'pencil',

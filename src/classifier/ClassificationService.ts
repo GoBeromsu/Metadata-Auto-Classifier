@@ -1,7 +1,11 @@
 import type { TFile, App } from 'obsidian';
 
 import { COMMON_CONSTANTS } from '../constants';
-import { getContentWithoutFrontmatter, getFieldValues, insertToFrontMatter } from '../lib/frontmatter';
+import {
+	getContentWithoutFrontmatter,
+	getFieldValues,
+	insertToFrontMatter,
+} from '../lib/frontmatter';
 import { processAPIRequest } from '../provider';
 import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from '../provider/prompt';
 import { Notice } from '../settings/components/Notice';
@@ -23,6 +27,28 @@ interface ValidationResult {
 
 export class ClassificationService {
 	constructor(private readonly context: ClassificationContext) {}
+
+	/**
+	 * Check if the provider has valid authentication configured
+	 * Supports both new auth field and legacy apiKey/oauth fields
+	 */
+	private hasValidAuth(provider: ProviderConfig): boolean {
+		// New unified auth format
+		if (provider.auth) {
+			if (provider.auth.type === 'apiKey') {
+				return Boolean(provider.auth.apiKey);
+			}
+			if (provider.auth.type === 'oauth') {
+				return Boolean(provider.auth.oauth?.accessToken);
+			}
+		}
+
+		// Legacy format
+		if (provider.authType === 'oauth') {
+			return Boolean(provider.oauth?.accessToken);
+		}
+		return Boolean(provider.apiKey);
+	}
 
 	async classify(currentFile: TFile, frontmatter: FrontmatterField): Promise<void> {
 		const fileNameWithoutExt = currentFile.name.replace(/\.[^/.]+$/, '');
@@ -86,11 +112,17 @@ export class ClassificationService {
 			};
 		}
 
-		if (!this.context.provider.apiKey) {
+		// Validate authentication based on provider auth type
+		if (!this.hasValidAuth(this.context.provider)) {
+			const authType = this.context.provider.authType ?? 'apiKey';
+			const errorMessage =
+				authType === 'oauth'
+					? `OAuth not configured for provider ${this.context.provider.name}. Please connect your account in settings.`
+					: `API key not configured for provider ${this.context.provider.name}. Please check your settings.`;
 			return {
 				isValid: false,
 				processedValues: [],
-				errorMessage: `API key not configured for provider ${this.context.provider.name}. Please check your settings.`,
+				errorMessage,
 			};
 		}
 

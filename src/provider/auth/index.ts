@@ -1,6 +1,6 @@
-// Auth module exports
-export { CodexOAuth } from './codex-oauth';
-export { CODEX_OAUTH } from './codex-constants';
+// Provider Auth module exports
+export { CodexOAuth } from './oauth';
+export { CODEX_OAUTH } from './oauth-constants';
 export {
 	isTokenExpired,
 	formatTokenExpiry,

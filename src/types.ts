@@ -3,7 +3,7 @@
 // ==========================================
 
 import type { TFile } from 'obsidian';
-import type { OAuthTokens } from './auth/types';
+import type { OAuthTokens } from './provider/auth/types';
 
 // ==========================================
 // Frontmatter Types (from frontmatter/types.ts)
@@ -54,12 +54,26 @@ export interface Model {
 
 export type AuthType = 'apiKey' | 'oauth';
 
+/**
+ * Unified authentication type - supports both API Key and OAuth
+ */
+export type ProviderAuth =
+	| { type: 'apiKey'; apiKey: string }
+	| { type: 'oauth'; oauth: OAuthTokens };
+
+/**
+ * Provider configuration interface
+ * NOTE: During migration, both old format (apiKey, oauth fields) and new format (auth field) are supported
+ */
 export interface ProviderBase {
 	name: string;
 	baseUrl: string;
 	temperature?: number;
 	models: Model[];
-	apiKey: string;
+	// New unified auth field
+	auth?: ProviderAuth;
+	// Legacy fields (kept for backward compatibility during migration)
+	apiKey?: string;
 	authType?: AuthType;
 	oauth?: OAuthTokens;
 }
@@ -137,4 +151,4 @@ export interface AutoClassifierSettings {
 }
 
 // Re-export auth types for convenience
-export type { OAuthTokens } from './auth/types';
+export type { OAuthTokens } from './provider/auth/types';

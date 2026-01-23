@@ -199,4 +199,170 @@ describe('UnifiedProvider Tests', () => {
 			expect(bodyData.temperature).toBe(0.3);
 		});
 	});
+
+	describe('getApiKey', () => {
+		it('should extract API key from new auth field', async () => {
+			const config: ProviderConfig = {
+				...mockConfig,
+				name: PROVIDER_NAMES.OPENAI,
+				auth: { type: 'apiKey', apiKey: 'new-format-key' },
+				apiKey: 'legacy-key', // Should be ignored
+			};
+
+			const mockApiResponse = {
+				choices: [{
+					message: { content: '{"output":["test"],"reliability":1.0}' }
+				}]
+			};
+
+			mockSendRequest.mockResolvedValueOnce(mockApiResponse);
+
+			await unifiedProvider.callAPI('system', 'user', config, 'model');
+
+			const callArgs = mockSendRequest.mock.calls[0];
+			const headers = callArgs[1] as Record<string, string>;
+			expect(headers.Authorization).toBe('Bearer new-format-key');
+		});
+
+		it('should fall back to legacy apiKey field', async () => {
+			const config: ProviderConfig = {
+				...mockConfig,
+				name: PROVIDER_NAMES.OPENAI,
+				apiKey: 'legacy-api-key',
+			};
+
+			const mockApiResponse = {
+				choices: [{
+					message: { content: '{"output":["test"],"reliability":1.0}' }
+				}]
+			};
+
+			mockSendRequest.mockResolvedValueOnce(mockApiResponse);
+
+			await unifiedProvider.callAPI('system', 'user', config, 'model');
+
+			const callArgs = mockSendRequest.mock.calls[0];
+			const headers = callArgs[1] as Record<string, string>;
+			expect(headers.Authorization).toBe('Bearer legacy-api-key');
+		});
+	});
+
+	describe('Codex provider with OAuth', () => {
+		it('should use OAuth tokens from new auth field for Codex', async () => {
+			const config: ProviderConfig = {
+				name: PROVIDER_NAMES.CODEX,
+				baseUrl: 'https://codex.api',
+				models: [],
+				auth: {
+					type: 'oauth',
+					oauth: {
+						accessToken: 'new-oauth-token',
+						refreshToken: 'refresh',
+						expiresAt: Date.now() / 1000 + 3600,
+						accountId: 'new-account-id',
+					},
+				},
+			};
+
+			const mockApiResponse = {
+				output: [{
+					type: 'message',
+					content: [{
+						type: 'output_text',
+						text: '{"output":["test"],"reliability":1.0}'
+					}]
+				}]
+			};
+
+			mockSendRequest.mockResolvedValueOnce(mockApiResponse);
+
+			await unifiedProvider.callAPI('system', 'user', config, 'model');
+
+			const callArgs = mockSendRequest.mock.calls[0];
+			const headers = callArgs[1] as Record<string, string>;
+			expect(headers.Authorization).toBe('Bearer new-oauth-token');
+			expect(headers['ChatGPT-Account-ID']).toBe('new-account-id');
+		});
+
+		it('should fall back to legacy oauth field for Codex', async () => {
+			const config: ProviderConfig = {
+				name: PROVIDER_NAMES.CODEX,
+				baseUrl: 'https://codex.api',
+				models: [],
+				oauth: {
+					accessToken: 'legacy-oauth-token',
+					refreshToken: 'refresh',
+					expiresAt: Date.now() / 1000 + 3600,
+					accountId: 'legacy-account-id',
+				},
+			};
+
+			const mockApiResponse = {
+				output: [{
+					type: 'message',
+					content: [{
+						type: 'output_text',
+						text: '{"output":["test"],"reliability":1.0}'
+					}]
+				}]
+			};
+
+			mockSendRequest.mockResolvedValueOnce(mockApiResponse);
+
+			await unifiedProvider.callAPI('system', 'user', config, 'model');
+
+			const callArgs = mockSendRequest.mock.calls[0];
+			const headers = callArgs[1] as Record<string, string>;
+			expect(headers.Authorization).toBe('Bearer legacy-oauth-token');
+			expect(headers['ChatGPT-Account-ID']).toBe('legacy-account-id');
+		});
+
+		it('should throw error when Codex OAuth is not configured', async () => {
+			const config: ProviderConfig = {
+				name: PROVIDER_NAMES.CODEX,
+				baseUrl: 'https://codex.api',
+				models: [],
+				// No oauth configured
+			};
+
+			await expect(unifiedProvider.callAPI('system', 'user', config, 'model'))
+				.rejects.toThrow('Codex requires OAuth authentication');
+		});
+
+		it('should parse Codex response format correctly', () => {
+			const codexResponse = {
+				output: [{
+					type: 'message',
+					content: [{
+						type: 'output_text',
+						text: '{"output":["category1","category2"],"reliability":0.85}'
+					}]
+				}]
+			};
+
+			const result = unifiedProvider.processApiResponse(codexResponse, PROVIDER_NAMES.CODEX);
+
+			expect(result).toEqual({
+				output: ['category1', 'category2'],
+				reliability: 0.85
+			});
+		});
+
+		it('should throw error for invalid Codex response without output array', () => {
+			const invalidResponse = { notOutput: [] };
+			expect(() => unifiedProvider.processApiResponse(invalidResponse, PROVIDER_NAMES.CODEX))
+				.toThrow('Codex response missing output array');
+		});
+
+		it('should throw error for Codex response without message content', () => {
+			const invalidResponse = {
+				output: [{
+					type: 'other',
+					content: []
+				}]
+			};
+			expect(() => unifiedProvider.processApiResponse(invalidResponse, PROVIDER_NAMES.CODEX))
+				.toThrow('Codex response missing message content');
+		});
+	});
 });

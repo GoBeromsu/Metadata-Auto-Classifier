@@ -8,7 +8,7 @@ import {
 import { PROVIDER_NAMES } from '../lib';
 import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 import { sendRequest } from './request';
-import { CODEX_OAUTH } from '../auth/codex-constants';
+import { CODEX_OAUTH } from './auth/oauth-constants';
 
 const parseJsonResponse = (content: string, providerName: string): StructuredOutput => {
 	try {
@@ -156,15 +156,18 @@ export class UnifiedProvider implements APIProvider {
 		},
 		[PROVIDER_NAMES.CODEX]: {
 			buildHeaders: (_apiKey: string, provider?: ProviderConfig) => {
-				if (!provider?.oauth) {
+				// Support both new auth field and legacy oauth field
+				const oauth = provider?.auth?.type === 'oauth' ? provider.auth.oauth : provider?.oauth;
+
+				if (!oauth) {
 					throw new Error(
 						'Codex requires OAuth authentication. Please connect your account in settings.'
 					);
 				}
 				return {
 					'Content-Type': 'application/json',
-					Authorization: `Bearer ${provider.oauth.accessToken}`,
-					'ChatGPT-Account-ID': provider.oauth.accountId,
+					Authorization: `Bearer ${oauth.accessToken}`,
+					'ChatGPT-Account-ID': oauth.accountId,
 				};
 			},
 			buildRequestBody: (systemRole, userPrompt, model, temperature) => ({
@@ -240,6 +243,18 @@ export class UnifiedProvider implements APIProvider {
 		return spec.buildHeaders(apiKey);
 	}
 
+	/**
+	 * Extract API key from provider config (supports both new auth field and legacy apiKey)
+	 */
+	private getApiKey(provider: ProviderConfig): string {
+		// New unified auth format
+		if (provider.auth?.type === 'apiKey') {
+			return provider.auth.apiKey;
+		}
+		// Legacy format
+		return provider.apiKey ?? '';
+	}
+
 	async callAPI(
 		systemRole: string,
 		userPrompt: string,
@@ -248,15 +263,16 @@ export class UnifiedProvider implements APIProvider {
 		temperature?: number
 	): Promise<StructuredOutput> {
 		const spec = this.getSpec(provider.name);
+		const apiKey = this.getApiKey(provider);
 
-		const headers = spec.buildHeaders(provider.apiKey, provider);
+		const headers = spec.buildHeaders(apiKey, provider);
 		const body = spec.buildRequestBody(
 			systemRole,
 			userPrompt,
 			selectedModel,
 			provider.temperature ?? temperature
 		);
-		const url = spec.buildUrl(provider.baseUrl, selectedModel, provider.apiKey);
+		const url = spec.buildUrl(provider.baseUrl, selectedModel, apiKey);
 
 		const response = await sendRequest(url, headers, body);
 		return this.processApiResponse(response, provider.name);
