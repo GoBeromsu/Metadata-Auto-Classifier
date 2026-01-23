@@ -1,18 +1,18 @@
-import { processAPIRequest } from 'api';
 import type { TFile } from 'obsidian';
 import { Plugin } from 'obsidian';
 import { CommonNotice } from 'ui/components/common/CommonNotice';
-import { COMMON_CONSTANTS } from './api/constants';
-import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from './api/prompt';
 import type { ProviderConfig } from './api/types';
-import { getContentWithoutFrontmatter, getFieldValues, insertToFrontMatter } from './frontmatter';
 import type { FrontmatterField } from './frontmatter/types';
+import { ClassificationService, CommandService } from './services';
 import type { AutoClassifierSettings } from './ui';
 import { AutoClassifierSettingTab } from './ui';
 import { DEFAULT_FRONTMATTER_SETTING, DEFAULT_SETTINGS } from './utils/constants';
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
+	private classificationService: ClassificationService | null = null;
+	private commandService: CommandService | null = null;
+
 	async onload() {
 		await this.loadSettings();
 		this.setupCommand();
@@ -20,14 +20,11 @@ export default class AutoClassifierPlugin extends Plugin {
 	}
 
 	setupCommand() {
-		this.settings.frontmatter.forEach((fm) => {
-			this.registerCommand(fm.name, async () => await this.processFrontmatter(fm.id));
+		this.commandService = new CommandService(this, {
+			processFrontmatter: (id) => this.processFrontmatter(id),
+			processAllFrontmatter: () => this.processAllFrontmatter(),
 		});
-
-		this.registerCommand(
-			'Fetch all frontmatter using current provider',
-			async () => await this.processAllFrontmatter()
-		);
+		this.commandService.setupCommands(this.settings.frontmatter);
 	}
 
 	registerCommand(name: string, callback: () => Promise<void>) {
@@ -53,8 +50,10 @@ export default class AutoClassifierPlugin extends Plugin {
 			return;
 		}
 
-		const selectedProvider = this.getSelectedProvider();
-		if (!selectedProvider) {
+		let selectedProvider: ProviderConfig | null = null;
+		try {
+			selectedProvider = this.getSelectedProvider();
+		} catch {
 			const error = new Error('No provider selected.');
 			CommonNotice.error(error);
 			return;
@@ -66,102 +65,25 @@ export default class AutoClassifierPlugin extends Plugin {
 			CommonNotice.error(error);
 			return;
 		}
-		await this.processFrontmatterItem(selectedProvider, currentFile, frontmatter);
+
+		await this.classifyFrontmatter(selectedProvider, currentFile, frontmatter);
 	}
 
-	private readonly processFrontmatterItem = async (
-		selectedProvider: ProviderConfig,
-		currentFile: TFile,
+	private async classifyFrontmatter(
+		provider: ProviderConfig,
+		file: TFile,
 		frontmatter: FrontmatterField
-	): Promise<void> => {
-		const fileNameWithoutExt = currentFile.name.replace(/\.[^/.]+$/, '');
-		// Auto-collect refs from vault if not already set
-		if (!frontmatter.refs || frontmatter.refs.length === 0) {
-			frontmatter.refs = getFieldValues(
-				frontmatter.name,
-				this.app.vault.getMarkdownFiles(),
-				this.app.metadataCache
-			);
-			await this.saveSettings();
-		}
+	): Promise<void> {
+		this.classificationService = new ClassificationService({
+			app: this.app,
+			provider,
+			model: this.settings.selectedModel,
+			classificationRule: this.settings.classificationRule,
+			saveSettings: () => this.saveSettings(),
+		});
 
-		const currentValues = frontmatter.refs;
-
-		const processedValues =
-			frontmatter.linkType === 'WikiLink'
-				? currentValues.map((value) =>
-						value.startsWith('[[') && value.endsWith(']]') ? value.slice(2, -2) : value
-					)
-				: currentValues;
-
-		if (processedValues.length === 0) {
-			const error = new Error(
-				`Tagging ${fileNameWithoutExt} (${frontmatter.name}) - No reference values found. Please add some reference tags/categories in the plugin settings.`
-			);
-			CommonNotice.error(error);
-			return;
-		}
-
-		// Validate API configuration
-		if (!selectedProvider.apiKey) {
-			const error = new Error(
-				`API key not configured for provider ${selectedProvider.name}. Please check your settings.`
-			);
-			CommonNotice.error(error);
-			return;
-		}
-
-		if (!this.settings.selectedModel) {
-			const error = new Error(`No model selected. Please select a model in the plugin settings.`);
-			CommonNotice.error(error);
-			return;
-		}
-		const currentContent = await this.app.vault.read(currentFile);
-		const content = getContentWithoutFrontmatter(currentContent);
-		const classificationRule = this.settings.classificationRule;
-		const promptTemplate = getPromptTemplate(
-			frontmatter.count,
-			content,
-			processedValues,
-			frontmatter.customQuery,
-			classificationRule
-		);
-
-		const apiResponse = await CommonNotice.withProgress(currentFile.name, frontmatter.name, () =>
-			processAPIRequest(
-				DEFAULT_SYSTEM_ROLE,
-				promptTemplate,
-				selectedProvider,
-				this.settings.selectedModel
-			)
-		);
-
-		if (apiResponse && apiResponse.reliability > COMMON_CONSTANTS.MIN_RELIABILITY_THRESHOLD) {
-			const processFrontMatter = (file: TFile, fn: (frontmatter: any) => void) =>
-				this.app.fileManager.processFrontMatter(file, fn);
-
-			await insertToFrontMatter(processFrontMatter, {
-				file: currentFile,
-				name: frontmatter.name,
-				value: apiResponse.output,
-				overwrite: frontmatter.overwrite,
-				linkType: frontmatter.linkType,
-			});
-			const successMessage = [
-				`✓ ${fileNameWithoutExt} (${frontmatter.name})`,
-				`Reliability: ${apiResponse.reliability}`,
-				'Added:',
-				...apiResponse.output.map((tag) => `- ${tag}`),
-			].join('\n');
-
-			CommonNotice.success(successMessage);
-		} else if (apiResponse) {
-			const error = new Error(
-				`Tagging ${fileNameWithoutExt} (${frontmatter.name}) - Low reliability (${apiResponse.reliability})`
-			);
-			CommonNotice.error(error);
-		}
-	};
+		await this.classificationService.classify(file, frontmatter);
+	}
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
