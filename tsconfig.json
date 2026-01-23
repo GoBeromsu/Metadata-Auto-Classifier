@@ -11,7 +11,9 @@
 			"ui": ["src/ui/index"],
 			"ui/*": ["src/ui/*"],
 			"frontmatter": ["src/frontmatter/index"],
-			"frontmatter/*": ["src/frontmatter/*"]
+			"frontmatter/*": ["src/frontmatter/*"],
+			"services": ["src/services/index"],
+			"services/*": ["src/services/*"]
 		},
 		"inlineSourceMap": true,
 		"inlineSources": true,
@@ -28,5 +30,6 @@
 		"resolveJsonModule": true,
 		"esModuleInterop": true
 	},
-	"include": ["src/**/*.ts", "__tests__/**/*.ts"]
+	"include": ["src/**/*.ts"],
+	"exclude": ["__tests__/**/*", "__mocks__/**/*", "node_modules"]
 }
