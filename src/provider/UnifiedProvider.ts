@@ -177,7 +177,12 @@ export class UnifiedProvider implements APIProvider {
 					input: [
 						{
 							role: 'user',
-							content: userPrompt,
+							content: [
+								{
+									type: 'input_text',
+									text: userPrompt,
+								},
+							],
 						},
 					],
 					stream: false,
