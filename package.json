@@ -30,7 +30,7 @@
 		"@types/jest": "^29.5.14",
 		"@types/node": "^16.11.6",
 		"builtin-modules": "3.3.0",
-		"esbuild": "0.17.3",
+		"esbuild": "0.25.0",
 		"eslint": "^9.27.0",
 		"eslint-config-prettier": "^10.1.5",
 		"eslint-plugin-boundaries": "^5.0.1",
