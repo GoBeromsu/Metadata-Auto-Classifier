@@ -1,9 +1,14 @@
-import { Setting, TextAreaComponent, TextComponent } from 'obsidian';
-import {
-	createButtonConfig,
-	createExtraButtonConfig,
-	type CommonButtonProps,
-} from './CommonButton';
+import { ExtraButtonComponent, Setting, TextAreaComponent, TextComponent } from 'obsidian';
+
+export interface ButtonProps {
+	text?: string;
+	icon?: string;
+	tooltip?: string;
+	onClick: () => void;
+	cta?: boolean;
+	warning?: boolean;
+	disabled?: boolean;
+}
 
 export interface DropdownOption {
 	value: string;
@@ -57,9 +62,9 @@ export interface CommonSettingProps {
 	textArea?: TextAreaConfig;
 
 	// Button components
-	button?: CommonButtonProps;
-	extraButton?: CommonButtonProps;
-	buttons?: CommonButtonProps[];
+	button?: ButtonProps;
+	extraButton?: ButtonProps;
+	buttons?: ButtonProps[];
 }
 
 export class CommonSetting {
@@ -156,12 +161,25 @@ export class CommonSetting {
 		component.onChange(textArea.onChange);
 	}
 
-	private addButton(buttonProps: CommonButtonProps): void {
-		this.setting.addButton(createButtonConfig(buttonProps));
+	private addButton(props: ButtonProps): void {
+		this.setting.addButton((btn) => {
+			if (props.text) btn.setButtonText(props.text);
+			if (props.icon) btn.setIcon(props.icon);
+			if (props.tooltip) btn.setTooltip(props.tooltip);
+			if (props.cta) btn.setCta();
+			if (props.warning) btn.setWarning();
+			if (props.disabled) btn.setDisabled(props.disabled);
+			btn.onClick(props.onClick);
+		});
 	}
 
-	private addExtraButton(buttonProps: CommonButtonProps): void {
-		this.setting.addExtraButton(createExtraButtonConfig(buttonProps));
+	private addExtraButton(props: ButtonProps): void {
+		this.setting.addExtraButton((btn: ExtraButtonComponent) => {
+			if (props.icon) btn.setIcon(props.icon);
+			if (props.tooltip) btn.setTooltip(props.tooltip);
+			if (props.disabled) btn.setDisabled(props.disabled);
+			btn.onClick(props.onClick);
+		});
 	}
 
 	private initRangeInput(config: RangeInputConfig): void {

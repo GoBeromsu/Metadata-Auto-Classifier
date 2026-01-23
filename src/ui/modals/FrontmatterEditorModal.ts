@@ -3,6 +3,7 @@ import type { FrontmatterField, LinkType } from 'frontmatter/types';
 import type { App, TextAreaComponent } from 'obsidian';
 import { Modal, Setting, TextAreaComponent as ObsidianTextArea } from 'obsidian';
 import { WikiLinkSelector } from 'ui/components/WikiLinkSelector';
+import { CommonNotice } from 'ui/components/common/CommonNotice';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
 import type { FrontmatterEditorModalProps } from 'ui/types';
 
@@ -188,8 +189,14 @@ export class ConfigurableSettingModal extends Modal {
 					.setButtonText('Save')
 					.setCta()
 					.onClick(async () => {
-						await this.props.onSave(this.localState);
-						this.close();
+						const notice = CommonNotice.startProgress('Saving settings...');
+						btn.setDisabled(true);
+						try {
+							await this.props.onSave(this.localState);
+							this.close();
+						} finally {
+							CommonNotice.endProgress(notice);
+						}
 					})
 			);
 	}

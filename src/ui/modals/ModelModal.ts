@@ -1,7 +1,6 @@
 import type { Model, ProviderConfig, ProviderPreset } from 'api/types';
 import type { App } from 'obsidian';
-import { Modal } from 'obsidian';
-import { CommonButton } from 'ui/components/common/CommonButton';
+import { ButtonComponent, Modal } from 'obsidian';
 import { CommonNotice } from 'ui/components/common/CommonNotice';
 import type { DropdownOption } from 'ui/components/common/CommonSetting';
 import { CommonSetting } from 'ui/components/common/CommonSetting';
@@ -286,37 +285,42 @@ export class ModelModal extends Modal {
 	private addButtons(containerEl: HTMLElement): void {
 		const buttonContainer = containerEl.createDiv({ cls: 'button-container mac-button-container' });
 
-		CommonButton(buttonContainer, {
-			text: 'Cancel',
-			onClick: () => this.close(),
-		});
+		new ButtonComponent(buttonContainer)
+			.setButtonText('Cancel')
+			.onClick(() => this.close());
 
-		CommonButton(buttonContainer, {
-			text: 'Save',
-			cta: true,
-			onClick: async () => {
-				if (this.validateForm()) {
-                                        const model: Model = {
-                                                id: this.modelId,
-                                                name: this.modelName,
-                                        };
+		const saveBtn = new ButtonComponent(buttonContainer)
+			.setButtonText('Save')
+			.setCta()
+			.onClick(async () => {
+				const notice = CommonNotice.startProgress('Saving model...');
+				saveBtn.setDisabled(true);
+				try {
+					if (this.validateForm()) {
+						const model: Model = {
+							id: this.modelId,
+							name: this.modelName,
+						};
 
-					// Use callback to handle business logic
-					this.props.onSave({
-						provider: this.selectedProvider,
-						model: model,
-                                                isEdit: !!this.props.editTarget,
-                                                oldModel: this.props.editTarget
-                                                        ? {
-                                                                        model: this.props.editTarget.model,
-                                                                        provider: this.props.editTarget.provider,
-                                                                }
-                                                        : undefined,
-                                        });
-					this.close();
+						// Use callback to handle business logic
+						this.props.onSave({
+							provider: this.selectedProvider,
+							model: model,
+							isEdit: !!this.props.editTarget,
+							oldModel: this.props.editTarget
+								? {
+										model: this.props.editTarget.model,
+										provider: this.props.editTarget.provider,
+									}
+								: undefined,
+						});
+						this.close();
+					}
+				} finally {
+					CommonNotice.endProgress(notice);
+					saveBtn.setDisabled(false);
 				}
-			},
-		});
+			});
 	}
 
 	private updatePopularModels(): void {

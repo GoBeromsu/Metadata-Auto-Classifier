@@ -1,7 +1,6 @@
 import type { ProviderConfig } from 'api/types';
 import type { App } from 'obsidian';
-import { Modal } from 'obsidian';
-import { CommonButton } from 'ui/components/common/CommonButton';
+import { ButtonComponent, Modal } from 'obsidian';
 import { CommonNotice } from 'ui/components/common/CommonNotice';
 import { CommonSetting, DropdownOption } from 'ui/components/common/CommonSetting';
 import { ModalAccessibilityHelper } from 'ui/utils/ModalAccessibilityHelper';
@@ -150,21 +149,26 @@ export class ProviderModal extends Modal {
 	private addButtons(containerEl: HTMLElement): void {
 		const buttonContainer = containerEl.createDiv({ cls: 'button-container mac-button-container' });
 
-		CommonButton(buttonContainer, {
-			text: 'Cancel',
-			onClick: () => this.close(),
-		});
+		new ButtonComponent(buttonContainer)
+			.setButtonText('Cancel')
+			.onClick(() => this.close());
 
-		CommonButton(buttonContainer, {
-			text: 'Save',
-			cta: true,
-			onClick: () => {
-				if (this.validateForm()) {
-					this.onSave(this.providerConfig);
-					this.close();
+		const saveBtn = new ButtonComponent(buttonContainer)
+			.setButtonText('Save')
+			.setCta()
+			.onClick(async () => {
+				const notice = CommonNotice.startProgress('Saving provider...');
+				saveBtn.setDisabled(true);
+				try {
+					if (this.validateForm()) {
+						this.onSave(this.providerConfig);
+						this.close();
+					}
+				} finally {
+					CommonNotice.endProgress(notice);
+					saveBtn.setDisabled(false);
 				}
-			},
-		});
+			});
 	}
 
 	private loadPresetData(providerName: string): void {
