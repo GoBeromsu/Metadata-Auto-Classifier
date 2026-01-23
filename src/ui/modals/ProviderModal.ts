@@ -35,6 +35,11 @@ export class ProviderModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
+		// Accessibility: Set modal role and label
+		contentEl.setAttribute('role', 'dialog');
+		contentEl.setAttribute('aria-modal', 'true');
+		contentEl.setAttribute('aria-label', 'Provider Settings');
+
 		// Modal title - unified
 		contentEl.createEl('h2', { text: 'Provider Settings' });
 
@@ -46,6 +51,38 @@ export class ProviderModal extends Modal {
 
 		// Buttons
 		this.addButtons(contentEl);
+
+		// Accessibility: Focus first input and setup keyboard navigation
+		this.setupAccessibility(contentEl);
+	}
+
+	private setupAccessibility(contentEl: HTMLElement): void {
+		// Focus first focusable element
+		setTimeout(() => {
+			const firstInput = contentEl.querySelector('input, select, button') as HTMLElement;
+			if (firstInput) {
+				firstInput.focus();
+			}
+		}, 50);
+
+		// Keyboard navigation: Tab trapping
+		contentEl.addEventListener('keydown', (e: KeyboardEvent) => {
+			if (e.key === 'Tab') {
+				const focusableElements = contentEl.querySelectorAll(
+					'input, select, button, [tabindex]:not([tabindex="-1"])'
+				);
+				const firstElement = focusableElements[0] as HTMLElement;
+				const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+				if (e.shiftKey && document.activeElement === firstElement) {
+					e.preventDefault();
+					lastElement.focus();
+				} else if (!e.shiftKey && document.activeElement === lastElement) {
+					e.preventDefault();
+					firstElement.focus();
+				}
+			}
+		});
 	}
 
 	private addPresetSetting(containerEl: HTMLElement): void {
@@ -127,19 +164,14 @@ export class ProviderModal extends Modal {
 				const linkEl = document.createElement('a');
 				linkEl.href = preset.apiKeyUrl;
 				linkEl.target = '_blank';
-				linkEl.style.color = 'var(--interactive-accent)';
-				linkEl.style.marginLeft = '4px';
+				linkEl.className = 'mac-api-key-link';
 				linkEl.textContent = 'Get your API key here';
 				settingEl.appendChild(linkEl);
 			}
 		}
 	}
 	private addButtons(containerEl: HTMLElement): void {
-		const buttonContainer = containerEl.createDiv({ cls: 'button-container' });
-		buttonContainer.style.display = 'flex';
-		buttonContainer.style.justifyContent = 'flex-end';
-		buttonContainer.style.gap = '8px';
-		buttonContainer.style.marginTop = '20px';
+		const buttonContainer = containerEl.createDiv({ cls: 'button-container mac-button-container' });
 
 		CommonButton(buttonContainer, {
 			text: 'Cancel',
@@ -192,20 +224,18 @@ export class ProviderModal extends Modal {
 	private validateForm(): boolean {
 		// Provider name validation
 		if (!this.providerConfig.name.trim()) {
-			CommonNotice.error(
-				new Error(
-					'[Provider validation] Provider name is required. Please enter a name for your provider.'
-				)
+			CommonNotice.validationError(
+				'Provider',
+				'Provider name is required. Please enter a name for your provider.'
 			);
 			return false;
 		}
 
 		// API URL validation
 		if (!this.providerConfig.baseUrl.trim()) {
-			CommonNotice.error(
-				new Error(
-					'[Provider validation] API URL is required. Please enter a valid API endpoint URL.'
-				)
+			CommonNotice.validationError(
+				'Provider',
+				'API URL is required. Please enter a valid API endpoint URL.'
 			);
 			return false;
 		}
@@ -214,10 +244,9 @@ export class ProviderModal extends Modal {
 		try {
 			new URL(this.providerConfig.baseUrl);
 		} catch {
-			CommonNotice.error(
-				new Error(
-					'[URL validation] Please enter a valid URL (e.g., https://api.example.com/v1/chat/completions)'
-				)
+			CommonNotice.validationError(
+				'Provider',
+				'Please enter a valid URL (e.g., https://api.example.com/v1/chat/completions)'
 			);
 			return false;
 		}

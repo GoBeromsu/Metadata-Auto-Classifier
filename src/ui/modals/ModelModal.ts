@@ -47,8 +47,13 @@ export class ModelModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		// Modal title
+		// Accessibility: Set modal role and label
+		contentEl.setAttribute('role', 'dialog');
+		contentEl.setAttribute('aria-modal', 'true');
 		const title = this.props.editTarget ? 'Edit Model' : 'Add Model';
+		contentEl.setAttribute('aria-label', title);
+
+		// Modal title
 		contentEl.createEl('h2', { text: title });
 
 		// Provider selection
@@ -64,6 +69,38 @@ export class ModelModal extends Modal {
 
 		// Buttons
 		this.addButtons(contentEl);
+
+		// Accessibility: Focus first input and setup keyboard navigation
+		this.setupAccessibility(contentEl);
+	}
+
+	private setupAccessibility(contentEl: HTMLElement): void {
+		// Focus first focusable element
+		setTimeout(() => {
+			const firstInput = contentEl.querySelector('input, select, button') as HTMLElement;
+			if (firstInput) {
+				firstInput.focus();
+			}
+		}, 50);
+
+		// Keyboard navigation: Tab trapping
+		contentEl.addEventListener('keydown', (e: KeyboardEvent) => {
+			if (e.key === 'Tab') {
+				const focusableElements = contentEl.querySelectorAll(
+					'input, select, button, [tabindex]:not([tabindex="-1"])'
+				);
+				const firstElement = focusableElements[0] as HTMLElement;
+				const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+				if (e.shiftKey && document.activeElement === firstElement) {
+					e.preventDefault();
+					lastElement.focus();
+				} else if (!e.shiftKey && document.activeElement === lastElement) {
+					e.preventDefault();
+					firstElement.focus();
+				}
+			}
+		});
 	}
 
 	private addProviderSetting(containerEl: HTMLElement): void {
@@ -112,33 +149,21 @@ export class ModelModal extends Modal {
 		}
 
 		const modelsContainer = containerEl.createEl('div', {
-			cls: 'popular-models-container',
+			cls: 'popular-models-container mac-grid-container',
 		});
-		modelsContainer.style.display = 'grid';
-		modelsContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
-		modelsContainer.style.gap = '8px';
-		modelsContainer.style.marginTop = '10px';
-		modelsContainer.style.marginBottom = '20px';
 
 		if (providerData && providerData.popularModels) {
 			// Add popular models as radio buttons
 			providerData.popularModels.forEach((model) => {
 				const modelOption = modelsContainer.createEl('label', {
-					cls: 'model-option',
+					cls: 'model-option mac-model-option',
 				});
-				modelOption.style.display = 'flex';
-				modelOption.style.alignItems = 'center';
-				modelOption.style.padding = '8px 12px';
-				modelOption.style.border = '1px solid var(--background-modifier-border)';
-				modelOption.style.borderRadius = '4px';
-				modelOption.style.cursor = 'pointer';
 
 				const radio = modelOption.createEl('input', {
 					type: 'radio',
 					attr: { name: 'popular-model' },
 				});
 				radio.value = model.id;
-				radio.style.marginRight = '8px';
 				radio.addEventListener('change', () => {
 					if (radio.checked) {
                                                 this.modelName = model.name;
@@ -154,21 +179,14 @@ export class ModelModal extends Modal {
 
 		// Add Custom option
 		const customOption = modelsContainer.createEl('label', {
-			cls: 'model-option custom-option',
+			cls: 'model-option custom-option mac-model-option',
 		});
-		customOption.style.display = 'flex';
-		customOption.style.alignItems = 'center';
-		customOption.style.padding = '8px 12px';
-		customOption.style.border = '1px solid var(--background-modifier-border)';
-		customOption.style.borderRadius = '4px';
-		customOption.style.cursor = 'pointer';
 
 		const customRadio = customOption.createEl('input', {
 			type: 'radio',
 			attr: { name: 'popular-model' },
 		});
 		customRadio.value = 'custom';
-		customRadio.style.marginRight = '8px';
 		customRadio.checked = true; // Set Custom as default selection
 		customRadio.addEventListener('change', () => {
 			if (customRadio.checked) {
@@ -188,13 +206,9 @@ export class ModelModal extends Modal {
 			const label = option as HTMLElement;
 
 			if (radio && radio.checked) {
-				label.style.backgroundColor = 'var(--interactive-accent)';
-				label.style.color = 'var(--text-on-accent)';
-				label.style.borderColor = 'var(--interactive-accent)';
+				label.classList.add('selected');
 			} else {
-				label.style.backgroundColor = '';
-				label.style.color = '';
-				label.style.borderColor = 'var(--background-modifier-border)';
+				label.classList.remove('selected');
 			}
 		});
 	}
@@ -212,6 +226,8 @@ export class ModelModal extends Modal {
                                 value: this.modelName,
                                 onChange: (value) => {
                                         this.modelName = value;
+					// When user types, clear radio selection (switch to custom)
+					this.syncRadioWithInputs();
                                 },
 			},
 		});
@@ -225,9 +241,47 @@ export class ModelModal extends Modal {
 				value: this.modelId,
 				onChange: (value) => {
 					this.modelId = value;
+					// When user types, update radio selection
+					this.syncRadioWithInputs();
 				},
 			},
 		});
+	}
+
+	/**
+	 * Sync radio button selection with current input values
+	 * If inputs match a popular model, select that radio; otherwise select "Custom"
+	 */
+	private syncRadioWithInputs(): void {
+		const modelOptions = this.contentEl.querySelectorAll('.model-option');
+		let matchFound = false;
+
+		modelOptions.forEach((option) => {
+			const radio = option.querySelector('input[type="radio"]') as HTMLInputElement;
+			if (!radio) return;
+
+			// Check if this radio's value matches current model ID
+			if (radio.value !== 'custom' && radio.value === this.modelId) {
+				radio.checked = true;
+				matchFound = true;
+			} else if (radio.value === 'custom' && !matchFound) {
+				// Will be set after loop if no match found
+			} else {
+				radio.checked = false;
+			}
+		});
+
+		// If no popular model matched, select "Custom"
+		if (!matchFound) {
+			const customRadio = this.contentEl.querySelector(
+				'.custom-option input[type="radio"]'
+			) as HTMLInputElement;
+			if (customRadio) {
+				customRadio.checked = true;
+			}
+		}
+
+		this.updateRadioSelection();
 	}
 
 	private updateFormInputs(): void {
@@ -253,11 +307,7 @@ export class ModelModal extends Modal {
 	}
 
 	private addButtons(containerEl: HTMLElement): void {
-		const buttonContainer = containerEl.createDiv({ cls: 'button-container' });
-		buttonContainer.style.display = 'flex';
-		buttonContainer.style.justifyContent = 'flex-end';
-		buttonContainer.style.gap = '8px';
-		buttonContainer.style.marginTop = '20px';
+		const buttonContainer = containerEl.createDiv({ cls: 'button-container mac-button-container' });
 
 		CommonButton(buttonContainer, {
 			text: 'Cancel',
@@ -301,17 +351,17 @@ export class ModelModal extends Modal {
 
 	private validateForm(): boolean {
 		if (!this.selectedProvider) {
-			CommonNotice.error(new Error('Provider is required'));
+			CommonNotice.validationError('Model', 'Provider is required');
 			return false;
 		}
 
 		if (!this.modelId.trim()) {
-			CommonNotice.error(new Error('Model ID is required'));
+			CommonNotice.validationError('Model', 'Model ID is required');
 			return false;
 		}
 
                 if (!this.modelName.trim()) {
-                        CommonNotice.error(new Error('Display name is required'));
+                        CommonNotice.validationError('Model', 'Display name is required');
                         return false;
                 }
 
