@@ -1,13 +1,13 @@
-import { PROVIDER_NAMES } from '../utils';
 import {
 	ANTHROPIC_TOOL_CONFIG,
 	COMMON_CONSTANTS,
 	GEMINI_STRUCTURE_OUTPUT,
 	OLLAMA_STRUCTURE_OUTPUT,
 	OPENAI_STRUCTURE_OUTPUT,
-} from './constants';
+} from '../constants';
+import { PROVIDER_NAMES } from '../lib';
+import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 import { sendRequest } from './index';
-import type { APIProvider, ProviderConfig, StructuredOutput } from './types';
 
 const parseJsonResponse = (content: string, providerName: string): StructuredOutput => {
 	try {

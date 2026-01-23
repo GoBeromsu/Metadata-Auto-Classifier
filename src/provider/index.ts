@@ -1,8 +1,8 @@
 import type { RequestUrlParam } from 'obsidian';
 import { requestUrl } from 'obsidian';
-import { COMMON_CONSTANTS } from './constants';
+import { COMMON_CONSTANTS } from '../constants';
+import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 import { UnifiedProvider } from './UnifiedProvider';
-import type { APIProvider, ProviderConfig, StructuredOutput } from './types';
 
 // Re-export for backward compatibility in tests
 export { UnifiedProvider } from './UnifiedProvider';
