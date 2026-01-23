@@ -1,3 +1,5 @@
+import { sanitizePromptInput, sanitizeReferenceValues } from '../utils/sanitizer';
+
 // Constants for system behaviour and default prompt template
 export const DEFAULT_SYSTEM_ROLE = `You are a JSON classification assistant. Respond only with a valid JSON object adhering to the specified schema.`;
 
@@ -58,14 +60,18 @@ export function getPromptTemplate(
 	</content>
 	`;
 
+	// Sanitize user-provided inputs to prevent prompt injection
+	const sanitizedReference = sanitizeReferenceValues(reference);
+	const sanitizedCustomQuery = sanitizePromptInput(customQuery);
+
 	const completePrompt =
 		customTemplate +
 		outputStructureTemplate
 			.replace('{minCount}', String(count.min))
 			.replace('{maxCount}', String(count.max))
-			.replace('{reference}', reference.join(', '))
+			.replace('{reference}', sanitizedReference.join(', '))
 			.replace('{input}', input)
-			.replace('{customQuery}', customQuery);
+			.replace('{customQuery}', sanitizedCustomQuery);
 
 	return completePrompt;
 }
