@@ -178,29 +178,24 @@ export class UnifiedProvider implements APIProvider {
 				};
 			},
 
-			buildRequestBody: (systemRole, userPrompt, model, temperature) => {
-				const body: Record<string, unknown> = {
-					model,
-					instructions: systemRole,
-					input: [
-						{
-							role: 'user',
-							content: [
-								{
-									type: 'input_text',
-									text: userPrompt,
-								},
-							],
-						},
-					],
-					stream: true, // Required for Codex API
-					store: false,
-				};
-				if (temperature !== undefined) {
-					body.temperature = temperature;
-				}
-				return body;
-			},
+			// Note: Codex Responses API does not support temperature parameter
+			buildRequestBody: (systemRole, userPrompt, model, _temperature) => ({
+				model,
+				instructions: systemRole,
+				input: [
+					{
+						role: 'user',
+						content: [
+							{
+								type: 'input_text',
+								text: userPrompt,
+							},
+						],
+					},
+				],
+				stream: true, // Required for Codex API
+				store: false,
+			}),
 
 			buildUrl: () => CODEX_OAUTH.API_ENDPOINT,
 
