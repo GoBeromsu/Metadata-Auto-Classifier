@@ -106,23 +106,41 @@ const parseSSEEvents = (text: string): SSEEvent[] => {
 
 /**
  * Extract error details from requestUrl exceptions
- * Obsidian's requestUrl throws on 4xx/5xx with limited info
+ * Obsidian's requestUrl throws an object with status, headers, and potentially body
  */
-const extractErrorDetails = (error: unknown): { status?: number; message: string } => {
+const extractErrorDetails = (
+	error: unknown
+): { status?: number; message: string; body?: string } => {
+	// Log all properties for debugging
+	if (typeof error === 'object' && error !== null) {
+		const err = error as Record<string, unknown>;
+		console.log('[API Error] Error object properties:', Object.keys(err));
+
+		// Try to extract response body from various possible properties
+		const body =
+			typeof err.text === 'string'
+				? err.text
+				: typeof err.json === 'string'
+					? err.json
+					: typeof err.body === 'string'
+						? err.body
+						: typeof err.response === 'string'
+							? err.response
+							: err.json
+								? JSON.stringify(err.json)
+								: undefined;
+
+		return {
+			status: typeof err.status === 'number' ? err.status : undefined,
+			message: String(err.message || err.error || body || JSON.stringify(error)),
+			body: body,
+		};
+	}
+
 	if (error instanceof Error) {
-		// Try to extract status from error message (e.g., "Request failed, status 400")
 		const statusMatch = error.message.match(/status\s*(\d{3})/i);
 		const status = statusMatch ? parseInt(statusMatch[1], 10) : undefined;
 		return { status, message: error.message };
-	}
-
-	// Check if error object has useful properties
-	if (typeof error === 'object' && error !== null) {
-		const err = error as Record<string, unknown>;
-		return {
-			status: typeof err.status === 'number' ? err.status : undefined,
-			message: String(err.message || err.error || JSON.stringify(error)),
-		};
 	}
 
 	return { message: String(error) };
@@ -168,10 +186,14 @@ export const sendStreamingRequest = async (
 			url,
 			status: errorDetails.status,
 			message: errorDetails.message,
+			body: errorDetails.body,
 			rawError: error,
 		});
+
+		// Use body if available, otherwise fall back to message
+		const errorMessage = errorDetails.body || errorDetails.message;
 		throw new Error(
-			`Streaming request failed${errorDetails.status ? ` (HTTP ${errorDetails.status})` : ''}: ${errorDetails.message}`
+			`Streaming request failed${errorDetails.status ? ` (HTTP ${errorDetails.status})` : ''}: ${errorMessage}`
 		);
 	}
 
