@@ -14,6 +14,8 @@ export class ClassificationRuleSection {
 			cls: 'custom-prompt-container mac-custom-prompt-container',
 		});
 
+		// Using let because textAreaComponent is referenced in onClick closure before assignment
+		// eslint-disable-next-line prefer-const
 		let textAreaComponent: TextAreaComponent;
 
 		CommonSetting.create(textAreaContainer, {
@@ -25,7 +27,7 @@ export class ClassificationRuleSection {
 				onClick: () => {
 					textAreaComponent.setValue(DEFAULT_TASK_TEMPLATE);
 					this.plugin.settings.classificationRule = DEFAULT_TASK_TEMPLATE;
-					this.plugin.saveSettings();
+					void this.plugin.saveSettings();
 					this.onRefresh();
 				},
 			},

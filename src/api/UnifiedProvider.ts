@@ -27,9 +27,9 @@ const parseJsonResponse = (content: string, providerName: string): StructuredOut
 	}
 };
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // Using any for API response data since providers return varied structures
 // that are validated at runtime in parseResponse functions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type APIResponseData = any;
 
 // Generic request body type for API requests
