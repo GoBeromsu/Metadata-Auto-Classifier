@@ -174,7 +174,7 @@ export class UnifiedProvider implements APIProvider {
 				return {
 					'Content-Type': 'application/json',
 					Authorization: `Bearer ${oauth.accessToken}`,
-					'ChatGPT-Account-ID': oauth.accountId,
+					'ChatGPT-Account-Id': oauth.accountId,
 				};
 			},
 

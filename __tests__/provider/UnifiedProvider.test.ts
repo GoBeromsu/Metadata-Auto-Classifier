@@ -276,7 +276,7 @@ describe('UnifiedProvider Tests', () => {
 			const callArgs = mockSendStreamingRequest.mock.calls[0];
 			const headers = callArgs[1] as Record<string, string>;
 			expect(headers.Authorization).toBe('Bearer new-oauth-token');
-			expect(headers['ChatGPT-Account-ID']).toBe('new-account-id');
+			expect(headers['ChatGPT-Account-Id']).toBe('new-account-id');
 		});
 
 		it('should fall back to legacy oauth field for Codex', async () => {
@@ -302,7 +302,7 @@ describe('UnifiedProvider Tests', () => {
 			const callArgs = mockSendStreamingRequest.mock.calls[0];
 			const headers = callArgs[1] as Record<string, string>;
 			expect(headers.Authorization).toBe('Bearer legacy-oauth-token');
-			expect(headers['ChatGPT-Account-ID']).toBe('legacy-account-id');
+			expect(headers['ChatGPT-Account-Id']).toBe('legacy-account-id');
 		});
 
 		it('should throw error when Codex OAuth is not configured', async () => {

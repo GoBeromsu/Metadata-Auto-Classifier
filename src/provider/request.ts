@@ -105,51 +105,58 @@ const parseSSEEvents = (text: string): SSEEvent[] => {
 };
 
 /**
- * Extract error details from requestUrl exceptions
- * Obsidian's requestUrl throws an object with status, headers, and potentially body
+ * Send streaming request using Node's https module (like Smart Composer)
+ * This bypasses CORS and provides better error handling than Obsidian's requestUrl
  */
-const extractErrorDetails = (
-	error: unknown
-): { status?: number; message: string; body?: string } => {
-	// Log all properties for debugging
-	if (typeof error === 'object' && error !== null) {
-		const err = error as Record<string, unknown>;
-		console.log('[API Error] Error object properties:', Object.keys(err));
+const sendStreamingRequestViaNode = async (
+	url: string,
+	headers: Record<string, string>,
+	body: Record<string, unknown>
+): Promise<{ status: number; text: string }> => {
+	// Dynamic import of Node's https module (only works on desktop)
 
-		// Try to extract response body from various possible properties
-		const body =
-			typeof err.text === 'string'
-				? err.text
-				: typeof err.json === 'string'
-					? err.json
-					: typeof err.body === 'string'
-						? err.body
-						: typeof err.response === 'string'
-							? err.response
-							: err.json
-								? JSON.stringify(err.json)
-								: undefined;
+	const https = require('https') as typeof import('https');
 
-		return {
-			status: typeof err.status === 'number' ? err.status : undefined,
-			message: String(err.message || err.error || body || JSON.stringify(error)),
-			body: body,
-		};
-	}
+	const parsedUrl = new URL(url);
+	const payload = JSON.stringify(body);
+	const payloadLength = Buffer.byteLength(payload);
 
-	if (error instanceof Error) {
-		const statusMatch = error.message.match(/status\s*(\d{3})/i);
-		const status = statusMatch ? parseInt(statusMatch[1], 10) : undefined;
-		return { status, message: error.message };
-	}
+	return new Promise((resolve, reject) => {
+		const request = https.request(
+			{
+				hostname: parsedUrl.hostname,
+				port: parsedUrl.port ? Number(parsedUrl.port) : 443,
+				path: `${parsedUrl.pathname}${parsedUrl.search}`,
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Content-Length': payloadLength.toString(),
+					...headers,
+				},
+			},
+			(response) => {
+				const chunks: Buffer[] = [];
+				response.on('data', (chunk: Buffer) => chunks.push(chunk));
+				response.on('end', () => {
+					const text = Buffer.concat(chunks).toString('utf8');
+					resolve({
+						status: response.statusCode ?? 0,
+						text,
+					});
+				});
+				response.on('error', reject);
+			}
+		);
 
-	return { message: String(error) };
+		request.on('error', reject);
+		request.write(payload);
+		request.end();
+	});
 };
 
 /**
  * Send a streaming request and accumulate text from SSE events
- * Uses provider-specific event parser to extract text deltas
- * Uses Obsidian's requestUrl for CORS bypass with enhanced error handling
+ * Uses Node's https module for Codex (like Smart Composer) for better error handling
  */
 export const sendStreamingRequest = async (
 	url: string,
@@ -170,30 +177,13 @@ export const sendStreamingRequest = async (
 	let response: { status: number; text: string };
 
 	try {
-		response = await requestUrl({
-			url,
-			method: 'POST',
-			headers: {
-				...headers,
-				Accept: 'text/event-stream',
-			},
-			body: JSON.stringify(body),
-		});
+		// Use Node's https module like Smart Composer does
+		// This bypasses CORS and allows reading error response bodies
+		response = await sendStreamingRequestViaNode(url, headers, body);
 	} catch (error) {
-		// requestUrl throws on 4xx/5xx errors - extract what info we can
-		const errorDetails = extractErrorDetails(error);
-		console.error('[API Streaming Error] Request threw:', {
-			url,
-			status: errorDetails.status,
-			message: errorDetails.message,
-			body: errorDetails.body,
-			rawError: error,
-		});
-
-		// Use body if available, otherwise fall back to message
-		const errorMessage = errorDetails.body || errorDetails.message;
+		console.error('[API Streaming Error] Request failed:', error);
 		throw new Error(
-			`Streaming request failed${errorDetails.status ? ` (HTTP ${errorDetails.status})` : ''}: ${errorMessage}`
+			`Streaming request failed: ${error instanceof Error ? error.message : String(error)}`
 		);
 	}
 
