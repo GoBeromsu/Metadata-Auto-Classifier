@@ -1,7 +1,7 @@
 import type AutoClassifierPlugin from 'main';
 import { PluginSettingTab } from 'obsidian';
 
-import type { AutoClassifierSettings, FrontmatterField } from '../types';
+import type { FrontmatterField } from '../types';
 import { generateId } from '../lib';
 import { DEFAULT_FRONTMATTER_SETTING } from '../constants';
 import { Setting } from './components/Setting';
@@ -73,13 +73,13 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 	}
 
 	private addNewFrontmatter(): void {
-                const newFrontmatter: FrontmatterField = {
+		const newFrontmatter: FrontmatterField = {
 			id: generateId(),
 			...DEFAULT_FRONTMATTER_SETTING,
 		};
 
 		this.plugin.settings.frontmatter.push(newFrontmatter);
-		this.plugin.saveSettings();
+		void this.plugin.saveSettings();
 		this.frontmatterSetting.display();
 	}
 }

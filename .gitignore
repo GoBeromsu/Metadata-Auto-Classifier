@@ -27,3 +27,6 @@ data.json
 .yarnrc.yml
 .pnp.cjs
 .pnp.loader.mjs
+
+# Jest
+ts-jest.log
