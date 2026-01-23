@@ -9,10 +9,11 @@ export interface CommonButtonProps {
 	warning?: boolean;
 	disabled?: boolean;
 	className?: string;
+	ariaLabel?: string;
 }
 
 function configureButton(button: ButtonComponent, props: CommonButtonProps): ButtonComponent {
-	const { text, icon, tooltip, onClick, cta, warning, disabled, className } = props;
+	const { text, icon, tooltip, onClick, cta, warning, disabled, className, ariaLabel } = props;
 
 	if (text) button.setButtonText(text);
 	if (icon) button.setIcon(icon);
@@ -22,6 +23,15 @@ function configureButton(button: ButtonComponent, props: CommonButtonProps): But
 	if (disabled !== undefined) button.setDisabled(disabled);
 	if (className) button.buttonEl.addClass(className);
 
+	// Accessibility: Set ARIA attributes
+	if (ariaLabel) {
+		button.buttonEl.setAttribute('aria-label', ariaLabel);
+	} else if (tooltip) {
+		// Use tooltip as fallback for aria-label
+		button.buttonEl.setAttribute('aria-label', tooltip);
+	}
+	button.buttonEl.setAttribute('role', 'button');
+
 	button.onClick(onClick);
 	return button;
 }
@@ -30,13 +40,22 @@ function configureExtraButton(
 	button: ExtraButtonComponent,
 	props: CommonButtonProps
 ): ExtraButtonComponent {
-	const { icon, tooltip, onClick, disabled, className } = props;
+	const { icon, tooltip, onClick, disabled, className, ariaLabel } = props;
 
 	// ExtraButtonComponent는 icon만 지원 (text, cta, warning 미지원)
 	if (icon) button.setIcon(icon);
 	if (tooltip) button.setTooltip(tooltip);
 	if (disabled !== undefined) button.setDisabled(disabled);
 	if (className) button.extraSettingsEl.addClass(className);
+
+	// Accessibility: Set ARIA attributes
+	if (ariaLabel) {
+		button.extraSettingsEl.setAttribute('aria-label', ariaLabel);
+	} else if (tooltip) {
+		// Use tooltip as fallback for aria-label
+		button.extraSettingsEl.setAttribute('aria-label', tooltip);
+	}
+	button.extraSettingsEl.setAttribute('role', 'button');
 
 	button.onClick(onClick);
 	return button;
