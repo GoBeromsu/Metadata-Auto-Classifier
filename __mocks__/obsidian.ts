@@ -1,5 +1,19 @@
 export const requestUrl = jest.fn();
 
+// Platform mock
+export const Platform = {
+	isDesktop: true,
+	isMobile: false,
+	isDesktopApp: true,
+	isMobileApp: false,
+	isIosApp: false,
+	isAndroidApp: false,
+	isMacOS: false,
+	isWin: false,
+	isLinux: false,
+	isSafari: false,
+};
+
 // Obsidian API functions
 export const getFrontMatterInfo = jest.fn((content: string) => {
 	const match = content.match(/^---\n[\s\S]*?\n---\n/);

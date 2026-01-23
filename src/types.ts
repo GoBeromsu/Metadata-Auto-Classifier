@@ -3,6 +3,7 @@
 // ==========================================
 
 import type { TFile } from 'obsidian';
+import type { OAuthTokens } from './auth/types';
 
 // ==========================================
 // Frontmatter Types (from frontmatter/types.ts)
@@ -34,8 +35,10 @@ export type ProcessFrontMatterFn = (
 	fn: (frontmatter: FrontMatter) => void
 ) => Promise<void>;
 
-export interface InsertFrontMatterParams
-	extends Pick<FrontmatterField, 'name' | 'overwrite' | 'linkType'> {
+export interface InsertFrontMatterParams extends Pick<
+	FrontmatterField,
+	'name' | 'overwrite' | 'linkType'
+> {
 	file: TFile;
 	value: string[];
 }
@@ -49,12 +52,16 @@ export interface Model {
 	name: string;
 }
 
+export type AuthType = 'apiKey' | 'oauth';
+
 export interface ProviderBase {
 	name: string;
 	baseUrl: string;
 	temperature?: number;
 	models: Model[];
 	apiKey: string;
+	authType?: AuthType;
+	oauth?: OAuthTokens;
 }
 
 export type ProviderConfig = ProviderBase;
@@ -126,4 +133,8 @@ export interface AutoClassifierSettings {
 	selectedModel: string;
 	frontmatter: FrontmatterField[];
 	classificationRule: string;
+	codexConnection?: OAuthTokens;
 }
+
+// Re-export auth types for convenience
+export type { OAuthTokens } from './auth/types';

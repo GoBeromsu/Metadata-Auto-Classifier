@@ -9,6 +9,7 @@ export const PROVIDER_NAMES = {
 	DEEPSEEK: providerPresetsData.deepseek.name,
 	LMSTUDIO: providerPresetsData.lmstudio.name,
 	OLLAMA: providerPresetsData.ollama.name,
+	CODEX: providerPresetsData.codex.name,
 	CUSTOM: providerPresetsData.custom.name,
 } as const;
 

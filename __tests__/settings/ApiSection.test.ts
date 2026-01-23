@@ -51,15 +51,15 @@ const createMockPlugin = () => ({
 	saveSettings: jest.fn().mockResolvedValue(undefined),
 });
 
-const createMockContainer = () => ({
+const createMockElement = (): any => ({
 	empty: jest.fn(),
-	createEl: jest.fn().mockReturnValue({
-		createEl: jest.fn().mockReturnValue({}),
-	}),
-	createDiv: jest.fn().mockReturnValue({
-		style: {},
-	}),
+	style: {},
+	innerHTML: '',
+	createEl: jest.fn().mockImplementation(() => createMockElement()),
+	createDiv: jest.fn().mockImplementation(() => createMockElement()),
 });
+
+const createMockContainer = () => createMockElement();
 
 describe('Api Container - Regression Tests', () => {
 	let mockPlugin: any;

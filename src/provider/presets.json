@@ -161,5 +161,27 @@
 				"name": "Ministral 8B Instruct"
 			}
 		]
+	},
+	"codex": {
+		"name": "Codex",
+		"apiKeyUrl": "",
+		"apiKeyRequired": false,
+		"modelsList": "https://openai.com/chatgpt",
+		"baseUrl": "https://chatgpt.com/backend-api/codex/responses",
+		"temperature": 0.6,
+		"popularModels": [
+			{
+				"id": "gpt-4o",
+				"name": "GPT-4o"
+			},
+			{
+				"id": "o1",
+				"name": "o1"
+			},
+			{
+				"id": "o3-mini",
+				"name": "o3-mini"
+			}
+		]
 	}
 }

@@ -8,6 +8,7 @@ import {
 import { PROVIDER_NAMES } from '../lib';
 import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
 import { sendRequest } from './request';
+import { CODEX_OAUTH } from '../auth/codex-constants';
 
 const parseJsonResponse = (content: string, providerName: string): StructuredOutput => {
 	try {
@@ -35,7 +36,7 @@ type APIResponseData = any;
 type RequestBody = Record<string, unknown>;
 
 interface ProviderSpec {
-	buildHeaders: (apiKey: string) => Record<string, string>;
+	buildHeaders: (apiKey: string, provider?: ProviderConfig) => Record<string, string>;
 	buildRequestBody: (
 		systemRole: string,
 		userPrompt: string,
@@ -153,6 +154,56 @@ export class UnifiedProvider implements APIProvider {
 				return parseJsonResponse(content, 'OpenRouter');
 			},
 		},
+		[PROVIDER_NAMES.CODEX]: {
+			buildHeaders: (_apiKey: string, provider?: ProviderConfig) => {
+				if (!provider?.oauth) {
+					throw new Error(
+						'Codex requires OAuth authentication. Please connect your account in settings.'
+					);
+				}
+				return {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${provider.oauth.accessToken}`,
+					'ChatGPT-Account-ID': provider.oauth.accountId,
+				};
+			},
+			buildRequestBody: (systemRole, userPrompt, model, temperature) => ({
+				model,
+				instructions: systemRole,
+				input: userPrompt,
+				temperature,
+				text: {
+					format: {
+						type: 'json_schema',
+						...OPENAI_STRUCTURE_OUTPUT.json_schema,
+					},
+				},
+			}),
+			buildUrl: () => CODEX_OAUTH.API_ENDPOINT,
+			parseResponse: (data) => {
+				// Codex API returns response in output array format
+				const output = data?.output;
+				if (!output || !Array.isArray(output)) {
+					throw new Error('Codex response missing output array');
+				}
+
+				// Find the message content in the output
+				const messageItem = output.find((item: { type: string }) => item.type === 'message');
+				if (!messageItem?.content) {
+					throw new Error('Codex response missing message content');
+				}
+
+				// Extract text from content array
+				const textContent = messageItem.content.find(
+					(c: { type: string }) => c.type === 'output_text'
+				);
+				if (!textContent?.text) {
+					throw new Error('Codex response missing text content');
+				}
+
+				return parseJsonResponse(textContent.text, 'Codex');
+			},
+		},
 	};
 
 	// Default spec for OpenAI, DeepSeek, LMStudio, Custom
@@ -198,7 +249,7 @@ export class UnifiedProvider implements APIProvider {
 	): Promise<StructuredOutput> {
 		const spec = this.getSpec(provider.name);
 
-		const headers = spec.buildHeaders(provider.apiKey);
+		const headers = spec.buildHeaders(provider.apiKey, provider);
 		const body = spec.buildRequestBody(
 			systemRole,
 			userPrompt,

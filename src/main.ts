@@ -1,5 +1,6 @@
 import type { TFile } from 'obsidian';
 import { Plugin } from 'obsidian';
+import { CodexOAuth, isTokenExpired } from './auth';
 import { ClassificationService, CommandService } from './classifier';
 import { DEFAULT_FRONTMATTER_SETTING, DEFAULT_SETTINGS } from './constants';
 import { Notice } from './settings/components/Notice';
@@ -14,6 +15,7 @@ export default class AutoClassifierPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+		await this.refreshCodexTokenIfNeeded();
 		try {
 			this.setupCommand();
 		} catch (error) {
@@ -21,6 +23,38 @@ export default class AutoClassifierPlugin extends Plugin {
 			Notice.error(new Error('Plugin initialization failed: could not setup commands'));
 		}
 		this.addSettingTab(new AutoClassifierSettingTab(this));
+	}
+
+	/**
+	 * Refresh Codex OAuth tokens if they are expired or about to expire
+	 */
+	private async refreshCodexTokenIfNeeded(): Promise<void> {
+		const tokens = this.settings.codexConnection;
+		if (!tokens) return;
+
+		// Check if tokens are expired or will expire within 5 minutes
+		if (!isTokenExpired(tokens)) return;
+
+		try {
+			const codexOAuth = new CodexOAuth();
+			const newTokens = await codexOAuth.refreshTokens(tokens);
+
+			// Update stored tokens
+			this.settings.codexConnection = newTokens;
+
+			// Also update the Codex provider if it exists
+			const codexProvider = this.settings.providers.find((p) => p.name === 'Codex');
+			if (codexProvider) {
+				codexProvider.oauth = newTokens;
+			}
+
+			await this.saveSettings();
+			console.log('Codex tokens refreshed successfully');
+		} catch (error) {
+			console.error('Failed to refresh Codex tokens:', error);
+			// Don't show notice on startup to avoid confusion
+			// User will see error when they try to use Codex
+		}
 	}
 
 	setupCommand() {
