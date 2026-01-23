@@ -1,21 +1,20 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-	preset: 'ts-jest',
 	testEnvironment: 'node',
 	roots: ['<rootDir>/__tests__', '<rootDir>/src'],
 	moduleFileExtensions: ['ts', 'js', 'json'],
 	transform: {
-		'^.+\\.ts$': ['ts-jest', {
-			tsconfig: 'tsconfig.json',
-			isolatedModules: true,
-		}],
+		'^.+\\.tsx?$': [
+			'ts-jest',
+			{
+				tsconfig: 'tsconfig.test.json',
+			},
+		],
 	},
-	transformIgnorePatterns: [],
 	moduleNameMapper: {
 		'^obsidian$': '<rootDir>/__mocks__/obsidian.ts',
 		'^main$': '<rootDir>/src/main.ts',
 		'^types$': '<rootDir>/src/types.ts',
-		'^constants$': '<rootDir>/src/constants.ts',
 		'^provider$': '<rootDir>/src/provider/index.ts',
 		'^provider/(.*)$': '<rootDir>/src/provider/$1',
 		'^lib$': '<rootDir>/src/lib/index.ts',

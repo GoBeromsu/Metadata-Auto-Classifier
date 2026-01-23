@@ -2,9 +2,9 @@ jest.mock('settings/modals/FrontmatterEditorModal', () => ({
 	ConfigurableSettingModal: class {},
 }));
 
-import type { FrontmatterField } from 'frontmatter/types';
-import { TagSection } from 'settings/TagSection';
-import { DEFAULT_TAG_SETTING } from 'utils/constants';
+import type { FrontmatterField } from 'types';
+import { Tag } from 'settings/TagSection';
+import { DEFAULT_TAG_SETTING } from '../../src/constants';
 
 interface MockPlugin {
 	app: { vault: { getMarkdownFiles: jest.Mock } };
@@ -37,19 +37,19 @@ const createMockContainer = (): MockContainer => ({
 describe('Tag Container - Regression Tests', () => {
 	let mockPlugin: MockPlugin;
 	let mockContainer: MockContainer;
-	let tagSection: TagSection;
+	let tag: Tag;
 
 	beforeEach(() => {
 		mockPlugin = createMockPlugin();
 		mockContainer = createMockContainer();
-		tagSection = new (TagSection as any)(mockPlugin, mockContainer as unknown as HTMLElement);
+		tag = new (Tag as any)(mockPlugin, mockContainer as unknown as HTMLElement);
 		jest.clearAllMocks();
 	});
 
 	describe('Basic Rendering', () => {
 		test('renders DEFAULT_TAG_SETTING without delete button', () => {
 			// When: display is called (should not throw)
-			expect(() => tagSection.display()).not.toThrow();
+			expect(() => tag.display()).not.toThrow();
 
 			// Verify the DEFAULT_TAG_SETTING properties are valid for display
 			expect(DEFAULT_TAG_SETTING.name).toBeDefined();
@@ -68,7 +68,7 @@ describe('Tag Container - Regression Tests', () => {
 			const updatedSetting = { ...DEFAULT_TAG_SETTING, name: 'Updated Tag Name' };
 
 			// Mock openEditModal
-			(tagSection as any).openEditModal = jest
+			(tag as any).openEditModal = jest
 				.fn()
 				.mockImplementation(
 					(_: FrontmatterField, onSave: (s: FrontmatterField) => Promise<void>) =>
@@ -76,7 +76,7 @@ describe('Tag Container - Regression Tests', () => {
 				);
 
 			// When: tag setting is edited
-			await (tagSection as any).handleEdit(DEFAULT_TAG_SETTING);
+			await (tag as any).handleEdit(DEFAULT_TAG_SETTING);
 
 			// Then: id=0 template should be updated
 			expect(mockPlugin.settings.frontmatter[0].name).toBe('Updated Tag Name');
@@ -98,7 +98,7 @@ describe('Tag Container - Regression Tests', () => {
 			];
 			const updatedSetting = { ...DEFAULT_TAG_SETTING, name: 'Updated' };
 
-			(tagSection as any).openEditModal = jest
+			(tag as any).openEditModal = jest
 				.fn()
 				.mockImplementation(
 					(_: FrontmatterField, onSave: (s: FrontmatterField) => Promise<void>) =>
@@ -106,7 +106,7 @@ describe('Tag Container - Regression Tests', () => {
 				);
 
 			// When: handleEdit is called
-			await (tagSection as any).handleEdit(DEFAULT_TAG_SETTING);
+			await (tag as any).handleEdit(DEFAULT_TAG_SETTING);
 
 			// Then: should handle without errors
 			expect(mockPlugin.saveSettings).toHaveBeenCalled();

@@ -1,9 +1,17 @@
+// Mock the request module
+jest.mock('provider/request', () => ({
+	sendRequest: jest.fn(),
+}));
+
 import { UnifiedProvider } from 'provider/UnifiedProvider';
+import { sendRequest } from 'provider/request';
 import { ProviderConfig } from 'types';
 import { requestUrl } from 'obsidian';
-import { PROVIDER_NAMES } from 'utils';
+import { PROVIDER_NAMES } from 'lib';
 
 jest.mock('obsidian');
+
+const mockSendRequest = sendRequest as jest.MockedFunction<typeof sendRequest>;
 
 describe('UnifiedProvider Tests', () => {
 	const unifiedProvider = new UnifiedProvider();
@@ -120,27 +128,24 @@ describe('UnifiedProvider Tests', () => {
 				name: PROVIDER_NAMES.ANTHROPIC
 			};
 
-			const mockResponse = {
-				status: 200,
-				json: {
-					content: [{
-						type: 'tool_use',
-						input: { output: ['test'], reliability: 1.0 }
-					}]
-				}
+			const mockApiResponse = {
+				content: [{
+					type: 'tool_use',
+					input: { output: ['test'], reliability: 1.0 }
+				}]
 			};
 
-			(requestUrl as jest.Mock).mockResolvedValueOnce(mockResponse);
+			mockSendRequest.mockResolvedValueOnce(mockApiResponse);
 
 			const result = await unifiedProvider.callAPI('system', 'user', config, 'model');
 
-			expect(requestUrl).toHaveBeenCalledWith(
+			expect(mockSendRequest).toHaveBeenCalledWith(
+				config.baseUrl,
 				expect.objectContaining({
-					headers: expect.objectContaining({
-						'x-api-key': 'test-key',
-						'anthropic-version': '2023-06-01'
-					})
-				})
+					'x-api-key': 'test-key',
+					'anthropic-version': '2023-06-01'
+				}),
+				expect.any(Object)
 			);
 			expect(result).toEqual({ output: ['test'], reliability: 1.0 });
 		});
@@ -151,27 +156,24 @@ describe('UnifiedProvider Tests', () => {
 				name: PROVIDER_NAMES.GEMINI
 			};
 
-			const mockResponse = {
-				status: 200,
-				json: {
-					candidates: [{
-						content: {
-							parts: [{
-								text: '{"output":["test"],"reliability":0.95}'
-							}]
-						}
-					}]
-				}
+			const mockApiResponse = {
+				candidates: [{
+					content: {
+						parts: [{
+							text: '{"output":["test"],"reliability":0.95}'
+						}]
+					}
+				}]
 			};
 
-			(requestUrl as jest.Mock).mockResolvedValueOnce(mockResponse);
+			mockSendRequest.mockResolvedValueOnce(mockApiResponse);
 
 			await unifiedProvider.callAPI('system', 'user', config, 'gemini-pro');
 
-			expect(requestUrl).toHaveBeenCalledWith(
-				expect.objectContaining({
-					url: expect.stringContaining('models/gemini-pro:generateContent?key=test-key')
-				})
+			expect(mockSendRequest).toHaveBeenCalledWith(
+				expect.stringContaining('models/gemini-pro:generateContent?key=test-key'),
+				expect.any(Object),
+				expect.any(Object)
 			);
 		});
 
@@ -182,21 +184,18 @@ describe('UnifiedProvider Tests', () => {
 				temperature: 0.3
 			};
 
-			const mockResponse = {
-				status: 200,
-				json: {
-					choices: [{
-						message: { content: '{"output":["test"],"reliability":1.0}' }
-					}]
-				}
+			const mockApiResponse = {
+				choices: [{
+					message: { content: '{"output":["test"],"reliability":1.0}' }
+				}]
 			};
 
-			(requestUrl as jest.Mock).mockResolvedValueOnce(mockResponse);
+			mockSendRequest.mockResolvedValueOnce(mockApiResponse);
 
 			await unifiedProvider.callAPI('system', 'user', config, 'model', 0.9);
 
-			const callArgs = (requestUrl as jest.Mock).mock.calls[0][0];
-			const bodyData = JSON.parse(callArgs.body);
+			const callArgs = mockSendRequest.mock.calls[0];
+			const bodyData = callArgs[2] as Record<string, unknown>;
 			expect(bodyData.temperature).toBe(0.3);
 		});
 	});

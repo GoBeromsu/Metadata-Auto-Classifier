@@ -1,6 +1,6 @@
 import AutoClassifierPlugin from 'main';
 import { App, TFile, createMockTFile } from 'obsidian';
-import { DEFAULT_SETTINGS, DEFAULT_FRONTMATTER_SETTING } from 'constants';
+import { DEFAULT_SETTINGS, DEFAULT_FRONTMATTER_SETTING } from '../src/constants';
 import type { ProviderConfig, FrontmatterField } from 'types';
 
 // Mock the provider module

@@ -7,7 +7,7 @@ import {
 } from '../constants';
 import { PROVIDER_NAMES } from '../lib';
 import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
-import { sendRequest } from './index';
+import { sendRequest } from './request';
 
 const parseJsonResponse = (content: string, providerName: string): StructuredOutput => {
 	try {
@@ -29,7 +29,6 @@ const parseJsonResponse = (content: string, providerName: string): StructuredOut
 
 // Using any for API response data since providers return varied structures
 // that are validated at runtime in parseResponse functions
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type APIResponseData = any;
 
 // Generic request body type for API requests
