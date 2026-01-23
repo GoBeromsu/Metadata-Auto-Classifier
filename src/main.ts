@@ -15,7 +15,12 @@ export default class AutoClassifierPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		this.setupCommand();
+		try {
+			this.setupCommand();
+		} catch (error) {
+			console.error('Failed to setup commands:', error);
+			CommonNotice.error(new Error('Plugin initialization failed: could not setup commands'));
+		}
 		this.addSettingTab(new AutoClassifierSettingTab(this));
 	}
 
