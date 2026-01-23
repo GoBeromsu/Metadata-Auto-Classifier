@@ -2,43 +2,32 @@
 |---|---|
 | Bash(git:*), Bash(yarn:*), Bash(gh:*), Bash(cat:*), Bash(cp:*), Bash(mkdir:*), Bash(rm:*), Bash(zip:*), Read, Edit | Create a consistent Obsidian plugin release |
 
-## Context
+## Obsidian Plugin Release Rules
 
-- Current version in package.json: !`cat package.json | grep '"version"' | head -1`
-- Current version in manifest.json: !`cat manifest.json | grep '"version"'`
-- Last entry in versions.json: !`tail -3 versions.json`
-- Existing release tags (last 5): !`gh release list --limit 5`
-- Git status: !`git status --short`
+### 1. 버전 형식
+- 버전은 `X.Y.Z` 형식을 사용한다 (예: `1.7.0`)
+- package.json, manifest.json, versions.json의 버전이 모두 일치해야 한다
 
-## Release Checklist
+### 2. 태그 형식
+- 태그는 **v 접두사 없이** 버전 그대로 사용한다: `1.7.0`
+- Obsidian은 manifest.json의 version 값을 태그 이름으로 직접 사용한다
+- 예시: `git tag -a 1.7.0 -m "1.7.0 release"`
 
-### 1. Version Consistency Check
-Verify that ALL versions match:
-- `package.json` version
-- `manifest.json` version
-- `versions.json` has an entry for this version
+### 3. 필수 릴리스 파일
+모든 릴리스에는 다음 파일이 포함되어야 한다:
+- `main.js` - 빌드된 플러그인 코드
+- `manifest.json` - 플러그인 메타데이터
+- `styles.css` - 플러그인 스타일
+- `versions.json` - 버전 호환성 맵
 
-### 2. Tag Naming Convention
-**CRITICAL**: This project uses tags **WITHOUT "v" prefix** (e.g., `1.7.0`, NOT `v1.7.0`)
-- Obsidian uses manifest.json version as the tag name directly
-- Using "v" prefix causes 404 errors in community plugin downloads
-
-### 3. Required Release Assets
-All releases MUST include:
-- `main.js` - Built plugin code
-- `manifest.json` - Plugin metadata
-- `styles.css` - Plugin styles
-- `versions.json` - Version compatibility map
-
-## Your Task
-
-1. **Verify versions match** across package.json, manifest.json, and versions.json
-2. **Check for uncommitted changes** - warn if working directory is not clean
-3. **Build the project**: `yarn build`
-4. **Run tests**: `yarn test`
-5. **Create git tag** (WITHOUT "v" prefix): `git tag -a X.Y.Z -m "vX.Y.Z - Release description"`
-6. **Push tag**: `git push origin X.Y.Z`
-7. **Create GitHub release** with all required assets:
+### 4. 릴리스 순서
+1. 버전 업데이트: package.json, manifest.json, versions.json
+2. 커밋 및 푸시
+3. 빌드: `yarn build`
+4. 테스트: `yarn test`
+5. 태그 생성: `git tag -a X.Y.Z -m "X.Y.Z release"`
+6. 태그 푸시: `git push origin X.Y.Z`
+7. 릴리스 생성:
 ```bash
 gh release create X.Y.Z \
   --title "X.Y.Z" \
@@ -49,15 +38,23 @@ gh release create X.Y.Z \
   ./versions.json
 ```
 
-8. **Verify release** by checking the download URL works:
+### 5. 릴리스 검증
+릴리스 후 다운로드 URL이 정상 작동하는지 확인한다:
 ```bash
-curl -sI "https://github.com/GoBeromsu/Metadata-Auto-Classifier/releases/download/X.Y.Z/manifest.json" | head -3
+curl -sI "https://github.com/GoBeromsu/Metadata-Auto-Classifier/releases/download/X.Y.Z/manifest.json"
+# HTTP/2 302 가 나와야 정상 (404는 실패)
 ```
 
-## Error Prevention
+---
 
-- If versions don't match, STOP and ask user to fix
-- If tag already exists, STOP and inform user
-- If build fails, STOP and show error
-- If tests fail, STOP and show error
-- Always verify 302 redirect (not 404) after release creation
+## Context
+
+- package.json 버전: !`cat package.json | grep '"version"' | head -1`
+- manifest.json 버전: !`cat manifest.json | grep '"version"'`
+- versions.json 마지막 항목: !`tail -3 versions.json`
+- 최근 릴리스: !`gh release list --limit 5`
+- Git 상태: !`git status --short`
+
+## Your Task
+
+위 규칙에 따라 릴리스를 진행한다. 버전 불일치나 필수 파일 누락 시 중단하고 사용자에게 알린다.
