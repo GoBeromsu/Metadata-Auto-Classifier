@@ -175,12 +175,16 @@
 				"name": "GPT-4o"
 			},
 			{
-				"id": "o1",
-				"name": "o1"
+				"id": "gpt-4.1-mini",
+				"name": "GPT-4.1 Mini"
 			},
 			{
 				"id": "o3-mini",
 				"name": "o3-mini"
+			},
+			{
+				"id": "o4-mini",
+				"name": "o4-mini"
 			}
 		]
 	}
