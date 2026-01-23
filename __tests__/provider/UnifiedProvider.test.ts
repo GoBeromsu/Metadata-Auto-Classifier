@@ -1,10 +1,11 @@
 // Mock the request module
 jest.mock('provider/request', () => ({
 	sendRequest: jest.fn(),
+	sendStreamingRequest: jest.fn(),
 }));
 
 import { UnifiedProvider } from 'provider/UnifiedProvider';
-import { sendRequest } from 'provider/request';
+import { sendRequest, sendStreamingRequest } from 'provider/request';
 import { ProviderConfig } from 'types';
 import { requestUrl } from 'obsidian';
 import { PROVIDER_NAMES } from 'lib';
@@ -12,6 +13,7 @@ import { PROVIDER_NAMES } from 'lib';
 jest.mock('obsidian');
 
 const mockSendRequest = sendRequest as jest.MockedFunction<typeof sendRequest>;
+const mockSendStreamingRequest = sendStreamingRequest as jest.MockedFunction<typeof sendStreamingRequest>;
 
 describe('UnifiedProvider Tests', () => {
 	const unifiedProvider = new UnifiedProvider();
@@ -264,21 +266,14 @@ describe('UnifiedProvider Tests', () => {
 				},
 			};
 
-			const mockApiResponse = {
-				output: [{
-					type: 'message',
-					content: [{
-						type: 'output_text',
-						text: '{"output":["test"],"reliability":1.0}'
-					}]
-				}]
-			};
-
-			mockSendRequest.mockResolvedValueOnce(mockApiResponse);
+			// Codex uses streaming, so mock returns accumulated text
+			const mockStreamedText = '{"output":["test"],"reliability":1.0}';
+			mockSendStreamingRequest.mockResolvedValueOnce(mockStreamedText);
 
 			await unifiedProvider.callAPI('system', 'user', config, 'model');
 
-			const callArgs = mockSendRequest.mock.calls[0];
+			// Verify sendStreamingRequest was called with correct headers
+			const callArgs = mockSendStreamingRequest.mock.calls[0];
 			const headers = callArgs[1] as Record<string, string>;
 			expect(headers.Authorization).toBe('Bearer new-oauth-token');
 			expect(headers['ChatGPT-Account-ID']).toBe('new-account-id');
@@ -297,21 +292,14 @@ describe('UnifiedProvider Tests', () => {
 				},
 			};
 
-			const mockApiResponse = {
-				output: [{
-					type: 'message',
-					content: [{
-						type: 'output_text',
-						text: '{"output":["test"],"reliability":1.0}'
-					}]
-				}]
-			};
-
-			mockSendRequest.mockResolvedValueOnce(mockApiResponse);
+			// Codex uses streaming, so mock returns accumulated text
+			const mockStreamedText = '{"output":["test"],"reliability":1.0}';
+			mockSendStreamingRequest.mockResolvedValueOnce(mockStreamedText);
 
 			await unifiedProvider.callAPI('system', 'user', config, 'model');
 
-			const callArgs = mockSendRequest.mock.calls[0];
+			// Verify sendStreamingRequest was called with correct headers
+			const callArgs = mockSendStreamingRequest.mock.calls[0];
 			const headers = callArgs[1] as Record<string, string>;
 			expect(headers.Authorization).toBe('Bearer legacy-oauth-token');
 			expect(headers['ChatGPT-Account-ID']).toBe('legacy-account-id');

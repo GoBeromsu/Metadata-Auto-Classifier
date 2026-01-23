@@ -7,7 +7,7 @@ import {
 } from '../constants';
 import { PROVIDER_NAMES } from '../lib';
 import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
-import { sendRequest } from './request';
+import { sendRequest, sendStreamingRequest, type SSEEvent } from './request';
 import { CODEX_OAUTH } from './auth/oauth-constants';
 
 const parseJsonResponse = (content: string, providerName: string): StructuredOutput => {
@@ -45,6 +45,11 @@ interface ProviderSpec {
 	) => RequestBody;
 	buildUrl: (baseUrl: string, model: string, apiKey: string) => string;
 	parseResponse: (data: APIResponseData) => StructuredOutput;
+	// Streaming support for providers that require it (e.g., Codex)
+	requiresStreaming?: boolean;
+	parseStreamEvent?: (event: SSEEvent) => string | null;
+	// For streaming providers, parseResponse receives accumulated text string
+	parseStreamResponse?: (text: string) => StructuredOutput;
 }
 
 export class UnifiedProvider implements APIProvider {
@@ -155,6 +160,8 @@ export class UnifiedProvider implements APIProvider {
 			},
 		},
 		[PROVIDER_NAMES.CODEX]: {
+			requiresStreaming: true,
+
 			buildHeaders: (_apiKey: string, provider?: ProviderConfig) => {
 				// Support both new auth field and legacy oauth field
 				const oauth = provider?.auth?.type === 'oauth' ? provider.auth.oauth : provider?.oauth;
@@ -170,6 +177,7 @@ export class UnifiedProvider implements APIProvider {
 					'ChatGPT-Account-ID': oauth.accountId,
 				};
 			},
+
 			buildRequestBody: (systemRole, userPrompt, model, temperature) => {
 				const body: Record<string, unknown> = {
 					model,
@@ -185,7 +193,7 @@ export class UnifiedProvider implements APIProvider {
 							],
 						},
 					],
-					stream: false,
+					stream: true, // Required for Codex API
 					store: false,
 				};
 				if (temperature !== undefined) {
@@ -193,21 +201,38 @@ export class UnifiedProvider implements APIProvider {
 				}
 				return body;
 			},
+
 			buildUrl: () => CODEX_OAUTH.API_ENDPOINT,
+
+			// Parse SSE events from Codex streaming response
+			parseStreamEvent: (event: SSEEvent) => {
+				if (event.type === 'response.output_text.delta') {
+					return (event.delta as string) ?? null;
+				}
+				if (event.type === 'error') {
+					throw new Error(`Codex stream error: ${event.message || JSON.stringify(event)}`);
+				}
+				return null;
+			},
+
+			// Parse the accumulated text from streaming response
+			parseStreamResponse: (text: string) => {
+				return parseJsonResponse(text, 'Codex');
+			},
+
+			// Fallback parseResponse (not used when streaming, but required by interface)
 			parseResponse: (data) => {
-				// Codex API returns response in output array format
+				// This is kept for interface compatibility but won't be used with streaming
 				const output = data?.output;
 				if (!output || !Array.isArray(output)) {
 					throw new Error('Codex response missing output array');
 				}
 
-				// Find the message content in the output
 				const messageItem = output.find((item: { type: string }) => item.type === 'message');
 				if (!messageItem?.content) {
 					throw new Error('Codex response missing message content');
 				}
 
-				// Extract text from content array
 				const textContent = messageItem.content.find(
 					(c: { type: string }) => c.type === 'output_text'
 				);
@@ -285,6 +310,13 @@ export class UnifiedProvider implements APIProvider {
 		);
 		const url = spec.buildUrl(provider.baseUrl, selectedModel, apiKey);
 
+		// Use streaming for providers that require it (e.g., Codex)
+		if (spec.requiresStreaming && spec.parseStreamEvent && spec.parseStreamResponse) {
+			const accumulatedText = await sendStreamingRequest(url, headers, body, spec.parseStreamEvent);
+			return spec.parseStreamResponse(accumulatedText);
+		}
+
+		// Standard non-streaming request for other providers
 		const response = await sendRequest(url, headers, body);
 		return this.processApiResponse(response, provider.name);
 	}
