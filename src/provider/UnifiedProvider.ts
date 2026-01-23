@@ -174,13 +174,14 @@ export class UnifiedProvider implements APIProvider {
 				const body: Record<string, unknown> = {
 					model,
 					instructions: systemRole,
-					input: userPrompt,
-					text: {
-						format: {
-							type: 'json_schema',
-							...OPENAI_STRUCTURE_OUTPUT.json_schema,
+					input: [
+						{
+							role: 'user',
+							content: userPrompt,
 						},
-					},
+					],
+					stream: false,
+					store: false,
 				};
 				if (temperature !== undefined) {
 					body.temperature = temperature;
