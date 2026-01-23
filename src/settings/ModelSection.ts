@@ -37,13 +37,9 @@ export class ModelSection {
 		const hasModels = providers.some((p) => p.models.length > 0);
 
 		if (!hasModels) {
-			const emptyState = containerEl.createEl('div', {
-				cls: 'setting-item-description',
-				attr: { style: 'text-align: center; padding: 1em 0;' },
-			});
-			emptyState.createEl('div', {
-				text: 'No models configured',
-				cls: 'mod-muted',
+			Setting.create(containerEl, {
+				name: 'No models configured',
+				desc: 'Add a model to get started',
 			});
 			return;
 		}
