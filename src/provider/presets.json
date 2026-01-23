@@ -166,6 +166,7 @@
 		"name": "Codex",
 		"apiKeyUrl": "",
 		"apiKeyRequired": false,
+		"authType": "oauth",
 		"modelsList": "https://openai.com/chatgpt",
 		"baseUrl": "https://chatgpt.com/backend-api/codex/responses",
 		"temperature": 0.6,
