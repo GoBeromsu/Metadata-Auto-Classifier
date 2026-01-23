@@ -69,7 +69,7 @@ export class CodexOAuth {
 			// Required for Codex OAuth
 			id_token_add_organizations: 'true',
 			codex_cli_simplified_flow: 'true',
-			originator: 'obsidian-smart-composer',
+			originator: 'metadata-auto-classifier',
 		});
 
 		return `${CODEX_OAUTH.AUTHORIZATION_ENDPOINT}?${params.toString()}`;
