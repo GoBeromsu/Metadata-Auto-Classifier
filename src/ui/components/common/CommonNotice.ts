@@ -5,6 +5,24 @@ export class CommonNotice {
 		new Notice(message, duration);
 	}
 
+	/**
+	 * Format a validation error message with component context
+	 * @param component - The component name (e.g., 'Provider', 'Model')
+	 * @param message - The error message
+	 * @returns Formatted error message: [Component] Message
+	 */
+	static formatValidationError(component: string, message: string): string {
+		return `[${component}] ${message}`;
+	}
+
+	/**
+	 * Show a validation error with component context
+	 */
+	static validationError(component: string, message: string): void {
+		const formattedMessage = this.formatValidationError(component, message);
+		this.error(new Error(formattedMessage));
+	}
+
 	static error(error: Error): void {
 		this.show(`❌ ${error.message}`, 5000);
 		console.error(error);

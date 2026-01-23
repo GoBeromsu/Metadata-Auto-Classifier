@@ -46,6 +46,11 @@ export class Api {
 						icon: 'trash',
 						text: 'Delete',
 						onClick: async () => {
+							const confirmed = confirm(`Are you sure you want to delete "${provider.name}" provider?`);
+							if (!confirmed) {
+								return;
+							}
+
 							this.plugin.settings.providers = this.plugin.settings.providers.filter(
 								(p) => p.name !== provider.name
 							);
@@ -73,10 +78,7 @@ export class Api {
 	}
 
 	private addClassificationRule(containerEl: HTMLElement, classificationRule: string): void {
-		const textAreaContainer = containerEl.createDiv({ cls: 'custom-prompt-container' });
-		textAreaContainer.style.width = '100%';
-		textAreaContainer.style.marginTop = '8px';
-		textAreaContainer.style.marginBottom = '16px';
+		const textAreaContainer = containerEl.createDiv({ cls: 'custom-prompt-container mac-custom-prompt-container' });
 
 		CommonSetting.create(textAreaContainer, {
 			name: 'Classification Rule',
@@ -224,6 +226,11 @@ export class Api {
 							icon: 'trash',
 							text: 'Delete',
 							onClick: async () => {
+								const confirmed = confirm(`Are you sure you want to delete "${config.name}" model?`);
+								if (!confirmed) {
+									return;
+								}
+
 								const currentProvider = this.plugin.settings.providers.find(
 									(p) => p.name === provider.name
 								);
