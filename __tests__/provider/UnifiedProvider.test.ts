@@ -1,11 +1,33 @@
+// Mock HttpError class
+class MockHttpError extends Error {
+	status: number;
+	responseText: string;
+
+	constructor(message: string, status: number, responseText: string) {
+		super(message);
+		this.name = 'HttpError';
+		this.status = status;
+		this.responseText = responseText;
+	}
+}
+
 // Mock the request module
 jest.mock('provider/request', () => ({
 	sendRequest: jest.fn(),
 	sendStreamingRequest: jest.fn(),
+	HttpError: MockHttpError,
+}));
+
+// Mock the oauth module
+jest.mock('provider/auth/oauth', () => ({
+	CodexOAuth: jest.fn().mockImplementation(() => ({
+		refreshTokens: jest.fn(),
+	})),
 }));
 
 import { UnifiedProvider } from 'provider/UnifiedProvider';
 import { sendRequest, sendStreamingRequest } from 'provider/request';
+import { CodexOAuth } from 'provider/auth/oauth';
 import { ProviderConfig } from 'types';
 import { requestUrl } from 'obsidian';
 import { PROVIDER_NAMES } from 'lib';
@@ -14,6 +36,10 @@ jest.mock('obsidian');
 
 const mockSendRequest = sendRequest as jest.MockedFunction<typeof sendRequest>;
 const mockSendStreamingRequest = sendStreamingRequest as jest.MockedFunction<typeof sendStreamingRequest>;
+const mockCodexOAuth = CodexOAuth as jest.MockedClass<typeof CodexOAuth>;
+
+// Use MockHttpError for creating test errors
+const HttpError = MockHttpError;
 
 describe('UnifiedProvider Tests', () => {
 	const unifiedProvider = new UnifiedProvider();
@@ -352,5 +378,117 @@ describe('UnifiedProvider Tests', () => {
 			expect(() => unifiedProvider.processApiResponse(invalidResponse, PROVIDER_NAMES.CODEX))
 				.toThrow('Codex response missing message content');
 		});
+	});
+
+	describe('Codex 401 token refresh', () => {
+		const codexConfig: ProviderConfig = {
+			name: PROVIDER_NAMES.CODEX,
+			baseUrl: 'https://codex.api',
+			models: [],
+			auth: {
+				type: 'oauth',
+				oauth: {
+					accessToken: 'expired-token',
+					refreshToken: 'refresh-token',
+					expiresAt: Date.now() / 1000 + 3600,
+					accountId: 'account-123',
+				},
+			},
+		};
+
+		beforeEach(() => {
+			mockCodexOAuth.mockClear();
+		});
+
+		it('should refresh tokens and retry on 401 error', async () => {
+			// First call throws 401
+			const http401Error = new HttpError('Authentication failed', 401, 'Unauthorized');
+			mockSendStreamingRequest
+				.mockRejectedValueOnce(http401Error)
+				.mockResolvedValueOnce('{"output":["test"],"reliability":1.0}');
+
+			// Mock token refresh
+			const newTokens = {
+				accessToken: 'new-token',
+				refreshToken: 'new-refresh-token',
+				expiresAt: Date.now() / 1000 + 7200,
+				accountId: 'account-123',
+			};
+			const mockRefreshTokens = jest.fn().mockResolvedValue(newTokens);
+			mockCodexOAuth.mockImplementation(() => ({
+				refreshTokens: mockRefreshTokens,
+			}) as any);
+
+			const result = await unifiedProvider.callAPI(
+				'system',
+				'user',
+				codexConfig,
+				'model'
+			);
+
+			expect(result).toEqual({ output: ['test'], reliability: 1.0 });
+			expect(mockSendStreamingRequest).toHaveBeenCalledTimes(2);
+			expect(mockRefreshTokens).toHaveBeenCalledWith(codexConfig.auth?.type === 'oauth' ? codexConfig.auth.oauth : undefined);
+		});
+
+		it('should call onTokenRefresh callback after token refresh', async () => {
+			const http401Error = new HttpError('Authentication failed', 401, 'Unauthorized');
+			mockSendStreamingRequest
+				.mockRejectedValueOnce(http401Error)
+				.mockResolvedValueOnce('{"output":["test"],"reliability":1.0}');
+
+			const newTokens = {
+				accessToken: 'new-token',
+				refreshToken: 'new-refresh-token',
+				expiresAt: Date.now() / 1000 + 7200,
+				accountId: 'account-123',
+			};
+			mockCodexOAuth.mockImplementation(() => ({
+				refreshTokens: jest.fn().mockResolvedValue(newTokens),
+			}) as any);
+
+			const onTokenRefresh = jest.fn();
+
+			await unifiedProvider.callAPI(
+				'system',
+				'user',
+				codexConfig,
+				'model',
+				undefined,
+				onTokenRefresh
+			);
+
+			expect(onTokenRefresh).toHaveBeenCalledWith(newTokens);
+		});
+
+		it('should throw error if token refresh fails', async () => {
+			const http401Error = new HttpError('Authentication failed', 401, 'Unauthorized');
+			mockSendStreamingRequest.mockRejectedValueOnce(http401Error);
+
+			mockCodexOAuth.mockImplementation(() => ({
+				refreshTokens: jest.fn().mockRejectedValue(new Error('Refresh failed')),
+			}) as any);
+
+			await expect(
+				unifiedProvider.callAPI('system', 'user', codexConfig, 'model')
+			).rejects.toThrow('Refresh failed');
+		});
+
+		it('should throw error if OAuth tokens are not configured', async () => {
+			const configWithoutOAuth: ProviderConfig = {
+				name: PROVIDER_NAMES.CODEX,
+				baseUrl: 'https://codex.api',
+				models: [],
+				// No oauth configured
+			};
+
+			const http401Error = new HttpError('Authentication failed', 401, 'Unauthorized');
+			mockSendStreamingRequest.mockRejectedValueOnce(http401Error);
+
+			await expect(
+				unifiedProvider.callAPI('system', 'user', configWithoutOAuth, 'model')
+			).rejects.toThrow('Codex OAuth tokens');
+		});
+
 	});
 });

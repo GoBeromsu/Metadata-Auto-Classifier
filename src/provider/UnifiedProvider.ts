@@ -6,9 +6,15 @@ import {
 	OPENAI_STRUCTURE_OUTPUT,
 } from '../constants';
 import { PROVIDER_NAMES } from '../lib';
-import type { APIProvider, ProviderConfig, StructuredOutput } from '../types';
-import { sendRequest, sendStreamingRequest, type SSEEvent } from './request';
+import type {
+	APIProvider,
+	ProviderConfig,
+	StructuredOutput,
+	OnTokenRefreshCallback,
+} from '../types';
+import { sendRequest, sendStreamingRequest, HttpError, type SSEEvent } from './request';
 import { CODEX_OAUTH } from './auth/oauth-constants';
+import { CodexOAuth } from './auth/oauth';
 
 const parseJsonResponse = (content: string, providerName: string): StructuredOutput => {
 	try {
@@ -32,8 +38,14 @@ const parseJsonResponse = (content: string, providerName: string): StructuredOut
 // that are validated at runtime in parseResponse functions
 type APIResponseData = any;
 
-// Generic request body type for API requests
 type RequestBody = Record<string, unknown>;
+
+function extractOAuthTokens(provider: ProviderConfig) {
+	if (provider.auth?.type === 'oauth') {
+		return provider.auth.oauth;
+	}
+	return provider.oauth;
+}
 
 interface ProviderSpec {
 	buildHeaders: (apiKey: string, provider?: ProviderConfig) => Record<string, string>;
@@ -163,9 +175,10 @@ export class UnifiedProvider implements APIProvider {
 			requiresStreaming: true,
 
 			buildHeaders: (_apiKey: string, provider?: ProviderConfig) => {
-				// Support both new auth field and legacy oauth field
-				const oauth = provider?.auth?.type === 'oauth' ? provider.auth.oauth : provider?.oauth;
-
+				if (!provider) {
+					throw new Error('Codex requires provider config for OAuth tokens');
+				}
+				const oauth = extractOAuthTokens(provider);
 				if (!oauth?.accessToken || !oauth?.accountId) {
 					throw new Error(
 						'Codex OAuth tokens incomplete. Please reconnect your account in settings.'
@@ -290,7 +303,8 @@ export class UnifiedProvider implements APIProvider {
 		userPrompt: string,
 		provider: ProviderConfig,
 		selectedModel: string,
-		temperature?: number
+		temperature?: number,
+		onTokenRefresh?: OnTokenRefreshCallback
 	): Promise<StructuredOutput> {
 		const spec = this.getSpec(provider.name);
 		const apiKey = this.getApiKey(provider);
@@ -306,13 +320,85 @@ export class UnifiedProvider implements APIProvider {
 
 		// Use streaming for providers that require it (e.g., Codex)
 		if (spec.requiresStreaming && spec.parseStreamEvent && spec.parseStreamResponse) {
-			const accumulatedText = await sendStreamingRequest(url, headers, body, spec.parseStreamEvent);
-			return spec.parseStreamResponse(accumulatedText);
+			try {
+				const accumulatedText = await sendStreamingRequest(
+					url,
+					headers,
+					body,
+					spec.parseStreamEvent
+				);
+				return spec.parseStreamResponse(accumulatedText);
+			} catch (error) {
+				// Handle 401 for Codex: attempt token refresh and retry
+				const isCodex401 =
+					error instanceof HttpError &&
+					error.status === 401 &&
+					provider.name === PROVIDER_NAMES.CODEX;
+
+				if (isCodex401) {
+					console.log('[Codex] 401 received, attempting token refresh...');
+					return this.refreshCodexTokensAndRetry(
+						provider,
+						systemRole,
+						userPrompt,
+						selectedModel,
+						temperature,
+						onTokenRefresh
+					);
+				}
+				throw error;
+			}
 		}
 
 		// Standard non-streaming request for other providers
 		const response = await sendRequest(url, headers, body);
 		return this.processApiResponse(response, provider.name);
+	}
+
+	private async refreshCodexTokensAndRetry(
+		provider: ProviderConfig,
+		systemRole: string,
+		userPrompt: string,
+		selectedModel: string,
+		temperature?: number,
+		onTokenRefresh?: OnTokenRefreshCallback
+	): Promise<StructuredOutput> {
+		const oauth = extractOAuthTokens(provider);
+		if (!oauth) {
+			throw new Error('Codex OAuth tokens not found. Please reconnect your account.');
+		}
+
+		const codexOAuth = new CodexOAuth();
+		const newTokens = await codexOAuth.refreshTokens(oauth);
+		console.log('[Codex] Tokens refreshed successfully');
+
+		const updatedProvider: ProviderConfig = {
+			...provider,
+			auth: { type: 'oauth', oauth: newTokens },
+			oauth: newTokens,
+		};
+
+		if (onTokenRefresh) {
+			await onTokenRefresh(newTokens);
+		}
+
+		// Retry the streaming request with refreshed tokens
+		const spec = this.getSpec(provider.name);
+		if (!spec.parseStreamEvent || !spec.parseStreamResponse) {
+			throw new Error('Codex spec is missing stream handlers');
+		}
+
+		const headers = spec.buildHeaders('', updatedProvider);
+		const body = spec.buildRequestBody(
+			systemRole,
+			userPrompt,
+			selectedModel,
+			provider.temperature ?? temperature
+		);
+		const url = spec.buildUrl(provider.baseUrl, selectedModel, '');
+
+		const accumulatedText = await sendStreamingRequest(url, headers, body, spec.parseStreamEvent);
+		return spec.parseStreamResponse(accumulatedText);
 	}
 
 	processApiResponse(responseData: APIResponseData, providerName?: string): StructuredOutput {

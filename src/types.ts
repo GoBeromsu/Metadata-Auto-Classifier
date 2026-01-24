@@ -93,13 +93,19 @@ export interface ProviderPreset extends Omit<ProviderBase, 'apiKey'> {
 	popularModels: Model[];
 }
 
+/**
+ * Callback for when OAuth tokens are refreshed during API calls
+ */
+export type OnTokenRefreshCallback = (tokens: OAuthTokens) => Promise<void>;
+
 export interface APIProvider {
 	callAPI(
 		systemRole: string,
 		user_prompt: string,
 		provider: ProviderConfig,
 		selectedModel: string,
-		temperature?: number
+		temperature?: number,
+		onTokenRefresh?: OnTokenRefreshCallback
 	): Promise<StructuredOutput>;
 
 	buildHeaders(apiKey: string): Record<string, string>;
