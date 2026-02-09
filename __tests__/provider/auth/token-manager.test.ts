@@ -14,11 +14,11 @@ describe('token-manager', () => {
 	const originalDateNow = Date.now;
 
 	beforeEach(() => {
-		jest.spyOn(Date, 'now').mockImplementation(() => mockNow);
+		vi.spyOn(Date, 'now').mockImplementation(() => mockNow);
 	});
 
 	afterEach(() => {
-		jest.restoreAllMocks();
+		vi.restoreAllMocks();
 	});
 
 	describe('parseJwtClaims', () => {

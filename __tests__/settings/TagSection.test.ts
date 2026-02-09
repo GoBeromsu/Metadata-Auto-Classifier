@@ -1,36 +1,37 @@
-jest.mock('settings/modals/FrontmatterEditorModal', () => ({
+vi.mock('settings/modals/FrontmatterEditorModal', () => ({
 	ConfigurableSettingModal: class {},
 }));
 
+import type { Mock } from 'vitest';
 import type { FrontmatterField } from 'types';
 import { Tag } from 'settings/TagSection';
 import { DEFAULT_TAG_SETTING } from '../../src/constants';
 
 interface MockPlugin {
-	app: { vault: { getMarkdownFiles: jest.Mock } };
+	app: { vault: { getMarkdownFiles: Mock } };
 	settings: { frontmatter: FrontmatterField[] };
-	saveSettings: jest.Mock;
+	saveSettings: Mock;
 }
 
 interface MockContainer {
-	empty: jest.Mock;
-	createEl: jest.Mock;
-	createDiv: jest.Mock;
+	empty: Mock;
+	createEl: Mock;
+	createDiv: Mock;
 }
 
 const createMockPlugin = (): MockPlugin => ({
-	app: { vault: { getMarkdownFiles: jest.fn() } },
+	app: { vault: { getMarkdownFiles: vi.fn() } },
 	settings: {
 		frontmatter: [{ ...DEFAULT_TAG_SETTING }],
 	},
-	saveSettings: jest.fn().mockResolvedValue(undefined),
+	saveSettings: vi.fn().mockResolvedValue(undefined),
 });
 
 const createMockContainer = (): MockContainer => ({
-	empty: jest.fn(),
-	createEl: jest.fn(),
-	createDiv: jest.fn().mockReturnValue({
-		createEl: jest.fn(),
+	empty: vi.fn(),
+	createEl: vi.fn(),
+	createDiv: vi.fn().mockReturnValue({
+		createEl: vi.fn(),
 	}),
 });
 
@@ -43,7 +44,7 @@ describe('Tag Container - Regression Tests', () => {
 		mockPlugin = createMockPlugin();
 		mockContainer = createMockContainer();
 		tag = new (Tag as any)(mockPlugin, mockContainer as unknown as HTMLElement);
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	});
 
 	describe('Basic Rendering', () => {
@@ -68,7 +69,7 @@ describe('Tag Container - Regression Tests', () => {
 			const updatedSetting = { ...DEFAULT_TAG_SETTING, name: 'Updated Tag Name' };
 
 			// Mock openEditModal
-			(tag as any).openEditModal = jest
+			(tag as any).openEditModal = vi
 				.fn()
 				.mockImplementation(
 					(_: FrontmatterField, onSave: (s: FrontmatterField) => Promise<void>) =>
@@ -98,7 +99,7 @@ describe('Tag Container - Regression Tests', () => {
 			];
 			const updatedSetting = { ...DEFAULT_TAG_SETTING, name: 'Updated' };
 
-			(tag as any).openEditModal = jest
+			(tag as any).openEditModal = vi
 				.fn()
 				.mockImplementation(
 					(_: FrontmatterField, onSave: (s: FrontmatterField) => Promise<void>) =>

@@ -1,35 +1,35 @@
-jest.mock('provider', () => ({
-	testModel: jest.fn(),
+vi.mock('provider', () => ({
+	testModel: vi.fn(),
 }));
 
-jest.mock('settings/modals/ModelModal', () => ({
+vi.mock('settings/modals/ModelModal', () => ({
 	ModelModal: class {
 		constructor(
 			public app: any,
 			public props: any
 		) {}
-		open = jest.fn();
+		open = vi.fn();
 	},
 }));
 
-jest.mock('settings/modals/ProviderModal', () => ({
+vi.mock('settings/modals/ProviderModal', () => ({
 	ProviderModal: class {
 		constructor(
 			public app: any,
 			public onSave: any,
 			public provider?: any
 		) {}
-		open = jest.fn();
+		open = vi.fn();
 	},
 }));
 
 import { testModel } from 'provider';
 import { Api } from 'settings/ApiSection';
 
-const mockTestModel = testModel as jest.MockedFunction<typeof testModel>;
+const mockTestModel = vi.mocked(testModel);
 
 const createMockPlugin = () => ({
-	app: { vault: { getMarkdownFiles: jest.fn() } },
+	app: { vault: { getMarkdownFiles: vi.fn() } },
 	settings: {
 		providers: [
 			{
@@ -48,15 +48,15 @@ const createMockPlugin = () => ({
 		selectedModel: 'gpt-4',
 		classificationRule: 'default rule',
 	},
-	saveSettings: jest.fn().mockResolvedValue(undefined),
+	saveSettings: vi.fn().mockResolvedValue(undefined),
 });
 
 const createMockElement = (): any => ({
-	empty: jest.fn(),
+	empty: vi.fn(),
 	style: {},
 	innerHTML: '',
-	createEl: jest.fn().mockImplementation(() => createMockElement()),
-	createDiv: jest.fn().mockImplementation(() => createMockElement()),
+	createEl: vi.fn().mockImplementation(() => createMockElement()),
+	createDiv: vi.fn().mockImplementation(() => createMockElement()),
 });
 
 const createMockContainer = () => createMockElement();
@@ -70,7 +70,7 @@ describe('Api Container - Regression Tests', () => {
 		mockPlugin = createMockPlugin();
 		mockContainer = createMockContainer();
 		api = new Api(mockPlugin, mockContainer);
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	});
 
 	describe('Basic Rendering', () => {

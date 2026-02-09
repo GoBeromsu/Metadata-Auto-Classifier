@@ -8,6 +8,7 @@ on:
 
 env:
   PLUGIN_NAME: metadata-auto-classifier
+  HUSKY: 0
 
 permissions:
   contents: write
@@ -18,15 +19,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
+
       - name: Build
         id: build
         run: |
-          yarn
-          yarn run build --if-present
+          pnpm install --frozen-lockfile
+          pnpm run build
 
       - name: Validate required files
         run: |

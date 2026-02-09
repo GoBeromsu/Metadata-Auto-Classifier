@@ -1,34 +1,37 @@
+import type { Mock } from 'vitest';
 import { ProviderSection } from '../../src/settings/ProviderSection';
 import type { App } from 'obsidian';
 import type AutoClassifierPlugin from '../../src/main';
 import type { ProviderConfig, OAuthTokens } from '../../src/types';
+import { formatTokenExpiry, isTokenExpired } from '../../src/provider/auth';
+import { Setting } from '../../src/settings/components/Setting';
 
 // Mock the provider/auth module
-jest.mock('../../src/provider/auth', () => ({
-	formatTokenExpiry: jest.fn((tokens) => {
+vi.mock('../../src/provider/auth', () => ({
+	formatTokenExpiry: vi.fn((tokens) => {
 		const remaining = tokens.expiresAt - Math.floor(Date.now() / 1000);
 		if (remaining <= 0) return 'Expired';
 		const hours = Math.floor(remaining / 3600);
 		const minutes = Math.floor((remaining % 3600) / 60);
 		return hours > 0 ? `${hours}h ${minutes}m remaining` : `${minutes}m remaining`;
 	}),
-	isTokenExpired: jest.fn((tokens) => {
+	isTokenExpired: vi.fn((tokens) => {
 		const buffer = 300; // 5 minutes
 		return Date.now() / 1000 >= tokens.expiresAt - buffer;
 	}),
 }));
 
 // Mock the ProviderModal
-jest.mock('../../src/settings/modals/ProviderModal', () => ({
-	ProviderModal: jest.fn().mockImplementation(() => ({
-		open: jest.fn(),
+vi.mock('../../src/settings/modals/ProviderModal', () => ({
+	ProviderModal: vi.fn().mockImplementation(() => ({
+		open: vi.fn(),
 	})),
 }));
 
 // Mock Setting component
-jest.mock('../../src/settings/components/Setting', () => ({
+vi.mock('../../src/settings/components/Setting', () => ({
 	Setting: {
-		create: jest.fn(),
+		create: vi.fn(),
 	},
 }));
 
@@ -36,10 +39,10 @@ describe('ProviderSection', () => {
 	let providerSection: ProviderSection;
 	let mockPlugin: Partial<AutoClassifierPlugin>;
 	let mockApp: Partial<App>;
-	let onRefresh: jest.Mock;
+	let onRefresh: Mock;
 
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 
 		mockPlugin = {
 			settings: {
@@ -49,11 +52,11 @@ describe('ProviderSection', () => {
 				frontmatter: [],
 				classificationRule: '',
 			},
-			saveSettings: jest.fn().mockResolvedValue(undefined),
+			saveSettings: vi.fn().mockResolvedValue(undefined),
 		};
 
 		mockApp = {};
-		onRefresh = jest.fn();
+		onRefresh = vi.fn();
 
 		providerSection = new ProviderSection(
 			mockPlugin as AutoClassifierPlugin,
@@ -83,7 +86,6 @@ describe('ProviderSection', () => {
 		});
 
 		it('should return OAuth status for provider with authType oauth', () => {
-			const { isTokenExpired, formatTokenExpiry } = require('../../src/provider/auth');
 
 			const oauthTokens: OAuthTokens = {
 				accessToken: 'token',
@@ -112,7 +114,6 @@ describe('ProviderSection', () => {
 		});
 
 		it('should return "OAuth Not Connected" for OAuth provider without tokens', () => {
-			const { isTokenExpired } = require('../../src/provider/auth');
 
 			const provider: ProviderConfig = {
 				name: 'Codex',
@@ -132,7 +133,6 @@ describe('ProviderSection', () => {
 		});
 
 		it('should return "OAuth Not Connected" for expired tokens', () => {
-			const { isTokenExpired } = require('../../src/provider/auth');
 
 			const expiredTokens: OAuthTokens = {
 				accessToken: 'token',
@@ -159,7 +159,6 @@ describe('ProviderSection', () => {
 		});
 
 		it('should detect OAuth provider by oauth field even without authType', () => {
-			const { isTokenExpired, formatTokenExpiry } = require('../../src/provider/auth');
 
 			const oauthTokens: OAuthTokens = {
 				accessToken: 'token',
@@ -188,7 +187,6 @@ describe('ProviderSection', () => {
 	});
 
 	describe('render', () => {
-		const { Setting } = require('../../src/settings/components/Setting');
 
 		it('should render provider list with Setting.create', () => {
 			const providers: ProviderConfig[] = [
@@ -207,8 +205,8 @@ describe('ProviderSection', () => {
 			];
 
 			const mockContainer = {
-				createEl: jest.fn().mockReturnValue({
-					createEl: jest.fn(),
+				createEl: vi.fn().mockReturnValue({
+					createEl: vi.fn(),
 				}),
 			} as unknown as HTMLElement;
 
@@ -222,7 +220,6 @@ describe('ProviderSection', () => {
 		});
 
 		it('should render OAuth status in provider description', () => {
-			const { isTokenExpired, formatTokenExpiry } = require('../../src/provider/auth');
 
 			const oauthTokens: OAuthTokens = {
 				accessToken: 'token',
@@ -246,8 +243,8 @@ describe('ProviderSection', () => {
 			formatTokenExpiry.mockReturnValue('1h 0m remaining');
 
 			const mockContainer = {
-				createEl: jest.fn().mockReturnValue({
-					createEl: jest.fn(),
+				createEl: vi.fn().mockReturnValue({
+					createEl: vi.fn(),
 				}),
 			} as unknown as HTMLElement;
 
@@ -267,8 +264,8 @@ describe('ProviderSection', () => {
 			const providers: ProviderConfig[] = [];
 
 			const mockContainer = {
-				createEl: jest.fn().mockReturnValue({
-					createEl: jest.fn(),
+				createEl: vi.fn().mockReturnValue({
+					createEl: vi.fn(),
 				}),
 			} as unknown as HTMLElement;
 

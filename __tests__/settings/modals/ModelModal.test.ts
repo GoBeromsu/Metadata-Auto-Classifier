@@ -1,20 +1,21 @@
 import { App } from 'obsidian';
 import { ModelModal, ModelModalProps } from 'settings/modals/ModelModal';
 import type { ProviderConfig } from 'types';
+import { Notice as SettingsNotice } from 'settings/components/Notice';
 
 // Mock Notice
-jest.mock('settings/components/Notice', () => ({
+vi.mock('settings/components/Notice', () => ({
 	Notice: {
-		error: jest.fn(),
-		success: jest.fn(),
-		validationError: jest.fn(),
-		formatValidationError: jest.fn((component, message) => `[${component}] ${message}`),
+		error: vi.fn(),
+		success: vi.fn(),
+		validationError: vi.fn(),
+		formatValidationError: vi.fn((component, message) => `[${component}] ${message}`),
 	},
 }));
 
 // Mock lib
-jest.mock('lib', () => ({
-	getProviderPresets: jest.fn().mockReturnValue([
+vi.mock('lib', () => ({
+	getProviderPresets: vi.fn().mockReturnValue([
 		{
 			name: 'OpenAI',
 			baseUrl: 'https://api.openai.com/v1/chat/completions',
@@ -38,11 +39,11 @@ describe('ModelModal', () => {
 	};
 
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		mockApp = new App();
 		mockProps = {
 			providers: [mockProvider],
-			onSave: jest.fn(),
+			onSave: vi.fn(),
 		};
 	});
 
@@ -111,7 +112,6 @@ describe('ModelModal', () => {
 	});
 
 	describe('Form Validation', () => {
-		const { Notice: SettingsNotice } = require('settings/components/Notice');
 
 		it('should show error when provider is not selected', () => {
 			const modal = new ModelModal(mockApp, mockProps);

@@ -1,4 +1,4 @@
-export const requestUrl = jest.fn();
+export const requestUrl = vi.fn();
 
 // Platform mock
 export const Platform = {
@@ -15,7 +15,7 @@ export const Platform = {
 };
 
 // Obsidian API functions
-export const getFrontMatterInfo = jest.fn((content: string) => {
+export const getFrontMatterInfo = vi.fn((content: string) => {
 	const match = content.match(/^---\n[\s\S]*?\n---\n/);
 	if (match) {
 		return {
@@ -31,7 +31,7 @@ export const getFrontMatterInfo = jest.fn((content: string) => {
 	};
 });
 
-export const parseFrontMatterStringArray = jest.fn((frontmatter: any, key: string) => {
+export const parseFrontMatterStringArray = vi.fn((frontmatter: any, key: string) => {
 	if (!frontmatter || !frontmatter[key]) {
 		return null;
 	}
@@ -42,7 +42,7 @@ export const parseFrontMatterStringArray = jest.fn((frontmatter: any, key: strin
 	return [value];
 });
 
-export const getAllTags = jest.fn((cache: any) => {
+export const getAllTags = vi.fn((cache: any) => {
 	if (!cache) return null;
 	const tags = new Set<string>();
 
@@ -66,7 +66,7 @@ export const getAllTags = jest.fn((cache: any) => {
 export class MetadataCache {
 	private fileCaches = new Map<any, any>();
 
-	getFileCache = jest.fn((file: any) => {
+	getFileCache = vi.fn((file: any) => {
 		return this.fileCaches.get(file) || null;
 	});
 
@@ -102,20 +102,20 @@ export function createMockTFile(path: string, basename: string): TFile {
 // Basic App mock for components relying on Obsidian's App
 export class App {
 	vault = {
-		getMarkdownFiles: jest.fn().mockReturnValue([]),
-		read: jest.fn().mockResolvedValue(''),
-		modify: jest.fn().mockResolvedValue(undefined),
-		create: jest.fn().mockResolvedValue(undefined),
-		delete: jest.fn().mockResolvedValue(undefined),
+		getMarkdownFiles: vi.fn().mockReturnValue([]),
+		read: vi.fn().mockResolvedValue(''),
+		modify: vi.fn().mockResolvedValue(undefined),
+		create: vi.fn().mockResolvedValue(undefined),
+		delete: vi.fn().mockResolvedValue(undefined),
 	} as any;
 	metadataCache = new MetadataCache();
 	workspace = {
-		getActiveFile: jest.fn().mockReturnValue(null),
-		on: jest.fn(),
-		off: jest.fn(),
+		getActiveFile: vi.fn().mockReturnValue(null),
+		on: vi.fn(),
+		off: vi.fn(),
 	} as any;
 	fileManager = {
-		processFrontMatter: jest.fn(),
+		processFrontMatter: vi.fn(),
 	} as any;
 }
 
@@ -136,83 +136,83 @@ export class FuzzySuggestModal<T> {
 // ---------------------- UI Mocks ----------------------
 
 export class ButtonComponent {
-	buttonEl = { addClass: jest.fn(), setAttribute: jest.fn() } as any;
-	setButtonText = jest.fn().mockReturnThis();
-	setIcon = jest.fn().mockReturnThis();
-	setTooltip = jest.fn().mockReturnThis();
-	setCta = jest.fn().mockReturnThis();
-	setWarning = jest.fn().mockReturnThis();
-	setDisabled = jest.fn().mockReturnThis();
-	onClick = jest.fn();
+	buttonEl = { addClass: vi.fn(), setAttribute: vi.fn() } as any;
+	setButtonText = vi.fn().mockReturnThis();
+	setIcon = vi.fn().mockReturnThis();
+	setTooltip = vi.fn().mockReturnThis();
+	setCta = vi.fn().mockReturnThis();
+	setWarning = vi.fn().mockReturnThis();
+	setDisabled = vi.fn().mockReturnThis();
+	onClick = vi.fn();
 	constructor(public containerEl: HTMLElement) {}
 }
 
 export class ExtraButtonComponent {
-	extraSettingsEl = { addClass: jest.fn(), setAttribute: jest.fn() } as any;
-	setIcon = jest.fn().mockReturnThis();
-	setTooltip = jest.fn().mockReturnThis();
-	setDisabled = jest.fn().mockReturnThis();
-	onClick = jest.fn();
+	extraSettingsEl = { addClass: vi.fn(), setAttribute: vi.fn() } as any;
+	setIcon = vi.fn().mockReturnThis();
+	setTooltip = vi.fn().mockReturnThis();
+	setDisabled = vi.fn().mockReturnThis();
+	onClick = vi.fn();
 	constructor(public containerEl: HTMLElement) {}
 }
 
-export const Notice = jest.fn().mockImplementation(function (message: string, duration: number) {
+export const Notice = vi.fn().mockImplementation(function (message: string, duration: number) {
 	this.message = message;
 	this.duration = duration;
-	this.setMessage = jest.fn();
-	this.hide = jest.fn();
+	this.setMessage = vi.fn();
+	this.hide = vi.fn();
 	return this;
 });
 
 export class Setting {
-	settingEl = { addClass: jest.fn(), createSpan: jest.fn() } as any;
-	controlEl = { createSpan: jest.fn() } as any;
+	settingEl = { addClass: vi.fn(), createSpan: vi.fn() } as any;
+	controlEl = { createSpan: vi.fn() } as any;
 	constructor(public containerEl: HTMLElement) {}
-	setName = jest.fn();
-	setDesc = jest.fn();
-	setHeading = jest.fn();
-	addText = jest.fn();
-	addDropdown = jest.fn();
-	addToggle = jest.fn();
-	addExtraButton = jest.fn();
-	addButton = jest.fn();
+	setName = vi.fn();
+	setDesc = vi.fn();
+	setHeading = vi.fn();
+	addText = vi.fn();
+	addDropdown = vi.fn();
+	addToggle = vi.fn();
+	addExtraButton = vi.fn();
+	addButton = vi.fn();
 }
 
 export class TextComponent {
-	inputEl = { type: '', style: { width: '' }, value: '', classList: { add: jest.fn() } } as any;
-	setPlaceholder = jest.fn();
-	setValue = jest.fn();
-	onChange = jest.fn();
+	inputEl = { type: '', style: { width: '' }, value: '', classList: { add: vi.fn() } } as any;
+	setPlaceholder = vi.fn();
+	setValue = vi.fn();
+	onChange = vi.fn();
 }
 
 export class TextAreaComponent {
 	inputEl = { rows: 0, style: { width: '' } } as any;
 	constructor(public containerEl: HTMLElement) {}
-	setPlaceholder = jest.fn().mockReturnThis();
-	setValue = jest.fn().mockReturnThis();
-	onChange = jest.fn().mockReturnThis();
+	setPlaceholder = vi.fn().mockReturnThis();
+	setValue = vi.fn().mockReturnThis();
+	onChange = vi.fn().mockReturnThis();
 }
 
 // Helper to create a recursive mock element
 function createMockElement(): any {
 	const mockElement: any = {
-		empty: jest.fn(),
+		empty: vi.fn(),
 		style: {},
 		classList: {
-			add: jest.fn(),
-			remove: jest.fn(),
+			add: vi.fn(),
+			remove: vi.fn(),
 		},
-		setAttribute: jest.fn(),
-		querySelector: jest.fn().mockReturnValue(null),
-		querySelectorAll: jest.fn().mockReturnValue([]),
-		addEventListener: jest.fn(),
-		appendChild: jest.fn(),
+		setAttribute: vi.fn(),
+		querySelector: vi.fn().mockReturnValue(null),
+		querySelectorAll: vi.fn().mockReturnValue([]),
+		addEventListener: vi.fn(),
+		appendChild: vi.fn(),
 		value: '',
 		checked: false,
 	};
 	// Recursive mock for createEl and createDiv
-	mockElement.createEl = jest.fn().mockImplementation(() => createMockElement());
-	mockElement.createDiv = jest.fn().mockImplementation(() => createMockElement());
+	mockElement.createEl = vi.fn().mockImplementation(() => createMockElement());
+	mockElement.createDiv = vi.fn().mockImplementation(() => createMockElement());
 	return mockElement;
 }
 
@@ -226,12 +226,12 @@ export class Modal {
 		this.app = app;
 		this.contentEl = createMockElement() as any;
 		this.modalEl = {
-			addClass: jest.fn(),
+			addClass: vi.fn(),
 		} as any;
 	}
 
-	open = jest.fn();
-	close = jest.fn();
+	open = vi.fn();
+	close = vi.fn();
 	onOpen(): void {}
 	onClose(): void {}
 }
@@ -245,11 +245,11 @@ export class Plugin {
 		this.app = app || new App();
 	}
 
-	loadData = jest.fn().mockResolvedValue({});
-	saveData = jest.fn().mockResolvedValue(undefined);
-	addCommand = jest.fn();
-	addSettingTab = jest.fn();
-	registerCommand = jest.fn();
+	loadData = vi.fn().mockResolvedValue({});
+	saveData = vi.fn().mockResolvedValue(undefined);
+	addCommand = vi.fn();
+	addSettingTab = vi.fn();
+	registerCommand = vi.fn();
 
 	onload(): Promise<void> | void {}
 	onunload(): void {}
@@ -265,9 +265,9 @@ export class PluginSettingTab {
 		this.app = app;
 		this.plugin = plugin;
 		this.containerEl = {
-			empty: jest.fn(),
-			createEl: jest.fn(),
-			createDiv: jest.fn(),
+			empty: vi.fn(),
+			createEl: vi.fn(),
+			createDiv: vi.fn(),
 		} as any;
 	}
 
@@ -277,21 +277,21 @@ export class PluginSettingTab {
 
 // Vault mock
 export class Vault {
-	getMarkdownFiles = jest.fn().mockReturnValue([]);
-	read = jest.fn().mockResolvedValue('');
-	modify = jest.fn().mockResolvedValue(undefined);
-	create = jest.fn().mockResolvedValue(undefined);
-	delete = jest.fn().mockResolvedValue(undefined);
+	getMarkdownFiles = vi.fn().mockReturnValue([]);
+	read = vi.fn().mockResolvedValue('');
+	modify = vi.fn().mockResolvedValue(undefined);
+	create = vi.fn().mockResolvedValue(undefined);
+	delete = vi.fn().mockResolvedValue(undefined);
 }
 
 // FileManager mock
 export class FileManager {
-	processFrontMatter = jest.fn();
+	processFrontMatter = vi.fn();
 }
 
 // Workspace mock
 export class Workspace {
-	getActiveFile = jest.fn().mockReturnValue(null);
-	on = jest.fn();
-	off = jest.fn();
+	getActiveFile = vi.fn().mockReturnValue(null);
+	on = vi.fn();
+	off = vi.fn();
 }

@@ -1,28 +1,32 @@
 import { ClassificationService, ClassificationContext } from '../../src/classifier/ClassificationService';
 import type { App, TFile, MetadataCache, Vault } from 'obsidian';
 import type { FrontmatterField, ProviderConfig, OAuthTokens } from '../../src/types';
+import { Notice as SettingsNotice } from '../../src/settings/components/Notice';
+import { processAPIRequest } from '../../src/provider';
+import { insertToFrontMatter, getFieldValues } from '../../src/lib/frontmatter';
+import { getPromptTemplate } from '../../src/provider/prompt';
 
 // Mock dependencies
-jest.mock('../../src/provider', () => ({
-	processAPIRequest: jest.fn(),
+vi.mock('../../src/provider', () => ({
+	processAPIRequest: vi.fn(),
 }));
 
-jest.mock('../../src/provider/prompt', () => ({
+vi.mock('../../src/provider/prompt', () => ({
 	DEFAULT_SYSTEM_ROLE: 'Test system role',
-	getPromptTemplate: jest.fn().mockReturnValue('Test prompt'),
+	getPromptTemplate: vi.fn().mockReturnValue('Test prompt'),
 }));
 
-jest.mock('../../src/lib/frontmatter', () => ({
-	getContentWithoutFrontmatter: jest.fn().mockReturnValue('Test content'),
-	getFieldValues: jest.fn().mockReturnValue(['tag1', 'tag2']),
-	insertToFrontMatter: jest.fn().mockResolvedValue(undefined),
+vi.mock('../../src/lib/frontmatter', () => ({
+	getContentWithoutFrontmatter: vi.fn().mockReturnValue('Test content'),
+	getFieldValues: vi.fn().mockReturnValue(['tag1', 'tag2']),
+	insertToFrontMatter: vi.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock('../../src/settings/components/Notice', () => ({
+vi.mock('../../src/settings/components/Notice', () => ({
 	Notice: {
-		error: jest.fn(),
-		success: jest.fn(),
-		withProgress: jest.fn(async (_fileName, _fmName, fn) => await fn()),
+		error: vi.fn(),
+		success: vi.fn(),
+		withProgress: vi.fn(async (_fileName, _fmName, fn) => await fn()),
 	},
 }));
 
@@ -34,7 +38,7 @@ describe('ClassificationService', () => {
 	let mockFrontmatter: FrontmatterField;
 
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 
 		mockProvider = {
 			name: 'TestProvider',
@@ -46,12 +50,12 @@ describe('ClassificationService', () => {
 
 		mockApp = {
 			vault: {
-				read: jest.fn().mockResolvedValue('file content'),
-				getMarkdownFiles: jest.fn().mockReturnValue([]),
+				read: vi.fn().mockResolvedValue('file content'),
+				getMarkdownFiles: vi.fn().mockReturnValue([]),
 			} as unknown as Vault,
 			metadataCache: {} as MetadataCache,
 			fileManager: {
-				processFrontMatter: jest.fn(),
+				processFrontMatter: vi.fn(),
 			},
 		};
 
@@ -60,7 +64,7 @@ describe('ClassificationService', () => {
 			provider: mockProvider,
 			model: 'test-model',
 			classificationRule: 'test rule',
-			saveSettings: jest.fn().mockResolvedValue(undefined),
+			saveSettings: vi.fn().mockResolvedValue(undefined),
 		};
 
 		mockFrontmatter = {
@@ -77,8 +81,7 @@ describe('ClassificationService', () => {
 	});
 
 	describe('hasValidAuth', () => {
-		const { Notice } = require('../../src/settings/components/Notice');
-		const { processAPIRequest } = require('../../src/provider');
+		const Notice = SettingsNotice;
 
 		it('should pass validation with API key authentication', async () => {
 			processAPIRequest.mockResolvedValue({
@@ -274,9 +277,7 @@ describe('ClassificationService', () => {
 	});
 
 	describe('classify', () => {
-		const { Notice } = require('../../src/settings/components/Notice');
-		const { processAPIRequest } = require('../../src/provider');
-		const { insertToFrontMatter, getFieldValues } = require('../../src/lib/frontmatter');
+		const Notice = SettingsNotice;
 
 		it('should auto-fetch refs when empty', async () => {
 			const frontmatterWithNoRefs: FrontmatterField = {
@@ -384,7 +385,6 @@ describe('ClassificationService', () => {
 			await service.classify(mockFile, wikiLinkFrontmatter);
 
 			// The getPromptTemplate should receive stripped tags
-			const { getPromptTemplate } = require('../../src/provider/prompt');
 			expect(getPromptTemplate).toHaveBeenCalledWith(
 				expect.anything(),
 				expect.anything(),

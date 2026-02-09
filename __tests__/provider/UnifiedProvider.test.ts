@@ -1,28 +1,31 @@
-// Mock HttpError class
-class MockHttpError extends Error {
-	status: number;
-	responseText: string;
+// Mock HttpError class - must use vi.hoisted() since vi.mock is hoisted
+const { MockHttpError } = vi.hoisted(() => {
+	class MockHttpError extends Error {
+		status: number;
+		responseText: string;
 
-	constructor(message: string, status: number, responseText: string) {
-		super(message);
-		this.name = 'HttpError';
-		this.status = status;
-		this.responseText = responseText;
+		constructor(message: string, status: number, responseText: string) {
+			super(message);
+			this.name = 'HttpError';
+			this.status = status;
+			this.responseText = responseText;
+		}
 	}
-}
+	return { MockHttpError };
+});
 
 // Mock the request module
-jest.mock('provider/request', () => ({
-	sendRequest: jest.fn(),
-	sendStreamingRequest: jest.fn(),
+vi.mock('provider/request', () => ({
+	sendRequest: vi.fn(),
+	sendStreamingRequest: vi.fn(),
 	HttpError: MockHttpError,
 }));
 
 // Mock the oauth module
-jest.mock('provider/auth/oauth', () => ({
-	CodexOAuth: jest.fn().mockImplementation(() => ({
-		refreshTokens: jest.fn(),
-	})),
+vi.mock('provider/auth/oauth', () => ({
+	CodexOAuth: vi.fn(function (this: any) {
+		this.refreshTokens = vi.fn();
+	}),
 }));
 
 import { UnifiedProvider } from 'provider/UnifiedProvider';
@@ -32,11 +35,11 @@ import { ProviderConfig } from 'types';
 import { requestUrl } from 'obsidian';
 import { PROVIDER_NAMES } from 'lib';
 
-jest.mock('obsidian');
+vi.mock('obsidian');
 
-const mockSendRequest = sendRequest as jest.MockedFunction<typeof sendRequest>;
-const mockSendStreamingRequest = sendStreamingRequest as jest.MockedFunction<typeof sendStreamingRequest>;
-const mockCodexOAuth = CodexOAuth as jest.MockedClass<typeof CodexOAuth>;
+const mockSendRequest = vi.mocked(sendRequest);
+const mockSendStreamingRequest = vi.mocked(sendStreamingRequest);
+const mockCodexOAuth = vi.mocked(CodexOAuth);
 
 // Use MockHttpError for creating test errors
 const HttpError = MockHttpError;
@@ -53,7 +56,7 @@ describe('UnifiedProvider Tests', () => {
 	};
 
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	});
 
 	describe('Response parsing', () => {
@@ -414,10 +417,10 @@ describe('UnifiedProvider Tests', () => {
 				expiresAt: Date.now() / 1000 + 7200,
 				accountId: 'account-123',
 			};
-			const mockRefreshTokens = jest.fn().mockResolvedValue(newTokens);
-			mockCodexOAuth.mockImplementation(() => ({
-				refreshTokens: mockRefreshTokens,
-			}) as any);
+			const mockRefreshTokens = vi.fn().mockResolvedValue(newTokens);
+			mockCodexOAuth.mockImplementation(function (this: any) {
+				this.refreshTokens = mockRefreshTokens;
+			});
 
 			const result = await unifiedProvider.callAPI(
 				'system',
@@ -443,11 +446,11 @@ describe('UnifiedProvider Tests', () => {
 				expiresAt: Date.now() / 1000 + 7200,
 				accountId: 'account-123',
 			};
-			mockCodexOAuth.mockImplementation(() => ({
-				refreshTokens: jest.fn().mockResolvedValue(newTokens),
-			}) as any);
+			mockCodexOAuth.mockImplementation(function (this: any) {
+				this.refreshTokens = vi.fn().mockResolvedValue(newTokens);
+			});
 
-			const onTokenRefresh = jest.fn();
+			const onTokenRefresh = vi.fn();
 
 			await unifiedProvider.callAPI(
 				'system',
@@ -465,9 +468,9 @@ describe('UnifiedProvider Tests', () => {
 			const http401Error = new HttpError('Authentication failed', 401, 'Unauthorized');
 			mockSendStreamingRequest.mockRejectedValueOnce(http401Error);
 
-			mockCodexOAuth.mockImplementation(() => ({
-				refreshTokens: jest.fn().mockRejectedValue(new Error('Refresh failed')),
-			}) as any);
+			mockCodexOAuth.mockImplementation(function (this: any) {
+				this.refreshTokens = vi.fn().mockRejectedValue(new Error('Refresh failed'));
+			});
 
 			await expect(
 				unifiedProvider.callAPI('system', 'user', codexConfig, 'model')

@@ -2,45 +2,49 @@ import AutoClassifierPlugin from 'main';
 import { App, TFile, createMockTFile } from 'obsidian';
 import { DEFAULT_SETTINGS, DEFAULT_FRONTMATTER_SETTING } from '../src/constants';
 import type { ProviderConfig, FrontmatterField, OAuthTokens } from 'types';
+import { Notice as SettingsNotice } from 'settings/components/Notice';
+import { processAPIRequest } from 'provider';
+import { insertToFrontMatter, getFieldValues } from 'lib/frontmatter';
+import { isTokenExpired, CodexOAuth } from 'provider/auth';
 
 // Mock the provider/auth module
-jest.mock('provider/auth', () => ({
-	CodexOAuth: jest.fn().mockImplementation(() => ({
-		refreshTokens: jest.fn().mockResolvedValue({
+vi.mock('provider/auth', () => ({
+	CodexOAuth: vi.fn(function (this: any) {
+		this.refreshTokens = vi.fn().mockResolvedValue({
 			accessToken: 'new-access-token',
 			refreshToken: 'new-refresh-token',
 			expiresAt: Math.floor(Date.now() / 1000) + 3600,
 			accountId: 'test-account-id',
-		}),
-	})),
-	isTokenExpired: jest.fn().mockReturnValue(false),
+		});
+	}),
+	isTokenExpired: vi.fn().mockReturnValue(false),
 }));
 
 // Mock the provider module
-jest.mock('provider', () => ({
-	processAPIRequest: jest.fn(),
+vi.mock('provider', () => ({
+	processAPIRequest: vi.fn(),
 }));
 
 // Mock the frontmatter module
-jest.mock('lib/frontmatter', () => ({
-	getContentWithoutFrontmatter: jest.fn().mockReturnValue('Test content'),
-	getFieldValues: jest.fn().mockReturnValue(['tag1', 'tag2', 'tag3']),
-	insertToFrontMatter: jest.fn().mockResolvedValue(undefined),
+vi.mock('lib/frontmatter', () => ({
+	getContentWithoutFrontmatter: vi.fn().mockReturnValue('Test content'),
+	getFieldValues: vi.fn().mockReturnValue(['tag1', 'tag2', 'tag3']),
+	insertToFrontMatter: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Mock Notice
-jest.mock('settings/components/Notice', () => ({
+vi.mock('settings/components/Notice', () => ({
 	Notice: {
-		error: jest.fn(),
-		success: jest.fn(),
-		withProgress: jest.fn(async (fileName, fmName, fn) => await fn()),
+		error: vi.fn(),
+		success: vi.fn(),
+		withProgress: vi.fn(async (fileName, fmName, fn) => await fn()),
 	},
 }));
 
 // Mock AutoClassifierSettingTab
-jest.mock('settings', () => ({
-	AutoClassifierSettingTab: jest.fn().mockImplementation(() => ({
-		display: jest.fn(),
+vi.mock('settings', () => ({
+	AutoClassifierSettingTab: vi.fn().mockImplementation(() => ({
+		display: vi.fn(),
 	})),
 }));
 
@@ -67,7 +71,7 @@ describe('AutoClassifierPlugin', () => {
 	};
 
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 
 		mockApp = new App();
 		plugin = new AutoClassifierPlugin(mockApp);
@@ -85,7 +89,7 @@ describe('AutoClassifierPlugin', () => {
 
 	describe('loadSettings', () => {
 		it('should load settings with default values when no saved data exists', async () => {
-			(plugin.loadData as jest.Mock).mockResolvedValue(null);
+			(plugin.loadData as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
 			await plugin.loadSettings();
 
@@ -98,7 +102,7 @@ describe('AutoClassifierPlugin', () => {
 				selectedProvider: 'SavedProvider',
 				providers: [mockProvider],
 			};
-			(plugin.loadData as jest.Mock).mockResolvedValue(savedData);
+			(plugin.loadData as ReturnType<typeof vi.fn>).mockResolvedValue(savedData);
 
 			await plugin.loadSettings();
 
@@ -119,7 +123,7 @@ describe('AutoClassifierPlugin', () => {
 					},
 				],
 			};
-			(plugin.loadData as jest.Mock).mockResolvedValue(savedData);
+			(plugin.loadData as ReturnType<typeof vi.fn>).mockResolvedValue(savedData);
 
 			await plugin.loadSettings();
 
@@ -141,7 +145,7 @@ describe('AutoClassifierPlugin', () => {
 					},
 				],
 			};
-			(plugin.loadData as jest.Mock).mockResolvedValue(savedData);
+			(plugin.loadData as ReturnType<typeof vi.fn>).mockResolvedValue(savedData);
 
 			await plugin.loadSettings();
 
@@ -179,10 +183,10 @@ describe('AutoClassifierPlugin', () => {
 	});
 
 	describe('processFrontmatter', () => {
-		const { Notice } = require('settings/components/Notice');
+		const Notice = SettingsNotice;
 
 		beforeEach(() => {
-			jest.clearAllMocks();
+			vi.clearAllMocks();
 		});
 
 		it('should show error when no active file', async () => {
@@ -224,8 +228,7 @@ describe('AutoClassifierPlugin', () => {
 			const mockFile = createMockTFile('test/path.md', 'test');
 			mockApp.workspace.getActiveFile.mockReturnValue(mockFile);
 
-			const { processAPIRequest } = require('provider');
-			processAPIRequest.mockResolvedValue({
+				processAPIRequest.mockResolvedValue({
 				output: ['result-tag'],
 				reliability: 0.9,
 			});
@@ -238,12 +241,10 @@ describe('AutoClassifierPlugin', () => {
 	});
 
 	describe('classifyFrontmatter (via classificationService)', () => {
-		const { Notice } = require('settings/components/Notice');
-		const { processAPIRequest } = require('provider');
-		const { insertToFrontMatter, getFieldValues } = require('lib/frontmatter');
+		const Notice = SettingsNotice;
 
 		beforeEach(() => {
-			jest.clearAllMocks();
+			vi.clearAllMocks();
 		});
 
 		it('should auto-collect refs from vault when refs is empty', async () => {
@@ -383,7 +384,7 @@ describe('AutoClassifierPlugin', () => {
 	describe('setupCommand', () => {
 		it('should setup command service with all frontmatter settings', () => {
 			// Mock addCommand to track calls
-			plugin.addCommand = jest.fn();
+			plugin.addCommand = vi.fn();
 
 			plugin.settings.frontmatter = [
 				{ ...mockFrontmatter, id: 1, name: 'category' },
@@ -397,7 +398,7 @@ describe('AutoClassifierPlugin', () => {
 		});
 
 		it('should register "Fetch all frontmatter" command', () => {
-			plugin.addCommand = jest.fn();
+			plugin.addCommand = vi.fn();
 			plugin.settings.frontmatter = [mockFrontmatter];
 
 			plugin.setupCommand();
@@ -414,7 +415,7 @@ describe('AutoClassifierPlugin', () => {
 
 	describe('processAllFrontmatter', () => {
 		it('should process all frontmatter items sequentially', async () => {
-			const processFrontmatterSpy = jest
+			const processFrontmatterSpy = vi
 				.spyOn(plugin, 'processFrontmatter')
 				.mockResolvedValue(undefined);
 
@@ -439,7 +440,7 @@ describe('AutoClassifierPlugin', () => {
 		it('should be callable and invoke addCommand internally', () => {
 			// Since we cannot easily mock the inherited addCommand,
 			// we verify registerCommand is properly defined and callable
-			const callback = jest.fn();
+			const callback = vi.fn();
 
 			// registerCommand should not throw
 			expect(() => plugin.registerCommand('test-command', callback)).not.toThrow();
@@ -469,7 +470,7 @@ describe('AutoClassifierPlugin', () => {
 			plugin.settings.providers = [codexProvider];
 			(plugin.settings as any).codexConnection = mockOAuthTokens;
 
-			(plugin.loadData as jest.Mock).mockResolvedValue({
+			(plugin.loadData as ReturnType<typeof vi.fn>).mockResolvedValue({
 				providers: [codexProvider],
 				codexConnection: mockOAuthTokens,
 			});
@@ -520,7 +521,7 @@ describe('AutoClassifierPlugin', () => {
 			plugin.settings.providers = [mockProvider];
 			delete (plugin.settings as any).codexConnection;
 
-			const saveSpy = jest.spyOn(plugin, 'saveSettings');
+			const saveSpy = vi.spyOn(plugin, 'saveSettings');
 
 			const migrateSettings = (plugin as any).migrateSettings.bind(plugin);
 			await migrateSettings();
@@ -533,10 +534,9 @@ describe('AutoClassifierPlugin', () => {
 	});
 
 	describe('refreshOAuthTokensIfNeeded', () => {
-		const { isTokenExpired, CodexOAuth } = require('provider/auth');
 
 		beforeEach(() => {
-			jest.clearAllMocks();
+			vi.clearAllMocks();
 		});
 
 		it('should not refresh when no OAuth providers exist', async () => {
@@ -572,7 +572,7 @@ describe('AutoClassifierPlugin', () => {
 			await refreshOAuthTokensIfNeeded();
 
 			// Should check if expired but not refresh
-			const mockCodexOAuthInstance = CodexOAuth.mock.results[0]?.value;
+			const mockCodexOAuthInstance = (CodexOAuth as any).mock.instances[0];
 			expect(mockCodexOAuthInstance?.refreshTokens).not.toHaveBeenCalled();
 		});
 
@@ -597,7 +597,7 @@ describe('AutoClassifierPlugin', () => {
 
 			isTokenExpired.mockReturnValue(true);
 
-			const saveSpy = jest.spyOn(plugin, 'saveSettings').mockResolvedValue(undefined);
+			const saveSpy = vi.spyOn(plugin, 'saveSettings').mockResolvedValue(undefined);
 
 			const refreshOAuthTokensIfNeeded = (plugin as any).refreshOAuthTokensIfNeeded.bind(plugin);
 			await refreshOAuthTokensIfNeeded();
@@ -632,11 +632,11 @@ describe('AutoClassifierPlugin', () => {
 			isTokenExpired.mockReturnValue(true);
 
 			// Mock refresh to throw error
-			CodexOAuth.mockImplementationOnce(() => ({
-				refreshTokens: jest.fn().mockRejectedValue(new Error('Refresh failed')),
-			}));
+			CodexOAuth.mockImplementationOnce(function (this: any) {
+				this.refreshTokens = vi.fn().mockRejectedValue(new Error('Refresh failed'));
+			});
 
-			const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
 
 			const refreshOAuthTokensIfNeeded = (plugin as any).refreshOAuthTokensIfNeeded.bind(plugin);
 

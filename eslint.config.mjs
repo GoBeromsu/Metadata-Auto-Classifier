@@ -139,6 +139,7 @@ export default [
 			'__mocks__/**',
 			'*.js',
 			'*.mjs',
+			'scripts/**',
 		],
 	},
 

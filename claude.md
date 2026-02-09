@@ -8,18 +8,20 @@ Obsidian plugin: AI-powered automatic metadata classification and generation. Au
 
 - Version: 1.11.0
 - Entry: `src/main.ts` → `AutoClassifierPlugin extends Plugin`
-- Package manager: **yarn** (do NOT use npm)
+- Package manager: **pnpm** (do NOT use npm or yarn)
 
 ## Build & Dev Commands
 
 ```bash
-yarn dev            # esbuild dev mode (watch)
-yarn build          # tsc type-check + esbuild production
-yarn test           # Jest unit tests
-yarn test:watch     # Jest watch mode
-yarn test:coverage  # Jest with coverage report
-yarn lint           # ESLint (flat config v9)
-yarn lint:fix       # ESLint auto-fix
+pnpm run dev            # vault selection + esbuild watch + hot reload
+pnpm run dev:build      # esbuild watch only (no vault)
+pnpm run build          # tsc type-check + esbuild production (single-shot)
+pnpm run test           # Vitest unit tests
+pnpm run test:watch     # Vitest watch mode
+pnpm run test:coverage  # Vitest with coverage report
+pnpm run lint           # ESLint (flat config v9)
+pnpm run lint:fix       # ESLint auto-fix
+pnpm run ci             # build + lint + test
 ```
 
 ## Architecture (4-module boundary)
@@ -41,11 +43,11 @@ src/
 
 ## Testing
 
-- Framework: Jest + ts-jest
+- Framework: Vitest
 - Test location: `__tests__/` (mirrors src/ structure)
 - Obsidian API mock: `__mocks__/obsidian.ts`
 - Coverage: v8, HTML + LCOV reports
-- Path aliases: `tsconfig.test.json`
+- Config: `vitest.config.ts` (includes path aliases)
 
 ## TypeScript Path Aliases
 

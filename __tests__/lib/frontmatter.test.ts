@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest';
 import {
 	getContentWithoutFrontmatter,
 	getFieldValues,
@@ -10,7 +11,7 @@ import { getAllTags, getFrontMatterInfo, parseFrontMatterStringArray, MetadataCa
 // -------------------- getContentWithoutFrontmatter Tests --------------------
 describe('getContentWithoutFrontmatter', () => {
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	});
 
 	test('removes frontmatter from content with frontmatter', () => {
@@ -66,7 +67,7 @@ describe('getFieldValues', () => {
 	let file3: ReturnType<typeof createMockTFile>;
 
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		metadataCache = new MetadataCache();
 		file1 = createMockTFile('note1.md', 'note1');
 		file2 = createMockTFile('note2.md', 'note2');
@@ -136,12 +137,12 @@ describe('getFieldValues', () => {
 
 // -------------------- insertToFrontMatter Tests --------------------
 describe('insertToFrontMatter', () => {
-	let mockProcessFrontMatter: jest.Mock;
+	let mockProcessFrontMatter: Mock;
 	let mockFile: ReturnType<typeof createMockTFile>;
 
 	beforeEach(() => {
-		jest.clearAllMocks();
-		mockProcessFrontMatter = jest.fn((file, callback) => {
+		vi.clearAllMocks();
+		mockProcessFrontMatter = vi.fn((file, callback) => {
 			const frontmatter = {};
 			callback(frontmatter);
 			return Promise.resolve();
@@ -189,7 +190,7 @@ describe('insertToFrontMatter', () => {
 	});
 
 	test('overwrites existing values when overwrite is true', async () => {
-		mockProcessFrontMatter = jest.fn((file, callback) => {
+		mockProcessFrontMatter = vi.fn((file, callback) => {
 			const frontmatter = { tags: ['old1', 'old2'] };
 			callback(frontmatter);
 			return Promise.resolve();
@@ -214,7 +215,7 @@ describe('insertToFrontMatter', () => {
 	});
 
 	test('appends values when overwrite is false', async () => {
-		mockProcessFrontMatter = jest.fn((file, callback) => {
+		mockProcessFrontMatter = vi.fn((file, callback) => {
 			const frontmatter = { tags: ['existing'] };
 			callback(frontmatter);
 			return Promise.resolve();
@@ -238,7 +239,7 @@ describe('insertToFrontMatter', () => {
 	});
 
 	test('removes duplicate values', async () => {
-		mockProcessFrontMatter = jest.fn((file, callback) => {
+		mockProcessFrontMatter = vi.fn((file, callback) => {
 			const frontmatter = { tags: ['tag1', 'tag2'] };
 			callback(frontmatter);
 			return Promise.resolve();

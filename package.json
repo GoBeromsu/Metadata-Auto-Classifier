@@ -3,13 +3,15 @@
 	"version": "1.11.0",
 	"description": "Metadata Auto Classifier is an innovative Obsidian plugin that harnesses the power of AI to revolutionize your note-taking experience. By automatically generating and classifying metadata for your notes, this plugin streamlines your workflow and enhances the organization of your knowledge base.",
 	"main": "main.js",
+	"packageManager": "pnpm@10.28.2",
 	"scripts": {
-		"dev": "node esbuild.config.mjs",
+		"dev": "node scripts/dev.mjs",
+		"dev:build": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"ci": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production --if-present",
-		"test": "jest",
-		"test:watch": "jest --watch",
-		"test:coverage": "jest --coverage",
+		"ci": "pnpm run build && pnpm run lint && pnpm run test",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"version": "",
@@ -28,8 +30,8 @@
 		"@codemirror/state": "^6.0.0",
 		"@codemirror/view": "^6.0.0",
 		"@eslint/js": "^9.27.0",
-		"@types/jest": "^29.5.14",
-		"@types/node": "^16.11.6",
+		"@types/node": "^20.0.0",
+		"@vitest/coverage-v8": "^4.0.18",
 		"builtin-modules": "3.3.0",
 		"esbuild": "0.25.0",
 		"eslint": "^9.27.0",
@@ -39,14 +41,18 @@
 		"eslint-plugin-sonarjs": "^3.0.2",
 		"eslint-plugin-unicorn": "^59.0.1",
 		"husky": "^9.1.7",
-		"jest": "^29.7.0",
 		"lint-staged": "^16.2.7",
 		"obsidian": "latest",
 		"prettier": "^3.5.3",
-		"ts-jest": "^29.3.4",
 		"tslib": "2.6.2",
 		"typescript": "^5.8.3",
-		"typescript-eslint": "^8.33.0"
+		"typescript-eslint": "^8.33.0",
+		"vitest": "^4.0.18"
+	},
+	"pnpm": {
+		"overrides": {
+			"@eslint/plugin-kit": "^0.3.4"
+		}
 	},
 	"lint-staged": {
 		"src/**/*.ts": [

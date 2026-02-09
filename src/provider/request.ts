@@ -1,5 +1,6 @@
 import type { RequestUrlParam } from 'obsidian';
 import { requestUrl } from 'obsidian';
+import https from 'https';
 
 const STREAM_TIMEOUT_MS = 60000; // 60 seconds
 const MAX_RETRIES = 3;
@@ -130,7 +131,7 @@ async function sendStreamingRequestViaNode(
 	body: Record<string, unknown>,
 	timeoutMs: number = STREAM_TIMEOUT_MS
 ): Promise<{ status: number; text: string }> {
-	const https = require('https') as typeof import('https');
+	// https is imported at module level for proper testability
 
 	const parsedUrl = new URL(url);
 	const payload = JSON.stringify(body);

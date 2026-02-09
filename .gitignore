@@ -1,5 +1,5 @@
 # vscode
-.vscode 
+.vscode
 
 # Intellij
 *.iml
@@ -23,13 +23,9 @@ data.json
 
 # Exclude the built main.js file
 /main.js
-.yarn
-.yarnrc.yml
-.pnp.cjs
-.pnp.loader.mjs
 
-# Jest
-ts-jest.log
+# env
+.env
 
 # test
 coverage

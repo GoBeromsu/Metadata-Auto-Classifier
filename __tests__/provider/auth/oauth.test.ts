@@ -1,54 +1,61 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Platform, requestUrl } from 'obsidian';
 import { CodexOAuth } from '../../../src/provider/auth/oauth';
 import type { OAuthTokens } from '../../../src/provider/auth/types';
+import { OAuthCallbackServer } from '../../../src/provider/auth/oauth-server';
+import { createTokensFromResponse, isTokenExpired } from '../../../src/provider/auth/token-manager';
+import type { Mock } from 'vitest';
 
 // Mock obsidian
-jest.mock('obsidian', () => ({
+vi.mock('obsidian', () => ({
 	Platform: {
 		isDesktop: true,
 	},
-	requestUrl: jest.fn(),
+	requestUrl: vi.fn(),
 }));
 
-// Mock the oauth-server
-jest.mock('../../../src/provider/auth/oauth-server', () => ({
-	OAuthCallbackServer: jest.fn().mockImplementation(() => ({
-		waitForCallback: jest.fn(),
-		stop: jest.fn(),
-	})),
-}));
+// Mock the oauth-server - use a class-like constructor mock
+vi.mock('../../../src/provider/auth/oauth-server', () => {
+	const MockServer = vi.fn(function (this: any) {
+		this.waitForCallback = vi.fn();
+		this.stop = vi.fn();
+	});
+	return { OAuthCallbackServer: MockServer };
+});
 
 // Mock pkce
-jest.mock('../../../src/provider/auth/pkce', () => ({
-	generatePKCEChallenge: jest.fn().mockResolvedValue({
+vi.mock('../../../src/provider/auth/pkce', () => ({
+	generatePKCEChallenge: vi.fn().mockResolvedValue({
 		codeVerifier: 'test-verifier',
 		codeChallenge: 'test-challenge',
 	}),
-	generateState: jest.fn().mockReturnValue('test-state'),
+	generateState: vi.fn().mockReturnValue('test-state'),
 }));
 
 // Mock token-manager
-jest.mock('../../../src/provider/auth/token-manager', () => ({
-	createTokensFromResponse: jest.fn().mockReturnValue({
+vi.mock('../../../src/provider/auth/token-manager', () => ({
+	createTokensFromResponse: vi.fn().mockReturnValue({
 		accessToken: 'new-access-token',
 		refreshToken: 'new-refresh-token',
 		expiresAt: Math.floor(Date.now() / 1000) + 3600,
 		accountId: 'test-account-id',
 	}),
-	isTokenExpired: jest.fn().mockReturnValue(false),
+	isTokenExpired: vi.fn().mockReturnValue(false),
 }));
 
 // Mock global window
-const mockWindowOpen = jest.fn();
+const mockWindowOpen = vi.fn();
 (global as any).window = {
 	open: mockWindowOpen,
 };
+
+const MockOAuthCallbackServer = OAuthCallbackServer as unknown as Mock;
 
 describe('CodexOAuth', () => {
 	let codexOAuth: CodexOAuth;
 
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		mockWindowOpen.mockClear();
 		codexOAuth = new CodexOAuth();
 	});
@@ -77,18 +84,19 @@ describe('CodexOAuth', () => {
 		it('should open browser and wait for callback on desktop', async () => {
 			(Platform as any).isDesktop = true;
 
-			const { OAuthCallbackServer } = require('../../../src/provider/auth/oauth-server');
 			const mockServer = {
-				waitForCallback: jest.fn().mockResolvedValue({
+				waitForCallback: vi.fn().mockResolvedValue({
 					code: 'auth-code',
 					state: 'test-state',
 				}),
-				stop: jest.fn(),
+				stop: vi.fn(),
 			};
-			OAuthCallbackServer.mockImplementation(() => mockServer);
+			MockOAuthCallbackServer.mockImplementation(function (this: any) {
+				Object.assign(this, mockServer);
+			});
 
 			// Mock requestUrl for token exchange
-			(requestUrl as jest.Mock).mockResolvedValue({
+			(requestUrl as any).mockResolvedValue({
 				status: 200,
 				json: {
 					access_token: 'access-token',
@@ -111,12 +119,13 @@ describe('CodexOAuth', () => {
 		it('should stop server on error', async () => {
 			(Platform as any).isDesktop = true;
 
-			const { OAuthCallbackServer } = require('../../../src/provider/auth/oauth-server');
 			const mockServer = {
-				waitForCallback: jest.fn().mockRejectedValue(new Error('Callback timeout')),
-				stop: jest.fn(),
+				waitForCallback: vi.fn().mockRejectedValue(new Error('Callback timeout')),
+				stop: vi.fn(),
 			};
-			OAuthCallbackServer.mockImplementation(() => mockServer);
+			MockOAuthCallbackServer.mockImplementation(function (this: any) {
+				Object.assign(this, mockServer);
+			});
 
 			await expect(codexOAuth.startAuthFlow()).rejects.toThrow('Callback timeout');
 			expect(mockServer.stop).toHaveBeenCalled();
@@ -132,7 +141,7 @@ describe('CodexOAuth', () => {
 		};
 
 		it('should refresh tokens successfully', async () => {
-			(requestUrl as jest.Mock).mockResolvedValue({
+			(requestUrl as any).mockResolvedValue({
 				status: 200,
 				json: {
 					access_token: 'refreshed-access-token',
@@ -156,7 +165,7 @@ describe('CodexOAuth', () => {
 		});
 
 		it('should throw error on refresh failure', async () => {
-			(requestUrl as jest.Mock).mockResolvedValue({
+			(requestUrl as any).mockResolvedValue({
 				status: 400,
 				json: {
 					error: 'invalid_grant',
@@ -170,7 +179,6 @@ describe('CodexOAuth', () => {
 		});
 
 		it('should preserve original refresh token if new one not provided', async () => {
-			const { createTokensFromResponse } = require('../../../src/provider/auth/token-manager');
 
 			// Mock to return tokens without refresh token
 			createTokensFromResponse.mockReturnValueOnce({
@@ -180,7 +188,7 @@ describe('CodexOAuth', () => {
 				accountId: 'account-id',
 			});
 
-			(requestUrl as jest.Mock).mockResolvedValue({
+			(requestUrl as any).mockResolvedValue({
 				status: 200,
 				json: {
 					access_token: 'new-access',
@@ -196,7 +204,6 @@ describe('CodexOAuth', () => {
 		});
 
 		it('should preserve original account ID if extraction fails', async () => {
-			const { createTokensFromResponse } = require('../../../src/provider/auth/token-manager');
 
 			// Mock to return tokens without account ID
 			createTokensFromResponse.mockReturnValueOnce({
@@ -206,7 +213,7 @@ describe('CodexOAuth', () => {
 				accountId: '', // Empty
 			});
 
-			(requestUrl as jest.Mock).mockResolvedValue({
+			(requestUrl as any).mockResolvedValue({
 				status: 200,
 				json: {
 					access_token: 'new-access',
@@ -231,7 +238,6 @@ describe('CodexOAuth', () => {
 		};
 
 		it('should return original tokens if not expired', async () => {
-			const { isTokenExpired } = require('../../../src/provider/auth/token-manager');
 			isTokenExpired.mockReturnValue(false);
 
 			const result = await codexOAuth.refreshTokensIfNeeded(validTokens);
@@ -241,10 +247,9 @@ describe('CodexOAuth', () => {
 		});
 
 		it('should refresh tokens if expired', async () => {
-			const { isTokenExpired } = require('../../../src/provider/auth/token-manager');
 			isTokenExpired.mockReturnValue(true);
 
-			(requestUrl as jest.Mock).mockResolvedValue({
+			(requestUrl as any).mockResolvedValue({
 				status: 200,
 				json: {
 					access_token: 'new-access',
@@ -265,14 +270,15 @@ describe('CodexOAuth', () => {
 		it('should stop callback server if running', async () => {
 			(Platform as any).isDesktop = true;
 
-			const { OAuthCallbackServer } = require('../../../src/provider/auth/oauth-server');
 			const mockServer = {
-				waitForCallback: jest.fn().mockImplementation(
+				waitForCallback: vi.fn().mockImplementation(
 					() => new Promise(() => {}) // Never resolves
 				),
-				stop: jest.fn(),
+				stop: vi.fn(),
 			};
-			OAuthCallbackServer.mockImplementation(() => mockServer);
+			MockOAuthCallbackServer.mockImplementation(function (this: any) {
+				Object.assign(this, mockServer);
+			});
 
 			// Start flow but don't await
 			const flowPromise = codexOAuth.startAuthFlow();

@@ -1,4 +1,4 @@
-jest.mock('settings/modals/FrontmatterEditorModal', () => ({
+vi.mock('settings/modals/FrontmatterEditorModal', () => ({
 	ConfigurableSettingModal: class {},
 }));
 
@@ -15,20 +15,20 @@ const makeItem = (id: number) => ({
 });
 
 const createMockPlugin = () => ({
-	app: { vault: { getMarkdownFiles: jest.fn() } },
+	app: { vault: { getMarkdownFiles: vi.fn() } },
 	settings: {
 		frontmatter: [makeItem(1), makeItem(2), makeItem(3)],
 	},
-	saveSettings: jest.fn().mockResolvedValue(undefined),
-	registerCommand: jest.fn(),
-	processFrontmatter: jest.fn(),
+	saveSettings: vi.fn().mockResolvedValue(undefined),
+	registerCommand: vi.fn(),
+	processFrontmatter: vi.fn(),
 });
 
 const createMockContainer = () => ({
-	empty: jest.fn(),
-	createEl: jest.fn(),
-	createDiv: jest.fn().mockReturnValue({
-		createEl: jest.fn(),
+	empty: vi.fn(),
+	createEl: vi.fn(),
+	createDiv: vi.fn().mockReturnValue({
+		createEl: vi.fn(),
 	}),
 });
 
@@ -41,8 +41,8 @@ describe('Frontmatter Container - Regression Tests', () => {
 		mockPlugin = createMockPlugin();
 		mockContainer = createMockContainer();
 		frontmatter = new (Frontmatter as any)(mockPlugin, mockContainer);
-		(global as any).confirm = jest.fn().mockReturnValue(true);
-		jest.clearAllMocks();
+		(global as any).confirm = vi.fn().mockReturnValue(true);
+		vi.clearAllMocks();
 	});
 
 	describe('Basic Rendering', () => {
@@ -113,7 +113,7 @@ describe('Frontmatter Container - Regression Tests', () => {
 			const updatedTemplate = { ...originalTemplate, name: 'Updated Template' };
 
 			// Mock openEditModal
-			(frontmatter as any).openEditModal = jest
+			(frontmatter as any).openEditModal = vi
 				.fn()
 				.mockImplementation((template: any, onSave: any) => onSave(updatedTemplate));
 

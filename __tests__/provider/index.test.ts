@@ -7,12 +7,12 @@ describe('sendRequest', () => {
 	const body = { foo: 'bar' };
 
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	});
 
 	it('should return JSON for successful request', async () => {
 		const mockResponse = { status: 200, json: { ok: true } };
-		(requestUrl as jest.Mock).mockResolvedValueOnce(mockResponse);
+		(requestUrl as any).mockResolvedValueOnce(mockResponse);
 
 		const result = await sendRequest(url, headers, body);
 
@@ -26,7 +26,7 @@ describe('sendRequest', () => {
 	});
 
 	it('should throw server error when status is 500', async () => {
-		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 500, text: 'Internal Server Error' });
+		(requestUrl as any).mockResolvedValueOnce({ status: 500, text: 'Internal Server Error' });
 
 		await expect(sendRequest(url, headers, body)).rejects.toThrow(
 			`Server error (HTTP 500) from ${url}: Internal Server Error`
@@ -34,7 +34,7 @@ describe('sendRequest', () => {
 	});
 
 	it('should throw server error when status is 503', async () => {
-		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 503, text: 'Service Unavailable' });
+		(requestUrl as any).mockResolvedValueOnce({ status: 503, text: 'Service Unavailable' });
 
 		await expect(sendRequest(url, headers, body)).rejects.toThrow(
 			`Server error (HTTP 503) from ${url}: Service Unavailable`
@@ -42,7 +42,7 @@ describe('sendRequest', () => {
 	});
 
 	it('should throw client error when status is 400', async () => {
-		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 400, text: 'Bad Request' });
+		(requestUrl as any).mockResolvedValueOnce({ status: 400, text: 'Bad Request' });
 
 		await expect(sendRequest(url, headers, body)).rejects.toThrow(
 			`Client error (HTTP 400) from ${url}: Bad Request`
@@ -50,7 +50,7 @@ describe('sendRequest', () => {
 	});
 
 	it('should throw client error when status is 401', async () => {
-		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 401, text: 'Unauthorized' });
+		(requestUrl as any).mockResolvedValueOnce({ status: 401, text: 'Unauthorized' });
 
 		await expect(sendRequest(url, headers, body)).rejects.toThrow(
 			`Client error (HTTP 401) from ${url}: Unauthorized`
@@ -58,7 +58,7 @@ describe('sendRequest', () => {
 	});
 
 	it('should throw client error when status is 404', async () => {
-		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 404, text: 'Not Found' });
+		(requestUrl as any).mockResolvedValueOnce({ status: 404, text: 'Not Found' });
 
 		await expect(sendRequest(url, headers, body)).rejects.toThrow(
 			`Client error (HTTP 404) from ${url}: Not Found`
@@ -66,7 +66,7 @@ describe('sendRequest', () => {
 	});
 
 	it('should throw client error when status is 429', async () => {
-		(requestUrl as jest.Mock).mockResolvedValueOnce({ status: 429, text: 'Rate Limit Exceeded' });
+		(requestUrl as any).mockResolvedValueOnce({ status: 429, text: 'Rate Limit Exceeded' });
 
 		await expect(sendRequest(url, headers, body)).rejects.toThrow(
 			`Client error (HTTP 429) from ${url}: Rate Limit Exceeded`
@@ -75,13 +75,13 @@ describe('sendRequest', () => {
 
 	it('should rethrow native errors from requestUrl', async () => {
 		const networkError = new Error('Network connection failed');
-		(requestUrl as jest.Mock).mockRejectedValueOnce(networkError);
+		(requestUrl as any).mockRejectedValueOnce(networkError);
 
 		await expect(sendRequest(url, headers, body)).rejects.toThrow('Network connection failed');
 	});
 
 	it('should convert non-Error exceptions to Error', async () => {
-		(requestUrl as jest.Mock).mockRejectedValueOnce('string error');
+		(requestUrl as any).mockRejectedValueOnce('string error');
 
 		await expect(sendRequest(url, headers, body)).rejects.toThrow('string error');
 	});

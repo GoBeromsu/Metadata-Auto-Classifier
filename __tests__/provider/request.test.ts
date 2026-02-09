@@ -1,24 +1,27 @@
 import { HttpError, sendStreamingRequest } from 'provider/request';
 
-// Track https mock state
-let mockRequestCallback: ((response: unknown) => void) | null = null;
-let mockCallCount = 0;
-let mockResponseQueue: Array<{ statusCode: number; data: string }> = [];
+// Track https mock state - must be hoisted for vi.mock factory
+const mockState = vi.hoisted(() => ({
+	mockRequestCallback: null as ((response: unknown) => void) | null,
+	mockCallCount: 0,
+	mockResponseQueue: [] as Array<{ statusCode: number; data: string }>,
+}));
 
-// Mock https module
-jest.mock('https', () => ({
-	request: (_options: unknown, callback: (response: unknown) => void) => {
-		mockRequestCallback = callback;
-		mockCallCount++;
+// Mock https module - use 'node:https' because Vite normalizes Node builtins to node: prefix
+// The source code uses require('https') which Vite resolves as node:https
+vi.mock('node:https', () => {
+	const requestFn = (_options: unknown, callback: (response: unknown) => void) => {
+		mockState.mockRequestCallback = callback;
+		mockState.mockCallCount++;
 
 		const mockRequest = {
 			on: () => mockRequest,
-			write: jest.fn(),
+			write: vi.fn(),
 			end: () => {
 				// Simulate async response
 				setImmediate(() => {
-					if (mockResponseQueue.length > 0) {
-						const responseData = mockResponseQueue.shift()!;
+					if (mockState.mockResponseQueue.length > 0) {
+						const responseData = mockState.mockResponseQueue.shift()!;
 						const mockResponse = {
 							statusCode: responseData.statusCode,
 							on: (event: string, handler: (data?: Buffer) => void) => {
@@ -31,15 +34,19 @@ jest.mock('https', () => ({
 								return mockResponse;
 							},
 						};
-						mockRequestCallback?.(mockResponse);
+						mockState.mockRequestCallback?.(mockResponse);
 					}
 				});
 			},
-			destroy: jest.fn(),
+			destroy: vi.fn(),
 		};
 		return mockRequest;
-	},
-}));
+	};
+	return {
+		default: { request: requestFn },
+		request: requestFn,
+	};
+});
 
 describe('HttpError', () => {
 	it('should create error with status and responseText', () => {
@@ -78,14 +85,14 @@ describe('sendStreamingRequest', () => {
 	};
 
 	beforeEach(() => {
-		mockCallCount = 0;
-		mockResponseQueue = [];
-		mockRequestCallback = null;
+		mockState.mockCallCount = 0;
+		mockState.mockResponseQueue = [];
+		mockState.mockRequestCallback = null;
 	});
 
 	describe('successful requests', () => {
 		it('should parse SSE events and accumulate text', async () => {
-			mockResponseQueue = [
+			mockState.mockResponseQueue = [
 				{
 					statusCode: 200,
 					data: 'data: {"type":"text.delta","delta":"Hello"}\ndata: {"type":"text.delta","delta":" World"}\n',
@@ -98,7 +105,7 @@ describe('sendStreamingRequest', () => {
 		});
 
 		it('should skip data: [DONE] lines', async () => {
-			mockResponseQueue = [
+			mockState.mockResponseQueue = [
 				{
 					statusCode: 200,
 					data: 'data: {"type":"text.delta","delta":"Valid"}\ndata: [DONE]\n',
@@ -111,7 +118,7 @@ describe('sendStreamingRequest', () => {
 		});
 
 		it('should skip non-JSON data lines', async () => {
-			mockResponseQueue = [
+			mockState.mockResponseQueue = [
 				{
 					statusCode: 200,
 					data: 'data: {"type":"text.delta","delta":"Valid"}\ndata: not-json\n',
@@ -124,7 +131,7 @@ describe('sendStreamingRequest', () => {
 		});
 
 		it('should return empty string when no text events', async () => {
-			mockResponseQueue = [
+			mockState.mockResponseQueue = [
 				{
 					statusCode: 200,
 					data: 'data: {"type":"other"}\n',
@@ -139,7 +146,7 @@ describe('sendStreamingRequest', () => {
 
 	describe('401 errors', () => {
 		it('should throw HttpError with status 401 immediately', async () => {
-			mockResponseQueue = [
+			mockState.mockResponseQueue = [
 				{
 					statusCode: 401,
 					data: '{"error":"unauthorized"}',
@@ -152,7 +159,7 @@ describe('sendStreamingRequest', () => {
 		});
 
 		it('should include status 401 in HttpError', async () => {
-			mockResponseQueue = [
+			mockState.mockResponseQueue = [
 				{
 					statusCode: 401,
 					data: '{"error":"unauthorized"}',
@@ -169,7 +176,7 @@ describe('sendStreamingRequest', () => {
 		});
 
 		it('should NOT retry 401 errors', async () => {
-			mockResponseQueue = [
+			mockState.mockResponseQueue = [
 				{ statusCode: 401, data: 'unauthorized' },
 				{ statusCode: 200, data: 'data: {"type":"text.delta","delta":"OK"}\n' },
 			];
@@ -178,42 +185,42 @@ describe('sendStreamingRequest', () => {
 				HttpError
 			);
 
-			expect(mockCallCount).toBe(1); // Should NOT retry
+			expect(mockState.mockCallCount).toBe(1); // Should NOT retry
 		});
 	});
 
 	describe('non-retryable client errors', () => {
 		it('should throw HttpError on 400 without retry', async () => {
-			mockResponseQueue = [{ statusCode: 400, data: 'Bad Request' }];
+			mockState.mockResponseQueue = [{ statusCode: 400, data: 'Bad Request' }];
 
 			await expect(sendStreamingRequest(url, headers, body, parseEvent)).rejects.toThrow(
 				HttpError
 			);
-			expect(mockCallCount).toBe(1);
+			expect(mockState.mockCallCount).toBe(1);
 		});
 
 		it('should throw HttpError on 404 without retry', async () => {
-			mockResponseQueue = [{ statusCode: 404, data: 'Not Found' }];
+			mockState.mockResponseQueue = [{ statusCode: 404, data: 'Not Found' }];
 
 			await expect(sendStreamingRequest(url, headers, body, parseEvent)).rejects.toThrow(
 				HttpError
 			);
-			expect(mockCallCount).toBe(1);
+			expect(mockState.mockCallCount).toBe(1);
 		});
 
 		it('should throw HttpError on 403 without retry', async () => {
-			mockResponseQueue = [{ statusCode: 403, data: 'Forbidden' }];
+			mockState.mockResponseQueue = [{ statusCode: 403, data: 'Forbidden' }];
 
 			await expect(sendStreamingRequest(url, headers, body, parseEvent)).rejects.toThrow(
 				HttpError
 			);
-			expect(mockCallCount).toBe(1);
+			expect(mockState.mockCallCount).toBe(1);
 		});
 	});
 
 	describe('HttpError properties', () => {
 		it('should preserve response text in HttpError', async () => {
-			mockResponseQueue = [{ statusCode: 401, data: 'Custom error message' }];
+			mockState.mockResponseQueue = [{ statusCode: 401, data: 'Custom error message' }];
 
 			try {
 				await sendStreamingRequest(url, headers, body, parseEvent);
@@ -224,7 +231,7 @@ describe('sendStreamingRequest', () => {
 		});
 
 		it('should have correct message format for 4xx errors', async () => {
-			mockResponseQueue = [{ statusCode: 400, data: 'Invalid request' }];
+			mockState.mockResponseQueue = [{ statusCode: 400, data: 'Invalid request' }];
 
 			try {
 				await sendStreamingRequest(url, headers, body, parseEvent);

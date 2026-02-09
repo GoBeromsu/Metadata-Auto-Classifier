@@ -5,12 +5,12 @@ import { Notice } from 'obsidian';
 
 describe('Notice', () => {
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	});
 
 	test('error shows error notice and logs', () => {
 		const err = new Error('boom');
-		const log = jest.spyOn(console, 'error').mockImplementation(() => {});
+		const log = vi.spyOn(console, 'error').mockImplementation(() => {});
 		SettingsNotice.error(err);
 		expect(Notice).toHaveBeenCalledWith('❌ boom', 5000);
 		expect(log).toHaveBeenCalledWith(err);
@@ -22,25 +22,25 @@ describe('Notice', () => {
 	});
 
 	test('startProgress and endProgress manage notice', () => {
-		jest.useFakeTimers();
+		vi.useFakeTimers();
 		const notice: any = SettingsNotice.startProgress('Task');
 		expect(Notice).toHaveBeenCalledWith(expect.stringContaining('Task'), 0);
 		expect(notice.interval).toBeDefined();
-		jest.advanceTimersByTime(200);
+		vi.advanceTimersByTime(200);
 		expect(notice.setMessage).toHaveBeenCalled();
 		SettingsNotice.endProgress(notice);
 		expect(notice.hide).toHaveBeenCalled();
-		jest.useRealTimers();
+		vi.useRealTimers();
 	});
 
 	test('withProgress wraps async function with progress notice', async () => {
-		jest.useFakeTimers();
-		const fn = jest.fn().mockResolvedValue('done');
+		vi.useFakeTimers();
+		const fn = vi.fn().mockResolvedValue('done');
 		const promise = SettingsNotice.withProgress('file.md', 'tags', fn);
 		const result = await promise;
 		expect(result).toBe('done');
 		expect(fn).toHaveBeenCalled();
-		jest.runOnlyPendingTimers();
-		jest.useRealTimers();
+		vi.runOnlyPendingTimers();
+		vi.useRealTimers();
 	});
 });
