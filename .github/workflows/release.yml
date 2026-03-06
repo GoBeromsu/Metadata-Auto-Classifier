@@ -1,79 +1,42 @@
-name: Build obsidian plugin
+name: Release plugin
 
 on:
   push:
-    # Sequence of patterns matched against refs/tags
     tags:
-      - '*' # Push events to matching any tag format, i.e. 1.0, 20.15.10
-
-env:
-  PLUGIN_NAME: metadata-auto-classifier
-  HUSKY: 0
+      - '*'
 
 permissions:
   contents: write
+
+env:
+  PLUGIN_NAME: metadata-auto-classifier
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      HUSKY: 0
     steps:
       - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-
+          node-version: '20'
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Build
-        id: build
         run: |
           pnpm install --frozen-lockfile
           pnpm run build
-
-      - name: Validate required files
-        run: |
-          echo "Checking required release files..."
-          REQUIRED_FILES="main.js manifest.json styles.css versions.json"
-          MISSING=""
-          for file in $REQUIRED_FILES; do
-            if [ ! -f "$file" ]; then
-              MISSING="$MISSING $file"
-            fi
-          done
-          if [ -n "$MISSING" ]; then
-            echo "::error::Missing required files:$MISSING"
-            exit 1
-          fi
-          echo "All required files present: $REQUIRED_FILES"
-
-      - name: Validate version consistency
-        run: |
-          PKG_VERSION=$(node -p "require('./package.json').version")
-          MANIFEST_VERSION=$(node -p "require('./manifest.json').version")
-          if [ "$PKG_VERSION" != "$MANIFEST_VERSION" ]; then
-            echo "::error::Version mismatch! package.json=$PKG_VERSION, manifest.json=$MANIFEST_VERSION"
-            exit 1
-          fi
-          echo "Version consistent: $PKG_VERSION"
-
-      - name: Package plugin
-        run: |
           mkdir ${{ env.PLUGIN_NAME }}
           cp main.js manifest.json styles.css ${{ env.PLUGIN_NAME }}
           zip -r ${{ env.PLUGIN_NAME }}.zip ${{ env.PLUGIN_NAME }}
-      - name: Create Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG_NAME: ${{ github.ref_name }}
-        run: |
-          gh release create "$TAG_NAME" \
-            --title "$TAG_NAME" \
-            --generate-notes \
-            ./${{ env.PLUGIN_NAME }}.zip#${{ env.PLUGIN_NAME }}-$TAG_NAME.zip \
-            ./main.js \
-            ./manifest.json \
-            ./styles.css \
-            ./versions.json
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ env.PLUGIN_NAME }}.zip
+            main.js
+            manifest.json
+            styles.css
+            versions.json
