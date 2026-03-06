@@ -14,7 +14,8 @@
 		"test:coverage": "vitest run --coverage",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
-		"version": "",
+		"version": "node scripts/version.mjs",
+		"postversion": "git push && git push --tags",
 		"prepare": "husky"
 	},
 	"keywords": [
