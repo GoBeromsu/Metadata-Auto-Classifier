@@ -6,7 +6,6 @@
 
 Obsidian plugin: AI-powered automatic metadata classification and generation. Automatically classifies and generates note frontmatter via AI providers.
 
-- Version: 1.11.0
 - Entry: `src/main.ts` → `AutoClassifierPlugin extends Plugin`
 - Package manager: **pnpm** (do NOT use npm or yarn)
 
@@ -22,6 +21,9 @@ pnpm run test:coverage  # Vitest with coverage report
 pnpm run lint           # ESLint (flat config v9)
 pnpm run lint:fix       # ESLint auto-fix
 pnpm run ci             # build + lint + test
+pnpm run release:patch  # lint:fix → patch bump → auto-push tag
+pnpm run release:minor  # lint:fix → minor bump → auto-push tag
+pnpm run release:major  # lint:fix → major bump → auto-push tag
 ```
 
 ## Architecture (4-module boundary)
@@ -64,3 +66,12 @@ classifier → src/classifier/index
 - ESLint flat config v9 + `eslint-plugin-boundaries` + `eslint-plugin-sonarjs`
 - Prettier (2 spaces, semicolons, trailing commas)
 - Husky pre-commit → lint-staged (changed .ts files only)
+- `boiler.config.mjs` — configures dev deploy (copy mode), version staging (`manifest.json`, `versions.json`), and release artifact packaging
+
+## Release
+
+1. `pnpm ci` — MUST pass (build + lint + test)
+2. `pnpm release:patch|minor|major` — lint:fix → version bump → auto-push tag
+3. GitHub Actions handles CI + Release workflows
+
+**DENIED by settings.json:** `git tag`, `git push --tags`, `gh release` — only `pnpm release:*` is allowed.
