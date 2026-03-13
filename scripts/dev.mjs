@@ -99,8 +99,12 @@ function discoverVaults() {
     return Object.values(vaults)
       .filter((vault) => vault.path && fs.existsSync(vault.path))
       .map((vault) => ({ name: path.basename(vault.path), path: vault.path }));
-  } catch {
-    return [];
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      console.warn(`WARN Failed to parse Obsidian config at ${configFile}: ${error.message}`);
+      return [];
+    }
+    throw error;
   }
 }
 
@@ -198,6 +202,7 @@ function copyStaticFiles(selectedVaults, pluginId, staticFiles) {
       const sourceFile = path.resolve(process.cwd(), file.from);
       const destinationFile = path.join(pluginDir, file.to);
       if (!fs.existsSync(sourceFile)) {
+        console.warn(`  WARN Skipped ${file.from} (file not found)`);
         continue;
       }
 
@@ -225,6 +230,7 @@ function startFileSync(selectedVaults, pluginId, watchFiles) {
       }
 
       debounceTimer = setTimeout(() => {
+        let hadError = false;
         for (const vaultPath of selectedVaults) {
           const pluginDir = path.join(vaultPath, '.obsidian', 'plugins', pluginId);
           const destinationFile = path.join(pluginDir, destinationName);
@@ -233,27 +239,44 @@ function startFileSync(selectedVaults, pluginId, watchFiles) {
             fs.copyFileSync(sourceFile, destinationFile);
             fs.writeFileSync(path.join(pluginDir, '.hotreload'), String(Date.now()));
           } catch (error) {
+            hadError = true;
             const message = error instanceof Error ? error.message : String(error);
             console.error(`Failed to copy ${sourceFile} -> ${destinationFile}: ${message}`);
           }
         }
 
-        console.log(`[${new Date().toLocaleTimeString()}] Synced ${destinationName} -> vault(s)`);
+        if (hadError) {
+          console.warn(`[${new Date().toLocaleTimeString()}] Synced ${destinationName} with errors (see above)`);
+        } else {
+          console.log(`[${new Date().toLocaleTimeString()}] Synced ${destinationName} -> vault(s)`);
+        }
       }, 100);
     });
   };
 
+  const WAIT_TIMEOUT_MS = 30_000;
+
   for (const file of watchFiles) {
     const sourceFile = path.resolve(process.cwd(), file.from);
+    const startTime = Date.now();
+
     const waitForFile = () => {
       if (fs.existsSync(sourceFile)) {
+        console.log(`  Watching ${file.from} for changes`);
         startWatch(sourceFile, file.to);
+        return;
+      }
+
+      if (Date.now() - startTime > WAIT_TIMEOUT_MS) {
+        console.error(`ERROR Timed out waiting for ${file.from} to be created (${WAIT_TIMEOUT_MS / 1000}s)`);
+        console.error('  Check that your build command produces this file.');
         return;
       }
 
       setTimeout(waitForFile, 500);
     };
 
+    console.log(`  Waiting for ${file.from} to be created by build...`);
     waitForFile();
   }
 }
@@ -291,31 +314,20 @@ async function main() {
 
   copyStaticFiles(selectedVaults, pluginId, config.deploy.staticFiles ?? []);
 
-  if (config.deploy.mode === 'delegate') {
-    const vaultEnvValue = selectedVaults.join(',');
-    const env = { ...process.env, [config.deploy.envVar]: vaultEnvValue };
+  const isDelegate = config.deploy.mode === 'delegate';
+  const env = isDelegate
+    ? { ...process.env, [config.deploy.envVar]: selectedVaults.join(',') }
+    : process.env;
 
-    console.log(`\nStarting build (delegate mode, ${config.deploy.envVar}=${vaultEnvValue})...\n`);
-    const child = spawn(config.buildCommand[0], config.buildCommand.slice(1), {
-      cwd: process.cwd(),
-      env,
-      stdio: 'inherit',
-    });
+  console.log(
+    isDelegate
+      ? `\nStarting build (delegate mode, ${config.deploy.envVar}=${selectedVaults.join(',')})...\n`
+      : '\nStarting build (copy mode)...\n',
+  );
 
-    const cleanup = () => {
-      child.kill();
-      process.exit(0);
-    };
-
-    process.on('SIGINT', cleanup);
-    process.on('SIGTERM', cleanup);
-    child.on('exit', (code) => process.exit(code ?? 0));
-    return;
-  }
-
-  console.log('\nStarting build (copy mode)...\n');
   const child = spawn(config.buildCommand[0], config.buildCommand.slice(1), {
     cwd: process.cwd(),
+    env,
     stdio: 'inherit',
   });
 
@@ -326,13 +338,17 @@ async function main() {
 
   process.on('SIGINT', cleanup);
   process.on('SIGTERM', cleanup);
-  child.on('exit', (code) => {
-    if (code !== null && code !== 0) {
-      process.exit(code);
-    }
-  });
 
-  startFileSync(selectedVaults, pluginId, config.deploy.watchFiles ?? []);
+  if (isDelegate) {
+    child.on('exit', (code) => process.exit(code ?? 0));
+  } else {
+    child.on('exit', (code) => {
+      if (code !== null && code !== 0) {
+        process.exit(code);
+      }
+    });
+    startFileSync(selectedVaults, pluginId, config.deploy.watchFiles ?? []);
+  }
 }
 
 await main();

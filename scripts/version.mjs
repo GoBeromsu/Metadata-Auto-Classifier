@@ -23,6 +23,10 @@ writeFileSync('versions.json', `${JSON.stringify(versions, null, '\t')}\n`);
 const stageFiles = boiler.version?.stageFiles ?? [];
 if (stageFiles.length > 0) {
   const result = spawnSync('git', ['add', ...stageFiles], { stdio: 'inherit' });
+  if (result.error) {
+    console.error(`Failed to run git add: ${result.error.message}`);
+    process.exit(1);
+  }
   if ((result.status ?? 0) !== 0) {
     process.exit(result.status ?? 1);
   }

@@ -10,6 +10,9 @@ export default {
       watchFiles: [{ from: 'main.js', to: 'main.js' }],
     },
   },
+  version: {
+    stageFiles: ['manifest.json', 'versions.json'],
+  },
   release: {
     pluginName: 'metadata-auto-classifier',
     copyFiles: ['main.js', 'manifest.json', 'styles.css'],
