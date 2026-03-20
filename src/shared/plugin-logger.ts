@@ -6,7 +6,7 @@ export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export class PluginLogger {
 	constructor(
 		private readonly prefix: string,
-		private readonly isDebug: () => boolean = () => false
+		private readonly isDebug: () => boolean = () => false,
 	) {}
 
 	debug(message: string, data?: Record<string, unknown>): void {
@@ -43,9 +43,7 @@ export class PluginLogger {
 
 	private format(level: LogLevel, message: string, data?: Record<string, unknown>): string {
 		const pairs = data
-			? ` | ${Object.entries(data)
-					.map(([k, v]) => `${k}=${JSON.stringify(v)}`)
-					.join(' ')}`
+			? ` | ${Object.entries(data).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(' ')}`
 			: '';
 		return `[${this.prefix}] ${level.padEnd(5)} | ${message}${pairs}`;
 	}

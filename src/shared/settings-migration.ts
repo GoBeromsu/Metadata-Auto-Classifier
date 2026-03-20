@@ -10,7 +10,7 @@ export type MigrationFn = (data: Record<string, unknown>) => Record<string, unkn
  */
 export function migrateSettings(
 	data: Record<string, unknown>,
-	migrations: MigrationFn[]
+	migrations: MigrationFn[],
 ): { data: Record<string, unknown>; changed: boolean } {
 	let current = { ...data };
 
