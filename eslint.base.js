@@ -25,6 +25,18 @@ export const baseConfig = tseslint.config(
 		},
 	},
 	{
+		files: ['src/domain/**/*.ts', 'src/types/**/*.ts', 'src/utils/**/*.ts'],
+		ignores: ['**/*.d.ts'],
+		rules: {
+			'no-restricted-imports': ['error', {
+				patterns: [{
+					group: ['obsidian', 'obsidian/*'],
+					message: 'domain/, types/, and utils/ layers must not import from obsidian. Move this code to ui/ or inject the dependency.',
+				}],
+			}],
+		},
+	},
+	{
 		files: ['scripts/**/*.{js,mjs}', 'tooling/**/*.{js,mjs}', 'esbuild.config.mjs', 'version-bump.mjs'],
 		languageOptions: {
 			ecmaVersion: 'latest',

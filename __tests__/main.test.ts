@@ -1,7 +1,7 @@
 import AutoClassifierPlugin from 'main';
 import { App, TFile, createMockTFile } from 'obsidian';
-import { DEFAULT_SETTINGS, DEFAULT_FRONTMATTER_SETTING } from '../src/constants';
-import type { ProviderConfig, FrontmatterField, OAuthTokens } from 'types';
+import { DEFAULT_SETTINGS, DEFAULT_FRONTMATTER_SETTING } from '../src/domain/constants';
+import type { ProviderConfig, FrontmatterField, OAuthTokens } from '../src/types/index';
 import { Notice as SettingsNotice } from 'settings/components/Notice';
 import { processAPIRequest } from 'provider';
 import { insertToFrontMatter, getFieldValues } from 'lib/frontmatter';

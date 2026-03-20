@@ -1,9 +1,9 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Platform, requestUrl } from 'obsidian';
-import { CodexOAuth } from '../../../src/provider/auth/oauth';
-import type { OAuthTokens } from '../../../src/provider/auth/types';
-import { OAuthCallbackServer } from '../../../src/provider/auth/oauth-server';
-import { createTokensFromResponse, isTokenExpired } from '../../../src/provider/auth/token-manager';
+import { CodexOAuth } from '../../../src/ui/auth/oauth';
+import type { OAuthTokens } from '../../../src/types/auth';
+import { OAuthCallbackServer } from '../../../src/domain/auth/oauth-server';
+import { createTokensFromResponse, isTokenExpired } from '../../../src/domain/auth/token-manager';
 import type { Mock } from 'vitest';
 
 // Mock obsidian
@@ -15,7 +15,7 @@ vi.mock('obsidian', () => ({
 }));
 
 // Mock the oauth-server - use a class-like constructor mock
-vi.mock('../../../src/provider/auth/oauth-server', () => {
+vi.mock('../../../src/domain/auth/oauth-server', () => {
 	const MockServer = vi.fn(function (this: any) {
 		this.waitForCallback = vi.fn();
 		this.stop = vi.fn();
@@ -24,7 +24,7 @@ vi.mock('../../../src/provider/auth/oauth-server', () => {
 });
 
 // Mock pkce
-vi.mock('../../../src/provider/auth/pkce', () => ({
+vi.mock('../../../src/domain/auth/pkce', () => ({
 	generatePKCEChallenge: vi.fn().mockResolvedValue({
 		codeVerifier: 'test-verifier',
 		codeChallenge: 'test-challenge',
@@ -33,7 +33,7 @@ vi.mock('../../../src/provider/auth/pkce', () => ({
 }));
 
 // Mock token-manager
-vi.mock('../../../src/provider/auth/token-manager', () => ({
+vi.mock('../../../src/domain/auth/token-manager', () => ({
 	createTokensFromResponse: vi.fn().mockReturnValue({
 		accessToken: 'new-access-token',
 		refreshToken: 'new-refresh-token',

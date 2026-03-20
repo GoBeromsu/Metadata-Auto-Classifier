@@ -5,8 +5,8 @@ import {
 	createTokensFromResponse,
 	getTokenRemainingTime,
 	formatTokenExpiry,
-} from '../../../src/provider/auth/token-manager';
-import type { OAuthTokens, TokenResponse } from '../../../src/provider/auth/types';
+} from '../../../src/domain/auth/token-manager';
+import type { OAuthTokens, TokenResponse } from '../../../src/types/auth';
 
 describe('token-manager', () => {
 	// Mock Date.now for consistent testing

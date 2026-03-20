@@ -1,27 +1,27 @@
-import { ClassificationService, ClassificationContext } from '../../src/classifier/ClassificationService';
+import { ClassificationService, ClassificationContext } from '../../src/ui/ClassificationService';
 import type { App, TFile, MetadataCache, Vault } from 'obsidian';
 import type { FrontmatterField, ProviderConfig, OAuthTokens } from '../../src/types';
-import { processAPIRequest } from '../../src/provider';
-import { insertToFrontMatter, getFieldValues } from '../../src/lib/frontmatter';
-import { getPromptTemplate } from '../../src/provider/prompt';
+import { processAPIRequest } from '../../src/ui/provider-api';
+import { insertToFrontMatter, getFieldValues } from '../../src/ui/frontmatter';
+import { getPromptTemplate } from '../../src/domain/prompt';
 
 // Mock dependencies
-vi.mock('../../src/provider', () => ({
+vi.mock('../../src/ui/provider-api', () => ({
 	processAPIRequest: vi.fn(),
 }));
 
-vi.mock('../../src/provider/prompt', () => ({
+vi.mock('../../src/domain/prompt', () => ({
 	DEFAULT_SYSTEM_ROLE: 'Test system role',
 	getPromptTemplate: vi.fn().mockReturnValue('Test prompt'),
 }));
 
-vi.mock('../../src/lib/frontmatter', () => ({
+vi.mock('../../src/ui/frontmatter', () => ({
 	getContentWithoutFrontmatter: vi.fn().mockReturnValue('Test content'),
 	getFieldValues: vi.fn().mockReturnValue(['tag1', 'tag2']),
 	insertToFrontMatter: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('../../src/settings/components/Notice', () => ({
+vi.mock('../../src/ui/settings/components/Notice', () => ({
 	Notice: {
 		error: vi.fn(),
 		success: vi.fn(),

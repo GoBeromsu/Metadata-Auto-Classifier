@@ -1,11 +1,11 @@
 import type { TFile } from 'obsidian';
 import { Plugin } from 'obsidian';
-import { CodexOAuth, isTokenExpired } from './provider/auth';
-import { ClassificationService, CommandService } from './classifier';
-import { DEFAULT_FRONTMATTER_SETTING, DEFAULT_SETTINGS, NOTICE_CATALOG } from './constants';
-import type { AutoClassifierSettings } from './settings';
-import { AutoClassifierSettingTab } from './settings';
-import type { FrontmatterField, ProviderConfig } from './types';
+import { CodexOAuth, isTokenExpired } from './ui/auth';
+import { ClassificationService } from './ui/ClassificationService';
+import { CommandService } from './ui/CommandService';
+import { DEFAULT_FRONTMATTER_SETTING, DEFAULT_SETTINGS, NOTICE_CATALOG } from './domain/constants';
+import type { AutoClassifierSettings, FrontmatterField, ProviderConfig } from './types';
+import { AutoClassifierSettingTab } from './ui/settings';
 import { PluginLogger } from './shared/plugin-logger';
 import { PluginNotices } from './shared/plugin-notices';
 import { migrateSettings } from './shared/settings-migration';

@@ -5,7 +5,7 @@ vi.mock('settings/modals/FrontmatterEditorModal', () => ({
 import type { Mock } from 'vitest';
 import type { FrontmatterField } from 'types';
 import { Tag } from 'settings/TagSection';
-import { DEFAULT_TAG_SETTING } from '../../src/constants';
+import { DEFAULT_TAG_SETTING } from '../../src/domain/constants';
 
 interface MockPlugin {
 	app: { vault: { getMarkdownFiles: Mock } };
