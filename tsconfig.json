@@ -4,14 +4,15 @@
 		"outDir": "dist",
 		"paths": {
 			"main": ["src/main"],
-			"provider": ["src/provider/index"],
-			"provider/*": ["src/provider/*"],
-			"lib": ["src/lib/index"],
-			"lib/*": ["src/lib/*"],
-			"settings": ["src/settings/index"],
-			"settings/*": ["src/settings/*"],
-			"classifier": ["src/classifier/index"],
-			"classifier/*": ["src/classifier/*"]
+			"domain": ["src/domain"],
+			"domain/*": ["src/domain/*"],
+			"ui": ["src/ui"],
+			"ui/*": ["src/ui/*"],
+			"types": ["src/types"],
+			"types/*": ["src/types/*"],
+			"utils": ["src/utils"],
+			"utils/*": ["src/utils/*"],
+			"shared/*": ["src/shared/*"]
 		},
 		"inlineSourceMap": true,
 		"inlineSources": true,

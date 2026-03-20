@@ -3,7 +3,7 @@ import {
 	generateCodeChallenge,
 	generateState,
 	generatePKCEChallenge,
-} from '../../../src/provider/auth/pkce';
+} from '../../../src/domain/auth/pkce';
 
 describe('pkce', () => {
 	describe('generateCodeVerifier', () => {

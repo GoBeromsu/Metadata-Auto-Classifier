@@ -1,13 +1,13 @@
 import type { Mock } from 'vitest';
-import { ProviderSection } from '../../src/settings/ProviderSection';
+import { ProviderSection } from '../../src/ui/settings/ProviderSection';
 import type { App } from 'obsidian';
 import type AutoClassifierPlugin from '../../src/main';
 import type { ProviderConfig, OAuthTokens } from '../../src/types';
-import { formatTokenExpiry, isTokenExpired } from '../../src/provider/auth';
-import { Setting } from '../../src/settings/components/Setting';
+import { formatTokenExpiry, isTokenExpired } from '../../src/ui/auth';
+import { Setting } from '../../src/ui/settings/components/Setting';
 
 // Mock the provider/auth module
-vi.mock('../../src/provider/auth', () => ({
+vi.mock('../../src/ui/auth', () => ({
 	formatTokenExpiry: vi.fn((tokens) => {
 		const remaining = tokens.expiresAt - Math.floor(Date.now() / 1000);
 		if (remaining <= 0) return 'Expired';
@@ -22,14 +22,14 @@ vi.mock('../../src/provider/auth', () => ({
 }));
 
 // Mock the ProviderModal
-vi.mock('../../src/settings/modals/ProviderModal', () => ({
+vi.mock('../../src/ui/settings/modals/ProviderModal', () => ({
 	ProviderModal: vi.fn().mockImplementation(() => ({
 		open: vi.fn(),
 	})),
 }));
 
 // Mock Setting component
-vi.mock('../../src/settings/components/Setting', () => ({
+vi.mock('../../src/ui/settings/components/Setting', () => ({
 	Setting: {
 		create: vi.fn(),
 	},

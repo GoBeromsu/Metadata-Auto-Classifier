@@ -20,51 +20,56 @@ export default [
 			unicorn,
 		},
 		settings: {
-			// Module boundary definitions
-			// Structure: provider/ | classifier/ | settings/ | lib/
+			// Module boundary definitions — 4-layer architecture
+			// main → ui → domain → utils/types
 			'boundaries/elements': [
-				{
-					type: 'provider',
-					pattern: 'src/provider/**',
-					mode: 'folder',
-				},
-				{
-					type: 'classifier',
-					pattern: 'src/classifier/**',
-					mode: 'folder',
-				},
-				{
-					type: 'settings',
-					pattern: 'src/settings/**',
-					mode: 'folder',
-				},
-				{
-					type: 'lib',
-					pattern: 'src/lib/**',
-					mode: 'folder',
-				},
 				{
 					type: 'main',
 					pattern: 'src/main.ts',
 					mode: 'file',
 				},
+				{
+					type: 'ui',
+					pattern: 'src/ui/**',
+					mode: 'folder',
+				},
+				{
+					type: 'domain',
+					pattern: 'src/domain/**',
+					mode: 'folder',
+				},
+				{
+					type: 'utils',
+					pattern: 'src/utils/**',
+					mode: 'folder',
+				},
+				{
+					type: 'types',
+					pattern: 'src/types/**',
+					mode: 'folder',
+				},
+				{
+					type: 'shared',
+					pattern: 'src/shared/**',
+					mode: 'folder',
+				},
 			],
-			// Dependency rules between modules
+			// Dependency rules between layers
 			'boundaries/rules': [
 				{
-					from: 'settings',
-					disallow: ['provider'],
-					message: 'settings cannot import provider directly. Use classifier instead.',
+					from: 'domain',
+					disallow: ['ui'],
+					message: 'domain layer must not import from ui layer.',
 				},
 				{
-					from: 'provider',
-					disallow: ['settings', 'classifier'],
-					message: 'provider is pure API layer. No UI/business logic dependency.',
+					from: 'utils',
+					disallow: ['ui', 'domain'],
+					message: 'utils layer must not import from ui or domain.',
 				},
 				{
-					from: 'lib',
-					disallow: ['provider', 'classifier', 'settings'],
-					message: 'lib is pure utility. No domain module dependency.',
+					from: 'types',
+					disallow: ['ui', 'domain', 'utils'],
+					message: 'types layer must not import from other layers.',
 				},
 			],
 		},
