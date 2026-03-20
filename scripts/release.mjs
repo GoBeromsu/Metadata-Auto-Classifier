@@ -28,7 +28,8 @@ if (!RELEASE_LEVELS.has(level)) {
 }
 
 const pnpm = getPnpmCommand();
-if (fs.existsSync('tooling/sync/index.mjs')) {
+const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+if (pkg.scripts?.['sync:check']) {
   run(pnpm, ['sync:check']);
 }
 run(pnpm, ['run', 'ci']);
