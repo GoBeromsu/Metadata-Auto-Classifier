@@ -21,3 +21,57 @@
  *   - Typography: --font-ui-small, --font-ui-medium, --font-smallest
  *   - Spacing: --size-4-1, --size-4-2, etc.
  */
+
+/* ─── Shared Icon Button ─── */
+/* Flat, no shadow, no background. Use for header action buttons. */
+.plugin-icon-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 4px;
+	border: none;
+	border-radius: var(--radius-s, 4px);
+	background: none;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: color 120ms ease, background-color 120ms ease;
+}
+.plugin-icon-btn:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+.plugin-icon-btn--active {
+	color: var(--interactive-accent);
+}
+.plugin-icon-btn svg {
+	width: 16px;
+	height: 16px;
+}
+
+/* ─── Shared Score Display ─── */
+/* Score on the left, plain text, no pill background. */
+.plugin-score {
+	min-width: 34px;
+	text-align: right;
+	font-size: var(--font-ui-small);
+	font-variant-numeric: tabular-nums;
+	flex-shrink: 0;
+}
+.plugin-score--high { color: var(--interactive-accent); font-weight: 600; }
+.plugin-score--medium { color: var(--text-muted); }
+.plugin-score--low { color: var(--text-faint); }
+
+/* ─── Shared State Display ─── */
+/* Empty, loading, error states. */
+.plugin-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 32px 16px;
+	text-align: center;
+	gap: 8px;
+}
+.plugin-state-icon { color: var(--text-faint); }
+.plugin-state-icon svg { width: 40px; height: 40px; }
+.plugin-state-text { font-size: var(--font-ui-small); color: var(--text-muted); margin: 0; }
+.plugin-state--error .plugin-state-icon { color: var(--text-error, var(--color-red, #e5534b)); }
