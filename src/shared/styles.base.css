@@ -75,3 +75,59 @@
 .plugin-state-icon svg { width: 40px; height: 40px; }
 .plugin-state-text { font-size: var(--font-ui-small); color: var(--text-muted); margin: 0; }
 .plugin-state--error .plugin-state-icon { color: var(--text-error, var(--color-red, #e5534b)); }
+
+/* ─── Shared Notice Display ─── */
+/* Obsidian's .notice container always uses a dark background regardless of theme.
+   Use `color: inherit` to pick up Obsidian's notice text color (light/white)
+   instead of theme variables that assume the editor background. */
+.plugin-notice {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-width: 260px;
+	color: inherit;
+}
+.plugin-notice-head {
+	margin: 0;
+	font-size: var(--font-smallest, 11px);
+	font-weight: 600;
+	color: inherit;
+	opacity: 0.6;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+.plugin-notice-content {
+	margin: 0;
+	font-size: var(--font-ui-small, 13px);
+	color: inherit;
+	white-space: pre-wrap;
+}
+.plugin-notice-actions {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+.plugin-notice-btn {
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: var(--radius-s, 6px);
+	background: rgba(255, 255, 255, 0.1);
+	color: inherit;
+	font-size: var(--font-smallest, 11px);
+	padding: 2px 8px;
+	cursor: pointer;
+}
+.plugin-notice-btn:hover {
+	background: rgba(255, 255, 255, 0.2);
+}
+.plugin-notice-btn--mute {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+}
+.plugin-notice-btn--mute svg {
+	width: 14px;
+	height: 14px;
+}
