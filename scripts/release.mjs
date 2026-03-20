@@ -33,4 +33,17 @@ if (pkg.scripts?.['sync:check']) {
   run(pnpm, ['sync:check']);
 }
 run(pnpm, ['run', 'ci']);
+
+// After CI (which runs build), manifest.json may be reformatted by esbuild.
+// Normalize to tab-indented format and auto-commit if dirty to unblock npm version.
+if (fs.existsSync('manifest.json')) {
+  const raw = fs.readFileSync('manifest.json', 'utf8');
+  const normalized = `${JSON.stringify(JSON.parse(raw), null, '\t')}\n`;
+  if (raw !== normalized) {
+    fs.writeFileSync('manifest.json', normalized);
+    run('git', ['add', 'manifest.json']);
+    run('git', ['commit', '-m', 'chore: normalize manifest.json formatting']);
+  }
+}
+
 run(pnpm, ['version', level]);
