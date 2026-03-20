@@ -28,6 +28,7 @@ export class Notice {
 
 	static error(error: Error): void {
 		this.show(`❌ ${error.message}`, 5000);
+		// eslint-disable-next-line no-console
 		console.error(error);
 	}
 
@@ -35,12 +36,17 @@ export class Notice {
 		this.show(message, 3000);
 	}
 
-	static startProgress(displayText: string): ObsidianNotice & { interval?: number; timeout?: number } {
+	static startProgress(
+		displayText: string
+	): ObsidianNotice & { interval?: number; timeout?: number } {
 		const spinChars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 		let spinIndex = 0;
 
 		const noticeText = () => `${spinChars[spinIndex]} ${displayText}`;
-		const notice = new ObsidianNotice(noticeText(), 0) as ObsidianNotice & { interval?: number; timeout?: number };
+		const notice = new ObsidianNotice(noticeText(), 0) as ObsidianNotice & {
+			interval?: number;
+			timeout?: number;
+		};
 
 		notice.interval = window.setInterval(() => {
 			spinIndex = (spinIndex + 1) % spinChars.length;

@@ -20,6 +20,7 @@ export default class AutoClassifierPlugin extends Plugin {
 		try {
 			this.setupCommand();
 		} catch (error) {
+			// eslint-disable-next-line no-console
 			console.error('Failed to setup commands:', error);
 			Notice.error(new Error('Plugin initialization failed: could not setup commands'));
 		}
@@ -54,8 +55,10 @@ export default class AutoClassifierPlugin extends Plugin {
 					provider.oauth = newTokens;
 				}
 				settingsChanged = true;
+				// eslint-disable-next-line no-console
 				console.log(`OAuth tokens refreshed for provider: ${provider.name}`);
 			} catch (error) {
+				// eslint-disable-next-line no-console
 				console.error(`Failed to refresh OAuth tokens for ${provider.name}:`, error);
 			}
 		}
@@ -157,6 +160,7 @@ export default class AutoClassifierPlugin extends Plugin {
 				codexProvider.oauth = this.settings.codexConnection;
 				codexProvider.authType = 'oauth';
 				settingsChanged = true;
+				// eslint-disable-next-line no-console
 				console.log('Migrated codexConnection to Codex provider oauth field');
 			}
 			// Remove legacy field

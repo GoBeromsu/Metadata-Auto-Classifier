@@ -1,7 +1,6 @@
 // eslint.config.mjs - Modern ESLint v9+ Flat Config
 
-import js from '@eslint/js';
-import ts from 'typescript-eslint';
+import { baseConfig } from './eslint.base.js';
 import prettier from 'eslint-config-prettier';
 import sonarjs from 'eslint-plugin-sonarjs';
 import importPlugin from 'eslint-plugin-import';
@@ -9,10 +8,9 @@ import boundaries from 'eslint-plugin-boundaries';
 import unicorn from 'eslint-plugin-unicorn';
 
 export default [
-	js.configs.recommended,
-	...ts.configs.recommended,
+	...baseConfig,
 
-	// TypeScript files configuration
+	// MAC-specific: module boundary enforcement, code quality plugins
 	{
 		files: ['src/**/*.ts'],
 		plugins: {
@@ -71,37 +69,13 @@ export default [
 			],
 		},
 		languageOptions: {
-			ecmaVersion: 'latest',
-			sourceType: 'module',
-			parser: ts.parser,
+			parser: (await import('typescript-eslint')).parser,
 			parserOptions: {
 				project: './tsconfig.json',
 				tsconfigRootDir: import.meta.dirname,
 			},
-			globals: {
-				// Node.js globals
-				process: 'readonly',
-				Buffer: 'readonly',
-				__dirname: 'readonly',
-				__filename: 'readonly',
-				module: 'readonly',
-				require: 'readonly',
-				exports: 'readonly',
-				global: 'readonly',
-				// Browser globals (for Obsidian)
-				window: 'readonly',
-				document: 'readonly',
-				console: 'readonly',
-			},
 		},
 		rules: {
-			// Disable base rules (use TypeScript versions)
-			'no-unused-vars': 'off',
-			'@typescript-eslint/no-unused-vars': ['error', { args: 'none' }],
-			'@typescript-eslint/ban-ts-comment': 'off',
-			'no-prototype-builtins': 'off',
-			'@typescript-eslint/no-empty-function': 'off',
-
 			// Legacy compatibility
 			'@typescript-eslint/no-explicit-any': 'off',
 			'@typescript-eslint/no-require-imports': 'off',
@@ -128,18 +102,11 @@ export default [
 		},
 	},
 
-	// Global ignores
+	// Extended ignores (beyond baseConfig)
 	{
 		ignores: [
-			'main.js',
-			'node_modules/**',
-			'dist/**',
-			'*.d.ts',
 			'__tests__/**',
 			'__mocks__/**',
-			'*.js',
-			'*.mjs',
-			'scripts/**',
 		],
 	},
 

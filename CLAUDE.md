@@ -21,9 +21,9 @@ pnpm run test:coverage  # Vitest with coverage report
 pnpm run lint           # ESLint (flat config v9)
 pnpm run lint:fix       # ESLint auto-fix
 pnpm run ci             # build + lint + test
-pnpm run release:patch  # lint:fix → patch bump → auto-push tag
-pnpm run release:minor  # lint:fix → minor bump → auto-push tag
-pnpm run release:major  # lint:fix → major bump → auto-push tag
+pnpm run release:patch  # run CI → patch bump → auto-push tag
+pnpm run release:minor  # run CI → minor bump → auto-push tag
+pnpm run release:major  # run CI → major bump → auto-push tag
 ```
 
 ## Architecture (4-module boundary)
@@ -70,8 +70,8 @@ classifier → src/classifier/index
 
 ## Release
 
-1. `pnpm ci` — MUST pass (build + lint + test)
-2. `pnpm release:patch|minor|major` — lint:fix → version bump → auto-push tag
+1. `pnpm run ci` — MUST pass (build + lint + test)
+2. `pnpm release:patch|minor|major` — run CI → version bump → auto-push tag
 3. GitHub Actions handles CI + Release workflows
 
 **DENIED by settings.json:** `git tag`, `git push --tags`, `gh release` — only `pnpm release:*` is allowed.

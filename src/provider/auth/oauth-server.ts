@@ -70,6 +70,7 @@ export class OAuthCallbackServer {
 			});
 
 			this.server.listen(CODEX_OAUTH.REDIRECT_PORT, '127.0.0.1', () => {
+				// eslint-disable-next-line no-console
 				console.log(`OAuth callback server listening on port ${CODEX_OAUTH.REDIRECT_PORT}`);
 			});
 		});
@@ -224,6 +225,7 @@ export class OAuthCallbackServer {
 		if (this.server) {
 			this.server.close();
 			this.server = null;
+			// eslint-disable-next-line no-console
 			console.log('OAuth callback server stopped');
 		}
 	}

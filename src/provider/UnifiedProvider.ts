@@ -336,6 +336,7 @@ export class UnifiedProvider implements APIProvider {
 					provider.name === PROVIDER_NAMES.CODEX;
 
 				if (isCodex401) {
+					// eslint-disable-next-line no-console
 					console.log('[Codex] 401 received, attempting token refresh...');
 					return this.refreshCodexTokensAndRetry(
 						provider,
@@ -370,6 +371,7 @@ export class UnifiedProvider implements APIProvider {
 
 		const codexOAuth = new CodexOAuth();
 		const newTokens = await codexOAuth.refreshTokens(oauth);
+		// eslint-disable-next-line no-console
 		console.log('[Codex] Tokens refreshed successfully');
 
 		const updatedProvider: ProviderConfig = {

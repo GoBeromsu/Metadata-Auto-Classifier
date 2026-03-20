@@ -9,6 +9,7 @@ export class ErrorHandler {
 	 */
 	static handleAPIError(error: Error, context?: string): void {
 		const message = context ? `[API] ${context}: ${error.message}` : `[API] ${error.message}`;
+		// eslint-disable-next-line no-console
 		console.error(message, error);
 		Notice.error(new Error(message));
 	}
@@ -29,6 +30,7 @@ export class ErrorHandler {
 			? `[Unexpected] ${context}: ${errorObj.message}`
 			: `[Unexpected] ${errorObj.message}`;
 
+		// eslint-disable-next-line no-console
 		console.error(message, error);
 		Notice.error(new Error(message));
 	}
@@ -36,10 +38,7 @@ export class ErrorHandler {
 	/**
 	 * Wrap an async function with error handling.
 	 */
-	static async wrapAsync<T>(
-		fn: () => Promise<T>,
-		context?: string
-	): Promise<T | null> {
+	static async wrapAsync<T>(fn: () => Promise<T>, context?: string): Promise<T | null> {
 		try {
 			return await fn();
 		} catch (error) {
@@ -51,10 +50,7 @@ export class ErrorHandler {
 	/**
 	 * Create a safe wrapper for callbacks that shouldn't throw.
 	 */
-	static safeCallback<T extends (...args: unknown[]) => void>(
-		fn: T,
-		context?: string
-	): T {
+	static safeCallback<T extends (...args: unknown[]) => void>(fn: T, context?: string): T {
 		return ((...args: unknown[]) => {
 			try {
 				fn(...args);

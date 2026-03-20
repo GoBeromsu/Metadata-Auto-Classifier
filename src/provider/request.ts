@@ -43,6 +43,7 @@ export async function sendRequest(
 ): Promise<unknown> {
 	const requestParam = createRequestParam(baseUrl, headers, data);
 
+	// eslint-disable-next-line no-console
 	console.log('[API Request]', {
 		url: baseUrl,
 		headers: maskSensitiveHeaders(headers),
@@ -54,6 +55,7 @@ export async function sendRequest(
 	try {
 		response = await requestUrl(requestParam);
 	} catch (error) {
+		// eslint-disable-next-line no-console
 		console.error('[API Error] Request failed:', error);
 		if (error instanceof Error) {
 			throw error;
@@ -62,6 +64,7 @@ export async function sendRequest(
 	}
 
 	if (response.status >= 500) {
+		// eslint-disable-next-line no-console
 		console.error('[API Error] Server error:', {
 			status: response.status,
 			response: response.json || response.text,
@@ -70,6 +73,7 @@ export async function sendRequest(
 	}
 
 	if (response.status >= 400) {
+		// eslint-disable-next-line no-console
 		console.error('[API Error] Client error:', {
 			status: response.status,
 			url: baseUrl,
@@ -208,6 +212,7 @@ export async function sendStreamingRequest(
 	body: Record<string, unknown>,
 	parseEvent: (event: SSEEvent) => string | null
 ): Promise<string> {
+	// eslint-disable-next-line no-console
 	console.log('[API Streaming Request]', {
 		url,
 		headers: maskSensitiveHeaders(headers),
@@ -230,6 +235,7 @@ export async function sendStreamingRequest(
 				// Check if we should retry for transient errors
 				if (isRetryableStatus(response.status) && attempt < MAX_RETRIES) {
 					const delayMs = INITIAL_DELAY_MS * Math.pow(2, attempt);
+					// eslint-disable-next-line no-console
 					console.warn(
 						`[API Streaming] Retryable error (HTTP ${response.status}), attempt ${attempt + 1}/${MAX_RETRIES + 1}, retrying in ${delayMs}ms`
 					);
@@ -237,6 +243,7 @@ export async function sendStreamingRequest(
 					continue;
 				}
 
+				// eslint-disable-next-line no-console
 				console.error('[API Streaming Error]', {
 					status: response.status,
 					url,
@@ -265,6 +272,7 @@ export async function sendStreamingRequest(
 				}
 			}
 
+			// eslint-disable-next-line no-console
 			console.log('[API Streaming Response] Accumulated text length:', accumulatedText.length);
 			return accumulatedText;
 		} catch (error) {
@@ -278,6 +286,7 @@ export async function sendStreamingRequest(
 			// Retry on network errors (not HTTP errors)
 			if (!(error instanceof HttpError) && attempt < MAX_RETRIES) {
 				const delayMs = INITIAL_DELAY_MS * Math.pow(2, attempt);
+				// eslint-disable-next-line no-console
 				console.warn(
 					`[API Streaming] Network error, attempt ${attempt + 1}/${MAX_RETRIES + 1}, retrying in ${delayMs}ms:`,
 					lastError.message
@@ -291,6 +300,7 @@ export async function sendStreamingRequest(
 				throw error;
 			}
 
+			// eslint-disable-next-line no-console
 			console.error('[API Streaming Error] Request failed:', lastError);
 			throw new Error(`Streaming request failed: ${lastError.message}`);
 		}
