@@ -1,7 +1,6 @@
 import { ClassificationService, ClassificationContext } from '../../src/classifier/ClassificationService';
 import type { App, TFile, MetadataCache, Vault } from 'obsidian';
 import type { FrontmatterField, ProviderConfig, OAuthTokens } from '../../src/types';
-import { Notice as SettingsNotice } from '../../src/settings/components/Notice';
 import { processAPIRequest } from '../../src/provider';
 import { insertToFrontMatter, getFieldValues } from '../../src/lib/frontmatter';
 import { getPromptTemplate } from '../../src/provider/prompt';
@@ -65,6 +64,11 @@ describe('ClassificationService', () => {
 			model: 'test-model',
 			classificationRule: 'test rule',
 			saveSettings: vi.fn().mockResolvedValue(undefined),
+			notices: {
+				show: vi.fn(() => null),
+				remove: vi.fn(),
+				unload: vi.fn(),
+			} as any,
 		};
 
 		mockFrontmatter = {
@@ -81,8 +85,6 @@ describe('ClassificationService', () => {
 	});
 
 	describe('hasValidAuth', () => {
-		const Notice = SettingsNotice;
-
 		it('should pass validation with API key authentication', async () => {
 			processAPIRequest.mockResolvedValue({
 				output: ['result'],
@@ -96,11 +98,10 @@ describe('ClassificationService', () => {
 
 			await service.classify(mockFile, mockFrontmatter);
 
-			// Should not show auth error
-			expect(Notice.error).not.toHaveBeenCalledWith(
-				expect.objectContaining({
-					message: expect.stringContaining('API key not configured'),
-				})
+			// Should not show auth error notice
+			expect(mockContext.notices.show).not.toHaveBeenCalledWith(
+				'no_auth',
+				expect.any(Object)
 			);
 		});
 
@@ -119,7 +120,8 @@ describe('ClassificationService', () => {
 
 			await service.classify(mockFile, mockFrontmatter);
 
-			expect(Notice.error).toHaveBeenCalledWith(
+			expect(mockContext.notices.show).toHaveBeenCalledWith(
+				'no_auth',
 				expect.objectContaining({
 					message: expect.stringContaining('API key not configured'),
 				})
@@ -147,11 +149,10 @@ describe('ClassificationService', () => {
 
 			await service.classify(mockFile, mockFrontmatter);
 
-			// Should not show auth error
-			expect(Notice.error).not.toHaveBeenCalledWith(
-				expect.objectContaining({
-					message: expect.stringContaining('API key not configured'),
-				})
+			// Should not show auth error notice
+			expect(mockContext.notices.show).not.toHaveBeenCalledWith(
+				'no_auth',
+				expect.any(Object)
 			);
 		});
 
@@ -183,11 +184,10 @@ describe('ClassificationService', () => {
 
 			await service.classify(mockFile, mockFrontmatter);
 
-			// Should not show auth error
-			expect(Notice.error).not.toHaveBeenCalledWith(
-				expect.objectContaining({
-					message: expect.stringContaining('not configured'),
-				})
+			// Should not show auth error notice
+			expect(mockContext.notices.show).not.toHaveBeenCalledWith(
+				'no_auth',
+				expect.any(Object)
 			);
 		});
 
@@ -220,11 +220,10 @@ describe('ClassificationService', () => {
 
 			await service.classify(mockFile, mockFrontmatter);
 
-			// Should not show auth error
-			expect(Notice.error).not.toHaveBeenCalledWith(
-				expect.objectContaining({
-					message: expect.stringContaining('not configured'),
-				})
+			// Should not show auth error notice
+			expect(mockContext.notices.show).not.toHaveBeenCalledWith(
+				'no_auth',
+				expect.any(Object)
 			);
 		});
 
@@ -245,7 +244,8 @@ describe('ClassificationService', () => {
 
 			await service.classify(mockFile, mockFrontmatter);
 
-			expect(Notice.error).toHaveBeenCalledWith(
+			expect(mockContext.notices.show).toHaveBeenCalledWith(
+				'no_auth',
 				expect.objectContaining({
 					message: expect.stringContaining('OAuth not configured'),
 				})
@@ -268,7 +268,8 @@ describe('ClassificationService', () => {
 
 			await service.classify(mockFile, mockFrontmatter);
 
-			expect(Notice.error).toHaveBeenCalledWith(
+			expect(mockContext.notices.show).toHaveBeenCalledWith(
+				'no_auth',
 				expect.objectContaining({
 					message: expect.stringContaining('not configured'),
 				})
@@ -277,8 +278,6 @@ describe('ClassificationService', () => {
 	});
 
 	describe('classify', () => {
-		const Notice = SettingsNotice;
-
 		it('should auto-fetch refs when empty', async () => {
 			const frontmatterWithNoRefs: FrontmatterField = {
 				...mockFrontmatter,
@@ -313,11 +312,8 @@ describe('ClassificationService', () => {
 
 			await service.classify(mockFile, mockFrontmatter);
 
-			expect(Notice.error).toHaveBeenCalledWith(
-				expect.objectContaining({
-					message: expect.stringContaining('No model selected'),
-				})
-			);
+			const calls = (mockContext.notices.show as ReturnType<typeof vi.fn>).mock.calls;
+			expect(calls.some((call) => call[0] === 'no_model')).toBe(true);
 		});
 
 		it('should insert to frontmatter on high reliability response', async () => {
@@ -341,7 +337,10 @@ describe('ClassificationService', () => {
 					value: ['category1', 'category2'],
 				})
 			);
-			expect(Notice.success).toHaveBeenCalled();
+			expect(mockContext.notices.show).toHaveBeenCalledWith(
+				'classify_success',
+				expect.any(Object)
+			);
 		});
 
 		it('should show error on low reliability response', async () => {
@@ -358,10 +357,9 @@ describe('ClassificationService', () => {
 			await service.classify(mockFile, mockFrontmatter);
 
 			expect(insertToFrontMatter).not.toHaveBeenCalled();
-			expect(Notice.error).toHaveBeenCalledWith(
-				expect.objectContaining({
-					message: expect.stringContaining('Low reliability'),
-				})
+			expect(mockContext.notices.show).toHaveBeenCalledWith(
+				'low_reliability',
+				expect.any(Object)
 			);
 		});
 

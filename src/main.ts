@@ -2,27 +2,33 @@ import type { TFile } from 'obsidian';
 import { Plugin } from 'obsidian';
 import { CodexOAuth, isTokenExpired } from './provider/auth';
 import { ClassificationService, CommandService } from './classifier';
-import { DEFAULT_FRONTMATTER_SETTING, DEFAULT_SETTINGS } from './constants';
-import { Notice } from './settings/components/Notice';
+import { DEFAULT_FRONTMATTER_SETTING, DEFAULT_SETTINGS, NOTICE_CATALOG } from './constants';
 import type { AutoClassifierSettings } from './settings';
 import { AutoClassifierSettingTab } from './settings';
 import type { FrontmatterField, ProviderConfig } from './types';
+import { PluginLogger } from './shared/plugin-logger';
+import { PluginNotices } from './shared/plugin-notices';
+import { migrateSettings } from './shared/settings-migration';
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
+	logger: PluginLogger;
+	notices: PluginNotices;
+
 	private classificationService: ClassificationService | null = null;
 	private commandService: CommandService | null = null;
 
 	async onload() {
+		this.logger = new PluginLogger('MAC');
+
 		await this.loadSettings();
-		await this.migrateSettings();
+		await this.runMigrateSettings();
 		await this.refreshOAuthTokensIfNeeded();
 		try {
 			this.setupCommand();
 		} catch (error) {
-			// eslint-disable-next-line no-console
-			console.error('Failed to setup commands:', error);
-			Notice.error(new Error('Plugin initialization failed: could not setup commands'));
+			this.logger.error('Failed to setup commands', { error: String(error) });
+			this.notices.show('init_failed');
 		}
 		this.addSettingTab(new AutoClassifierSettingTab(this));
 	}
@@ -55,11 +61,11 @@ export default class AutoClassifierPlugin extends Plugin {
 					provider.oauth = newTokens;
 				}
 				settingsChanged = true;
-				// eslint-disable-next-line no-console
-				console.log(`OAuth tokens refreshed for provider: ${provider.name}`);
+				this.logger.info(`OAuth tokens refreshed for provider: ${provider.name}`);
 			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.error(`Failed to refresh OAuth tokens for ${provider.name}:`, error);
+				this.logger.error(`Failed to refresh OAuth tokens for ${provider.name}`, {
+					error: String(error),
+				});
 			}
 		}
 
@@ -94,8 +100,7 @@ export default class AutoClassifierPlugin extends Plugin {
 	async processFrontmatter(frontmatterId: number): Promise<void> {
 		const currentFile = this.app.workspace.getActiveFile();
 		if (!currentFile) {
-			const error = new Error('No active file.');
-			Notice.error(error);
+			this.notices.show('no_active_file');
 			return;
 		}
 
@@ -103,15 +108,13 @@ export default class AutoClassifierPlugin extends Plugin {
 		try {
 			selectedProvider = this.getSelectedProvider();
 		} catch {
-			const error = new Error('No provider selected.');
-			Notice.error(error);
+			this.notices.show('no_provider_selected');
 			return;
 		}
 
 		const frontmatter = this.settings.frontmatter.find((fm) => fm.id === frontmatterId);
 		if (!frontmatter) {
-			const error = new Error(`No setting found for frontmatter ID ${frontmatterId}.`);
-			Notice.error(error);
+			this.notices.show('no_frontmatter_setting', { id: frontmatterId });
 			return;
 		}
 
@@ -129,6 +132,7 @@ export default class AutoClassifierPlugin extends Plugin {
 			model: this.settings.selectedModel,
 			classificationRule: this.settings.classificationRule,
 			saveSettings: () => this.saveSettings(),
+			notices: this.notices,
 		});
 
 		await this.classificationService.classify(file, frontmatter);
@@ -144,31 +148,55 @@ export default class AutoClassifierPlugin extends Plugin {
 			count: fm.count ?? { min: 1, max: 5 },
 		}));
 
+		// Initialize notices after settings are loaded so the mute store is available
+		this.notices = new PluginNotices(
+			{
+				settings: this.settings as unknown as Record<string, unknown>,
+				saveSettings: () => this.saveSettings(),
+			},
+			NOTICE_CATALOG,
+			'MAC'
+		);
+
 		await this.saveSettings();
 	}
 
 	/**
-	 * Migrate legacy settings to new format
+	 * Migrate legacy settings to new format using the shared migrateSettings helper
 	 */
-	private async migrateSettings(): Promise<void> {
-		let settingsChanged = false;
+	private async runMigrateSettings(): Promise<void> {
+		const raw = this.settings as unknown as Record<string, unknown>;
 
-		// Migrate legacy codexConnection to Codex provider's oauth field
-		if (this.settings.codexConnection) {
-			const codexProvider = this.settings.providers.find((p) => p.name === 'Codex');
-			if (codexProvider && !codexProvider.oauth) {
-				codexProvider.oauth = this.settings.codexConnection;
-				codexProvider.authType = 'oauth';
-				settingsChanged = true;
-				// eslint-disable-next-line no-console
-				console.log('Migrated codexConnection to Codex provider oauth field');
-			}
-			// Remove legacy field
-			delete this.settings.codexConnection;
-			settingsChanged = true;
-		}
+		const { data, changed } = migrateSettings(raw, [
+			(data) => {
+				// Migrate legacy codexConnection to Codex provider's oauth field
+				if (!data['codexConnection']) return data;
 
-		if (settingsChanged) {
+				const providers = data['providers'] as Array<Record<string, unknown>> | undefined;
+				const codexProvider = providers?.find((p) => p['name'] === 'Codex');
+				if (codexProvider && !codexProvider['oauth']) {
+					codexProvider['oauth'] = data['codexConnection'];
+					codexProvider['authType'] = 'oauth';
+					this.logger.info('Migrated codexConnection to Codex provider oauth field');
+				}
+				// Remove legacy field
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				const { codexConnection: _removed, ...rest } = data;
+				return rest;
+			},
+		]);
+
+		if (changed) {
+			this.settings = data as unknown as AutoClassifierSettings;
+			// Re-bind notices host after settings object is replaced
+			this.notices = new PluginNotices(
+				{
+					settings: this.settings as unknown as Record<string, unknown>,
+					saveSettings: () => this.saveSettings(),
+				},
+				NOTICE_CATALOG,
+				'MAC'
+			);
 			await this.saveSettings();
 		}
 	}

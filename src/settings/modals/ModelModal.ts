@@ -5,18 +5,20 @@ import { getProviderPresets } from '../../lib';
 import type { Model, ProviderConfig, ProviderPreset } from '../../types';
 import { ModalAccessibilityHelper } from '../components/ModalAccessibilityHelper';
 import { Notice } from '../components/Notice';
+import type { PluginNotices } from '../../shared/plugin-notices';
 import type { DropdownOption } from '../components/Setting';
 import { Setting as CommonSetting } from '../components/Setting';
 
 export interface ModelModalProps {
 	providers: ProviderConfig[];
-        onSave: (result: {
-                provider: string;
-                model: Model;
-                isEdit: boolean;
-                oldModel?: { model: string; provider: string };
-        }) => void;
-        editTarget?: { model: string; name: string; provider: string };
+	onSave: (result: {
+		provider: string;
+		model: Model;
+		isEdit: boolean;
+		oldModel?: { model: string; provider: string };
+	}) => void;
+	editTarget?: { model: string; name: string; provider: string };
+	notices: PluginNotices;
 }
 
 export class ModelModal extends Modal {
@@ -34,9 +36,9 @@ export class ModelModal extends Modal {
 
 		// Set initial values
 		if (props.editTarget) {
-                        this.selectedProvider = props.editTarget.provider;
-                        this.modelName = props.editTarget.name;
-                        this.modelId = props.editTarget.model;
+			this.selectedProvider = props.editTarget.provider;
+			this.modelName = props.editTarget.name;
+			this.modelId = props.editTarget.model;
 		} else {
 			// Set default provider for new models
 			if (props.providers.length > 0) {
@@ -143,7 +145,7 @@ export class ModelModal extends Modal {
 				radio.value = model.id;
 				radio.addEventListener('change', () => {
 					if (radio.checked) {
-                                                this.modelName = model.name;
+						this.modelName = model.name;
 						this.modelId = model.id;
 						this.updateFormInputs();
 						this.updateRadioSelection();
@@ -167,7 +169,7 @@ export class ModelModal extends Modal {
 		customRadio.checked = true; // Set Custom as default selection
 		customRadio.addEventListener('change', () => {
 			if (customRadio.checked) {
-                                this.modelName = '';
+				this.modelName = '';
 				this.modelId = '';
 				this.updateFormInputs();
 				this.updateRadioSelection();
@@ -200,12 +202,12 @@ export class ModelModal extends Modal {
 			desc: 'The name of the model you want to display in the interface.',
 			textInput: {
 				placeholder: 'Enter display name',
-                                value: this.modelName,
-                                onChange: (value) => {
-                                        this.modelName = value;
+				value: this.modelName,
+				onChange: (value) => {
+					this.modelName = value;
 					// When user types, clear radio selection (switch to custom)
 					this.syncRadioWithInputs();
-                                },
+				},
 			},
 		});
 
@@ -267,12 +269,12 @@ export class ModelModal extends Modal {
 		if (!formContainer) return;
 
 		// Update display name input
-                const displayNameInput = formContainer.querySelector(
-                        'input[placeholder="Enter display name"]'
-                ) as HTMLInputElement;
-                if (displayNameInput) {
-                        displayNameInput.value = this.modelName;
-                }
+		const displayNameInput = formContainer.querySelector(
+			'input[placeholder="Enter display name"]'
+		) as HTMLInputElement;
+		if (displayNameInput) {
+			displayNameInput.value = this.modelName;
+		}
 
 		// Update model ID input
 		const modelIdInput = formContainer.querySelector(
@@ -286,9 +288,7 @@ export class ModelModal extends Modal {
 	private addButtons(containerEl: HTMLElement): void {
 		const buttonContainer = containerEl.createDiv({ cls: 'button-container mac-button-container' });
 
-		new ButtonComponent(buttonContainer)
-			.setButtonText('Cancel')
-			.onClick(() => this.close());
+		new ButtonComponent(buttonContainer).setButtonText('Cancel').onClick(() => this.close());
 
 		const saveBtn = new ButtonComponent(buttonContainer)
 			.setButtonText('Save')
@@ -333,19 +333,28 @@ export class ModelModal extends Modal {
 
 	private validateForm(): boolean {
 		if (!this.selectedProvider) {
-			Notice.validationError('Model', 'Provider is required');
+			this.props.notices.show('validation_error', {
+				component: 'Model',
+				message: 'Provider is required',
+			});
 			return false;
 		}
 
 		if (!this.modelId.trim()) {
-			Notice.validationError('Model', 'Model ID is required');
+			this.props.notices.show('validation_error', {
+				component: 'Model',
+				message: 'Model ID is required',
+			});
 			return false;
 		}
 
-                if (!this.modelName.trim()) {
-                        Notice.validationError('Model', 'Display name is required');
-                        return false;
-                }
+		if (!this.modelName.trim()) {
+			this.props.notices.show('validation_error', {
+				component: 'Model',
+				message: 'Display name is required',
+			});
+			return false;
+		}
 
 		return true;
 	}

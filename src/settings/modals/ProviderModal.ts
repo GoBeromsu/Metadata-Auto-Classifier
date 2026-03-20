@@ -6,11 +6,13 @@ import { CodexOAuth, formatTokenExpiry, isTokenExpired, CODEX_OAUTH } from '../.
 import type { OAuthTokens, ProviderConfig } from '../../types';
 import { ModalAccessibilityHelper } from '../components/ModalAccessibilityHelper';
 import { Notice } from '../components/Notice';
+import type { PluginNotices } from '../../shared/plugin-notices';
 import { Setting as CommonSetting, type DropdownOption } from '../components/Setting';
 
 export class ProviderModal extends Modal {
 	private providerConfig: ProviderConfig;
 	private readonly onSave: (provider: ProviderConfig) => void;
+	private readonly notices: PluginNotices;
 	private readonly accessibilityHelper = new ModalAccessibilityHelper();
 	private readonly codexOAuth = new CodexOAuth();
 	private oauthTokens?: OAuthTokens;
@@ -18,10 +20,12 @@ export class ProviderModal extends Modal {
 	constructor(
 		app: App,
 		onSave: (provider: ProviderConfig) => void,
+		notices: PluginNotices,
 		existingProvider?: ProviderConfig
 	) {
 		super(app);
 		this.onSave = onSave;
+		this.notices = notices;
 
 		if (existingProvider) {
 			this.providerConfig = { ...existingProvider };
@@ -213,7 +217,7 @@ export class ProviderModal extends Modal {
 	 */
 	private async connectOAuth(): Promise<void> {
 		try {
-			Notice.success('Opening browser for authentication...');
+			this.notices.show('oauth_opening_browser');
 
 			const tokens = await this.codexOAuth.startAuthFlow();
 			this.oauthTokens = tokens;
@@ -222,14 +226,14 @@ export class ProviderModal extends Modal {
 			this.providerConfig.authType = 'oauth';
 			this.providerConfig.oauth = tokens;
 
-			Notice.success('Successfully connected!');
+			this.notices.show('oauth_connected');
 			this.updateForm();
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Unknown error';
 			if (message.includes('timeout') || message.includes('cancelled')) {
-				Notice.success('Authentication cancelled');
+				this.notices.show('oauth_cancelled');
 			} else {
-				Notice.error(new Error(`Failed to connect: ${message}`));
+				this.notices.show('oauth_failed', { message });
 			}
 		}
 	}
@@ -244,7 +248,7 @@ export class ProviderModal extends Modal {
 		this.oauthTokens = undefined;
 		this.providerConfig.oauth = undefined;
 
-		Notice.success('Disconnected');
+		this.notices.show('oauth_disconnected');
 		this.updateForm();
 	}
 
@@ -317,19 +321,19 @@ export class ProviderModal extends Modal {
 	private validateForm(): boolean {
 		// Provider name validation
 		if (!this.providerConfig.name.trim()) {
-			Notice.validationError(
-				'Provider',
-				'Provider name is required. Please enter a name for your provider.'
-			);
+			this.notices.show('validation_error', {
+				component: 'Provider',
+				message: 'Provider name is required. Please enter a name for your provider.',
+			});
 			return false;
 		}
 
 		// API URL validation
 		if (!this.providerConfig.baseUrl.trim()) {
-			Notice.validationError(
-				'Provider',
-				'API URL is required. Please enter a valid API endpoint URL.'
-			);
+			this.notices.show('validation_error', {
+				component: 'Provider',
+				message: 'API URL is required. Please enter a valid API endpoint URL.',
+			});
 			return false;
 		}
 
@@ -337,17 +341,20 @@ export class ProviderModal extends Modal {
 		try {
 			new URL(this.providerConfig.baseUrl);
 		} catch {
-			Notice.validationError(
-				'Provider',
-				'Please enter a valid URL (e.g., https://api.example.com/v1/chat/completions)'
-			);
+			this.notices.show('validation_error', {
+				component: 'Provider',
+				message: 'Please enter a valid URL (e.g., https://api.example.com/v1/chat/completions)',
+			});
 			return false;
 		}
 
 		// For OAuth providers, check if connected
 		if (this.isOAuthProvider() && Platform.isDesktop) {
 			if (!this.oauthTokens) {
-				Notice.validationError('Provider', 'Please connect your account before saving.');
+				this.notices.show('validation_error', {
+					component: 'Provider',
+					message: 'Please connect your account before saving.',
+				});
 				return false;
 			}
 		}

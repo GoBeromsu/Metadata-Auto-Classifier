@@ -3,7 +3,6 @@ import type { App } from 'obsidian';
 import type AutoClassifierPlugin from '../main';
 import { testModel } from '../provider';
 import type { Model, ProviderConfig } from '../types';
-import { Notice } from './components/Notice';
 import { Setting } from './components/Setting';
 import { ModelModal, type ModelModalProps } from './modals/ModelModal';
 
@@ -76,12 +75,13 @@ export class ModelSection {
 								try {
 									const success = await testModel(provider, config.id);
 									if (success) {
-										Notice.success(`${config.name} connection test successful!`);
+										this.plugin.notices.show('model_test_success', { name: config.name });
 									} else {
-										Notice.error(new Error(`${config.name} connection test failed!`));
+										this.plugin.notices.show('model_test_failed', { name: config.name });
 									}
 								} catch (error) {
-									Notice.error(error instanceof Error ? error : new Error('Test failed'));
+									const message = error instanceof Error ? error.message : 'Test failed';
+									this.plugin.notices.show('model_test_error', { message });
 								}
 							},
 						},
@@ -129,6 +129,7 @@ export class ModelSection {
 	): void {
 		const modalProps: ModelModalProps = {
 			providers: this.plugin.settings.providers,
+			notices: this.plugin.notices,
 			onSave: async (result) => {
 				if (result.isEdit && result.oldModel) {
 					const provider = this.plugin.settings.providers.find(

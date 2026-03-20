@@ -2,7 +2,6 @@ import type { Mock } from 'vitest';
 import { App } from 'obsidian';
 import { ProviderModal } from 'settings/modals/ProviderModal';
 import type { ProviderConfig } from 'types';
-import { Notice as SettingsNotice } from 'settings/components/Notice';
 
 // Mock Notice
 vi.mock('settings/components/Notice', () => ({
@@ -36,6 +35,12 @@ vi.mock('lib', () => ({
 	})),
 }));
 
+const mockNotices = {
+	show: vi.fn(() => null),
+	remove: vi.fn(),
+	unload: vi.fn(),
+} as any;
+
 describe('ProviderModal', () => {
 	let mockApp: App;
 	let mockOnSave: Mock;
@@ -48,7 +53,7 @@ describe('ProviderModal', () => {
 
 	describe('Constructor', () => {
 		it('should initialize with default values for new provider', () => {
-			const modal = new ProviderModal(mockApp, mockOnSave);
+			const modal = new ProviderModal(mockApp, mockOnSave, mockNotices);
 
 			expect(modal).toBeDefined();
 			// Access private property via any cast
@@ -67,7 +72,7 @@ describe('ProviderModal', () => {
 				temperature: 0.7,
 			};
 
-			const modal = new ProviderModal(mockApp, mockOnSave, existingProvider);
+			const modal = new ProviderModal(mockApp, mockOnSave, mockNotices, existingProvider);
 
 			const config = (modal as any).providerConfig;
 			expect(config.name).toBe('My OpenAI');
@@ -78,7 +83,7 @@ describe('ProviderModal', () => {
 
 	describe('onOpen', () => {
 		it('should create modal structure with accessibility attributes', () => {
-			const modal = new ProviderModal(mockApp, mockOnSave);
+			const modal = new ProviderModal(mockApp, mockOnSave, mockNotices);
 			modal.onOpen();
 
 			expect(modal.contentEl.empty).toHaveBeenCalled();
@@ -91,48 +96,57 @@ describe('ProviderModal', () => {
 	describe('Form Validation', () => {
 
 		it('should show error when provider name is empty', () => {
-			const modal = new ProviderModal(mockApp, mockOnSave);
+			const modal = new ProviderModal(mockApp, mockOnSave, mockNotices);
 			(modal as any).providerConfig.name = '   ';
 
 			const result = (modal as any).validateForm();
 
 			expect(result).toBe(false);
-			expect(SettingsNotice.validationError).toHaveBeenCalledWith(
-				'Provider',
-				expect.stringContaining('Provider name is required')
+			expect(mockNotices.show).toHaveBeenCalledWith(
+				'validation_error',
+				expect.objectContaining({
+					component: 'Provider',
+					message: expect.stringContaining('Provider name is required'),
+				})
 			);
 		});
 
 		it('should show error when API URL is empty', () => {
-			const modal = new ProviderModal(mockApp, mockOnSave);
+			const modal = new ProviderModal(mockApp, mockOnSave, mockNotices);
 			(modal as any).providerConfig.name = 'Test Provider';
 			(modal as any).providerConfig.baseUrl = '';
 
 			const result = (modal as any).validateForm();
 
 			expect(result).toBe(false);
-			expect(SettingsNotice.validationError).toHaveBeenCalledWith(
-				'Provider',
-				expect.stringContaining('API URL is required')
+			expect(mockNotices.show).toHaveBeenCalledWith(
+				'validation_error',
+				expect.objectContaining({
+					component: 'Provider',
+					message: expect.stringContaining('API URL is required'),
+				})
 			);
 		});
 
 		it('should show error when API URL is invalid', () => {
-			const modal = new ProviderModal(mockApp, mockOnSave);
+			const modal = new ProviderModal(mockApp, mockOnSave, mockNotices);
 			(modal as any).providerConfig.name = 'Test Provider';
 			(modal as any).providerConfig.baseUrl = 'not-a-valid-url';
 
 			const result = (modal as any).validateForm();
 
 			expect(result).toBe(false);
-			expect(SettingsNotice.validationError).toHaveBeenCalledWith(
-				'Provider',
-				expect.stringContaining('valid URL')
+			expect(mockNotices.show).toHaveBeenCalledWith(
+				'validation_error',
+				expect.objectContaining({
+					component: 'Provider',
+					message: expect.stringContaining('valid URL'),
+				})
 			);
 		});
 
 		it('should pass validation when all fields are valid', () => {
-			const modal = new ProviderModal(mockApp, mockOnSave);
+			const modal = new ProviderModal(mockApp, mockOnSave, mockNotices);
 			(modal as any).providerConfig.name = 'Test Provider';
 			(modal as any).providerConfig.baseUrl = 'https://api.example.com/v1/chat';
 
@@ -144,7 +158,7 @@ describe('ProviderModal', () => {
 
 	describe('onClose', () => {
 		it('should clean up content element', () => {
-			const modal = new ProviderModal(mockApp, mockOnSave);
+			const modal = new ProviderModal(mockApp, mockOnSave, mockNotices);
 			modal.onClose();
 
 			expect(modal.contentEl.empty).toHaveBeenCalled();

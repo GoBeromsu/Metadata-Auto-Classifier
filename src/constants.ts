@@ -3,6 +3,7 @@
 // ==========================================
 
 import type { FrontmatterField, LinkType, ProviderConfig, AutoClassifierSettings } from './types';
+import type { NoticeCatalog } from './shared/plugin-notices';
 
 // ==========================================
 // Common Constants (from api/constants.ts)
@@ -197,6 +198,106 @@ export const DEFAULT_TAG_SETTING: FrontmatterField = {
 	overwrite: false,
 	linkType: 'Normal' as LinkType,
 	customQuery: '',
+};
+
+// ==========================================
+// Notice Catalog — user-facing notification messages
+// ==========================================
+
+export const NOTICE_CATALOG: NoticeCatalog = {
+	// Error notices
+	init_failed: {
+		template: 'Plugin initialization failed: could not setup commands',
+		timeout: 5000,
+	},
+	no_active_file: {
+		template: 'No active file.',
+		timeout: 5000,
+	},
+	no_provider_selected: {
+		template: 'No provider selected.',
+		timeout: 5000,
+	},
+	no_frontmatter_setting: {
+		template: 'No setting found for frontmatter ID {{id}}.',
+		timeout: 5000,
+	},
+	validation_error: {
+		template: '[{{component}}] {{message}}',
+		timeout: 5000,
+		immutable: true,
+	},
+	api_error: {
+		template: '❌ {{message}}',
+		timeout: 5000,
+	},
+	low_reliability: {
+		template: 'Tagging {{file}} ({{frontmatter}}) - Low reliability ({{reliability}})',
+		timeout: 5000,
+	},
+	no_refs: {
+		template:
+			'Tagging {{file}} ({{frontmatter}}) - No reference values found. Please add some reference tags/categories in the plugin settings.',
+		timeout: 5000,
+	},
+	no_auth: {
+		template: '{{message}}',
+		timeout: 5000,
+	},
+	no_model: {
+		template: 'No model selected. Please select a model in the plugin settings.',
+		timeout: 5000,
+	},
+	model_not_for_provider: {
+		template:
+			'Model "{{model}}" is not available for provider {{provider}}. Please select a valid model in settings.',
+		timeout: 5000,
+	},
+	// Success notices
+	classify_success: {
+		template: '{{message}}',
+		timeout: 3000,
+		immutable: true,
+	},
+	// Auth notices
+	oauth_opening_browser: {
+		template: 'Opening browser for authentication...',
+		timeout: 3000,
+		immutable: true,
+	},
+	oauth_connected: {
+		template: 'Successfully connected!',
+		timeout: 3000,
+		immutable: true,
+	},
+	oauth_cancelled: {
+		template: 'Authentication cancelled',
+		timeout: 3000,
+		immutable: true,
+	},
+	oauth_failed: {
+		template: 'Failed to connect: {{message}}',
+		timeout: 5000,
+	},
+	oauth_disconnected: {
+		template: 'Disconnected',
+		timeout: 3000,
+		immutable: true,
+	},
+	// Model section
+	model_test_success: {
+		template: '{{name}} connection test successful!',
+		timeout: 3000,
+		immutable: true,
+	},
+	model_test_failed: {
+		template: '{{name}} connection test failed!',
+		timeout: 5000,
+	},
+	model_test_error: {
+		template: '❌ {{message}}',
+		timeout: 5000,
+	},
 };
 
 // Default settings for the Auto Classifier plugin

@@ -1,6 +1,7 @@
 import type { RequestUrlParam } from 'obsidian';
 import { requestUrl } from 'obsidian';
 import https from 'https';
+import { macLogger } from '../shared/mac-logger';
 
 const STREAM_TIMEOUT_MS = 60000; // 60 seconds
 const MAX_RETRIES = 3;
@@ -43,11 +44,10 @@ export async function sendRequest(
 ): Promise<unknown> {
 	const requestParam = createRequestParam(baseUrl, headers, data);
 
-	// eslint-disable-next-line no-console
-	console.log('[API Request]', {
+	macLogger.debug('[API Request]', {
 		url: baseUrl,
-		headers: maskSensitiveHeaders(headers),
-		body: data,
+		headers: JSON.stringify(maskSensitiveHeaders(headers)),
+		body: JSON.stringify(data),
 	});
 
 	let response: { status: number; text: string; json: unknown };
@@ -55,8 +55,7 @@ export async function sendRequest(
 	try {
 		response = await requestUrl(requestParam);
 	} catch (error) {
-		// eslint-disable-next-line no-console
-		console.error('[API Error] Request failed:', error);
+		macLogger.error('[API Error] Request failed', error);
 		if (error instanceof Error) {
 			throw error;
 		}
@@ -64,22 +63,18 @@ export async function sendRequest(
 	}
 
 	if (response.status >= 500) {
-		// eslint-disable-next-line no-console
-		console.error('[API Error] Server error:', {
-			status: response.status,
-			response: response.json || response.text,
-		});
+		macLogger.error(
+			'[API Error] Server error',
+			new Error(`HTTP ${response.status}: ${response.text}`)
+		);
 		throw new Error(`Server error (HTTP ${response.status}) from ${baseUrl}: ${response.text}`);
 	}
 
 	if (response.status >= 400) {
-		// eslint-disable-next-line no-console
-		console.error('[API Error] Client error:', {
-			status: response.status,
-			url: baseUrl,
-			responseJson: response.json,
-			responseText: response.text,
-		});
+		macLogger.error(
+			'[API Error] Client error',
+			new Error(`HTTP ${response.status} from ${baseUrl}: ${response.text}`)
+		);
 		throw new Error(`Client error (HTTP ${response.status}) from ${baseUrl}: ${response.text}`);
 	}
 
@@ -212,11 +207,10 @@ export async function sendStreamingRequest(
 	body: Record<string, unknown>,
 	parseEvent: (event: SSEEvent) => string | null
 ): Promise<string> {
-	// eslint-disable-next-line no-console
-	console.log('[API Streaming Request]', {
+	macLogger.debug('[API Streaming Request]', {
 		url,
-		headers: maskSensitiveHeaders(headers),
-		body,
+		headers: JSON.stringify(maskSensitiveHeaders(headers)),
+		body: JSON.stringify(body),
 	});
 
 	let lastError: Error | null = null;
@@ -235,20 +229,17 @@ export async function sendStreamingRequest(
 				// Check if we should retry for transient errors
 				if (isRetryableStatus(response.status) && attempt < MAX_RETRIES) {
 					const delayMs = INITIAL_DELAY_MS * Math.pow(2, attempt);
-					// eslint-disable-next-line no-console
-					console.warn(
+					macLogger.warn(
 						`[API Streaming] Retryable error (HTTP ${response.status}), attempt ${attempt + 1}/${MAX_RETRIES + 1}, retrying in ${delayMs}ms`
 					);
 					await delay(delayMs);
 					continue;
 				}
 
-				// eslint-disable-next-line no-console
-				console.error('[API Streaming Error]', {
-					status: response.status,
-					url,
-					responseText: response.text,
-				});
+				macLogger.error(
+					'[API Streaming Error]',
+					new Error(`HTTP ${response.status}: ${response.text}`)
+				);
 				throw new HttpError(
 					`Streaming request failed (HTTP ${response.status}): ${response.text}`,
 					response.status,
@@ -272,8 +263,9 @@ export async function sendStreamingRequest(
 				}
 			}
 
-			// eslint-disable-next-line no-console
-			console.log('[API Streaming Response] Accumulated text length:', accumulatedText.length);
+			macLogger.debug('[API Streaming Response] Accumulated text length', {
+				length: String(accumulatedText.length),
+			});
 			return accumulatedText;
 		} catch (error) {
 			lastError = error instanceof Error ? error : new Error(String(error));
@@ -286,10 +278,8 @@ export async function sendStreamingRequest(
 			// Retry on network errors (not HTTP errors)
 			if (!(error instanceof HttpError) && attempt < MAX_RETRIES) {
 				const delayMs = INITIAL_DELAY_MS * Math.pow(2, attempt);
-				// eslint-disable-next-line no-console
-				console.warn(
-					`[API Streaming] Network error, attempt ${attempt + 1}/${MAX_RETRIES + 1}, retrying in ${delayMs}ms:`,
-					lastError.message
+				macLogger.warn(
+					`[API Streaming] Network error, attempt ${attempt + 1}/${MAX_RETRIES + 1}, retrying in ${delayMs}ms: ${lastError.message}`
 				);
 				await delay(delayMs);
 				continue;
@@ -300,8 +290,7 @@ export async function sendStreamingRequest(
 				throw error;
 			}
 
-			// eslint-disable-next-line no-console
-			console.error('[API Streaming Error] Request failed:', lastError);
+			macLogger.error('[API Streaming Error] Request failed', lastError);
 			throw new Error(`Streaming request failed: ${lastError.message}`);
 		}
 	}

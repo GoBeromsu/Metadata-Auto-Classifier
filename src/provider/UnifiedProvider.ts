@@ -15,6 +15,7 @@ import type {
 import { sendRequest, sendStreamingRequest, HttpError, type SSEEvent } from './request';
 import { CODEX_OAUTH } from './auth/oauth-constants';
 import { CodexOAuth } from './auth/oauth';
+import { macLogger } from '../shared/mac-logger';
 
 const parseJsonResponse = (content: string, providerName: string): StructuredOutput => {
 	try {
@@ -336,8 +337,7 @@ export class UnifiedProvider implements APIProvider {
 					provider.name === PROVIDER_NAMES.CODEX;
 
 				if (isCodex401) {
-					// eslint-disable-next-line no-console
-					console.log('[Codex] 401 received, attempting token refresh...');
+					macLogger.info('[Codex] 401 received, attempting token refresh...');
 					return this.refreshCodexTokensAndRetry(
 						provider,
 						systemRole,
@@ -371,8 +371,7 @@ export class UnifiedProvider implements APIProvider {
 
 		const codexOAuth = new CodexOAuth();
 		const newTokens = await codexOAuth.refreshTokens(oauth);
-		// eslint-disable-next-line no-console
-		console.log('[Codex] Tokens refreshed successfully');
+		macLogger.info('[Codex] Tokens refreshed successfully');
 
 		const updatedProvider: ProviderConfig = {
 			...provider,

@@ -98,6 +98,7 @@ export class ProviderSection {
 				await this.plugin.saveSettings();
 				this.onRefresh();
 			},
+			this.plugin.notices,
 			providerToEdit
 		);
 		modal.open();

@@ -1,4 +1,4 @@
-import { Notice } from '../settings/components/Notice';
+import { macLogger } from '../shared/mac-logger';
 
 /**
  * Centralized error handling utility for consistent error management across the application.
@@ -9,16 +9,14 @@ export class ErrorHandler {
 	 */
 	static handleAPIError(error: Error, context?: string): void {
 		const message = context ? `[API] ${context}: ${error.message}` : `[API] ${error.message}`;
-		// eslint-disable-next-line no-console
-		console.error(message, error);
-		Notice.error(new Error(message));
+		macLogger.error(message, error);
 	}
 
 	/**
 	 * Handle validation errors with component context.
 	 */
 	static handleValidationError(component: string, message: string): void {
-		Notice.validationError(component, message);
+		macLogger.warn(`[Validation] [${component}] ${message}`);
 	}
 
 	/**
@@ -29,10 +27,7 @@ export class ErrorHandler {
 		const message = context
 			? `[Unexpected] ${context}: ${errorObj.message}`
 			: `[Unexpected] ${errorObj.message}`;
-
-		// eslint-disable-next-line no-console
-		console.error(message, error);
-		Notice.error(new Error(message));
+		macLogger.error(message, errorObj);
 	}
 
 	/**

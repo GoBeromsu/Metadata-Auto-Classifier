@@ -9,6 +9,7 @@ import {
 import { processAPIRequest } from '../provider';
 import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from '../provider/prompt';
 import { Notice } from '../settings/components/Notice';
+import type { PluginNotices } from '../shared/plugin-notices';
 import type { FrontmatterField, FrontMatter, ProviderConfig, StructuredOutput } from '../types';
 
 export interface ClassificationContext {
@@ -17,12 +18,15 @@ export interface ClassificationContext {
 	model: string;
 	classificationRule: string;
 	saveSettings: () => Promise<void>;
+	notices: PluginNotices;
 }
 
 interface ValidationResult {
 	isValid: boolean;
 	processedValues: string[];
 	errorMessage?: string;
+	noticeId?: string;
+	noticeParams?: Record<string, unknown>;
 }
 
 export class ClassificationService {
@@ -57,7 +61,9 @@ export class ClassificationService {
 		await this.ensureRefsExist(frontmatter);
 		const validation = this.validateClassificationInput(frontmatter, fileNameWithoutExt);
 		if (!validation.isValid) {
-			Notice.error(new Error(validation.errorMessage!));
+			if (validation.noticeId) {
+				this.context.notices.show(validation.noticeId, validation.noticeParams);
+			}
 			return;
 		}
 
@@ -108,7 +114,8 @@ export class ClassificationService {
 			return {
 				isValid: false,
 				processedValues: [],
-				errorMessage: `Tagging ${fileNameWithoutExt} (${frontmatter.name}) - No reference values found. Please add some reference tags/categories in the plugin settings.`,
+				noticeId: 'no_refs',
+				noticeParams: { file: fileNameWithoutExt, frontmatter: frontmatter.name },
 			};
 		}
 
@@ -122,7 +129,8 @@ export class ClassificationService {
 			return {
 				isValid: false,
 				processedValues: [],
-				errorMessage,
+				noticeId: 'no_auth',
+				noticeParams: { message: errorMessage },
 			};
 		}
 
@@ -130,7 +138,7 @@ export class ClassificationService {
 			return {
 				isValid: false,
 				processedValues: [],
-				errorMessage: `No model selected. Please select a model in the plugin settings.`,
+				noticeId: 'no_model',
 			};
 		}
 
@@ -140,7 +148,8 @@ export class ClassificationService {
 			return {
 				isValid: false,
 				processedValues: [],
-				errorMessage: `Model "${this.context.model}" is not available for provider ${this.context.provider.name}. Please select a valid model in settings.`,
+				noticeId: 'model_not_for_provider',
+				noticeParams: { model: this.context.model, provider: this.context.provider.name },
 			};
 		}
 
@@ -197,12 +206,13 @@ export class ClassificationService {
 				...apiResponse.output.map((tag) => `- ${tag}`),
 			].join('\n');
 
-			Notice.success(successMessage);
+			this.context.notices.show('classify_success', { message: successMessage });
 		} else {
-			const error = new Error(
-				`Tagging ${fileNameWithoutExt} (${frontmatter.name}) - Low reliability (${apiResponse.reliability})`
-			);
-			Notice.error(error);
+			this.context.notices.show('low_reliability', {
+				file: fileNameWithoutExt,
+				frontmatter: frontmatter.name,
+				reliability: apiResponse.reliability,
+			});
 		}
 	}
 }

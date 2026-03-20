@@ -1,7 +1,6 @@
 import { App } from 'obsidian';
 import { ModelModal, ModelModalProps } from 'settings/modals/ModelModal';
 import type { ProviderConfig } from 'types';
-import { Notice as SettingsNotice } from 'settings/components/Notice';
 
 // Mock Notice
 vi.mock('settings/components/Notice', () => ({
@@ -44,6 +43,11 @@ describe('ModelModal', () => {
 		mockProps = {
 			providers: [mockProvider],
 			onSave: vi.fn(),
+			notices: {
+				show: vi.fn(() => null),
+				remove: vi.fn(),
+				unload: vi.fn(),
+			} as any,
 		};
 	});
 
@@ -120,7 +124,10 @@ describe('ModelModal', () => {
 			const result = (modal as any).validateForm();
 
 			expect(result).toBe(false);
-			expect(SettingsNotice.validationError).toHaveBeenCalledWith('Model', 'Provider is required');
+			expect(mockProps.notices.show).toHaveBeenCalledWith(
+				'validation_error',
+				{ component: 'Model', message: 'Provider is required' }
+			);
 		});
 
 		it('should show error when model ID is empty', () => {
@@ -131,7 +138,10 @@ describe('ModelModal', () => {
 			const result = (modal as any).validateForm();
 
 			expect(result).toBe(false);
-			expect(SettingsNotice.validationError).toHaveBeenCalledWith('Model', 'Model ID is required');
+			expect(mockProps.notices.show).toHaveBeenCalledWith(
+				'validation_error',
+				{ component: 'Model', message: 'Model ID is required' }
+			);
 		});
 
 		it('should show error when display name is empty', () => {
@@ -142,7 +152,10 @@ describe('ModelModal', () => {
 			const result = (modal as any).validateForm();
 
 			expect(result).toBe(false);
-			expect(SettingsNotice.validationError).toHaveBeenCalledWith('Model', 'Display name is required');
+			expect(mockProps.notices.show).toHaveBeenCalledWith(
+				'validation_error',
+				{ component: 'Model', message: 'Display name is required' }
+			);
 		});
 
 		it('should pass validation when all fields are valid', () => {

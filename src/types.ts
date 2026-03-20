@@ -154,6 +154,7 @@ export interface AutoClassifierSettings {
 	frontmatter: FrontmatterField[];
 	classificationRule: string;
 	codexConnection?: OAuthTokens;
+	plugin_notices?: { muted: Record<string, boolean> };
 }
 
 // Re-export auth types for convenience
