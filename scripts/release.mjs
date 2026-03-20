@@ -28,7 +28,7 @@ if (!RELEASE_LEVELS.has(level)) {
 }
 
 const pnpm = getPnpmCommand();
-if (fs.existsSync('scripts/sync-to-plugins.mjs')) {
+if (fs.existsSync('tooling/sync/index.mjs')) {
   run(pnpm, ['sync:check']);
 }
 run(pnpm, ['run', 'ci']);

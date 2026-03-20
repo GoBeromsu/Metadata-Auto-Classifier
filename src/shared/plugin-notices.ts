@@ -93,6 +93,13 @@ export class PluginNotices {
 		return store[id] === true;
 	}
 
+	listMuted(): string[] {
+		const store = this.getMutedStore();
+		return Object.keys(store)
+			.filter((k) => store[k] === true)
+			.sort();
+	}
+
 	has(id: string): boolean {
 		return this.catalog[id] !== undefined;
 	}
