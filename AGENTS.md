@@ -28,12 +28,13 @@ Metadata Auto Classifier — Obsidian plugin that uses AI (OpenAI/Gemini/Ollama/
 
 | Directory | Purpose |
 |-----------|---------|
-| `src/domain/` | Business logic — NO obsidian imports |
-| `src/domain/auth/` | API key storage and validation |
-| `src/ui/` | Obsidian-dependent services, provider adapters, frontmatter, settings |
-| `src/ui/settings/` | Settings tab components |
-| `src/types/` | Pure type definitions |
-| `src/shared/` | Boiler-template synced files — DO NOT EDIT |
+| `src/` | Source layers (see `src/AGENTS.md`) |
+| `src/domain/` | Business logic — NO obsidian imports (see `src/domain/AGENTS.md`) |
+| `src/domain/auth/` | API key storage and validation (see `src/domain/auth/AGENTS.md`) |
+| `src/ui/` | Obsidian-dependent services, provider adapters, frontmatter, settings (see `src/ui/AGENTS.md`) |
+| `src/ui/settings/` | Settings tab components (see `src/ui/settings/AGENTS.md`) |
+| `src/types/` | Pure type definitions (see `src/types/AGENTS.md`) |
+| `src/shared/` | Boiler-template synced files — DO NOT EDIT (see `src/shared/AGENTS.md`) |
 
 ## For AI Agents
 
