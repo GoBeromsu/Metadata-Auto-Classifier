@@ -42,7 +42,7 @@ export class ModelModal extends Modal {
 		} else {
 			// Set default provider for new models
 			if (props.providers.length > 0) {
-				this.selectedProvider = props.providers[0].name;
+				this.selectedProvider = props.providers[0]!.name;
 			}
 		}
 	}

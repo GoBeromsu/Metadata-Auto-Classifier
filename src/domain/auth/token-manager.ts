@@ -11,7 +11,7 @@ export function parseJwtClaims(token: string): Record<string, unknown> {
 		throw new Error('Invalid JWT format');
 	}
 
-	const payload = parts[1];
+	const payload = parts[1]!;
 	// Handle base64url to base64 conversion
 	const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
 	const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');

@@ -297,7 +297,7 @@ export class ProviderModal extends Modal {
 
 		// Remove form elements (keep preset dropdown - index 0)
 		for (let i = formElements.length - 1; i >= 1; i--) {
-			formElements[i].remove();
+			formElements[i]!.remove();
 		}
 
 		// Remove OAuth info element if exists
