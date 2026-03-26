@@ -73,13 +73,6 @@ export default [
 				},
 			],
 		},
-		languageOptions: {
-			parser: (await import('typescript-eslint')).parser,
-			parserOptions: {
-				project: './tsconfig.json',
-				tsconfigRootDir: import.meta.dirname,
-			},
-		},
 		rules: {
 			// Legacy compatibility
 			'@typescript-eslint/no-explicit-any': 'off',
@@ -107,9 +100,39 @@ export default [
 		},
 	},
 
+	// MAC tech-debt overrides: rules that require large-scale refactoring.
+	// These are real issues but were not enforced before ESLint 9 adoption.
+	// TODO: address these incrementally.
+	{
+		rules: {
+			// MAC uses `any` types throughout legacy code from API responses.
+			'@typescript-eslint/no-unsafe-member-access': 'off',
+			'@typescript-eslint/no-unsafe-assignment': 'off',
+			'@typescript-eslint/no-unsafe-argument': 'off',
+			'@typescript-eslint/no-unsafe-return': 'off',
+			'@typescript-eslint/no-unsafe-call': 'off',
+			// Promise handling in legacy event handlers.
+			'@typescript-eslint/no-misused-promises': 'off',
+			// UI text capitalization and inline style issues — cosmetic, low priority.
+			'obsidianmd/ui/sentence-case': 'off',
+			'obsidianmd/no-static-styles-assignment': 'off',
+			'obsidianmd/settings-tab/no-manual-html-headings': 'off',
+			// Template expression and base-to-string safety.
+			'@typescript-eslint/restrict-template-expressions': 'off',
+			'@typescript-eslint/no-base-to-string': 'off',
+			// MAC's auth and request modules legitimately use Node.js built-ins.
+			'import/no-nodejs-modules': 'off',
+			// no-undef is redundant in TypeScript — tsc catches undefined identifiers.
+			'no-undef': 'off',
+			// Legacy use of confirm() in settings modals.
+			'no-alert': 'off',
+		},
+	},
+
 	// Extended ignores (beyond baseConfig)
 	{
 		ignores: [
+			'coverage/**',
 			'__tests__/**',
 			'__mocks__/**',
 		],

@@ -6,22 +6,19 @@ export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export class PluginLogger {
 	constructor(
 		private readonly prefix: string,
-		private readonly isDebug: () => boolean = () => false,
+		private readonly isDebug: () => boolean = () => false
 	) {}
 
 	debug(message: string, data?: Record<string, unknown>): void {
 		if (!this.isDebug()) return;
-		// eslint-disable-next-line no-console
 		console.debug(this.format('debug', message, data));
 	}
 
 	info(message: string, data?: Record<string, unknown>): void {
-		// eslint-disable-next-line no-console
-		console.info(this.format('info', message, data));
+		console.debug(this.format('info', message, data));
 	}
 
 	warn(message: string, data?: Record<string, unknown>): void {
-		// eslint-disable-next-line no-console
 		console.warn(this.format('warn', message, data));
 	}
 
@@ -29,10 +26,13 @@ export class PluginLogger {
 		let suffix = '';
 		if (error instanceof Error) {
 			suffix = ` | ${error.message}`;
-		} else if (error) {
-			suffix = ` | ${String(error)}`;
+		} else if (error !== undefined && error !== null) {
+			const repr =
+				typeof error === 'object'
+					? JSON.stringify(error as Record<string, unknown>)
+					: String(error as string | number | boolean | bigint | symbol);
+			suffix = ` | ${repr}`;
 		}
-		// eslint-disable-next-line no-console
 		console.error(`[${this.prefix}] error | ${message}${suffix}`);
 	}
 
@@ -43,7 +43,9 @@ export class PluginLogger {
 
 	private format(level: LogLevel, message: string, data?: Record<string, unknown>): string {
 		const pairs = data
-			? ` | ${Object.entries(data).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(' ')}`
+			? ` | ${Object.entries(data)
+					.map(([k, v]) => `${k}=${JSON.stringify(v)}`)
+					.join(' ')}`
 			: '';
 		return `[${this.prefix}] ${level.padEnd(5)} | ${message}${pairs}`;
 	}

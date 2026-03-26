@@ -26,7 +26,7 @@ export class PluginNotices {
 	constructor(
 		private readonly plugin: PluginNoticesHost,
 		private readonly catalog: NoticeCatalog,
-		private readonly prefix: string,
+		private readonly prefix: string
 	) {}
 
 	show(id: string, params?: Record<string, unknown>, opts?: NoticeShowOptions): Notice | null {
@@ -95,7 +95,9 @@ export class PluginNotices {
 
 	listMuted(): string[] {
 		const store = this.getMutedStore();
-		return Object.keys(store).filter((k) => store[k] === true).sort();
+		return Object.keys(store)
+			.filter((k) => store[k] === true)
+			.sort();
 	}
 
 	has(id: string): boolean {
@@ -115,10 +117,7 @@ export class PluginNotices {
 	private getPluginNoticesSettings(): { muted: Record<string, boolean> } {
 		const settings = this.plugin.settings;
 
-		if (
-			!settings['plugin_notices'] ||
-			typeof settings['plugin_notices'] !== 'object'
-		) {
+		if (!settings['plugin_notices'] || typeof settings['plugin_notices'] !== 'object') {
 			settings['plugin_notices'] = { muted: {} };
 		}
 
@@ -135,14 +134,16 @@ export class PluginNotices {
 		return template.replace(/{{\s*([\w.-]+)\s*}}/g, (_match, key: string) => {
 			const value = params[key];
 			if (value === null || value === undefined) return '';
-			return String(value);
+			if (typeof value === 'string') return value;
+			if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+			return JSON.stringify(value);
 		});
 	}
 
 	private buildFragment(
 		id: string,
 		text: string,
-		opts: { button?: { text: string; callback: () => void }; immutable: boolean },
+		opts: { button?: { text: string; callback: () => void }; immutable: boolean }
 	): DocumentFragment {
 		const fragment = document.createDocumentFragment();
 		const wrapper = document.createElement('div');
@@ -204,7 +205,6 @@ export class PluginNotices {
 					this.show('notice_muted', {}, { timeout: 2000 });
 				})
 				.catch((err: unknown) => {
-					// eslint-disable-next-line no-console
 					console.error(`[${this.prefix}] Failed to mute notice:`, err);
 				});
 		});
