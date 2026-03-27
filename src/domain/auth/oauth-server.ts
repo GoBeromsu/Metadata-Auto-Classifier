@@ -39,6 +39,7 @@ export class OAuthCallbackServer {
 	): Promise<OAuthCallbackResponse> {
 		// Dynamic import of http module to avoid breaking mobile builds
 
+		// eslint-disable-next-line @typescript-eslint/no-require-imports, import/no-nodejs-modules, no-undef -- http must be loaded via require() in Obsidian's Node context; dynamic import not viable here
 		const http = require('http') as {
 			createServer: (handler: (req: HttpRequest, res: HttpResponse) => void) => HttpServer;
 		};
@@ -59,7 +60,7 @@ export class OAuthCallbackServer {
 			this.server.on('error', (err: Error) => {
 				clearTimeout(timeout);
 				this.stop();
-				if ((err as NodeJS.ErrnoException).code === 'EADDRINUSE') {
+				if ((err as Error & { code?: string }).code === 'EADDRINUSE') {
 					reject(
 						new Error(
 							`Port ${CODEX_OAUTH.REDIRECT_PORT} is already in use. Please close any application using this port.`
@@ -83,7 +84,7 @@ export class OAuthCallbackServer {
 		req: HttpRequest,
 		res: HttpResponse,
 		expectedState: string,
-		timeout: NodeJS.Timeout
+		timeout: ReturnType<typeof setTimeout>
 	): void {
 		const url = new URL(req.url || '/', `http://localhost:${CODEX_OAUTH.REDIRECT_PORT}`);
 

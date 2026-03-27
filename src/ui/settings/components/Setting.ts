@@ -9,7 +9,7 @@ export interface ButtonProps {
 	text?: string;
 	icon?: string;
 	tooltip?: string;
-	onClick: () => void;
+	onClick: () => void | Promise<void>;
 	cta?: boolean;
 	warning?: boolean;
 	disabled?: boolean;
@@ -24,7 +24,7 @@ export interface TextInputConfig {
 	placeholder?: string;
 	value?: string;
 	disabled?: boolean;
-	onChange: (value: string) => void;
+	onChange: (value: string) => void | Promise<void>;
 }
 
 export interface RangeInputConfig {
@@ -32,25 +32,25 @@ export interface RangeInputConfig {
 	maxPlaceholder?: string;
 	minValue?: number;
 	maxValue?: number;
-	onChange: (min: number, max: number) => void;
+	onChange: (min: number, max: number) => void | Promise<void>;
 }
 
 export interface DropdownConfig {
 	options: DropdownOption[];
 	value?: string;
-	onChange: (value: string) => void;
+	onChange: (value: string) => void | Promise<void>;
 }
 
 export interface ToggleConfig {
 	value: boolean;
-	onChange: (value: boolean) => void;
+	onChange: (value: boolean) => void | Promise<void>;
 }
 
 export interface TextAreaConfig {
 	placeholder?: string;
 	value?: string;
 	rows?: number;
-	onChange: (value: string) => void;
+	onChange: (value: string) => void | Promise<void>;
 }
 
 export interface SettingProps {
@@ -197,7 +197,7 @@ export class Setting {
 			const min = parseInt(minComponent?.getValue() || '0', 10);
 			const max = parseInt(maxComponent?.getValue() || '0', 10);
 			if (!isNaN(min) && !isNaN(max)) {
-				config.onChange(min, max);
+				void config.onChange(min, max);
 			}
 		};
 
@@ -205,7 +205,7 @@ export class Setting {
 		this.setting.addText((input) => {
 			minComponent = input;
 			input.inputEl.type = 'number';
-			input.inputEl.style.width = '80px';
+			input.inputEl.setCssProps({ width: '80px' });
 			if (config.minPlaceholder) input.setPlaceholder(config.minPlaceholder);
 			if (config.minValue !== undefined) input.setValue(config.minValue.toString());
 			input.onChange(handleCombinedChange);
@@ -222,7 +222,7 @@ export class Setting {
 		this.setting.addText((input) => {
 			maxComponent = input;
 			input.inputEl.type = 'number';
-			input.inputEl.style.width = '80px';
+			input.inputEl.setCssProps({ width: '80px' });
 			if (config.maxPlaceholder) input.setPlaceholder(config.maxPlaceholder);
 			if (config.maxValue !== undefined) input.setValue(config.maxValue.toString());
 			input.onChange(handleCombinedChange);

@@ -94,6 +94,7 @@ export class ModelSection {
 							icon: 'trash',
 							text: 'Delete',
 							onClick: async () => {
+								// eslint-disable-next-line no-alert -- confirm() used intentionally for destructive action
 								const confirmed = confirm(
 									`Are you sure you want to delete "${config.name}" model?`
 								);

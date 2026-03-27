@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call -- APIResponseData is intentionally any; providers return varied runtime shapes validated by each parseResponse */
 import {
 	ANTHROPIC_TOOL_CONFIG,
 	COMMON_CONSTANTS,
@@ -37,6 +38,7 @@ const parseJsonResponse = (content: string, providerName: string): StructuredOut
 
 // Using any for API response data since providers return varied structures
 // that are validated at runtime in parseResponse functions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- intentional: API responses have varied runtime shapes validated by each provider's parseResponse
 type APIResponseData = any;
 
 type RequestBody = Record<string, unknown>;
@@ -219,7 +221,8 @@ export class UnifiedProvider implements APIProvider {
 					return (event.delta as string) ?? null;
 				}
 				if (event.type === 'error') {
-					throw new Error(`Codex stream error: ${event.message || JSON.stringify(event)}`);
+					const errMsg = typeof event.message === 'string' ? event.message : JSON.stringify(event);
+					throw new Error(`Codex stream error: ${errMsg}`);
 				}
 				return null;
 			},

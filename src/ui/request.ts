@@ -1,5 +1,6 @@
 import type { RequestUrlParam } from 'obsidian';
 import { requestUrl } from 'obsidian';
+// eslint-disable-next-line import/no-nodejs-modules -- https is required for streaming requests; Obsidian's requestUrl does not support streaming
 import https from 'https';
 import { macLogger } from '../shared/mac-logger';
 
@@ -252,7 +253,8 @@ export async function sendStreamingRequest(
 			for (const event of events) {
 				// Check for error events
 				if (event.type === 'error') {
-					throw new Error(`Stream error: ${event.message || JSON.stringify(event)}`);
+					const errMsg = typeof event.message === 'string' ? event.message : JSON.stringify(event);
+					throw new Error(`Stream error: ${errMsg}`);
 				}
 
 				const textDelta = parseEvent(event);

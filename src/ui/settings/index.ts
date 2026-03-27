@@ -1,5 +1,5 @@
 import type AutoClassifierPlugin from '../../main';
-import { PluginSettingTab } from 'obsidian';
+import { PluginSettingTab, Setting as ObsidianSetting } from 'obsidian';
 
 import type { FrontmatterField } from '../../types';
 import { generateId } from '../../utils/lib-utils';
@@ -44,7 +44,9 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 			button: {
 				text: 'Buy Me a Coffee',
 				cta: true,
-				onClick: () => window.open('https://www.buymeacoffee.com/gobeumsu9', '_blank'),
+				onClick: () => {
+					window.open('https://www.buymeacoffee.com/gobeumsu9', '_blank');
+				},
 			},
 		});
 
@@ -52,7 +54,7 @@ export class AutoClassifierSettingTab extends PluginSettingTab {
 		this.api = new Api(this.plugin, this.apiContainer);
 		this.api.display();
 
-		containerEl.createEl('h2', { text: 'Frontmatters' });
+		new ObsidianSetting(containerEl).setName('Frontmatters').setHeading();
 
 		this.tagContainer = containerEl.createDiv({ cls: 'tag-section' });
 		this.tagSetting = new Tag(this.plugin, this.tagContainer);

@@ -23,17 +23,19 @@ export class PluginLogger {
 	}
 
 	error(message: string, error?: unknown): void {
-		let suffix = '';
-		if (error instanceof Error) {
-			suffix = ` | ${error.message}`;
-		} else if (error !== undefined && error !== null) {
-			const repr =
-				typeof error === 'object'
-					? JSON.stringify(error as Record<string, unknown>)
-					: String(error as string | number | boolean | bigint | symbol);
-			suffix = ` | ${repr}`;
+		const detail = this.formatError(error);
+		console.error(`[${this.prefix}] error | ${message}${detail}`);
+	}
+
+	private formatError(error: unknown): string {
+		if (error === undefined || error === null) return '';
+		if (error instanceof Error) return ` | ${error.message}`;
+		if (typeof error === 'string') return ` | ${error}`;
+		try {
+			return ` | ${JSON.stringify(error)}`;
+		} catch {
+			return ` | [unserializable]`;
 		}
-		console.error(`[${this.prefix}] error | ${message}${suffix}`);
 	}
 
 	noticeError(message: string, error?: unknown): void {

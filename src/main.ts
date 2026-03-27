@@ -139,7 +139,11 @@ export default class AutoClassifierPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings = Object.assign(
+			{},
+			DEFAULT_SETTINGS,
+			await this.loadData()
+		) as typeof DEFAULT_SETTINGS;
 
 		// Migrate old frontmatter settings that may be missing count
 		this.settings.frontmatter = this.settings.frontmatter.map((fm) => ({

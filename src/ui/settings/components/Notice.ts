@@ -28,7 +28,6 @@ export class Notice {
 
 	static error(error: Error): void {
 		this.show(`❌ ${error.message}`, 5000);
-		// eslint-disable-next-line no-console
 		console.error(error);
 	}
 

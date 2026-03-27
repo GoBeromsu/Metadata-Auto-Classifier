@@ -93,7 +93,7 @@ export class ConfigurableSettingModal extends Modal {
 	}
 
 	private addCountSetting(containerEl: HTMLElement): void {
-		new Setting(containerEl).setName('Maximum Count').addSlider((slider) => {
+		new Setting(containerEl).setName('Maximum count').addSlider((slider) => {
 			slider
 				.setLimits(1, 10, 1)
 				.setValue(this.localState.count.max)
@@ -109,11 +109,11 @@ export class ConfigurableSettingModal extends Modal {
 		if (!this.props.options.showOptions) return;
 
 		new Setting(containerEl)
-			.setName('Available Options')
+			.setName('Available options')
 			.setDesc('Values that the AI can use as suggestions')
 			.addButton((button) => {
 				button
-					.setButtonText('Browse Files')
+					.setButtonText('Browse files')
 					.setIcon('folder')
 					.onClick(() => {
 						const wikiLinkSelector = new WikiLinkSelector(this.app);
@@ -135,6 +135,7 @@ export class ConfigurableSettingModal extends Modal {
 
 			this.textAreaComponent = new ObsidianTextArea(containerEl);
 			this.textAreaComponent
+				// eslint-disable-next-line obsidianmd/ui/sentence-case -- placeholder text uses example values; sentence case does not apply
 				.setPlaceholder('Option1, Option2, Option3...')
 				.setValue(displayValue)
 				.onChange(async (value) => {
@@ -150,6 +151,7 @@ export class ConfigurableSettingModal extends Modal {
 	}
 
 	private updateOptionsTextarea(): void {
+		// eslint-disable-next-line @typescript-eslint/no-misused-promises -- textAreaComponent is a class instance, not a Promise; rule incorrectly fires due to chainable .onChange() returning the component
 		if (this.textAreaComponent) {
 			let displayValue = '';
 			if (this.localState.refs && this.localState.refs.length > 0) {
@@ -161,7 +163,7 @@ export class ConfigurableSettingModal extends Modal {
 
 	private addCustomQuerySection(containerEl: HTMLElement): void {
 		new Setting(containerEl)
-			.setName('Custom Classification Rules')
+			.setName('Custom classification rules')
 			.setDesc('Add custom instructions to provide more context for classification.');
 
 		const textArea = new ObsidianTextArea(containerEl);

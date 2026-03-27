@@ -11,12 +11,8 @@ export const CODEX_OAUTH = {
 	API_ENDPOINT: 'https://chatgpt.com/backend-api/codex/responses',
 
 	// OAuth endpoints derived from issuer
-	get AUTHORIZATION_ENDPOINT() {
-		return `${this.ISSUER}/oauth/authorize`;
-	},
-	get TOKEN_ENDPOINT() {
-		return `${this.ISSUER}/oauth/token`;
-	},
+	AUTHORIZATION_ENDPOINT: 'https://auth.openai.com/oauth/authorize',
+	TOKEN_ENDPOINT: 'https://auth.openai.com/oauth/token',
 
 	// Scopes required for Codex API access
 	SCOPES: ['openid', 'profile', 'email', 'offline_access'],

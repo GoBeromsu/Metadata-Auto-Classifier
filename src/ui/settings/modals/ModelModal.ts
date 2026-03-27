@@ -16,7 +16,7 @@ export interface ModelModalProps {
 		model: Model;
 		isEdit: boolean;
 		oldModel?: { model: string; provider: string };
-	}) => void;
+	}) => void | Promise<void>;
 	editTarget?: { model: string; name: string; provider: string };
 	notices: PluginNotices;
 }
@@ -304,7 +304,7 @@ export class ModelModal extends Modal {
 						};
 
 						// Use callback to handle business logic
-						this.props.onSave({
+						void this.props.onSave({
 							provider: this.selectedProvider,
 							model: model,
 							isEdit: !!this.props.editTarget,

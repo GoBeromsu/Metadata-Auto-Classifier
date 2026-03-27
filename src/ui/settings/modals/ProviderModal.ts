@@ -11,7 +11,7 @@ import { Setting as CommonSetting, type DropdownOption } from '../components/Set
 
 export class ProviderModal extends Modal {
 	private providerConfig: ProviderConfig;
-	private readonly onSave: (provider: ProviderConfig) => void;
+	private readonly onSave: (provider: ProviderConfig) => void | Promise<void>;
 	private readonly notices: PluginNotices;
 	private readonly accessibilityHelper = new ModalAccessibilityHelper();
 	private readonly codexOAuth = new CodexOAuth();
@@ -19,7 +19,7 @@ export class ProviderModal extends Modal {
 
 	constructor(
 		app: App,
-		onSave: (provider: ProviderConfig) => void,
+		onSave: (provider: ProviderConfig) => void | Promise<void>,
 		notices: PluginNotices,
 		existingProvider?: ProviderConfig
 	) {
@@ -49,10 +49,10 @@ export class ProviderModal extends Modal {
 		// Accessibility: Set modal role and label
 		contentEl.setAttribute('role', 'dialog');
 		contentEl.setAttribute('aria-modal', 'true');
-		contentEl.setAttribute('aria-label', 'Provider Settings');
+		contentEl.setAttribute('aria-label', 'Provider settings');
 
 		// Modal title - unified
-		contentEl.createEl('h2', { text: 'Provider Settings' });
+		contentEl.createEl('h2', { text: 'Provider settings' });
 
 		// Always show preset selection
 		this.addPresetSetting(contentEl);
@@ -203,10 +203,13 @@ export class ProviderModal extends Modal {
 			const infoEl = containerEl.createEl('div', {
 				cls: 'setting-item-description oauth-connection-info',
 			});
-			infoEl.style.marginTop = '-8px';
-			infoEl.style.marginBottom = '16px';
-			infoEl.style.paddingLeft = '16px';
-			infoEl.style.color = 'var(--text-muted)';
+			infoEl.setCssProps({
+				'margin-top': '-8px',
+				'margin-bottom': '16px',
+				'padding-left': '16px',
+				color: 'var(--text-muted)',
+			});
+			// eslint-disable-next-line obsidianmd/ui/sentence-case -- "ChatGPT Pro" is a proper noun and must remain capitalized
 			infoEl.textContent = 'Requires ChatGPT Pro subscription';
 		}
 	}
@@ -241,6 +244,7 @@ export class ProviderModal extends Modal {
 	 * Disconnect OAuth
 	 */
 	private disconnectOAuth(): void {
+		// eslint-disable-next-line no-alert -- confirm() used intentionally for destructive action; modal refactor is out of scope
 		const confirmed = confirm('Are you sure you want to disconnect?');
 		if (!confirmed) return;
 
@@ -264,7 +268,7 @@ export class ProviderModal extends Modal {
 				saveBtn.setDisabled(true);
 				try {
 					if (this.validateForm()) {
-						this.onSave(this.providerConfig);
+						void this.onSave(this.providerConfig);
 						this.close();
 					}
 				} finally {

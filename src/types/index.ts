@@ -112,7 +112,7 @@ export interface APIProvider {
 	): Promise<StructuredOutput>;
 
 	buildHeaders(apiKey: string): Record<string, string>;
-	processApiResponse(responseData: any): StructuredOutput;
+	processApiResponse(responseData: unknown): StructuredOutput;
 }
 
 // ==========================================

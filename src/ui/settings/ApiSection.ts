@@ -26,7 +26,7 @@ export class Api {
 	display(): void {
 		const { classificationRule, providers, selectedModel } = this.plugin.settings;
 		this.containerEl.empty();
-		this.containerEl.createEl('h2', { text: 'API Configuration' });
+		this.containerEl.createEl('h2', { text: 'API configuration' });
 
 		this.classificationRuleSection.render(this.containerEl, classificationRule);
 		this.providerSection.render(this.containerEl, providers);

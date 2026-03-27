@@ -80,7 +80,7 @@ describe('Api Container - Regression Tests', () => {
 
 			// Then: All basic UI components should be created
 			expect(mockContainer.empty).toHaveBeenCalled();
-			expect(mockContainer.createEl).toHaveBeenCalledWith('h2', { text: 'API Configuration' });
+			expect(mockContainer.createEl).toHaveBeenCalledWith('h2', { text: 'API configuration' });
 			expect(mockContainer.createEl).toHaveBeenCalledWith('div', { cls: 'provider-section' });
 			expect(mockContainer.createEl).toHaveBeenCalledWith('div', { cls: 'model-section' });
 			expect(mockContainer.createDiv).toHaveBeenCalledWith({ cls: 'custom-prompt-container mac-custom-prompt-container' });

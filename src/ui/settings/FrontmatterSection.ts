@@ -16,7 +16,7 @@ export class Frontmatter extends BaseSettingsComponent {
 		filteredFrontmatter.forEach((frontmatter: FrontmatterField) => {
 			const actions: FrontmatterActions = {
 				onEdit: (setting: FrontmatterField) => this.handleEdit(setting),
-				onDelete: (setting: FrontmatterField) => this.handleDelete(setting),
+				onDelete: (setting: FrontmatterField) => void this.handleDelete(setting),
 			};
 
 			this.createFrontmatterSetting(this.containerEl, frontmatter, actions, true);
@@ -37,6 +37,7 @@ export class Frontmatter extends BaseSettingsComponent {
 	}
 
 	private async handleDelete(frontmatterSetting: FrontmatterField): Promise<void> {
+		// eslint-disable-next-line no-alert -- confirm() is used intentionally for destructive action; modal refactor is out of scope
 		const confirmed = confirm(
 			`Are you sure you want to delete "${frontmatterSetting.name}" frontmatter?`
 		);

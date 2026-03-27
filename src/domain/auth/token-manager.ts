@@ -18,7 +18,7 @@ export function parseJwtClaims(token: string): Record<string, unknown> {
 
 	try {
 		const decoded = atob(padded);
-		return JSON.parse(decoded);
+		return JSON.parse(decoded) as Record<string, unknown>;
 	} catch {
 		throw new Error('Failed to decode JWT payload');
 	}

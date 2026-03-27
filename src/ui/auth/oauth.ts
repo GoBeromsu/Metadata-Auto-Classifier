@@ -97,12 +97,12 @@ export class CodexOAuth {
 		});
 
 		if (response.status !== 200) {
-			const error =
-				response.json?.error_description || response.json?.error || 'Token exchange failed';
+			const json = response.json as { error_description?: string; error?: string };
+			const error = json.error_description || json.error || 'Token exchange failed';
 			throw new Error(`Token exchange failed: ${error}`);
 		}
 
-		const tokenResponse: TokenResponse = response.json;
+		const tokenResponse = response.json as TokenResponse;
 		return createTokensFromResponse(tokenResponse);
 	}
 
@@ -126,12 +126,12 @@ export class CodexOAuth {
 		});
 
 		if (response.status !== 200) {
-			const error =
-				response.json?.error_description || response.json?.error || 'Token refresh failed';
+			const json = response.json as { error_description?: string; error?: string };
+			const error = json.error_description || json.error || 'Token refresh failed';
 			throw new Error(`Token refresh failed: ${error}`);
 		}
 
-		const tokenResponse: TokenResponse = response.json;
+		const tokenResponse = response.json as TokenResponse;
 
 		// Preserve the original refresh token if a new one isn't provided
 		const newTokens = createTokensFromResponse(tokenResponse);

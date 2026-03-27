@@ -16,7 +16,6 @@ export class ClassificationRuleSection {
 		});
 
 		// Using let because textAreaComponent is referenced in onClick closure before assignment
-		// eslint-disable-next-line prefer-const
 		let textAreaComponent: TextAreaComponent;
 
 		Setting.create(textAreaContainer, {
@@ -43,6 +42,7 @@ export class ClassificationRuleSection {
 			});
 
 		textAreaComponent.inputEl.rows = 10;
+		// eslint-disable-next-line obsidianmd/no-static-styles-assignment -- textarea width must be set inline; no CSS class available for dynamic sizing
 		textAreaComponent.inputEl.style.width = '100%';
 	}
 }

@@ -89,7 +89,7 @@ describe('ProviderModal', () => {
 			expect(modal.contentEl.empty).toHaveBeenCalled();
 			expect(modal.contentEl.setAttribute).toHaveBeenCalledWith('role', 'dialog');
 			expect(modal.contentEl.setAttribute).toHaveBeenCalledWith('aria-modal', 'true');
-			expect(modal.contentEl.setAttribute).toHaveBeenCalledWith('aria-label', 'Provider Settings');
+			expect(modal.contentEl.setAttribute).toHaveBeenCalledWith('aria-label', 'Provider settings');
 		});
 	});
 
