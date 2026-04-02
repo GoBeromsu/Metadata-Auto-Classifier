@@ -293,7 +293,7 @@ export class ModelModal extends Modal {
 		const saveBtn = new ButtonComponent(buttonContainer)
 			.setButtonText('Save')
 			.setCta()
-			.onClick(async () => {
+			.onClick(() => {
 				const notice = Notice.startProgress('Saving model...');
 				saveBtn.setDisabled(true);
 				try {

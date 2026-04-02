@@ -263,7 +263,7 @@ export class ProviderModal extends Modal {
 		const saveBtn = new ButtonComponent(buttonContainer)
 			.setButtonText('Save')
 			.setCta()
-			.onClick(async () => {
+			.onClick(() => {
 				const notice = Notice.startProgress('Saving provider...');
 				saveBtn.setDisabled(true);
 				try {

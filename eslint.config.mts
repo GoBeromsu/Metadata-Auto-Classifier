@@ -44,6 +44,10 @@ export default tseslint.config(
 			'*.config.mts',
 			'*.config.js',
 			'*.config.mjs',
+			'**/*.config.ts',
+			'**/*.config.mts',
+			'**/*.config.js',
+			'**/*.config.mjs',
 		],
 		plugins: { '@typescript-eslint': tseslint.plugin },
 		rules: {

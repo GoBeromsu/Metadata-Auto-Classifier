@@ -30,7 +30,7 @@ export class ConfigurableSettingModal extends Modal {
 			textInput: {
 				placeholder: 'Enter name',
 				value: this.localState.name,
-				onChange: async (value) => {
+				onChange: (value) => {
 					this.localState.name = value;
 				},
 			},
@@ -72,7 +72,7 @@ export class ConfigurableSettingModal extends Modal {
 					{ value: 'Normal', display: 'Normal' },
 				],
 				value: this.localState.linkType || 'Normal',
-				onChange: async (value) => {
+				onChange: (value) => {
 					this.localState.linkType = value as LinkType;
 				},
 			},
@@ -85,7 +85,7 @@ export class ConfigurableSettingModal extends Modal {
 			className: 'control-setting',
 			toggle: {
 				value: this.localState.overwrite,
-				onChange: async (value) => {
+				onChange: (value) => {
 					this.localState.overwrite = value;
 				},
 			},
@@ -138,7 +138,7 @@ export class ConfigurableSettingModal extends Modal {
 				// eslint-disable-next-line obsidianmd/ui/sentence-case -- placeholder text uses example values; sentence case does not apply
 				.setPlaceholder('Option1, Option2, Option3...')
 				.setValue(displayValue)
-				.onChange(async (value) => {
+				.onChange((value) => {
 					const inputOptions = value
 						.split(',')
 						.map((option) => option.trim())
@@ -170,7 +170,7 @@ export class ConfigurableSettingModal extends Modal {
 		textArea
 			.setPlaceholder('Enter specific classification rules or additional context here...')
 			.setValue(this.localState.customQuery || '')
-			.onChange(async (value) => {
+			.onChange((value) => {
 				this.localState.customQuery = value;
 			});
 		textArea.inputEl.rows = 4;
