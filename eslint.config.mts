@@ -4,6 +4,14 @@ import obsidianmd from 'eslint-plugin-obsidianmd';
 import globals from 'globals';
 import { globalIgnores } from 'eslint/config';
 
+let vitestPlugin = null;
+try {
+	const imported = await import('eslint-plugin-vitest');
+	vitestPlugin = imported.default ?? imported;
+} catch {
+	vitestPlugin = null;
+}
+
 export default tseslint.config(
 	{
 		languageOptions: {
@@ -23,6 +31,29 @@ export default tseslint.config(
 	{
 		rules: {
 			'depend/ban-dependencies': 'off',
+		},
+	},
+	// Ban common async/type hazards in non-test TypeScript code.
+	{
+		files: ['**/*.ts', '**/*.mts'],
+		ignores: [
+			'test/**/*.ts',
+			'__tests__/**/*.ts',
+			'**/*.d.ts',
+			'*.config.ts',
+			'*.config.mts',
+			'*.config.js',
+			'*.config.mjs',
+		],
+		plugins: { '@typescript-eslint': tseslint.plugin },
+		rules: {
+			'@typescript-eslint/no-misused-promises': ['error', {
+				checksConditionals: true,
+				checksSpreads: true,
+				checksVoidReturn: true,
+			}],
+			'@typescript-eslint/no-redundant-type-constituents': 'error',
+			'@typescript-eslint/require-await': 'error',
 		},
 	},
 	// Layer enforcement: domain/, types/, utils/ must not import from obsidian.
@@ -65,20 +96,29 @@ export default tseslint.config(
 	// Test files: relax rules that don't apply to test code.
 	{
 		files: ['test/**/*.ts', '__tests__/**/*.ts'],
+		plugins: vitestPlugin ? { vitest: vitestPlugin } : {},
 		languageOptions: {
 			globals: { ...globals.node },
 		},
 		rules: {
+			...(vitestPlugin ? {
+				'vitest/expect-expect': 'error',
+				'vitest/no-disabled-tests': 'warn',
+				'vitest/no-conditional-tests': 'error',
+			} : {}),
 			'@typescript-eslint/no-explicit-any': 'off',
+			'@typescript-eslint/no-misused-promises': 'off',
+			'@typescript-eslint/no-redundant-type-constituents': 'off',
 			'@typescript-eslint/no-unsafe-assignment': 'off',
 			'@typescript-eslint/no-unsafe-argument': 'off',
 			'@typescript-eslint/no-unsafe-member-access': 'off',
 			'@typescript-eslint/no-unsafe-call': 'off',
 			'@typescript-eslint/no-unsafe-return': 'off',
+			'@typescript-eslint/require-await': 'off',
 			'@typescript-eslint/unbound-method': 'off',
 			'obsidianmd/hardcoded-config-path': 'off',
 			'import/no-nodejs-modules': 'off',
 		},
 	},
-	globalIgnores(['**/main.js', 'dist/', 'node_modules/']),
+	globalIgnores(['**/main.js', 'dist/', 'node_modules/', 'coverage/']),
 );
