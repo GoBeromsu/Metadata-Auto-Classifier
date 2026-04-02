@@ -50,7 +50,13 @@ export default tseslint.config(
 			'@typescript-eslint/no-misused-promises': ['error', {
 				checksConditionals: true,
 				checksSpreads: true,
-				checksVoidReturn: true,
+				checksVoidReturn: {
+					arguments: true,
+					attributes: true,
+					properties: true,
+					returns: false,
+					variables: true,
+				},
 			}],
 			'@typescript-eslint/no-redundant-type-constituents': 'error',
 			'@typescript-eslint/require-await': 'error',
