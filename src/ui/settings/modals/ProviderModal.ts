@@ -6,7 +6,7 @@ import { CodexOAuth, formatTokenExpiry, isTokenExpired, CODEX_OAUTH } from '../.
 import type { OAuthTokens, ProviderConfig } from '../../../types';
 import { ModalAccessibilityHelper } from '../components/ModalAccessibilityHelper';
 import { Notice } from '../components/Notice';
-import type { PluginNotices } from '../../../shared/plugin-notices';
+import type { PluginNotices } from '../../plugin-notices';
 import { Setting as CommonSetting, type DropdownOption } from '../components/Setting';
 
 export class ProviderModal extends Modal {

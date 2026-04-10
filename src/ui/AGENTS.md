@@ -28,7 +28,7 @@ Obsidian-dependent layer handling all I/O, side effects, and external integratio
 
 ## For AI Agents
 
-- **May import from:** `obsidian`, `domain/`, `utils/`, `types/`, `shared/`
+- **May import from:** `obsidian`, `domain/`, `utils/`, `types/`
 - **Do NOT import from:** other `ui/` modules without careful consideration (prefer through public exports)
 - All HTTP requests go through `request.ts` (unified logging and error handling)
 - Provider requests are abstracted through `UnifiedProvider` (no provider-specific logic in caller)
@@ -36,5 +36,5 @@ Obsidian-dependent layer handling all I/O, side effects, and external integratio
 
 ## Dependencies
 
-- Imports from: `domain/`, `utils/`, `types/`, `shared/`, `obsidian`
+- Imports from: `domain/`, `utils/`, `types/`, `obsidian`
 - Exports to: `main.ts`

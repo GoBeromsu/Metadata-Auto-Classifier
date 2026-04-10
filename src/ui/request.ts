@@ -2,7 +2,7 @@ import type { RequestUrlParam } from 'obsidian';
 import { requestUrl } from 'obsidian';
 // eslint-disable-next-line import/no-nodejs-modules -- https is required for streaming requests; Obsidian's requestUrl does not support streaming
 import https from 'https';
-import { macLogger } from '../shared/mac-logger';
+import { macLogger } from '../utils/mac-logger';
 
 const STREAM_TIMEOUT_MS = 60000; // 60 seconds
 const MAX_RETRIES = 3;

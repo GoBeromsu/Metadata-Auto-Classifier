@@ -36,5 +36,5 @@ Settings tab, sections, and configuration UI. Displays provider configuration, m
 
 ## Dependencies
 
-- Imports from: `domain/`, `utils/`, `types/`, `shared/`, `obsidian`
+- Imports from: `domain/`, `utils/`, `types/`, `obsidian`
 - Exports to: `main.ts`

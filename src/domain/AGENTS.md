@@ -32,5 +32,5 @@ Pure business logic with NO Obsidian imports. This layer contains domain logic f
 ## Dependencies
 
 - Imports from: `utils/`, `types/` only
-- Do NOT import from: `obsidian`, `ui/`, `shared/` (except type-only imports)
+- Do NOT import from: `obsidian`, `ui/`, or repo-external shared implementation surfaces
 - Exports to: `ui/`, `main.ts`

@@ -4,11 +4,11 @@ import { CodexOAuth, isTokenExpired } from './ui/auth';
 import { ClassificationService } from './ui/ClassificationService';
 import { CommandService } from './ui/CommandService';
 import { DEFAULT_FRONTMATTER_SETTING, DEFAULT_SETTINGS, NOTICE_CATALOG } from './domain/constants';
+import { migrateSettings } from './domain/settings-migration';
 import type { AutoClassifierSettings, FrontmatterField, ProviderConfig } from './types';
 import { AutoClassifierSettingTab } from './ui/settings';
-import { PluginLogger } from './shared/plugin-logger';
-import { PluginNotices } from './shared/plugin-notices';
-import { migrateSettings } from './shared/settings-migration';
+import { PluginNotices } from './ui/plugin-notices';
+import { PluginLogger } from './utils/plugin-logger';
 
 export default class AutoClassifierPlugin extends Plugin {
 	settings: AutoClassifierSettings;
@@ -166,7 +166,7 @@ export default class AutoClassifierPlugin extends Plugin {
 	}
 
 	/**
-	 * Migrate legacy settings to new format using the shared migrateSettings helper
+	 * Migrate legacy settings to the repo-local settings shape
 	 */
 	private async runMigrateSettings(): Promise<void> {
 		const raw = this.settings as unknown as Record<string, unknown>;

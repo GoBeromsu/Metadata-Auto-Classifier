@@ -1,4 +1,4 @@
-import { macLogger } from '../shared/mac-logger';
+import { macLogger } from './mac-logger';
 
 /**
  * Centralized error handling utility for consistent error management across the application.

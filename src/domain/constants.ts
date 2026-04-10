@@ -2,8 +2,13 @@
 // Consolidated Constants - All constants in one place
 // ==========================================
 
-import type { FrontmatterField, LinkType, ProviderConfig, AutoClassifierSettings } from '../types';
-import type { NoticeCatalog } from '../shared/plugin-notices';
+import type {
+	FrontmatterField,
+	LinkType,
+	ProviderConfig,
+	AutoClassifierSettings,
+	NoticeCatalog,
+} from '../types';
 
 // ==========================================
 // Common Constants

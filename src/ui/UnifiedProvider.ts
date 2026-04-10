@@ -16,7 +16,7 @@ import type {
 import { sendRequest, sendStreamingRequest, HttpError, type SSEEvent } from './request';
 import { CODEX_OAUTH } from '../domain/auth/oauth-constants';
 import { CodexOAuth } from './auth/oauth';
-import { macLogger } from '../shared/mac-logger';
+import { macLogger } from '../utils/mac-logger';
 
 const parseJsonResponse = (content: string, providerName: string): StructuredOutput => {
 	try {

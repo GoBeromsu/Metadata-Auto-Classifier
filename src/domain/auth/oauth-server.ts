@@ -1,6 +1,6 @@
 import { CODEX_OAUTH } from './oauth-constants';
 import type { OAuthCallbackResponse } from '../../types/auth';
-import { macLogger } from '../../shared/mac-logger';
+import { macLogger } from '../../utils/mac-logger';
 
 // Types for Node.js http module (imported dynamically)
 type HttpServer = {

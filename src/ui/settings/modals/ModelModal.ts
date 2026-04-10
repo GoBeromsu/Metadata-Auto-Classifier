@@ -5,7 +5,7 @@ import { getProviderPresets } from '../../../utils/lib-utils';
 import type { Model, ProviderConfig, ProviderPreset } from '../../../types';
 import { ModalAccessibilityHelper } from '../components/ModalAccessibilityHelper';
 import { Notice } from '../components/Notice';
-import type { PluginNotices } from '../../../shared/plugin-notices';
+import type { PluginNotices } from '../../plugin-notices';
 import type { DropdownOption } from '../components/Setting';
 import { Setting as CommonSetting } from '../components/Setting';
 

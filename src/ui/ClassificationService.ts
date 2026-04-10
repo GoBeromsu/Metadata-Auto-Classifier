@@ -5,8 +5,8 @@ import { getContentWithoutFrontmatter, getFieldValues, insertToFrontMatter } fro
 import { processAPIRequest } from './provider-api';
 import { DEFAULT_SYSTEM_ROLE, getPromptTemplate } from '../domain/prompt';
 import { Notice } from './settings/components/Notice';
-import type { PluginNotices } from '../shared/plugin-notices';
 import type { FrontmatterField, FrontMatter, ProviderConfig, StructuredOutput } from '../types';
+import type { PluginNotices } from './plugin-notices';
 
 export interface ClassificationContext {
 	app: App;

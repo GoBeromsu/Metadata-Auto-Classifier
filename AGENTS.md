@@ -34,7 +34,6 @@ Metadata Auto Classifier — Obsidian plugin that uses AI (OpenAI/Gemini/Ollama/
 | `src/ui/` | Obsidian-dependent services, provider adapters, frontmatter, settings (see `src/ui/AGENTS.md`) |
 | `src/ui/settings/` | Settings tab components (see `src/ui/settings/AGENTS.md`) |
 | `src/types/` | Pure type definitions (see `src/types/AGENTS.md`) |
-| `src/shared/` | Boiler-template synced files — DO NOT EDIT (see `src/shared/AGENTS.md`) |
 
 ## For AI Agents
 
@@ -42,7 +41,7 @@ Metadata Auto Classifier — Obsidian plugin that uses AI (OpenAI/Gemini/Ollama/
 - 4-layer architecture: `domain/` must not import `obsidian`
 - `UnifiedProvider.ts` is the extension point for new LLM providers — add there, not in services
 - `isDesktopOnly: false` — use `requestUrl` (Obsidian API), not `fetch` or Node `http`
-- `src/shared/` synced from `obsidian-boiler-template` — never edit directly
+- this repo keeps implementation local; do not reintroduce a default `src/shared/` implementation surface
 - Test files in `__tests__/` use Jest-style mocks in `__mocks__/`
 
 ### Testing Requirements
@@ -58,7 +57,7 @@ pnpm run lint   # ESLint — 0 errors required
 ## Dependencies
 
 ### Internal
-- `obsidian-boiler-template` — source of truth for `src/shared/`
+- workspace contract docs define shared surfaces; this repo keeps implementation local by default
 
 ### External
 - `obsidian` — Obsidian Plugin API
