@@ -113,8 +113,8 @@ export class ConfigurableSettingModal extends Modal {
 			.setDesc('Values that the AI can use as suggestions')
 			.addButton((button) => {
 				button
-					.setButtonText('Browse files')
 					.setIcon('folder')
+					.setTooltip('Browse files')
 					.onClick(() => {
 						const wikiLinkSelector = new WikiLinkSelector(this.app);
 						wikiLinkSelector.openFileSelector((selectedLink) => {
@@ -125,6 +125,7 @@ export class ConfigurableSettingModal extends Modal {
 							this.updateOptionsTextarea();
 						});
 					});
+				button.buttonEl.setAttribute('aria-label', 'Browse files');
 			});
 
 		if (this.props.options.showTextArea) {
