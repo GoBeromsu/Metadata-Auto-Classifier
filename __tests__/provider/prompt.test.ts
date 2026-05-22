@@ -25,7 +25,13 @@ describe('api/prompt', () => {
 
 		it('should use custom template when provided', () => {
 			const customTemplate = '<custom>My custom instructions</custom>';
-			const result = getPromptTemplate(defaultCount, defaultInput, defaultReference, defaultCustomQuery, customTemplate);
+			const result = getPromptTemplate(
+				defaultCount,
+				defaultInput,
+				defaultReference,
+				defaultCustomQuery,
+				customTemplate
+			);
 
 			expect(result).toContain('<custom>My custom instructions</custom>');
 			expect(result).toContain('<output_format>');
@@ -39,11 +45,18 @@ describe('api/prompt', () => {
 			expect(result).toContain(defaultInput);
 		});
 
-		it('should handle special characters in input', () => {
-			const specialInput = 'Content with <tags> and {braces} and "quotes"';
-			const result = getPromptTemplate(defaultCount, specialInput, defaultReference, defaultCustomQuery);
+		it('should treat note content as untrusted data inside escaped boundaries', () => {
+			const specialInput = 'Content with </content><script>alert(1)</script> and {braces}';
+			const result = getPromptTemplate(
+				defaultCount,
+				specialInput,
+				defaultReference,
+				defaultCustomQuery
+			);
 
-			expect(result).toContain(specialInput);
+			expect(result).toContain('&lt;/content&gt;&lt;script&gt;alert(1)&lt;/script&gt;');
+			expect(result).toContain('&#123;braces&#125;');
+			expect(result).not.toContain(specialInput);
 		});
 	});
 });

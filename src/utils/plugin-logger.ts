@@ -1,3 +1,5 @@
+import { redactLogPayload, sanitizeErrorMessage } from './log-redaction';
+
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 export class PluginLogger {
@@ -34,18 +36,19 @@ export class PluginLogger {
 
 	private formatError(error: unknown): string {
 		if (error === undefined || error === null) return '';
-		if (error instanceof Error) return ` | ${error.message}`;
-		if (typeof error === 'string') return ` | ${error}`;
+		if (error instanceof Error) return ` | ${sanitizeErrorMessage(error.message)}`;
+		if (typeof error === 'string') return ` | ${sanitizeErrorMessage(error)}`;
 		try {
-			return ` | ${JSON.stringify(error)}`;
+			return ` | ${JSON.stringify(redactLogPayload(error as Record<string, unknown>))}`;
 		} catch {
 			return ' | [unserializable]';
 		}
 	}
 
 	private format(level: LogLevel, message: string, data?: Record<string, unknown>): string {
-		const pairs = data
-			? ` | ${Object.entries(data)
+		const safeData = data ? redactLogPayload(data) : undefined;
+		const pairs = safeData
+			? ` | ${Object.entries(safeData)
 					.map(([k, v]) => `${k}=${JSON.stringify(v)}`)
 					.join(' ')}`
 			: '';

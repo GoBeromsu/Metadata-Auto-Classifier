@@ -39,6 +39,7 @@ export function getPromptTemplate(
 	// Sanitize user-provided inputs to prevent prompt injection
 	const sanitizedReference = sanitizeReferenceValues(reference);
 	const sanitizedCustomQuery = sanitizePromptInput(customQuery);
+	const sanitizedInput = sanitizePromptInput(input);
 
 	const completePrompt =
 		customTemplate +
@@ -46,7 +47,7 @@ export function getPromptTemplate(
 			.replace('{minCount}', String(count.min))
 			.replace('{maxCount}', String(count.max))
 			.replace('{reference}', sanitizedReference.join(', '))
-			.replace('{input}', input)
+			.replace('{input}', sanitizedInput)
 			.replace('{customQuery}', sanitizedCustomQuery);
 
 	return completePrompt;

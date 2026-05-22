@@ -1,6 +1,7 @@
 import { CODEX_OAUTH } from './oauth-constants';
 import type { OAuthCallbackResponse } from '../../types/auth';
 import { macLogger } from '../../utils/mac-logger';
+import { buildOAuthErrorHtml, buildOAuthSuccessHtml } from './oauth-response-html';
 
 // Types for Node.js http module (imported dynamically)
 type HttpServer = {
@@ -140,83 +141,16 @@ export class OAuthCallbackServer {
 	 * Send success HTML response
 	 */
 	private sendSuccessResponse(res: HttpResponse): void {
-		const html = `
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Authorization Successful</title>
-	<style>
-		body {
-			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			height: 100vh;
-			margin: 0;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		}
-		.container {
-			text-align: center;
-			background: white;
-			padding: 40px 60px;
-			border-radius: 16px;
-			box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-		}
-		h1 { color: #22c55e; margin-bottom: 10px; }
-		p { color: #666; }
-	</style>
-</head>
-<body>
-	<div class="container">
-		<h1>Authorization Successful!</h1>
-		<p>You can close this window and return to Obsidian.</p>
-	</div>
-</body>
-</html>`;
 		res.writeHead(200, { 'Content-Type': 'text/html' });
-		res.end(html);
+		res.end(buildOAuthSuccessHtml());
 	}
 
 	/**
 	 * Send error HTML response
 	 */
 	private sendErrorResponse(res: HttpResponse, message: string): void {
-		const html = `
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Authorization Failed</title>
-	<style>
-		body {
-			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			height: 100vh;
-			margin: 0;
-			background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
-		}
-		.container {
-			text-align: center;
-			background: white;
-			padding: 40px 60px;
-			border-radius: 16px;
-			box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-		}
-		h1 { color: #dc2626; margin-bottom: 10px; }
-		p { color: #666; }
-	</style>
-</head>
-<body>
-	<div class="container">
-		<h1>Authorization Failed</h1>
-		<p>${message}</p>
-		<p>Please close this window and try again.</p>
-	</div>
-</body>
-</html>`;
 		res.writeHead(400, { 'Content-Type': 'text/html' });
-		res.end(html);
+		res.end(buildOAuthErrorHtml(message));
 	}
 
 	/**

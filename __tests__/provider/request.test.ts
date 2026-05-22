@@ -1,3 +1,4 @@
+import { Platform } from 'obsidian';
 import { HttpError, sendStreamingRequest } from 'provider/request';
 
 // Track https mock state - must be hoisted for vi.mock factory
@@ -7,46 +8,14 @@ const mockState = vi.hoisted(() => ({
 	mockResponseQueue: [] as Array<{ statusCode: number; data: string }>,
 }));
 
-// Mock https module - use 'node:https' because Vite normalizes Node builtins to node: prefix
-// The source code uses require('https') which Vite resolves as node:https
-vi.mock('node:https', () => {
-	const requestFn = (_options: unknown, callback: (response: unknown) => void) => {
-		mockState.mockRequestCallback = callback;
+vi.mock('../../src/ui/streaming-node-request', () => ({
+	sendStreamingRequestViaNode: vi.fn(async () => {
 		mockState.mockCallCount++;
-
-		const mockRequest = {
-			on: () => mockRequest,
-			write: vi.fn(),
-			end: () => {
-				// Simulate async response
-				setImmediate(() => {
-					if (mockState.mockResponseQueue.length > 0) {
-						const responseData = mockState.mockResponseQueue.shift()!;
-						const mockResponse = {
-							statusCode: responseData.statusCode,
-							on: (event: string, handler: (data?: Buffer) => void) => {
-								if (event === 'data') {
-									handler(Buffer.from(responseData.data));
-								}
-								if (event === 'end') {
-									setImmediate(() => handler());
-								}
-								return mockResponse;
-							},
-						};
-						mockState.mockRequestCallback?.(mockResponse);
-					}
-				});
-			},
-			destroy: vi.fn(),
-		};
-		return mockRequest;
-	};
-	return {
-		default: { request: requestFn },
-		request: requestFn,
-	};
-});
+		const response = mockState.mockResponseQueue.shift();
+		if (!response) throw new Error('No mock response queued');
+		return { status: response.statusCode, text: response.data };
+	}),
+}));
 
 describe('HttpError', () => {
 	it('should create error with status and responseText', () => {
@@ -88,6 +57,20 @@ describe('sendStreamingRequest', () => {
 		mockState.mockCallCount = 0;
 		mockState.mockResponseQueue = [];
 		mockState.mockRequestCallback = null;
+		(Platform as any).isDesktop = true;
+	});
+
+	describe('desktop gating', () => {
+		it('rejects streaming requests on non-desktop before using Node HTTPS', async () => {
+			(Platform as any).isDesktop = false;
+
+			await expect(sendStreamingRequest(url, headers, body, parseEvent)).rejects.toThrow(
+				'Streaming requests are only available on desktop platforms'
+			);
+			expect(mockState.mockCallCount).toBe(0);
+
+			(Platform as any).isDesktop = true;
+		});
 	});
 
 	describe('successful requests', () => {
@@ -153,9 +136,7 @@ describe('sendStreamingRequest', () => {
 				},
 			];
 
-			await expect(sendStreamingRequest(url, headers, body, parseEvent)).rejects.toThrow(
-				HttpError
-			);
+			await expect(sendStreamingRequest(url, headers, body, parseEvent)).rejects.toThrow(HttpError);
 		});
 
 		it('should include status 401 in HttpError', async () => {
@@ -181,9 +162,7 @@ describe('sendStreamingRequest', () => {
 				{ statusCode: 200, data: 'data: {"type":"text.delta","delta":"OK"}\n' },
 			];
 
-			await expect(sendStreamingRequest(url, headers, body, parseEvent)).rejects.toThrow(
-				HttpError
-			);
+			await expect(sendStreamingRequest(url, headers, body, parseEvent)).rejects.toThrow(HttpError);
 
 			expect(mockState.mockCallCount).toBe(1); // Should NOT retry
 		});
@@ -193,27 +172,21 @@ describe('sendStreamingRequest', () => {
 		it('should throw HttpError on 400 without retry', async () => {
 			mockState.mockResponseQueue = [{ statusCode: 400, data: 'Bad Request' }];
 
-			await expect(sendStreamingRequest(url, headers, body, parseEvent)).rejects.toThrow(
-				HttpError
-			);
+			await expect(sendStreamingRequest(url, headers, body, parseEvent)).rejects.toThrow(HttpError);
 			expect(mockState.mockCallCount).toBe(1);
 		});
 
 		it('should throw HttpError on 404 without retry', async () => {
 			mockState.mockResponseQueue = [{ statusCode: 404, data: 'Not Found' }];
 
-			await expect(sendStreamingRequest(url, headers, body, parseEvent)).rejects.toThrow(
-				HttpError
-			);
+			await expect(sendStreamingRequest(url, headers, body, parseEvent)).rejects.toThrow(HttpError);
 			expect(mockState.mockCallCount).toBe(1);
 		});
 
 		it('should throw HttpError on 403 without retry', async () => {
 			mockState.mockResponseQueue = [{ statusCode: 403, data: 'Forbidden' }];
 
-			await expect(sendStreamingRequest(url, headers, body, parseEvent)).rejects.toThrow(
-				HttpError
-			);
+			await expect(sendStreamingRequest(url, headers, body, parseEvent)).rejects.toThrow(HttpError);
 			expect(mockState.mockCallCount).toBe(1);
 		});
 	});
